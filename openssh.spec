@@ -28,12 +28,7 @@
 %define build6x 0
 
 # Build position-independent executables (requires toolchain support)?
-# This hack is in here to prevent problem with pie on PPC64 bug 113499
-%ifarch ppc64 ppc
-%define pie 0
-%else
-%define pie 0
-%endif
+%define pie 1
 
 # Do we want kerberos5 support (1=yes 0=no)
 %define kerberos5 1
@@ -79,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 8
+%define rel 8.1
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -500,6 +495,9 @@ fi
 %endif
 
 %changelog
+* Mon Nov 29 2004 Thomas Woerner <twoerner@redhat.com> 3.9p1-8.1
+- fixed PIE build for all architectures
+
 * Mon Oct  4 2004 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-8
 - add a --enable-vendor-patchlevel option which allows a ShowPatchLevel option
   to enable display of a vendor patch level during version exchange (#120285)
