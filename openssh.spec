@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 11
+%define rel 12
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -505,6 +505,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 28 2005 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-12
+- rebuild so that configure can detect that krb5_init_ets is gone now
+
 * Mon Feb 21 2005 Tomas Mraz <tmraz@redhat.com> 3.9p1-11
 - don't call syslog in signal handler
 - allow password authentication when copying from remote
