@@ -96,6 +96,7 @@ Patch4: openssh-3.9p1-vendor.patch
 Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
+Patch21: openssh-3.9p1-safe-stop.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -229,6 +230,7 @@ environment.
 %endif
 
 #%patch20 -p0 -b .gssapimitm
+%patch21 -p1 -b .safe-stop
 
 autoreconf
 
@@ -475,7 +477,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
-%attr(0600,root,root) %config(noreplace) /etc/pam.d/sshd
+%attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0755,root,root) %config /etc/rc.d/init.d/sshd
 %endif
 
@@ -497,6 +499,11 @@ fi
 %endif
 
 %changelog
+* Fri Feb  4 2005 Tomas Mraz <tmraz@redhat.com>
+- change permissions on pam.d/sshd to 0644
+- patch initscript so it doesn't kill opened sessions if
+  the sshd daemon isn't running anymore
+
 * Mon Jan  3 2005 Bill Nottingham <notting@redhat.com> 3.9p1-9
 - don't use initlog
 
