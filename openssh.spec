@@ -1,5 +1,5 @@
 # Version of ssh-askpass
-%define aversion 1.2.2
+%define aversion 1.2.4.1
 
 # Do we want to disable building of x11-askpass? (1=yes 0=no)
 %define no_x11_askpass 0
@@ -7,63 +7,72 @@
 # Do we want to disable building of gnome-askpass? (1=yes 0=no)
 %define no_gnome_askpass 0
 
+# Do we want to link against a static libcrypto? (1=yes 0=no)
+%define static_libcrypto 0
+
+# Do we want smartcard support (1=yes 0=no)
+%define scard 0
+
+# Is this build for RHL 6.x?
+%define build6x 0
+
+# Disable IPv6 (avoids DNS hangs on some glibc versions)
+%define noip6 0
+
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
 %{?skip_x11_askpass:%define no_x11_askpass 1}
 %{?skip_gnome_askpass:%define no_gnome_askpass 1}
 
-# Is this a build for the rescue CD (without PAM)? (1=yes 0=no)
+# Is this a build for RHL 6.x or earlier?
+%{?build_6x:%define build6x 1}
+
+# If this is RHL 6.x, the default configuration has sysconfdir in /usr/etc.
+%if %{build6x}
+%define _sysconfdir /etc
+%define noip6 1
+%endif
+
+# Options for static OpenSSL link:
+# rpm -ba|--rebuild --define "static_openssl 1"
+%{?static_openssl:%define static_libcrypto 1}
+
+# Options for Smartcard support: (needs libsectok and openssl-engine)
+# rpm -ba|--rebuild --define "smartcard 1"
+%{?smartcard:%define scard 1}
+
+# Option to disable ipv6
+# rpm -ba|--rebuild --define "noipv6 1"
+%{?noipv6:%define noip6 1}
+
+# Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
 %define rescue 0
 %{?build_rescue:%define rescue 1}
 
-# Is this a build for 6.x or earlier?
-%define build6x 0
-%{?build_6x:%define build6x 1}
-
-# If this is 6.x, the default configuration has sysconfdir in /usr/etc.
-%if %{build6x}
-%define _sysconfdir /etc
-%endif
-
 Summary: The OpenSSH implementation of SSH.
 Name: openssh
-Version: 2.9p2
+Version: 3.1p1
 %if %{rescue}
-Release: 12rescue
+Release: 2rescue
 %else
-Release: 12
+Release: 2
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
-%if ! %{no_x11_askpass}
 Source1: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-%endif
 Source2: openssh.init
 Source3: gnome-ssh-askpass.sh
 Source4: gnome-ssh-askpass.csh
 Source5: openssh-closing.txt
-Patch0: openssh-2.9p1-redhat.patch
+Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.3.0p1-path.patch
-Patch2: openssh-2.5.1p1-crypt.patch
-Patch3: openssh-2.5.1p1-all.patch
-Patch4: openssh-2.9p1-keygen.patch
-Patch5: openssh-2.9p1-groups.patch
-Patch6: x11-askpass-1.2.2-xf41.patch
-Patch7: openssh-2.9p2-session.patch
-Patch8: openssh-2.9p2-maxfail.patch
-Patch9: openssh-2.9p2-xauth.patch
-Patch10: openssh-2.9p2-forwarding.patch
-Patch11: openssh-2.9p2-nologin.patch
-Patch12: openssh-2.9p2-int64_t.patch
-Patch13: openssh-2.9p2-debug.patch
-Patch14: openssh-2.9p2-test.patch
-Patch15: openssh-2.9p2-clientloop.patch
-Patch16: openssh-2.9p2-pubkey.patch
-Patch17: openssh-2.9p2-command.patch
-Patch18: openssh-2.9p2-echo.patch
-Patch19: openssh-2.9p2-do_exec.patch
-Patch20: openssh-2.9p2-uselogin.patch
-Patch100: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
+Patch2: openssh-3.0p1-all.patch
+Patch3: openssh-2.9p1-groups.patch
+Patch5: http://www.sxw.org.uk/computing/patches/openssh-3.0.2p1-krb5.patch
+Patch6: http://www.sxw.org.uk/computing/patches/openssh-3.0.2p1-gssapi.patch
+Patch7: openssh-302p1-named-keys-gss.patch
+Patch8: openssh-3.0.2p1-notice.patch
+Patch9: http://bugzilla.mindrot.org/showattachment.cgi?attach_id=32
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -73,8 +82,13 @@ PreReq: initscripts >= 5.00
 %else
 PreReq: initscripts >= 5.20
 %endif
-BuildPreReq: perl, openssl-devel, tcp_wrappers
-BuildPreReq: /bin/login, /usr/include/security/pam_appl.h, db1-devel
+BuildPreReq: perl, openssl-devel, sharutils, tcp_wrappers
+BuildPreReq: /bin/login
+%if %{build6x}
+BuildPreReq: glibc-devel, pam
+%else
+BuildPreReq: db1-devel, /usr/include/security/pam_appl.h
+%endif
 %if ! %{no_x11_askpass}
 BuildPreReq: XFree86-devel
 %endif
@@ -157,62 +171,57 @@ environment.
 %endif
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .path
-%patch2 -p1 -b .crypt
-%patch3 -p1 -b .all
-%patch4 -p0 -b .keygen
-%patch5 -p1 -b .groups
-%if ! %{no_x11_askpass}
-pushd x11-ssh-askpass-%{aversion}
-%patch6 -p1 -b .xf4
-popd
-%endif
-%patch7 -p0 -b .session
-%patch8 -p0 -b .maxfail
-%patch9 -p1 -b .xauth
-%patch10 -p0 -b .forwarding
-%patch11 -p0 -b .nologin
-%patch12 -p1 -b .int64_t
-%patch13 -p1 -b .debug
-%patch14 -p0 -b .test
-%patch15 -p0 -b .clientloop
-%patch16 -p0 -b .pubkey
-%patch17 -p0 -b .command
-%patch18 -p0 -b .echo
-%patch19 -p0 -b .do_exec
-%patch20 -p0 -b .uselogin
-if echo %{release} | grep -q gss ; then
-%patch100 -p1 -b .gssapi
-else
-true
-fi
+# Obsolete.
+#%patch2 -p1 -b .all
+%patch3 -p1 -b .groups
 
-aclocal
-autoheader
-autoconf
+# Apply gss-specific patches only if the release tag includes "gss".  (Not
+# to be used for actual releases until it's in the mainline.)
+if echo "%{release}" | grep -q gss; then
+%patch5 -p0 -b .krb5
+%patch6 -p1 -b .gssapi
+%patch7 -p1 -b .named-keys
+%patch8 -p1 -b .notice
+fi
+%if %{build6x}
+%patch9 -p0 -b .openssl095a
+%endif
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"; export CFLAGS
 %if %{rescue}
-CFLAGS="$CFLAGS -Os"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
 %endif
+
 %configure \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
+	--datadir=%{_datadir}/openssh \
 	--with-tcp-wrappers \
-	--with-rsh=/usr/bin/rsh \
+	--with-rsh=%{_bindir}/rsh \
+%if %{scard}
+	--with-smartcard \
+%endif
+%if %{noip6}
+	--with-ipv4-default \
+%endif
 %if %{build6x}
 	--with-ipv4-default \
 %endif
 %if %{rescue}
 	--without-pam --with-md5-passwords
 %else
-	--with-kerberos5=/usr/kerberos --with-pam
+	--with-pam --with-kerberos5=/usr/kerberos
+%endif
+
+%if %{static_libcrypto}
+perl -pi -e "s|-lcrypto|%{_libdir}/libcrypto.a|g" Makefile
 %endif
 
 make
 
 %if ! %{no_x11_askpass}
 pushd x11-ssh-askpass-%{aversion}
+%configure --libexecdir=%{_libexecdir}/openssh
 xmkmf -a
 make
 popd
@@ -251,7 +260,7 @@ ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
 install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
 
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 %{SOURCE3} %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
@@ -306,11 +315,15 @@ fi
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
-%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/primes
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
+%endif
+%if %{scard}
+%attr(0755,root,root) %dir %{_datadir}/openssh
+%attr(0644,root,root) %{_datadir}/openssh/Ssh.bin
 %endif
 
 %files clients
@@ -362,19 +375,59 @@ fi
 %endif
 
 %changelog
-* Mon Dec  3 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-12
-- add patch to fix UseLogin vulnerability from advisory by Markus
+* Thu Mar  7 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-2
+- bump and grind (through the build system)
 
-* Thu Nov 15 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-11
-- pull cvs patch to use do_exec for processing more commands (heads-up
-  from Markus)
+* Thu Mar  7 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-1
+- require sharutils for building (mindrot #137)
+- require db1-devel only when building for 6.x (#55105), which probably won't
+  work anyway (3.1 requires OpenSSL 0.9.6 to build), but what the heck
+- require pam-devel by file (not by package name) again
+- add Markus's patch to compile with OpenSSL 0.9.5a (from
+  http://bugzilla.mindrot.org/show_bug.cgi?id=141) and apply it if we're
+  building for 6.x
 
-* Wed Nov 14 2001 Nalin Dahyabhai <nalin@redhat.com>
-- pull cvs patch to stop sending fake dummy packets on carriage return
-  (heads-up from Solar Designer, bug reported originally by Yang Yu)
+* Thu Mar  7 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-0
+- update to 3.1p1
 
-* Fri Nov  9 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-10
-- pull cvs patch to make forced commands override subsystem invocations also
+* Tue Mar  5 2002 Nalin Dahyabhai <nalin@redhat.com> SNAP-20020305
+- update to SNAP-20020305
+- drop debug patch, fixed upstream
+
+* Wed Feb 20 2002 Nalin Dahyabhai <nalin@redhat.com> SNAP-20020220
+- update to SNAP-20020220 for testing purposes (you've been warned, if there's
+  anything to be warned about, gss patches won't apply, I don't mind)
+
+* Wed Feb 13 2002 Nalin Dahyabhai <nalin@redhat.com> 3.0.2p1-3
+- add patches from Simon Wilkinson and Nicolas Williams for GSSAPI key
+  exchange, authentication, and named key support
+
+* Wed Jan 23 2002 Nalin Dahyabhai <nalin@redhat.com> 3.0.2p1-2
+- remove dependency on db1-devel, which has just been swallowed up whole
+  by gnome-libs-devel
+
+* Sun Dec 29 2001 Nalin Dahyabhai <nalin@redhat.com>
+- adjust build dependencies so that build6x actually works right (fix
+  from Hugo van der Kooij)
+
+* Tue Dec  4 2001 Nalin Dahyabhai <nalin@redhat.com> 3.0.2p1-1
+- update to 3.0.2p1
+
+* Fri Nov 16 2001 Nalin Dahyabhai <nalin@redhat.com> 3.0.1p1-1
+- update to 3.0.1p1
+
+* Tue Nov 13 2001 Nalin Dahyabhai <nalin@redhat.com>
+- update to current CVS (not for use in distribution)
+
+* Thu Nov  8 2001 Nalin Dahyabhai <nalin@redhat.com> 3.0p1-1
+- merge some of Damien Miller <djm@mindrot.org> changes from the upstream
+  3.0p1 spec file and init script
+
+* Wed Nov  7 2001 Nalin Dahyabhai <nalin@redhat.com>
+- update to 3.0p1
+- update to x11-ssh-askpass 1.2.4.1
+- change build dependency on a file from pam-devel to the pam-devel package
+- replace primes with moduli
 
 * Thu Sep 27 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-9
 - incorporate fix from Markus Friedl's advisory for IP-based authorization bugs
@@ -402,7 +455,7 @@ fi
 
 * Thu Aug  9 2001 Nalin Dahyabhai <nalin@redhat.com>
 - pull cvs patch to add session initialization to no-pty sessions
-- pull cvs patch to not cut of challengeresponse auth needlessly
+- pull cvs patch to not cut off challengeresponse auth needlessly
 - refuse to do X11 forwarding if xauth isn't there, handy if you enable
   it by default on a system that doesn't have X installed (#49263)
 
@@ -466,7 +519,9 @@ fi
 * Mon Apr  2 2001 Nalin Dahyabhai <nalin@redhat.com>
 - mention that challengereponse supports PAM, so disabling password doesn't
   limit users to pubkey and rsa auth (#34378)
-- bypass the daemon() function in the init script and call initlog directly
+- bypass the daemon() function in the init script and call initlog directly,
+  because daemon() won't start a daemon it detects is already running (like
+  open connections)
 - require the version of openssl we had when we were built
 
 * Fri Mar 23 2001 Nalin Dahyabhai <nalin@redhat.com>
