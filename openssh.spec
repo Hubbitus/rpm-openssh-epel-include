@@ -1,5 +1,5 @@
 # Version of ssh-askpass
-%define aversion 1.2.0
+%define aversion 1.2.2
 
 # Do we want to disable building of x11-askpass? (1=yes 0=no)
 %define no_x11_askpass 0
@@ -25,33 +25,36 @@
 %define _sysconfdir /etc
 %endif
 
-Summary: OpenSSH free Secure Shell (SSH) implementation
+Summary: The OpenSSH implementation of SSH.
 Name: openssh
-Version: 2.5.2p2
-Release: 5
+Version: 2.9p2
+Release: 4
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
-Source1: http://www.jmknoble.cx/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
+Source1: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
 %endif
 Source2: openssh.init
 Source3: gnome-ssh-askpass.sh
 Source4: gnome-ssh-askpass.csh
 Source5: openssh-closing.txt
-Patch0: openssh-2.5.2p1-redhat.patch
+Patch0: openssh-2.9p1-redhat.patch
 Patch1: openssh-2.3.0p1-path.patch
 Patch2: openssh-2.5.1p1-crypt.patch
 Patch3: openssh-2.5.1p1-all.patch
-Patch4: openssh-2.5.2p2-setcred.patch
-Patch5: reinit.patch
-Patch6: aes-compat.diff
-Patch7: sftp-globfix.diff
-Patch8: openssh-2.5.2p2-manpages.patch
-Copyright: BSD
+Patch4: openssh-2.9p1-keygen.patch
+Patch5: openssh-2.9p1-groups.patch
+Patch6: x11-askpass-1.2.2-xf41.patch
+Patch10: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
+License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Obsoletes: ssh
+%if %{build6x}
+PreReq: initscripts >= 5.00
+%else
 PreReq: initscripts >= 5.20
+%endif
 BuildPreReq: perl, openssl-devel, tcp_wrappers
 BuildPreReq: /bin/login, /usr/include/security/pam_appl.h
 %if ! %{no_x11_askpass}
@@ -60,107 +63,72 @@ BuildPreReq: XFree86-devel
 %if ! %{no_gnome_askpass}
 BuildPreReq: gnome-libs-devel
 %endif
-#Requires: openssl = %(openssl version | awk '{print $2}')
 
 %package clients
-Summary: OpenSSH Secure Shell protocol clients
+Summary: OpenSSH clients.
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 Obsoletes: ssh-clients
-#Requires: openssl = %(openssl version | awk '{print $2}')
 
 %package server
-Summary: OpenSSH Secure Shell protocol server (sshd)
+Summary: The OpenSSH server daemon.
 Group: System Environment/Daemons
 Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9
-#Requires: openssl = %(openssl version | awk '{print $2}')
 %if ! %{build6x}
 Requires: /etc/pam.d/system-auth
 %endif
 
 %package askpass
-Summary: OpenSSH X11 passphrase dialog
+Summary: A passphrase dialog for OpenSSH and X.
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
 Obsoletes: ssh-extras
 
 %package askpass-gnome
-Summary: OpenSSH GNOME passphrase dialog
+Summary: A passphrase dialog for OpenSSH, X, and GNOME.
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
 Obsoletes: ssh-extras
 
 %description
-Ssh (Secure Shell) a program for logging into a remote machine and for
-executing commands in a remote machine.  It is intended to replace
-rlogin and rsh, and provide secure encrypted communications between
-two untrusted hosts over an insecure network.  X11 connections and
+SSH (Secure SHell) is a program for logging into and executing
+commands on a remote machine. SSH is intended to replace rlogin and
+rsh, and to provide secure encrypted communications between two
+untrusted hosts over an insecure network. X11 connections and
 arbitrary TCP/IP ports can also be forwarded over the secure channel.
 
-OpenSSH is OpenBSD's rework of the last free version of SSH, bringing it
-up to date in terms of security and features, as well as removing all 
-patented algorithms to separate libraries (OpenSSL).
+OpenSSH is OpenBSD's version of the last free version of SSH, bringing
+it up to date in terms of security and features, as well as removing
+all patented algorithms to separate libraries.
 
 This package includes the core files necessary for both the OpenSSH
-client and server.  To make this package useful, you should also
+client and server. To make this package useful, you should also
 install openssh-clients, openssh-server, or both.
 
 %description clients
-Ssh (Secure Shell) a program for logging into a remote machine and for
-executing commands in a remote machine.  It is intended to replace
-rlogin and rsh, and provide secure encrypted communications between
-two untrusted hosts over an insecure network.  X11 connections and
-arbitrary TCP/IP ports can also be forwarded over the secure channel.
-
-OpenSSH is OpenBSD's rework of the last free version of SSH, bringing it
-up to date in terms of security and features, as well as removing all 
-patented algorithms to separate libraries (OpenSSL).
-
-This package includes the clients necessary to make encrypted connections
-to SSH servers.
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package includes
+the clients necessary to make encrypted connections to SSH servers.
+You'll also need to install the openssh package on OpenSSH clients.
 
 %description server
-Ssh (Secure Shell) a program for logging into a remote machine and for
-executing commands in a remote machine.  It is intended to replace
-rlogin and rsh, and provide secure encrypted communications between
-two untrusted hosts over an insecure network.  X11 connections and
-arbitrary TCP/IP ports can also be forwarded over the secure channel.
-
-OpenSSH is OpenBSD's rework of the last free version of SSH, bringing it
-up to date in terms of security and features, as well as removing all 
-patented algorithms to separate libraries (OpenSSL).
-
-This package contains the secure shell daemon. The sshd is the server 
-part of the secure shell protocol and allows ssh clients to connect to 
-your host.
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package contains
+the secure shell daemon (sshd). The sshd daemon allows SSH clients to
+securely connect to your SSH server. You also need to have the openssh
+package installed.
 
 %description askpass
-Ssh (Secure Shell) a program for logging into a remote machine and for
-executing commands in a remote machine.  It is intended to replace
-rlogin and rsh, and provide secure encrypted communications between
-two untrusted hosts over an insecure network.  X11 connections and
-arbitrary TCP/IP ports can also be forwarded over the secure channel.
-
-OpenSSH is OpenBSD's rework of the last free version of SSH, bringing it
-up to date in terms of security and features, as well as removing all 
-patented algorithms to separate libraries (OpenSSL).
-
-This package contains Jim Knoble's <jmknoble@jmknoble.cx> X11 passphrase 
-dialog.
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package contains
+an X11 passphrase dialog for OpenSSH.
 
 %description askpass-gnome
-Ssh (Secure Shell) a program for logging into a remote machine and for
-executing commands in a remote machine.  It is intended to replace
-rlogin and rsh, and provide secure encrypted communications between
-two untrusted hosts over an insecure network.  X11 connections and
-arbitrary TCP/IP ports can also be forwarded over the secure channel.
-
-OpenSSH is OpenBSD's rework of the last free version of SSH, bringing it
-up to date in terms of security and features, as well as removing all 
-patented algorithms to separate libraries (OpenSSL).
-
-This package contains the GNOME passphrase dialog.
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package contains
+an X11 passphrase dialog for OpenSSH and the GNOME GUI desktop
+environment.
 
 %prep
 
@@ -173,11 +141,14 @@ This package contains the GNOME passphrase dialog.
 %patch1 -p1 -b .path
 %patch2 -p1 -b .crypt
 %patch3 -p1 -b .all
-%patch4 -p1 -b .setcred
-%patch5 -p0 -b .reinit
-%patch6 -p0 -b .aes-compat
-%patch7 -p0 -b .sftp-globfix
-%patch8 -p1 -b .manpages
+%patch4 -p0 -b .keygen
+%patch5 -p1 -b .groups
+pushd x11-ssh-askpass-%{aversion}
+%patch6 -p1 -b .xf4
+popd
+#%patch10 -p1 -b .gssapi
+
+aclocal
 autoheader
 autoconf
 
@@ -191,7 +162,7 @@ autoconf
 %if %{rescue}
 	--without-pam --with-md5-passwords
 %else
-	--with-pam
+	--with-kerberos5=/usr/kerberos --with-pam
 %endif
 
 make
@@ -347,6 +318,55 @@ fi
 %endif
 
 %changelog
+* Mon Aug  6 2001 Nalin Dahyabhai <nalin@redhat.com>
+- pass OPTIONS correctly to initlog (#50151)
+
+* Wed Jul 25 2001 Nalin Dahyabhai <nalin@redhat.com>
+- switch to x11-ssh-askpass 1.2.2
+
+* Wed Jul 11 2001 Nalin Dahyabhai <nalin@redhat.com>
+- rebuild in new environment
+
+* Mon Jun 25 2001 Nalin Dahyabhai <nalin@redhat.com>
+- disable the gssapi patch
+
+* Mon Jun 18 2001 Nalin Dahyabhai <nalin@redhat.com>
+- update to 2.9p2
+- refresh to a new version of the gssapi patch
+
+* Thu Jun  7 2001 Nalin Dahyabhai <nalin@redhat.com>
+- change Copyright: BSD to License: BSD
+- add Markus Friedl's unverified patch for the cookie file deletion problem
+  so that we can verify it
+- drop patch to check if xauth is present (was folded into cookie patch)
+- don't apply gssapi patches for the errata candidate
+- clear supplemental groups list at startup
+
+* Fri May 25 2001 Nalin Dahyabhai <nalin@redhat.com>
+- fix an error parsing the new default sshd_config
+- add a fix from Markus Friedl (via openssh-unix-dev) for ssh-keygen not
+  dealing with comments right
+
+* Thu May 24 2001 Nalin Dahyabhai <nalin@redhat.com>
+- add in Simon Wilkinson's GSSAPI patch to give it some testing in-house,
+  to be removed before the next beta cycle because it's a big departure
+  from the upstream version
+
+* Thu May  3 2001 Nalin Dahyabhai <nalin@redhat.com>
+- finish marking strings in the init script for translation
+- modify init script to source /etc/sysconfig/sshd and pass $OPTIONS to sshd
+  at startup (change merged from openssh.com init script, originally by
+  Pekka Savola)
+- refuse to do X11 forwarding if xauth isn't there, handy if you enable
+  it by default on a system that doesn't have X installed
+
+* Wed May  2 2001 Nalin Dahyabhai <nalin@redhat.com>
+- update to 2.9
+- drop various patches that came from or went upstream or to or from CVS
+
+* Wed Apr 18 2001 Nalin Dahyabhai <nalin@redhat.com>
+- only require initscripts 5.00 on 6.2 (reported by Peter Bieringer)
+
 * Sun Apr  8 2001 Preston Brown <pbrown@redhat.com>
 - remove explicit openssl requirement, fixes builddistro issue
 - make initscript stop() function wait until sshd really dead to avoid 
