@@ -28,7 +28,7 @@
 Summary: OpenSSH free Secure Shell (SSH) implementation
 Name: openssh
 Version: 2.5.2p2
-Release: 1.7.2
+Release: 5
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
@@ -38,7 +38,7 @@ Source2: openssh.init
 Source3: gnome-ssh-askpass.sh
 Source4: gnome-ssh-askpass.csh
 Source5: openssh-closing.txt
-Patch0: openssh-2.5.2p2-redhat.patch
+Patch0: openssh-2.5.2p1-redhat.patch
 Patch1: openssh-2.3.0p1-path.patch
 Patch2: openssh-2.5.1p1-crypt.patch
 Patch3: openssh-2.5.1p1-all.patch
@@ -46,6 +46,7 @@ Patch4: openssh-2.5.2p2-setcred.patch
 Patch5: reinit.patch
 Patch6: aes-compat.diff
 Patch7: sftp-globfix.diff
+Patch8: openssh-2.5.2p2-manpages.patch
 Copyright: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -59,19 +60,21 @@ BuildPreReq: XFree86-devel
 %if ! %{no_gnome_askpass}
 BuildPreReq: gnome-libs-devel
 %endif
-Requires: openssl
+#Requires: openssl = %(openssl version | awk '{print $2}')
 
 %package clients
 Summary: OpenSSH Secure Shell protocol clients
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 Obsoletes: ssh-clients
+#Requires: openssl = %(openssl version | awk '{print $2}')
 
 %package server
 Summary: OpenSSH Secure Shell protocol server (sshd)
 Group: System Environment/Daemons
 Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9
+#Requires: openssl = %(openssl version | awk '{print $2}')
 %if ! %{build6x}
 Requires: /etc/pam.d/system-auth
 %endif
@@ -174,6 +177,7 @@ This package contains the GNOME passphrase dialog.
 %patch5 -p0 -b .reinit
 %patch6 -p0 -b .aes-compat
 %patch7 -p0 -b .sftp-globfix
+%patch8 -p1 -b .manpages
 autoheader
 autoconf
 
@@ -343,15 +347,16 @@ fi
 %endif
 
 %changelog
-* Fri Mar 30 2001 Nalin Dahyabhai <nalin@redhat.com>
-- add pam_limits back to the PAM configuration
+* Sun Apr  8 2001 Preston Brown <pbrown@redhat.com>
+- remove explicit openssl requirement, fixes builddistro issue
+- make initscript stop() function wait until sshd really dead to avoid 
+  races in condrestart
 
-* Wed Mar 28 2001 Nalin Dahyabhai <nalin@redhat.com>
-- tweak the init script because 7.0's initscripts daemon() function
-  isn't as smart as it should be
-
-* Mon Mar 26 2001 Nalin Dahyabhai <nalin@redhat.com>
-- build for a 7.0 errata
+* Mon Apr  2 2001 Nalin Dahyabhai <nalin@redhat.com>
+- mention that challengereponse supports PAM, so disabling password doesn't
+  limit users to pubkey and rsa auth (#34378)
+- bypass the daemon() function in the init script and call initlog directly
+- require the version of openssl we had when we were built
 
 * Fri Mar 23 2001 Nalin Dahyabhai <nalin@redhat.com>
 - make do_pam_setcred() smart enough to know when to establish creds and
@@ -414,7 +419,7 @@ fi
 - Don't expose KbdInt responses in debug messages (from CVS).
 - Detect and handle errors in rsa_{public,private}_decrypt (from CVS).
 
-* Wed Feb  7 2001 Trond Eivind Glomsr)Bød <teg@redhat.com>
+* Wed Feb  7 2001 Trond Eivind Glomsrxd <teg@redhat.com>
 - i18n-tweak to initscript.
 
 * Tue Jan 23 2001 Nalin Dahyabhai <nalin@redhat.com>
