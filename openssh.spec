@@ -82,7 +82,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.6.1p2
-%define rel 34
+%define rel 35
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -491,6 +491,9 @@ fi
 %endif
 
 %changelog
+* Tue Jun 1 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-35
+- Remove CLOSEXEC on STDERR
+
 * Tue Mar 16 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-34
 
 * Wed Mar 03 2004 Phil Knirsch <pknirsch@redhat.com> 3.6.1p2-33.30.1
