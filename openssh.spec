@@ -17,14 +17,17 @@
 # Do we want smartcard support (1=yes 0=no)
 %define scard 0
 
+# Use GTK2 instead of GNOME in gnome-ssh-askpass
+%define gtk2 1
+
 # Is this build for RHL 6.x?
 %define build6x 0
 
 # Disable IPv6 (avoids DNS hangs on some glibc versions)
 %define noip6 0
 
-# Use gtk2 instead of gnome1 for gnome-ssh-askpass.
-%define gtk2 1
+# Do we want kerberos5 support (1=yes 0=no)
+%define kerberos5 1
 
 # Whether or not /sbin/nologin exists.
 %define nologin 1
@@ -59,26 +62,28 @@
 %define rescue 0
 %{?build_rescue:%define rescue 1}
 
-Summary: The OpenSSH implementation of SSH.
-Name: openssh
-Version: 3.4p1
+# Turn off some stuff for resuce builds
 %if %{rescue}
-Release: 5rescue
+%define kerberos5 0
+%endif
+
+Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
+Name: openssh
+Version: 3.5p1
+%define rel 6
+%if %{rescue}
+Release: %{rel}rescue
 %else
-Release: 5
+Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 Source1: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
+Source11: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
 Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.9p1-groups.patch
-Patch2: gnome-ssh-askpass-gtk2.patch
-Patch3: openssh-TODO.patch
-Patch4: openssh-3.4p1-hostauth.patch
-Patch5: openssh-3.4p1-pam-timing.patch
-Patch6: openssh-buffer-size.patch
-Patch7: openssh-3.5p1-skip-initial.patch
-#Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.2.3p1-gssapi-20020527.diff
+Patch2: openssh-3.5p1-multilib-pam.patch
+Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.4p1-gssapi-20020627.diff
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -108,6 +113,10 @@ BuildPreReq: XFree86-devel
 
 %if ! %{no_gnome_askpass}
 BuildPreReq: gnome-libs-devel
+%endif
+
+%if %{kerberos5}
+BuildPreReq: krb5-devel
 %endif
 
 %package clients
@@ -185,21 +194,14 @@ environment.
 %endif
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .groups
-%if %{gtk2}
-%patch2 -p0 -b .gtk2
-%endif
-%patch3 -p0 -b .TODO
-%patch4 -p0 -b .hostauth
-%patch5 -p1 -b .pam-timing
-%patch6 -p0 -b .buffer-size
-%patch7 -p1 -b .skip-initial
+%patch2 -p1 -b .multilib-pam
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
-# if echo "%{release}" | grep -q gss; then
-# %patch11 -p1 -b .gssapi
-# autoreconf-2.53
-# fi
+if echo "%{release}" | grep -q gss; then
+%patch11 -p1 -b .gssapi
+autoreconf-2.53
+fi
 
 %build
 %if %{rescue}
@@ -225,9 +227,14 @@ CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
 	--with-ipv4-default \
 %endif
 %if %{rescue}
-	--without-pam --with-md5-passwords --without-kerberos5
+	--without-pam --with-md5-passwords \
 %else
-	--with-pam --with-kerberos5=/usr/kerberos
+	--with-pam \
+%endif
+%if %{kerberos5}
+	--with-kerberos5=/usr/kerberos --with-ldflags=-L/usr/kerberos/%{_lib}
+%else
+	--without-kerberos5
 %endif
 
 %if %{static_libcrypto}
@@ -239,7 +246,7 @@ make
 %if ! %{no_x11_askpass}
 pushd x11-ssh-askpass-%{aversion}
 # This configure can't handle platform strings.
-./configure --prefix=%{_prefix} --libexecdir=%{_libexecdir}/openssh
+./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_libexecdir}/openssh
 xmkmf -a
 make
 popd
@@ -248,21 +255,19 @@ popd
 # Define a variable to toggle gnome1/gtk2 building.  This is necessary
 # because RPM doesn't handle nested %if statements.
 %if %{gtk2}
-gtk2=yes
+	gtk2=yes
 %else
-gtk2=no
+	gtk2=no
 %endif
 
 %if ! %{no_gnome_askpass}
 pushd contrib
 if [ $gtk2 = yes ] ; then
-	gcc $RPM_OPT_FLAGS `pkg-config --cflags gtk+-2.0` \
-		gnome-ssh-askpass.c -o gnome-ssh-askpass \
-		`pkg-config --libs gtk+-2.0`
+	make gnome-ssh-askpass2
+	mv gnome-ssh-askpass2 gnome-ssh-askpass
 else
-	gcc $RPM_OPT_FLAGS `gnome-config --cflags gnome gnomeui` \
-		gnome-ssh-askpass.c -o gnome-ssh-askpass \
-		`gnome-config --libs gnome gnomeui`
+	make gnome-ssh-askpass1
+	mv gnome-ssh-askpass1 gnome-ssh-askpass
 fi
 popd
 %endif
@@ -277,12 +282,12 @@ make install DESTDIR=$RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
-%if ! %{build6x}
-install -m644 contrib/redhat/sshd.pam      $RPM_BUILD_ROOT/etc/pam.d/sshd
-install -m755 contrib/redhat/sshd.init     $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
-%else
+%if %{build6x}
 install -m644 contrib/redhat/sshd.pam.old  $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m755 contrib/redhat/sshd.init.old $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
+%else
+install -m644 contrib/redhat/sshd.pam      $RPM_BUILD_ROOT/etc/pam.d/sshd
+install -m755 contrib/redhat/sshd.init     $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 %endif
 
 %if ! %{no_x11_askpass}
@@ -295,7 +300,7 @@ install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome
 %endif
 
 %if ! %{scard}
-rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
+	rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
 %endif
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
@@ -360,8 +365,6 @@ fi
 %files
 %defattr(-,root,root)
 %doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW README* RFC* TODO WARNING*
-%attr(0755,root,root) %{_bindir}/scp
-%attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -380,9 +383,12 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
+%attr(0755,root,root) %{_bindir}/scp
+%attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
 %attr(-,root,root) %{_bindir}/slogin
-%attr(-,root,root) %{_mandir}/man1/slogin.1*
+%attr(0644,root,root) %{_mandir}/man1/slogin.1*
+%attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-agent
 %attr(0755,root,root) %{_bindir}/ssh-add
@@ -392,7 +398,6 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/ssh-add.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-keyscan.1*
 %attr(0644,root,root) %{_mandir}/man1/sftp.1*
-%attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %endif
 
 %if ! %{rescue}
@@ -428,18 +433,34 @@ fi
 %endif
 
 %changelog
-* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-5
-- apply patch to store the correct buffer size in allocated buffers
-  (CAN-2003-0693)
-- skip the initial PAM authentication attempt with an empty password if
-  empty passwords are not permitted in our configuration (#103998)
+* Fri Feb 14 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6
+- move scp to the -clients subpackage, because it directly depends on ssh
+  which is also in -clients (#84329)
 
-* Fri Jul  4 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-4
+* Mon Feb 10 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-5
 - rebuild
 
-* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-3
-- backport patch to close timing attacks when PAM authentication is
-  short-circuited by other checks
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Tue Jan  7 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-3
+- rebuild
+
+* Tue Nov 12 2002 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-2
+- patch PAM configuration to use relative path names for the modules, allowing
+  us to not worry about which arch the modules are built for on multilib systems
+
+* Tue Oct 15 2002 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-1
+- update to 3.5p1, merging in filelist/perm changes from the upstream spec
+
+* Fri Oct  4 2002 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-3
+- merge
+
+* Thu Sep 12 2002  Than Ngo <than@redhat.com> 3.4p1-2.1
+- fix to build on multilib systems
+
+* Thu Aug 29 2002 Curtis Zinzilieta <curtisz@redhat.com> 3.4p1-2gss
+- added gssapi patches and uncommented patch here
 
 * Wed Aug 14 2002 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-2
 - pull patch from CVS to fix too-early free in ssh-keysign (#70009)
