@@ -32,7 +32,7 @@
 %ifarch ppc64 ppc
 %define pie 0
 %else
-%define pie 1
+%define pie 0
 %endif
 
 # Disable IPv6 (avoids DNS hangs on some glibc versions)
@@ -82,7 +82,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.6.1p2
-%define rel 27
+%define rel 34
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -242,7 +242,13 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 CFLAGS="$CFLAGS -Os"
 %endif
 %if %{pie}
-CFLAGS="$CFLAGS -fpie -pie"
+%ifarch s390 s390x
+CFLAGS="$CFLAGS -fPIE"
+%else
+CFLAGS="$CFLAGS -fpie"
+%endif
+export CFLAGS
+LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
 %endif
 %if %{build6x}
 export CFLAGS="$CFLAGS -D__func__=__FUNCTION__"
@@ -485,6 +491,29 @@ fi
 %endif
 
 %changelog
+* Tue Mar 16 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-34
+
+* Wed Mar 03 2004 Phil Knirsch <pknirsch@redhat.com> 3.6.1p2-33.30.1
+- Built RHLE3 U2 update package.
+
+* Wed Mar 3 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-33
+- Close file descriptors on exec 
+
+* Mon Mar  1 2004 Thomas Woerner <twoerner@redhat.com> 3.6.1p2-32
+- fixed pie build
+
+* Thu Feb 26 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-31
+- Add restorecon to startup scripts
+
+* Thu Feb 26 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-30
+- Add multiple qualified to openssh
+
+* Mon Feb 23 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-29
+- Eliminate selinux code and use pam_selinux
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Mon Jan 26 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-27
 - turn off pie on ppc
 
