@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.8.1p1
-%define rel 1
+%define rel 2
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -476,6 +476,9 @@ fi
 %endif
 
 %changelog
+* Wed Jun 9 2004 Daniel Walsh <dwalsh@redhat.com> 3.8.1p1-2
+- Remove use of pam_selinux and patch selinux in directly.  
+
 * Mon Jun  7 2004 Nalin Dahyabhai <nalin@redhat.com> 3.8.1p1-1
 - request gssapi-with-mic by default but not delegation (flag day for anyone
   who used previous gssapi patches)
