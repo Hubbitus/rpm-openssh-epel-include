@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 9
+%define rel 10
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -97,6 +97,7 @@ Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
 Patch21: openssh-3.9p1-safe-stop.patch
+Patch22: openssh-3.9p1-askpass-keep-above.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -231,6 +232,7 @@ environment.
 
 #%patch20 -p0 -b .gssapimitm
 %patch21 -p1 -b .safe-stop
+%patch22 -p1 -b .keep-above
 
 autoreconf
 
@@ -499,10 +501,16 @@ fi
 %endif
 
 %changelog
+* Tue Feb  8 2005 Tomas Mraz <tmraz@redhat.com> 3.9p1-10
+- enable trusted forwarding by default if X11 forwarding is 
+  required by user (#137685 and duplicates)
+- disable protocol 1 support by default in sshd server config (#88329)
+- keep the gnome-askpass dialog above others (#69131)
+
 * Fri Feb  4 2005 Tomas Mraz <tmraz@redhat.com>
-- change permissions on pam.d/sshd to 0644
+- change permissions on pam.d/sshd to 0644 (#64697)
 - patch initscript so it doesn't kill opened sessions if
-  the sshd daemon isn't running anymore
+  the sshd daemon isn't running anymore (#67624)
 
 * Mon Jan  3 2005 Bill Nottingham <notting@redhat.com> 3.9p1-9
 - don't use initlog
