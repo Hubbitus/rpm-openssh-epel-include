@@ -53,9 +53,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.1p1
 %if %{rescue}
-Release: 2rescue
+Release: 2rescues.1
 %else
-Release: 2
+Release: 2s.1
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -375,6 +375,9 @@ fi
 %endif
 
 %changelog
+* Wed Mar 18 2003 D. Marlin <dmarlin@redhat.com>
+- new s390 release number and rebuild for s390 (bug #85960)
+
 * Thu Mar  7 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-2
 - bump and grind (through the build system)
 
