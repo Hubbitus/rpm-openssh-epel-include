@@ -63,9 +63,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.4p1
 %if %{rescue}
-Release: 2rescue
+Release: 5rescue
 %else
-Release: 2
+Release: 5
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -75,6 +75,9 @@ Patch1: openssh-2.9p1-groups.patch
 Patch2: gnome-ssh-askpass-gtk2.patch
 Patch3: openssh-TODO.patch
 Patch4: openssh-3.4p1-hostauth.patch
+Patch5: openssh-3.4p1-pam-timing.patch
+Patch6: openssh-buffer-size.patch
+Patch7: openssh-3.5p1-skip-initial.patch
 #Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.2.3p1-gssapi-20020527.diff
 License: BSD
 Group: Applications/Internet
@@ -187,6 +190,9 @@ environment.
 %endif
 %patch3 -p0 -b .TODO
 %patch4 -p0 -b .hostauth
+%patch5 -p1 -b .pam-timing
+%patch6 -p0 -b .buffer-size
+%patch7 -p1 -b .skip-initial
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -286,6 +292,10 @@ ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
 
 %if ! %{no_gnome_askpass}
 install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
+%endif
+
+%if ! %{scard}
+rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
 %endif
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
@@ -418,6 +428,19 @@ fi
 %endif
 
 %changelog
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-5
+- apply patch to store the correct buffer size in allocated buffers
+  (CAN-2003-0693)
+- skip the initial PAM authentication attempt with an empty password if
+  empty passwords are not permitted in our configuration (#103998)
+
+* Fri Jul  4 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-4
+- rebuild
+
+* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-3
+- backport patch to close timing attacks when PAM authentication is
+  short-circuited by other checks
+
 * Wed Aug 14 2002 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-2
 - pull patch from CVS to fix too-early free in ssh-keysign (#70009)
 
