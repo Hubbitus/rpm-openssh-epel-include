@@ -28,7 +28,7 @@
 Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
-Release: 5
+Release: 6
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
@@ -48,7 +48,8 @@ Patch6: x11-askpass-1.2.2-xf41.patch
 Patch7: openssh-2.9p2-session.patch
 Patch8: openssh-2.9p2-maxfail.patch
 Patch9: openssh-2.9p2-xauth.patch
-Patch10: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
+Patch10: openssh-2.9p2-forwarding.patch
+Patch11: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -59,7 +60,7 @@ PreReq: initscripts >= 5.00
 PreReq: initscripts >= 5.20
 %endif
 BuildPreReq: perl, openssl-devel, tcp_wrappers
-BuildPreReq: /bin/login, /usr/include/security/pam_appl.h
+BuildPreReq: /bin/login, /usr/include/security/pam_appl.h, db1-devel
 %if ! %{no_x11_askpass}
 BuildPreReq: XFree86-devel
 %endif
@@ -154,7 +155,12 @@ popd
 %patch7 -p0 -b .session
 %patch8 -p0 -b .maxfail
 %patch9 -p1 -b .xauth
-#%patch10 -p1 -b .gssapi
+%patch10 -p0 -b .forwarding
+if echo %{release} | grep -q gss ; then
+%patch11 -p1 -b .gssapi
+else
+true
+fi
 
 aclocal
 autoheader
@@ -326,9 +332,15 @@ fi
 %endif
 
 %changelog
+* Mon Aug 20 2001 Nalin Dahyabhai <nalin@redhat.com>
+- add db1-devel as a BuildPrerequisite (noted by Hans Ecke)
+
+* Thu Aug 16 2001 Nalin Dahyabhai <nalin@redhat.com>
+- pull cvs patch to fix remote port forwarding with protocol 2
+
 * Thu Aug  9 2001 Nalin Dahyabhai <nalin@redhat.com>
-- backport cvs patch to add session initialization to no-pty sessions
-- backport cvs patch to not cut of challengeresponse auth needlessly
+- pull cvs patch to add session initialization to no-pty sessions
+- pull cvs patch to not cut of challengeresponse auth needlessly
 - refuse to do X11 forwarding if xauth isn't there, handy if you enable
   it by default on a system that doesn't have X installed (#49263)
 
