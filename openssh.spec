@@ -53,9 +53,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.1p1
 %if %{rescue}
-Release: 2rescues.1
+Release: 3rescue
 %else
-Release: 2s.1
+Release: 3
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -66,13 +66,11 @@ Source4: gnome-ssh-askpass.csh
 Source5: openssh-closing.txt
 Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.3.0p1-path.patch
-Patch2: openssh-3.0p1-all.patch
-Patch3: openssh-2.9p1-groups.patch
-Patch5: http://www.sxw.org.uk/computing/patches/openssh-3.0.2p1-krb5.patch
-Patch6: http://www.sxw.org.uk/computing/patches/openssh-3.0.2p1-gssapi.patch
-Patch7: openssh-302p1-named-keys-gss.patch
-Patch8: openssh-3.0.2p1-notice.patch
-Patch9: http://bugzilla.mindrot.org/showattachment.cgi?attach_id=32
+Patch2: openssh-2.9p1-groups.patch
+Patch3: openssh-3.1p1-defaultkeys.patch
+Patch11: http://www.sxw.org.uk/computing/patches/openssh-mit-krb5-20020326.diff
+Patch12: http://www.sxw.org.uk/computing/patches/openssh-3.1p1-gssapi-20020325.diff
+Patch13: http://bugzilla.mindrot.org/showattachment.cgi?attach_id=37
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -89,6 +87,7 @@ BuildPreReq: glibc-devel, pam
 %else
 BuildPreReq: db1-devel, /usr/include/security/pam_appl.h
 %endif
+BuildPrereq: autoconf253
 %if ! %{no_x11_askpass}
 BuildPreReq: XFree86-devel
 %endif
@@ -171,21 +170,20 @@ environment.
 %endif
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .path
-# Obsolete.
-#%patch2 -p1 -b .all
-%patch3 -p1 -b .groups
+%patch2 -p1 -b .groups
+%patch3 -p0 -b .defaultkeys
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
 if echo "%{release}" | grep -q gss; then
-%patch5 -p0 -b .krb5
-%patch6 -p1 -b .gssapi
-%patch7 -p1 -b .named-keys
-%patch8 -p1 -b .notice
+%patch11 -p0 -b .krb5
+%patch12 -p1 -b .gssapi
 fi
 %if %{build6x}
-%patch9 -p0 -b .openssl095a
+%patch13 -p0 -b .openssl095a
 %endif
+
+autoreconf-2.53
 
 %build
 %if %{rescue}
@@ -221,7 +219,8 @@ make
 
 %if ! %{no_x11_askpass}
 pushd x11-ssh-askpass-%{aversion}
-%configure --libexecdir=%{_libexecdir}/openssh
+# This configure can't handle platform strings.
+./configure --prefix=%{_prefix} --libexecdir=%{_libexecdir}/openssh
 xmkmf -a
 make
 popd
@@ -375,8 +374,17 @@ fi
 %endif
 
 %changelog
-* Wed Mar 18 2003 D. Marlin <dmarlin@redhat.com>
-- new s390 release number and rebuild for s390 (bug #85960)
+* Tue Apr  2 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-3
+- pull patch from CVS to avoid printing error messages when some of the
+  default keys aren't available when running ssh-add
+- refresh to current revisions of Simon's patches
+ 
+* Thu Mar 21 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-2gss
+- reintroduce Simon's gssapi patches
+- add buildprereq for autoconf253, which is needed to regenerate configure
+  after applying the gssapi patches
+- refresh to the latest version of Markus's patch to build properly with
+  older versions of OpenSSL
 
 * Thu Mar  7 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-2
 - bump and grind (through the build system)
