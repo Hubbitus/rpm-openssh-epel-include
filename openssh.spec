@@ -73,8 +73,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 3.9p1
-%define rel 13
+Version: 4.0p1
+%define rel 1
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -85,14 +85,13 @@ URL: http://www.openssh.com/portable.html
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
 # This package differs from the upstream OpenSSH tarball in that it
 # removes the ACSS cipher.
-Source0: openssh-%{version}-noacss.tar.gz
+Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-Patch0: openssh-3.9p1-redhat.patch
-Patch1: openssh-3.6.1p2-groups.patch
+Patch0: openssh-4.0p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-3.9p1-vendor.patch
+Patch4: openssh-4.0p1-vendor.patch
 Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
@@ -221,7 +220,6 @@ environment.
 %setup -q
 %endif
 %patch0 -p1 -b .redhat
-%patch1 -p1 -b .groups
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
@@ -505,6 +503,10 @@ fi
 %endif
 
 %changelog
+* Thu Mar 24 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-1
+- upgrade to 4.0p1
+- remove obsolete groups patch
+
 * Wed Mar 16 2005 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
