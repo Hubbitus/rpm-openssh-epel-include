@@ -70,7 +70,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.5p1
-%define rel 6
+%define rel 6.9
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -83,6 +83,7 @@ Source11: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.
 Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.9p1-groups.patch
 Patch2: openssh-3.5p1-multilib-pam.patch
+Patch3: openssh-3.5p1-pam-timing.patch
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.4p1-gssapi-20020627.diff
 License: BSD
 Group: Applications/Internet
@@ -195,6 +196,7 @@ environment.
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .groups
 %patch2 -p1 -b .multilib-pam
+%patch3 -p1 -b .pam-timing
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -433,6 +435,10 @@ fi
 %endif
 
 %changelog
+* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6.9
+- backport patch to close timing attacks when PAM authentication is
+  short-circuited by other checks
+
 * Fri Feb 14 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6
 - move scp to the -clients subpackage, because it directly depends on ssh
   which is also in -clients (#84329)
