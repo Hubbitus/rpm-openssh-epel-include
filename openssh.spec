@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 5
+%define rel 6
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -493,6 +493,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 14 2004 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-6
+- build
+
 * Mon Sep 13 2004 Nalin Dahyabhai <nalin@redhat.com>
 - disable ACSS support
 
