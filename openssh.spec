@@ -82,7 +82,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.6.1p2
-%define rel 35
+%define rel 36
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -491,6 +491,9 @@ fi
 %endif
 
 %changelog
+* Thu Jun 3 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-36
+- Change pam file to use open and close with pam_selinux
+
 * Tue Jun 1 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-35
 - Remove CLOSEXEC on STDERR
 
