@@ -28,7 +28,11 @@
 Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
-Release: 7
+%if %{rescue}
+Release: 9rescue
+%else
+Release: 9
+%endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
@@ -54,6 +58,7 @@ Patch12: openssh-2.9p2-int64_t.patch
 Patch13: openssh-2.9p2-debug.patch
 Patch14: openssh-2.9p2-test.patch
 Patch15: openssh-2.9p2-clientloop.patch
+Patch16: openssh-2.9p2-pubkey.patch
 Patch100: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
@@ -166,6 +171,7 @@ popd
 %patch13 -p1 -b .debug
 %patch14 -p0 -b .test
 %patch15 -p0 -b .clientloop
+%patch16 -p0 -b .pubkey
 if echo %{release} | grep -q gss ; then
 %patch100 -p1 -b .gssapi
 else
@@ -178,6 +184,9 @@ autoconf
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"; export CFLAGS
+%if %{rescue}
+CFLAGS="$CFLAGS -Os"; export CFLAGS
+%endif
 %configure \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
@@ -345,6 +354,12 @@ fi
 %endif
 
 %changelog
+* Thu Sep 27 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-9
+- incorporate fix from Markus Friedl's advisory for IP-based authorization bugs
+
+* Thu Sep 13 2001 Bernhard Rosenkraenzer <bero@redhat.com> 2.9p2-8
+- Merge changes to rescue build from current sysadmin survival cd
+
 * Thu Sep  6 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-7
 - fix scp's server's reporting of file sizes, and build with the proper
   preprocessor define to get large-file capable open(), stat(), etc.
