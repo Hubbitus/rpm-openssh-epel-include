@@ -42,7 +42,7 @@
 %{?skip_gnome_askpass:%define no_gnome_askpass 1}
 
 # Add option to build without GTK2 for older platforms with only GTK+.
-# RedHat <= 7.2 and Red Hat Advanced Server 2.1 are examples.
+# Red Hat Linux <= 7.2 and Red Hat Advanced Server 2.1 are examples.
 # rpm -ba|--rebuild --define 'no_gtk2 1'
 %{?no_gtk2:%define gtk2 0}
 
