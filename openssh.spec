@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.8.1p1
-%define rel 4
+%define rel 5
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -111,15 +111,18 @@ PreReq: initscripts >= 5.20
 %endif
 
 %if %{gtk2}
-BuildPreReq: gtk2-devel
+BuildPreReq: gtk2-devel, xauth
 %endif
-BuildPreReq: autoconf, openssl-devel, perl, sharutils, tcp_wrappers, zlib-devel
-BuildPreReq: /bin/login, xauth
+%if %{scard}
+BuildPreReq: sharutils
+%endif
+BuildPreReq: autoconf, openssl-devel, perl, tcp_wrappers, zlib-devel
+BuildPreReq: util-linux, groff, man
 
 %if %{build6x}
-BuildPreReq: glibc-devel, pam
+BuildPreReq: glibc-devel, pam-devel
 %else
-BuildPreReq: /usr/include/security/pam_appl.h
+BuildPreReq: pam-devel
 %endif
 
 %if ! %{no_x11_askpass}
@@ -132,6 +135,11 @@ BuildPreReq: gnome-libs-devel
 
 %if %{kerberos5}
 BuildPreReq: krb5-devel
+%endif
+
+%if %{WITH_SELINUX}
+Requires: libselinux
+BuildRequires: libselinux-devel
 %endif
 
 %package clients
@@ -355,6 +363,10 @@ install -m 755 contrib/redhat/gnome-ssh-askpass.csh $RPM_BUILD_ROOT%{_sysconfdir
 install -m 755 contrib/redhat/gnome-ssh-askpass.sh $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 %endif
 
+%if %{no_gnome_askpass}
+rm -f $RPM_BUILD_ROOT/etc/profile.d/gnome-ssh-askpass.*
+%endif
+
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
 
 %clean
@@ -481,6 +493,9 @@ fi
 %endif
 
 %changelog
+* Sun Aug 1 2004 Alan Cox <alan@redhat.com> 3.8.1p1-5
+- Apply buildreq fixup patch (#125296)
+
 * Tue Jun 15 2004 Daniel Walsh <dwalsh@redhat.com> 3.8.1p1-4
 - Clean up patch for upstream submission.
 
