@@ -70,7 +70,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.5p1
-%define rel 6.9
+%define rel 9
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -84,6 +84,8 @@ Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.9p1-groups.patch
 Patch2: openssh-3.5p1-multilib-pam.patch
 Patch3: openssh-3.5p1-pam-timing.patch
+Patch4: openssh-buffer-size.patch
+Patch5: openssh-3.5p1-skip-initial.patch
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.4p1-gssapi-20020627.diff
 License: BSD
 Group: Applications/Internet
@@ -197,6 +199,8 @@ environment.
 %patch1 -p1 -b .groups
 %patch2 -p1 -b .multilib-pam
 %patch3 -p1 -b .pam-timing
+%patch4 -p0 -b .buffer-size
+%patch5 -p1 -b .skip-initial
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -435,6 +439,12 @@ fi
 %endif
 
 %changelog
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-9
+- apply patch to store the correct buffer size in allocated buffers
+  (CAN-2003-0693)
+- skip the initial PAM authentication attempt with an empty password if
+  empty passwords are not permitted in our configuration (#103998)
+
 * Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6.9
 - backport patch to close timing attacks when PAM authentication is
   short-circuited by other checks
