@@ -70,7 +70,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.5p1
-%define rel 10
+%define rel 11
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -86,6 +86,7 @@ Patch2: openssh-3.5p1-multilib-pam.patch
 Patch3: openssh-3.5p1-pam-timing.patch
 Patch4: openssh-buffer-size.patch
 Patch5: openssh-3.5p1-skip-initial.patch
+Patch6: openssh-3.6.1p2-owl-realloc.diff
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.4p1-gssapi-20020627.diff
 License: BSD
 Group: Applications/Internet
@@ -201,6 +202,7 @@ environment.
 %patch3 -p1 -b .pam-timing
 %patch4 -p0 -b .buffer-size
 %patch5 -p1 -b .skip-initial
+%patch6 -p1 -b .owl-realloc
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -439,8 +441,12 @@ fi
 %endif
 
 %changelog
+* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-11
+- additional buffer manipulation cleanups from Solar Designer
+- this update goes to 11
+
 * Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.5p1-10
-- additional buffer manipulation fixes
+- additional buffer manipulation fixes (CAN-2003-0695)
 
 * Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-9
 - apply patch to store the correct buffer size in allocated buffers
