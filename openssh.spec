@@ -70,7 +70,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.5p1
-%define rel 9
+%define rel 10
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -439,6 +439,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.5p1-10
+- additional buffer manipulation fixes
+
 * Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-9
 - apply patch to store the correct buffer size in allocated buffers
   (CAN-2003-0693)
