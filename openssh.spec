@@ -88,6 +88,8 @@ Release: %{rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+# This package differs from the upstream OpenSSH tarball in that it
+# removes the ACSS cipher.
 Source0: openssh-%{version}-noacss.tar.gz
 Source1: openssh-nukeacss.sh
 Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
