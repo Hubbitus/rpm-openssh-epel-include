@@ -1,17 +1,16 @@
-%define aversion 1.0
+%define aversion 1.0.2
 Summary: OpenSSH free Secure Shell (SSH) implementation
 Name: openssh
-Version: 2.1.1p4
-Release: 1
+Version: 2.2.0p1
+Release: 5
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 Source1: http://www.ntrnet.net/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-Patch0: openssh-2.1.0p3-no_rsa.patch
-Patch1: openssh-2.1.0p3-redhat.patch
-Patch2: openssh-2.1.1p2-init.patch
-Patch3: openssh-2.1.1p2-strtok.patch
-Patch4: openssh-2.1.1p2-x11.patch
-Patch5: openssh-2.1.1p4-pipe.patch
+Source2: openssh.init
+Source3: gnome-ssh-askpass.sh
+Source4: gnome-ssh-askpass.csh
+Patch0: openssh-2.2.0p1-redhat.patch
+Patch1: openssh-2.2.0p1-agent.patch
 Copyright: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/openssh-%{version}-buildroot
@@ -19,10 +18,11 @@ Obsoletes: ssh
 PreReq: openssl >= 0.9.5a, initscripts >= 5.20
 Requires: openssl >= 0.9.5a
 BuildPreReq: perl, openssl-devel, tcp_wrappers, gnome-libs-devel
+BuildPreReq: /bin/login, /usr/bin/rsh, /usr/include/security/pam_appl.h
 
 %package clients
 Summary: OpenSSH Secure Shell protocol clients
-Requires: openssh = %{version}
+Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 Obsoletes: ssh-clients
 
@@ -30,19 +30,19 @@ Obsoletes: ssh-clients
 Summary: OpenSSH Secure Shell protocol server (sshd)
 Group: System Environment/Daemons
 Obsoletes: ssh-server
-PreReq: openssh = %{version}, chkconfig >= 0.9
+PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9
 Requires: /etc/pam.d/system-auth
 
 %package askpass
 Summary: OpenSSH X11 passphrase dialog
 Group: Applications/Internet
-Requires: openssh = %{version}
+Requires: openssh = %{version}-%{release}
 Obsoletes: ssh-extras
 
 %package askpass-gnome
 Summary: OpenSSH GNOME passphrase dialog
 Group: Applications/Internet
-Requires: openssh = %{version}
+Requires: openssh = %{version}-%{release}
 Obsoletes: ssh-extras
 
 %description
@@ -117,6 +117,32 @@ patented algorithms to separate libraries (OpenSSL).
 This package contains the GNOME passphrase dialog.
 
 %changelog
+* Thu Oct  5 2000 Nalin Dahyabhai <nalin@redhat.com>
+- Add BuildPreReq on /usr/include/security/pam_appl.h to be sure we always
+  build PAM authentication in.
+- Try setting SSH_ASKPASS if gnome-ssh-askpass is installed.
+- Clean out no-longer-used patches.
+- Patch ssh-add to try to add both identity and id_dsa, and to error only
+  when neither exists.
+
+* Mon Oct  2 2000 Nalin Dahyabhai <nalin@redhat.com>
+- Update x11-askpass to 1.0.2. (#17835)
+- Add BuildPreReqs for /bin/login and /usr/bin/rsh so that configure will
+  always find them in the right place. (#17909)
+- Set the default path to be the same as the one supplied by /bin/login, but
+  add /usr/X11R6/bin. (#17909)
+- Try to handle obsoletion of ssh-server more cleanly.  Package names
+  are different, but init script name isn't. (#17865)
+
+* Wed Sep  6 2000 Nalin Dahyabhai <nalin@redhat.com>
+- Update to 2.2.0p1. (#17835)
+- Tweak the init script to allow proper restarting. (#18023)
+
+* Wed Aug 23 2000 Nalin Dahyabhai <nalin@redhat.com>
+- Update to 20000823 snapshot.
+- Change subpackage requirements from %%{version} to %%{version}-%%{release}
+- Back out the pipe patch.
+
 * Mon Jul 17 2000 Nalin Dahyabhai <nalin@redhat.com>
 - Update to 2.1.1p4, which includes fixes for config file parsing problems.
 - Move the init script back.
@@ -193,16 +219,17 @@ This package contains the GNOME passphrase dialog.
 
 %prep
 %setup -q -a 1
-%patch1 -p1 -b .redhat
-%patch2 -p1 -b .init
-#%patch3 -p1 -b .strtok
-#%patch4 -p1 -b .x11
-%patch5 -p0 -b .pipe
+%patch0 -p1 -b .redhat
+%patch1 -p1 -b .agent
 autoconf
 
 %build
-%configure --sysconfdir=%{_sysconfdir}/ssh \
-	--with-tcp-wrappers --with-ipv4-default
+%configure \
+	--sysconfdir=%{_sysconfdir}/ssh \
+	--with-tcp-wrappers \
+	--with-ipv4-default \
+	--with-rsh=/usr/bin/rsh \
+	--with-default-path=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin
 make
 
 pushd x11-ssh-askpass-%{aversion}
@@ -224,23 +251,40 @@ install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/ssh
 install -m644 contrib/redhat/sshd.pam $RPM_BUILD_ROOT/etc/pam.d/sshd
-install -m755 contrib/redhat/sshd.init $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
+install -m755 $RPM_SOURCE_DIR/openssh.init $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 
 install -s x11-ssh-askpass-%{aversion}/x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/ssh/x11-ssh-askpass
 ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/ssh/ssh-askpass
 
 install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/ssh/gnome-ssh-askpass
 
+install -d $RPM_BUILD_ROOT/etc/profile.d/
+install -m 755 %{SOURCE3} %{SOURCE4} $RPM_BUILD_ROOT/etc/profile.d/
+
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%triggerun server -- ssh-server
+if [ "$1" != 0 -a -r /var/run/sshd.pid ] ; then
+	touch /var/run/sshd.restart
+fi
+
+%triggerpostun server -- ssh-server
+if [ "$1" != 0 ] ; then
+	/sbin/chkconfig --add sshd
+	if test -f /var/run/sshd.restart ; then
+		rm -f /var/run/sshd.restart
+		/sbin/service sshd start > /dev/null 2>&1
+	fi
+fi
+
 %post server
 /sbin/chkconfig --add sshd
 
 %postun server
-/sbin/service sshd condrestart > /dev/null 2>&1
+/sbin/service sshd condrestart > /dev/null 2>&1 || :
 
 %preun server
 if [ "$1" = 0 ]
@@ -252,7 +296,7 @@ fi
 %files
 %defattr(-,root,root)
 %doc ChangeLog OVERVIEW COPYING.Ylonen README* INSTALL 
-%doc CREDITS UPGRADING
+%doc CREDITS UPGRADING TODO
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
@@ -290,4 +334,5 @@ fi
 
 %files askpass-gnome
 %defattr(-,root,root)
+%attr(0755,root,root) %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
 %attr(0755,root,root) %{_libexecdir}/ssh/gnome-ssh-askpass
