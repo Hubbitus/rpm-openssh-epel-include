@@ -63,9 +63,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.4p1
 %if %{rescue}
-Release: 1rescue
+Release: 2rescue
 %else
-Release: 1
+Release: 2
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -74,6 +74,7 @@ Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.9p1-groups.patch
 Patch2: gnome-ssh-askpass-gtk2.patch
 Patch3: openssh-TODO.patch
+Patch4: openssh-3.4p1-hostauth.patch
 #Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.2.3p1-gssapi-20020527.diff
 License: BSD
 Group: Applications/Internet
@@ -185,6 +186,7 @@ environment.
 %patch2 -p0 -b .gtk2
 %endif
 %patch3 -p0 -b .TODO
+%patch4 -p0 -b .hostauth
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -416,6 +418,9 @@ fi
 %endif
 
 %changelog
+* Wed Aug 14 2002 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-2
+- pull patch from CVS to fix too-early free in ssh-keysign (#70009)
+
 * Thu Jun 27 2002 Nalin Dahyabhai <nalin@redhat.com> 3.4p1-1
 - 3.4p1
 - drop anon mmap patch
