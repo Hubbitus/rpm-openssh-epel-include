@@ -53,9 +53,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.1p1
 %if %{rescue}
-Release: 3rescue
+Release: 6rescue
 %else
-Release: 3
+Release: 6
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -68,6 +68,7 @@ Patch0: openssh-SNAP-20020220-redhat.patch
 Patch1: openssh-2.3.0p1-path.patch
 Patch2: openssh-2.9p1-groups.patch
 Patch3: openssh-3.1p1-defaultkeys.patch
+Patch4: openssh-adv.iss.patch
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-mit-krb5-20020326.diff
 Patch12: http://www.sxw.org.uk/computing/patches/openssh-3.1p1-gssapi-20020325.diff
 Patch13: http://bugzilla.mindrot.org/showattachment.cgi?attach_id=37
@@ -85,14 +86,14 @@ BuildPreReq: /bin/login
 %if %{build6x}
 BuildPreReq: glibc-devel, pam
 %else
-BuildPreReq: db1-devel, /usr/include/security/pam_appl.h
+BuildPreReq: /usr/include/security/pam_appl.h
 %endif
-BuildPrereq: autoconf253
+BuildPrereq: autoconf
 %if ! %{no_x11_askpass}
 BuildPreReq: XFree86-devel
 %endif
 %if ! %{no_gnome_askpass}
-BuildPreReq: gnome-libs-devel
+BuildPreReq: gnome-libs-devel, db1-devel
 %endif
 
 %package clients
@@ -172,23 +173,30 @@ environment.
 %patch1 -p1 -b .path
 %patch2 -p1 -b .groups
 %patch3 -p0 -b .defaultkeys
+%patch4 -p0 -b .adv.iss
+
+%if %{build6x}
+%patch13 -p0 -b .openssl095a
+%endif
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
 if echo "%{release}" | grep -q gss; then
 %patch11 -p0 -b .krb5
 %patch12 -p1 -b .gssapi
-fi
-%if %{build6x}
-%patch13 -p0 -b .openssl095a
-%endif
-
 autoreconf-2.53
+fi
 
 %build
 %if %{rescue}
 CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
 %endif
+
+# Only enable Kerberos support if we applied a patch for GSSAPI support.
+moreflags=
+if echo "%{release}" | grep -q gss; then
+moreflags=--with-kerberos5=/usr/kerberos
+fi
 
 %configure \
 	--sysconfdir=%{_sysconfdir}/ssh \
@@ -206,9 +214,9 @@ CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
 	--with-ipv4-default \
 %endif
 %if %{rescue}
-	--without-pam --with-md5-passwords
+	--without-pam --with-md5-passwords $moreflags
 %else
-	--with-pam --with-kerberos5=/usr/kerberos
+	--with-pam $moreflags
 %endif
 
 %if %{static_libcrypto}
@@ -374,6 +382,21 @@ fi
 %endif
 
 %changelog
+* Wed Jun 26 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-6
+- rebuild
+
+* Wed Jun 26 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-5
+- include patch from Markus's ISS advisory for missing bounds checks
+- re-require db1-devel
+- re-require pam-devel by package file
+- re-require autoconf instead of autoconf253
+- make sure Kerberos is disabled unless the not-enabled gssapi patch was applied
+
+* Wed May 17 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-4
+- drop buildreq on db1-devel
+- require pam-devel by package name
+- require autoconf instead of autoconf253 again
+
 * Tue Apr  2 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-3
 - pull patch from CVS to avoid printing error messages when some of the
   default keys aren't available when running ssh-add
