@@ -501,6 +501,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb  9 2005 Tomas Mraz <tmraz@redhat.com>
+- add spaces to messages in initscript (#138508)
+
 * Tue Feb  8 2005 Tomas Mraz <tmraz@redhat.com> 3.9p1-10
 - enable trusted forwarding by default if X11 forwarding is 
   required by user (#137685 and duplicates)
