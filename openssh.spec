@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 3
+%define rel 5
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -137,8 +137,8 @@ BuildPreReq: krb5-devel
 %endif
 
 %if %{WITH_SELINUX}
-Requires: libselinux
-BuildRequires: libselinux-devel
+Requires: libselinux >= 1.17.9
+BuildRequires: libselinux-devel >= 1.17.9
 %endif
 
 %package clients
@@ -491,6 +491,14 @@ fi
 %endif
 
 %changelog
+* Thu Sep 2 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-5
+- Change selinux patch to use get_default_context_with_role in libselinux.
+
+* Thu Sep 2 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-4
+- Fix patch
+	* Bad debug statement.
+	* Handle root/sysadm_r:kerberos
+
 * Thu Sep 2 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-3
 - Modify Colin Walter's patch to allow specifying rule during connection
 
