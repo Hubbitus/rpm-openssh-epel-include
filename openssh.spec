@@ -53,9 +53,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 3.1p1
 %if %{rescue}
-Release: 6rescue
+Release: 10rescue
 %else
-Release: 6
+Release: 10
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -69,6 +69,9 @@ Patch1: openssh-2.3.0p1-path.patch
 Patch2: openssh-2.9p1-groups.patch
 Patch3: openssh-3.1p1-defaultkeys.patch
 Patch4: openssh-adv.iss.patch
+Patch5: openssh-3.1p1-pam-timing.patch
+Patch6: openssh-3.1p1-buffer-size.patch
+Patch7: openssh-3.1p1-skip-initial.patch
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-mit-krb5-20020326.diff
 Patch12: http://www.sxw.org.uk/computing/patches/openssh-3.1p1-gssapi-20020325.diff
 Patch13: http://bugzilla.mindrot.org/showattachment.cgi?attach_id=37
@@ -174,6 +177,9 @@ environment.
 %patch2 -p1 -b .groups
 %patch3 -p0 -b .defaultkeys
 %patch4 -p0 -b .adv.iss
+%patch5 -p1 -b .pam-timing
+%patch6 -p0 -b .buffer-size
+%patch7 -p1 -b .skip-initial
 
 %if %{build6x}
 %patch13 -p0 -b .openssl095a
@@ -267,6 +273,10 @@ ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
 install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
 
+%if ! %{scard}
+rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
+%endif
+ 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 %{SOURCE3} %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 
@@ -382,6 +392,22 @@ fi
 %endif
 
 %changelog
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-10
+- rebuild
+
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-9
+- apply patch to store the correct buffer size in allocated buffers
+  (CAN-2003-0693)
+- skip the initial PAM authentication attempt with an empty password if
+  empty passwords are not permitted in our configuration (#103998)
+
+* Fri Jul  4 2003 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-8
+- rebuild
+
+* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-7
+- backport patch to close timing attacks when PAM authentication is
+  short-circuited by other checks
+
 * Wed Jun 26 2002 Nalin Dahyabhai <nalin@redhat.com> 3.1p1-6
 - rebuild
 
