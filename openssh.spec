@@ -28,7 +28,7 @@
 Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
-Release: 4
+Release: 5
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
@@ -45,6 +45,9 @@ Patch3: openssh-2.5.1p1-all.patch
 Patch4: openssh-2.9p1-keygen.patch
 Patch5: openssh-2.9p1-groups.patch
 Patch6: x11-askpass-1.2.2-xf41.patch
+Patch7: openssh-2.9p2-session.patch
+Patch8: openssh-2.9p2-maxfail.patch
+Patch9: openssh-2.9p2-xauth.patch
 Patch10: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
@@ -143,9 +146,14 @@ environment.
 %patch3 -p1 -b .all
 %patch4 -p0 -b .keygen
 %patch5 -p1 -b .groups
+%if ! %{no_x11_askpass}
 pushd x11-ssh-askpass-%{aversion}
 %patch6 -p1 -b .xf4
 popd
+%endif
+%patch7 -p0 -b .session
+%patch8 -p0 -b .maxfail
+%patch9 -p1 -b .xauth
 #%patch10 -p1 -b .gssapi
 
 aclocal
@@ -318,6 +326,15 @@ fi
 %endif
 
 %changelog
+* Thu Aug  9 2001 Nalin Dahyabhai <nalin@redhat.com>
+- backport cvs patch to add session initialization to no-pty sessions
+- backport cvs patch to not cut of challengeresponse auth needlessly
+- refuse to do X11 forwarding if xauth isn't there, handy if you enable
+  it by default on a system that doesn't have X installed (#49263)
+
+* Wed Aug  8 2001 Nalin Dahyabhai <nalin@redhat.com>
+- don't apply patches to code we don't intend to build (spotted by Matt Galgoci)
+
 * Mon Aug  6 2001 Nalin Dahyabhai <nalin@redhat.com>
 - pass OPTIONS correctly to initlog (#50151)
 
