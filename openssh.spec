@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.8.1p1
-%define rel 3
+%define rel 4
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -271,6 +271,11 @@ fi
 	--without-pam \
 %else
 	--with-pam \
+%endif
+%if %{WITH_SELINUX}
+	--with-selinux \
+%else
+	--without-selinux \
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}}
@@ -476,6 +481,9 @@ fi
 %endif
 
 %changelog
+* Tue Jun 15 2004 Daniel Walsh <dwalsh@redhat.com> 3.8.1p1-4
+- Clean up patch for upstream submission.
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
