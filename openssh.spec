@@ -1,5 +1,5 @@
 %if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 0
+%define WITH_SELINUX 1
 %endif
 
 # OpenSSH privilege separation requires a user & group ID
@@ -26,6 +26,14 @@
 
 # Is this build for RHL 6.x?
 %define build6x 0
+
+# Build position-independent executables (requires toolchain support)?
+# This hack is in here to prevent problem with pie on PPC64 bug 113499
+%ifarch ppc64 ppc
+%define pie 0
+%else
+%define pie 1
+%endif
 
 # Disable IPv6 (avoids DNS hangs on some glibc versions)
 %define noip6 0
@@ -74,7 +82,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.6.1p2
-%define rel 19
+%define rel 27
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -90,6 +98,9 @@ Patch2: openssh-3.5p1-multilib-pam.patch
 Patch3: openssh-buffer-size.patch
 Patch4: openssh-3.5p1-skip-initial.patch
 Patch5: openssh-3.6.1p2-owl-realloc.diff
+Patch6: openssh-3.7.1-buffer-double-free.patch
+Patch7: openssh-getsockopt-nowhinge.patch
+Patch8: openssh-3.6.1p1-owl-password-changing.diff
 Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.6.1p2-gssapi-20030430.diff
 Patch12: openssh-selinux.patch
 License: BSD
@@ -109,7 +120,7 @@ PreReq: initscripts >= 5.20
 %if %{gtk2}
 BuildPreReq: gtk2-devel
 %endif
-BuildPreReq: openssl-devel, perl, sharutils, tcp_wrappers
+BuildPreReq: openssl-devel, perl, sharutils, tcp_wrappers, zlib-devel
 BuildPreReq: /bin/login
 
 %if %{build6x}
@@ -209,6 +220,9 @@ environment.
 %patch3 -p0 -b .buffer-size
 %patch4 -p1 -b .skip-initial
 %patch5 -p1 -b .owl-realloc
+%patch6 -p3 -b .buffer-double-free
+%patch7 -p1 -b .getsockopt
+%patch8 -p1 -b .password-changing
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
@@ -224,6 +238,15 @@ fi
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+%if %{rescue}
+CFLAGS="$CFLAGS -Os"
+%endif
+%if %{pie}
+CFLAGS="$CFLAGS -fpie -pie"
+%endif
+%if %{build6x}
+export CFLAGS="$CFLAGS -D__func__=__FUNCTION__"
+%endif
 %if %{kerberos5}
 krb5_prefix=`krb5-config --prefix`
 if test "$krb5_prefix" != "%{_prefix}" ; then
@@ -235,9 +258,6 @@ else
 	CPPFLAGS="-I%{_includedir}/gssapi"; export CPPFLAGS
 	CFLAGS="$CFLAGS -I%{_includedir}/gssapi"
 fi
-%endif
-%if %{rescue}
-CFLAGS="$CFLAGS -Os"
 %endif
 
 %configure \
@@ -465,10 +485,51 @@ fi
 %endif
 
 %changelog
-* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-19
+* Mon Jan 26 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-27
+- turn off pie on ppc
+
+* Mon Jan 26 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-26
+- fix is_selinux_enabled
+
+* Wed Jan 14 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-25
+- Rebuild to grab shared libselinux
+
+* Wed Dec 3 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-24
+- turn on selinux
+
+* Tue Nov 18 2003 Nalin Dahyabhai <nalin@redhat.com>
+- un#ifdef out code for reporting password expiration in non-privsep
+  mode (#83585)
+
+* Mon Nov 10 2003 Nalin Dahyabhai <nalin@redhat.com>
+- add machinery to build with/without -fpie/-pie, default to doing so
+
+* Thu Nov 06 2003 David Woodhouse <dwmw2@redhat.com> 3.6.1p2-23
+- Don't whinge about getsockopt failing (#109161)
+
+* Fri Oct 24 2003 Nalin Dahyabhai <nalin@redhat.com>
+- add missing buildprereq on zlib-devel (#104558)
+
+* Mon Oct 13 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-22
+- turn selinux off
+
+* Mon Oct 13 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-21.sel
+- turn selinux on
+
+* Fri Sep 19 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-21
+- turn selinux off
+
+* Fri Sep 19 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-20.sel
+- turn selinux on
+
+* Fri Sep 19 2003 Nalin Dahyabhai <nalin@redhat.com>
+- additional fix for apparently-never-happens double-free in buffer_free()
+- extend fix for #103998 to cover SSH1
+
+* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-19
 - rebuild
 
-* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-18
+* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-18
 - additional buffer manipulation cleanups from Solar Designer
 
 * Wed Sep 17 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-17
@@ -477,19 +538,19 @@ fi
 * Wed Sep 17 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-16.sel
 - turn selinux on
 
-* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p1-15
+* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p2-15
 - rebuild
 
-* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p1-14
+* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p2-14
 - additional buffer manipulation fixes (CAN-2003-0695)
 
 * Tue Sep 16 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-13.sel
 - turn selinux on
 
-* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-12
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-12
 - rebuild
 
-* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-11
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-11
 - apply patch to store the correct buffer size in allocated buffers
   (CAN-2003-0693)
 - skip the initial PAM authentication attempt with an empty password if
