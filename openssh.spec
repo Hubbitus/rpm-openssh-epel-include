@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 12
+%define rel 13
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -505,6 +505,9 @@ fi
 %endif
 
 %changelog
+* Wed Mar 16 2005 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Mon Feb 28 2005 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-12
 - rebuild so that configure can detect that krb5_init_ets is gone now
 
