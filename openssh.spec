@@ -95,7 +95,7 @@ Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-3.9p1-vendor.patch
 Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
-Patch20: openssh-3.8p1-gssapimitm.patch
+Patch20: openssh-3.9p1-gssapimitm.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
