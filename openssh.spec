@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 6
+%define rel 7
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -111,9 +111,14 @@ PreReq: initscripts >= 5.00
 PreReq: initscripts >= 5.20
 %endif
 
+%if ! %{no_gnome_askpass}
 %if %{gtk2}
 BuildPreReq: gtk2-devel, xauth
+%else
+BuildPreReq: gnome-libs-devel
 %endif
+%endif
+
 %if %{scard}
 BuildPreReq: sharutils
 %endif
@@ -128,10 +133,6 @@ BuildPreReq: pam-devel
 
 %if ! %{no_x11_askpass}
 BuildPreReq: XFree86-devel
-%endif
-
-%if ! %{no_gnome_askpass}
-BuildPreReq: gnome-libs-devel
 %endif
 
 %if %{kerberos5}
@@ -493,6 +494,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 20 2004 Bill Nottingham <notting@redhat.com> 3.9p1-7
+- when using gtk2 for askpass, don't buildprereq gnome-libs-devel
+
 * Tue Sep 14 2004 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-6
 - build
 
