@@ -98,6 +98,7 @@ Patch12: openssh-selinux.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
 Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
+Patch23: openssh-3.9p1-no-log-signal.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -233,6 +234,7 @@ environment.
 #%patch20 -p0 -b .gssapimitm
 %patch21 -p1 -b .safe-stop
 %patch22 -p1 -b .keep-above
+%patch23 -p1 -b .signal
 
 autoreconf
 
@@ -501,6 +503,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 21 2005 Tomas Mraz <tmraz@redhat.com>
+- don't call syslog in signal handler
+
 * Wed Feb  9 2005 Tomas Mraz <tmraz@redhat.com>
 - add spaces to messages in initscript (#138508)
 
