@@ -29,9 +29,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
 %if %{rescue}
-Release: 11rescue
+Release: 12rescue
 %else
-Release: 11
+Release: 12
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -62,6 +62,7 @@ Patch16: openssh-2.9p2-pubkey.patch
 Patch17: openssh-2.9p2-command.patch
 Patch18: openssh-2.9p2-echo.patch
 Patch19: openssh-2.9p2-do_exec.patch
+Patch20: openssh-2.9p2-uselogin.patch
 Patch100: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
@@ -178,6 +179,7 @@ popd
 %patch17 -p0 -b .command
 %patch18 -p0 -b .echo
 %patch19 -p0 -b .do_exec
+%patch20 -p0 -b .uselogin
 if echo %{release} | grep -q gss ; then
 %patch100 -p1 -b .gssapi
 else
@@ -360,6 +362,9 @@ fi
 %endif
 
 %changelog
+* Mon Dec  3 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-12
+- add patch to fix UseLogin vulnerability from advisory by Markus
+
 * Thu Nov 15 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-11
 - pull cvs patch to use do_exec for processing more commands (heads-up
   from Markus)
