@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 2
+%define rel 3
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -491,6 +491,9 @@ fi
 %endif
 
 %changelog
+* Thu Sep 2 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-3
+- Modify Colin Walter's patch to allow specifying rule during connection
+
 * Tue Aug 31 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-2
 - Fix TTY handling for SELinux
 
