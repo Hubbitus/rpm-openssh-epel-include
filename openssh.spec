@@ -28,7 +28,7 @@
 Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
-Release: 6
+Release: 7
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 %if ! %{no_x11_askpass}
@@ -49,7 +49,12 @@ Patch7: openssh-2.9p2-session.patch
 Patch8: openssh-2.9p2-maxfail.patch
 Patch9: openssh-2.9p2-xauth.patch
 Patch10: openssh-2.9p2-forwarding.patch
-Patch11: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
+Patch11: openssh-2.9p2-nologin.patch
+Patch12: openssh-2.9p2-int64_t.patch
+Patch13: openssh-2.9p2-debug.patch
+Patch14: openssh-2.9p2-test.patch
+Patch15: openssh-2.9p2-clientloop.patch
+Patch100: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -156,8 +161,13 @@ popd
 %patch8 -p0 -b .maxfail
 %patch9 -p1 -b .xauth
 %patch10 -p0 -b .forwarding
+%patch11 -p0 -b .nologin
+%patch12 -p1 -b .int64_t
+%patch13 -p1 -b .debug
+%patch14 -p0 -b .test
+%patch15 -p0 -b .clientloop
 if echo %{release} | grep -q gss ; then
-%patch11 -p1 -b .gssapi
+%patch100 -p1 -b .gssapi
 else
 true
 fi
@@ -167,12 +177,15 @@ autoheader
 autoconf
 
 %build
+CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"; export CFLAGS
 %configure \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
 	--with-tcp-wrappers \
-	--with-ipv4-default \
 	--with-rsh=/usr/bin/rsh \
+%if %{build6x}
+	--with-ipv4-default \
+%endif
 %if %{rescue}
 	--without-pam --with-md5-passwords
 %else
@@ -327,12 +340,24 @@ fi
 %if ! %{no_gnome_askpass}
 %files askpass-gnome
 %defattr(-,root,root)
-%attr(0755,root,root) %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
+%attr(0755,root,root) %config %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
 %attr(0755,root,root) %{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
 
 %changelog
-* Mon Aug 20 2001 Nalin Dahyabhai <nalin@redhat.com>
+* Thu Sep  6 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-7
+- fix scp's server's reporting of file sizes, and build with the proper
+  preprocessor define to get large-file capable open(), stat(), etc.
+  (sftp has been doing this correctly all along) (#51827)
+- configure without --with-ipv4-default on RHL 7.x and newer (#45987,#52247)
+- pull cvs patch to fix support for /etc/nologin for non-PAM logins (#47298)
+- mark profile.d scriptlets as config files (#42337)
+- refer to Jason Stone's mail for zsh workaround for exit-hanging quasi-bug
+- change a couple of log() statements to debug() statements (#50751)
+- pull cvs patch to add -t flag to sshd (#28611)
+- clear fd_sets correctly (one bit per FD, not one byte per FD) (#43221)
+
+* Mon Aug 20 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-6
 - add db1-devel as a BuildPrerequisite (noted by Hans Ecke)
 
 * Thu Aug 16 2001 Nalin Dahyabhai <nalin@redhat.com>
