@@ -1,3 +1,7 @@
+%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
+%define WITH_SELINUX 0
+%endif
+
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
 %define sshd_gid    74
@@ -69,8 +73,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 3.5p1
-%define rel 11
+Version: 3.6.1p2
+%define rel 19
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -78,16 +82,16 @@ Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
-Source1: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-Source11: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
 Patch0: openssh-SNAP-20020220-redhat.patch
-Patch1: openssh-2.9p1-groups.patch
+Patch1: openssh-3.6.1p2-groups.patch
 Patch2: openssh-3.5p1-multilib-pam.patch
-Patch3: openssh-3.5p1-pam-timing.patch
-Patch4: openssh-buffer-size.patch
-Patch5: openssh-3.5p1-skip-initial.patch
-Patch6: openssh-3.6.1p2-owl-realloc.diff
-Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.4p1-gssapi-20020627.diff
+Patch3: openssh-buffer-size.patch
+Patch4: openssh-3.5p1-skip-initial.patch
+Patch5: openssh-3.6.1p2-owl-realloc.diff
+Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.6.1p2-gssapi-20030430.diff
+Patch12: openssh-selinux.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -102,6 +106,9 @@ PreReq: initscripts >= 5.00
 PreReq: initscripts >= 5.20
 %endif
 
+%if %{gtk2}
+BuildPreReq: gtk2-devel
+%endif
 BuildPreReq: openssl-devel, perl, sharutils, tcp_wrappers
 BuildPreReq: /bin/login
 
@@ -192,28 +199,45 @@ environment.
 %prep
 
 %if ! %{no_x11_askpass}
-%setup -q -a 1
+%setup -q -a 2
 %else
 %setup -q
 %endif
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .groups
 %patch2 -p1 -b .multilib-pam
-%patch3 -p1 -b .pam-timing
-%patch4 -p0 -b .buffer-size
-%patch5 -p1 -b .skip-initial
-%patch6 -p1 -b .owl-realloc
+%patch3 -p0 -b .buffer-size
+%patch4 -p1 -b .skip-initial
+%patch5 -p1 -b .owl-realloc
 
 # Apply gss-specific patches only if the release tag includes "gss".  (Not
 # to be used for actual releases until it's in the mainline.)
 if echo "%{release}" | grep -q gss; then
 %patch11 -p1 -b .gssapi
-autoreconf-2.53
+autoreconf
 fi
 
+%if %{WITH_SELINUX}
+#SELinux
+%patch12 -p1 -b .selinux
+%endif
+
 %build
+CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+%if %{kerberos5}
+krb5_prefix=`krb5-config --prefix`
+if test "$krb5_prefix" != "%{_prefix}" ; then
+	CPPFLAGS="$CPPFLAGS -I${krb5_prefix}/include -I${krb5_prefix}/include/gssapi"; export CPPFLAGS
+	CFLAGS="$CFLAGS -I${krb5_prefix}/include -I${krb5_prefix}/include/gssapi"
+	LDFLAGS="$LDFLAGS -L${krb5_prefix}/%{_lib}"; export LDFLAGS
+else
+	krb5_prefix=
+	CPPFLAGS="-I%{_includedir}/gssapi"; export CPPFLAGS
+	CFLAGS="$CFLAGS -I%{_includedir}/gssapi"
+fi
+%endif
 %if %{rescue}
-CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
+CFLAGS="$CFLAGS -Os"
 %endif
 
 %configure \
@@ -240,7 +264,7 @@ CFLAGS="$RPM_OPT_FLAGS -Os"; export CFLAGS
 	--with-pam \
 %endif
 %if %{kerberos5}
-	--with-kerberos5=/usr/kerberos --with-ldflags=-L/usr/kerberos/%{_lib}
+	--with-kerberos5${krb5_prefix:+=${krb5_prefix}}
 %else
 	--without-kerberos5
 %endif
@@ -441,22 +465,73 @@ fi
 %endif
 
 %changelog
-* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-11
-- additional buffer manipulation cleanups from Solar Designer
-- this update goes to 11
+* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-19
+- rebuild
 
-* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.5p1-10
+* Wed Sep 17 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-18
+- additional buffer manipulation cleanups from Solar Designer
+
+* Wed Sep 17 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-17
+- turn selinux off
+
+* Wed Sep 17 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-16.sel
+- turn selinux on
+
+* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p1-15
+- rebuild
+
+* Tue Sep 16 2003 Bill Nottingham <notting@redhat.com> 3.6.1p1-14
 - additional buffer manipulation fixes (CAN-2003-0695)
 
-* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-9
+* Tue Sep 16 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-13.sel
+- turn selinux on
+
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-12
+- rebuild
+
+* Tue Sep 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p1-11
 - apply patch to store the correct buffer size in allocated buffers
   (CAN-2003-0693)
 - skip the initial PAM authentication attempt with an empty password if
   empty passwords are not permitted in our configuration (#103998)
 
-* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6.9
-- backport patch to close timing attacks when PAM authentication is
-  short-circuited by other checks
+* Fri Sep 5 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-10
+- turn selinux off
+
+* Fri Sep 5 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-9.sel
+- turn selinux on
+
+* Tue Aug 26 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-8
+- Add BuildPreReq gtk2-devel if gtk2
+
+* Tue Aug 12 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-7
+- rebuild
+
+* Tue Aug 12 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-6
+- modify patch which clears the supplemental group list at startup to only
+  complain if setgroups() fails if sshd has euid == 0
+- handle krb5 installed in %%{_prefix} or elsewhere by using krb5-config
+
+* Tue Jul 28 2003 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-5
+- Add SELinux patch
+
+* Tue Jul 22 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-4
+- rebuild
+
+* Wed Jun 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-3
+- rebuild
+
+* Wed Jun 16 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-2
+- rebuild
+
+* Thu Jun  5 2003 Nalin Dahyabhai <nalin@redhat.com> 3.6.1p2-1
+- update to 3.6.1p2
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Mon Mar 24 2003 Florian La Roche <Florian.LaRoche@redhat.de>
+- add patch for getsockopt() call to work on bigendian 64bit archs
 
 * Fri Feb 14 2003 Nalin Dahyabhai <nalin@redhat.com> 3.5p1-6
 - move scp to the -clients subpackage, because it directly depends on ssh
