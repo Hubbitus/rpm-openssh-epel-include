@@ -35,9 +35,6 @@
 %define pie 0
 %endif
 
-# Disable IPv6 (avoids DNS hangs on some glibc versions)
-%define noip6 0
-
 # Do we want kerberos5 support (1=yes 0=no)
 %define kerberos5 1
 
@@ -49,13 +46,17 @@
 %{?skip_x11_askpass:%define no_x11_askpass 1}
 %{?skip_gnome_askpass:%define no_gnome_askpass 1}
 
+# Add option to build without GTK2 for older platforms with only GTK+.
+# RedHat <= 7.2 and Red Hat Advanced Server 2.1 are examples.
+# rpm -ba|--rebuild --define 'no_gtk2 1'
+%{?no_gtk2:%define gtk2 0}
+
 # Is this a build for RHL 6.x or earlier?
 %{?build_6x:%define build6x 1}
 
 # If this is RHL 6.x, the default configuration has sysconfdir in /usr/etc.
 %if %{build6x}
 %define _sysconfdir /etc
-%define noip6 1
 %endif
 
 # Options for static OpenSSL link:
@@ -65,10 +66,6 @@
 # Options for Smartcard support: (needs libsectok and openssl-engine)
 # rpm -ba|--rebuild --define "smartcard 1"
 %{?smartcard:%define scard 1}
-
-# Option to disable ipv6
-# rpm -ba|--rebuild --define "noipv6 1"
-%{?noipv6:%define noip6 1}
 
 # Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
 %define rescue 0
@@ -81,8 +78,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 3.6.1p2
-%define rel 36
+Version: 3.8.1p1
+%define rel 1
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -92,17 +89,13 @@ URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
 Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-Patch0: openssh-SNAP-20020220-redhat.patch
+Patch0: openssh-3.8.1p1-redhat.patch
 Patch1: openssh-3.6.1p2-groups.patch
-Patch2: openssh-3.5p1-multilib-pam.patch
-Patch3: openssh-buffer-size.patch
-Patch4: openssh-3.5p1-skip-initial.patch
-Patch5: openssh-3.6.1p2-owl-realloc.diff
-Patch6: openssh-3.7.1-buffer-double-free.patch
-Patch7: openssh-getsockopt-nowhinge.patch
-Patch8: openssh-3.6.1p1-owl-password-changing.diff
-Patch11: http://www.sxw.org.uk/computing/patches/openssh-3.6.1p2-gssapi-20030430.diff
+Patch2: openssh-3.8.1p1-skip-initial.patch
+Patch3: openssh-3.8.1p1-krb5-config.patch
+Patch4: openssh-3.8.1p1-pam_password.patch
 Patch12: openssh-selinux.patch
+Patch20: openssh-3.8p1-gssapimitm.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -120,8 +113,8 @@ PreReq: initscripts >= 5.20
 %if %{gtk2}
 BuildPreReq: gtk2-devel
 %endif
-BuildPreReq: openssl-devel, perl, sharutils, tcp_wrappers, zlib-devel
-BuildPreReq: /bin/login
+BuildPreReq: autoconf, openssl-devel, perl, sharutils, tcp_wrappers, zlib-devel
+BuildPreReq: /bin/login, xauth
 
 %if %{build6x}
 BuildPreReq: glibc-devel, pam
@@ -216,25 +209,18 @@ environment.
 %endif
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .groups
-%patch2 -p1 -b .multilib-pam
-%patch3 -p0 -b .buffer-size
-%patch4 -p1 -b .skip-initial
-%patch5 -p1 -b .owl-realloc
-%patch6 -p3 -b .buffer-double-free
-%patch7 -p1 -b .getsockopt
-%patch8 -p1 -b .password-changing
-
-# Apply gss-specific patches only if the release tag includes "gss".  (Not
-# to be used for actual releases until it's in the mainline.)
-if echo "%{release}" | grep -q gss; then
-%patch11 -p1 -b .gssapi
-autoreconf
-fi
+%patch2 -p1 -b .skip-initial
+%patch3 -p1 -b .krb5-config
+%patch4 -p0 -b .pam_password
 
 %if %{WITH_SELINUX}
 #SELinux
 %patch12 -p1 -b .selinux
 %endif
+
+#%patch20 -p0 -b .gssapimitm
+
+autoconf
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
@@ -278,14 +264,11 @@ fi
 %if %{scard}
 	--with-smartcard \
 %endif
-%if %{noip6}
-	--with-ipv4-default \
-%endif
 %if %{build6x}
 	--with-ipv4-default \
 %endif
 %if %{rescue}
-	--without-pam --with-md5-passwords \
+	--without-pam \
 %else
 	--with-pam \
 %endif
@@ -361,9 +344,11 @@ install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome
 	rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
 %endif
 
+%if ! %{no_gnome_askpass}
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 contrib/redhat/gnome-ssh-askpass.csh $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 contrib/redhat/gnome-ssh-askpass.sh $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
+%endif
 
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
 
@@ -448,7 +433,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
-%attr(0755,root,root) %{_bindir}/ssh-agent
+%attr(2755,root,nobody) %{_bindir}/ssh-agent
 %attr(0755,root,root) %{_bindir}/ssh-add
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
 %attr(0755,root,root) %{_bindir}/sftp
@@ -491,8 +476,17 @@ fi
 %endif
 
 %changelog
+* Mon Jun  7 2004 Nalin Dahyabhai <nalin@redhat.com> 3.8.1p1-1
+- request gssapi-with-mic by default but not delegation (flag day for anyone
+  who used previous gssapi patches)
+- no longer request x11 forwarding by default
+
 * Thu Jun 3 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-36
 - Change pam file to use open and close with pam_selinux
+
+* Tue Jun  1 2004 Nalin Dahyabhai <nalin@redhat.com> 3.8.1p1-0
+- update to 3.8.1p1
+- add workaround from CVS to reintroduce passwordauth using pam
 
 * Tue Jun 1 2004 Daniel Walsh <dwalsh@redhat.com> 3.6.1p2-35
 - Remove CLOSEXEC on STDERR
