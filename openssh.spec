@@ -86,8 +86,10 @@ Release: %{rel}rescue
 Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
-Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
-Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+#Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
+#Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+Source0: openssh-%{version}-noacss.tar.gz
+Source1: openssh-nukeacss.sh
 Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
 Patch0: openssh-3.9p1-redhat.patch
 Patch1: openssh-3.6.1p2-groups.patch
@@ -491,6 +493,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 13 2004 Nalin Dahyabhai <nalin@redhat.com>
+- disable ACSS support
+
 * Thu Sep 2 2004 Daniel Walsh <dwalsh@redhat.com> 3.9p1-5
 - Change selinux patch to use get_default_context_with_role in libselinux.
 
