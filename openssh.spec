@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.0p1
-%define rel 1
+%define rel 2
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -99,6 +99,8 @@ Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-3.9p1-fromto-remote.patch
+Patch25: openssh-4.0p1-local-forward.patch
+Patch26: openssh-4.0p1-krb5-valid.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -235,6 +237,8 @@ environment.
 %patch22 -p1 -b .keep-above
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
+%patch25 -p1 -b .local-forward
+%patch26 -p0 -b .krb5-valid
 
 autoreconf
 
@@ -503,6 +507,11 @@ fi
 %endif
 
 %changelog
+* Mon Apr  4 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-2
+- fixed Local/RemoteForward in ssh_config.5 manpage
+- fix fatal when Local/RemoteForward is used and scp run (#153258)
+- don't leak user validity when using krb5 authentication
+
 * Thu Mar 24 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-1
 - upgrade to 4.0p1
 - remove obsolete groups patch
