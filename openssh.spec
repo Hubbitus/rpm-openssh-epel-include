@@ -79,7 +79,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 7
+%define rel 8
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -95,6 +95,7 @@ Patch0: openssh-3.9p1-redhat.patch
 Patch1: openssh-3.6.1p2-groups.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
+Patch4: openssh-3.9p1-vendor.patch
 Patch12: openssh-selinux.patch
 Patch20: openssh-3.8p1-gssapimitm.patch
 License: BSD
@@ -221,6 +222,7 @@ environment.
 %patch1 -p1 -b .groups
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
+%patch4 -p1 -b .vendor
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -229,7 +231,7 @@ environment.
 
 #%patch20 -p0 -b .gssapimitm
 
-autoconf
+autoreconf
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
@@ -270,6 +272,8 @@ fi
 	--with-default-path=/usr/local/bin:/bin:/usr/bin \
 	--with-superuser-path=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin \
 	--with-privsep-path=%{_var}/empty/sshd \
+	--enable-vendor-patchlevel="FC-%{version}-%{release}" \
+	--disable-strip \
 %if %{scard}
 	--with-smartcard \
 %endif
@@ -494,6 +498,11 @@ fi
 %endif
 
 %changelog
+* Mon Oct  4 2004 Nalin Dahyabhai <nalin@redhat.com> 3.9p1-8
+- add a --enable-vendor-patchlevel option which allows a ShowPatchLevel option
+  to enable display of a vendor patch level during version exchange (#120285)
+- configure with --disable-strip to build useful debuginfo subpackages
+
 * Mon Sep 20 2004 Bill Nottingham <notting@redhat.com> 3.9p1-7
 - when using gtk2 for askpass, don't buildprereq gnome-libs-devel
 
