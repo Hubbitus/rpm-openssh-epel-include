@@ -29,9 +29,9 @@ Summary: The OpenSSH implementation of SSH.
 Name: openssh
 Version: 2.9p2
 %if %{rescue}
-Release: 9rescue
+Release: 11rescue
 %else
-Release: 9
+Release: 11
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -59,6 +59,9 @@ Patch13: openssh-2.9p2-debug.patch
 Patch14: openssh-2.9p2-test.patch
 Patch15: openssh-2.9p2-clientloop.patch
 Patch16: openssh-2.9p2-pubkey.patch
+Patch17: openssh-2.9p2-command.patch
+Patch18: openssh-2.9p2-echo.patch
+Patch19: openssh-2.9p2-do_exec.patch
 Patch100: http://www.sxw.org.uk/computing/patches/openssh-2.9p2-gssapi.patch
 License: BSD
 Group: Applications/Internet
@@ -172,6 +175,9 @@ popd
 %patch14 -p0 -b .test
 %patch15 -p0 -b .clientloop
 %patch16 -p0 -b .pubkey
+%patch17 -p0 -b .command
+%patch18 -p0 -b .echo
+%patch19 -p0 -b .do_exec
 if echo %{release} | grep -q gss ; then
 %patch100 -p1 -b .gssapi
 else
@@ -354,6 +360,17 @@ fi
 %endif
 
 %changelog
+* Thu Nov 15 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-11
+- pull cvs patch to use do_exec for processing more commands (heads-up
+  from Markus)
+
+* Wed Nov 14 2001 Nalin Dahyabhai <nalin@redhat.com>
+- pull cvs patch to stop sending fake dummy packets on carriage return
+  (heads-up from Solar Designer, bug reported originally by Yang Yu)
+
+* Fri Nov  9 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-10
+- pull cvs patch to make forced commands override subsystem invocations also
+
 * Thu Sep 27 2001 Nalin Dahyabhai <nalin@redhat.com> 2.9p2-9
 - incorporate fix from Markus Friedl's advisory for IP-based authorization bugs
 
