@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 3.9p1
-%define rel 8.1
+%define rel 9
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -93,6 +93,7 @@ Patch1: openssh-3.6.1p2-groups.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-3.9p1-vendor.patch
+Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
 Patch20: openssh-3.8p1-gssapimitm.patch
 License: BSD
@@ -220,6 +221,7 @@ environment.
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
+%patch5 -p1 -b .noinitlog
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -495,6 +497,9 @@ fi
 %endif
 
 %changelog
+* Mon Jan  3 2005 Bill Nottingham <notting@redhat.com> 3.9p1-9
+- don't use initlog
+
 * Mon Nov 29 2004 Thomas Woerner <twoerner@redhat.com> 3.9p1-8.1
 - fixed PIE build for all architectures
 
