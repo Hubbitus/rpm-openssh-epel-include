@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.0p1
-%define rel 2
+%define rel 3
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -507,6 +507,9 @@ fi
 %endif
 
 %changelog
+* Mon May 16 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-3
+- link libselinux only to sshd (#157678)
+
 * Mon Apr  4 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-2
 - fixed Local/RemoteForward in ssh_config.5 manpage
 - fix fatal when Local/RemoteForward is used and scp run (#153258)
