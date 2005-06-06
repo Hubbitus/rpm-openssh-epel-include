@@ -73,8 +73,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 4.0p1
-%define rel 3
+Version: 4.1p1
+%define rel 1
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -99,8 +99,8 @@ Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-3.9p1-fromto-remote.patch
-Patch25: openssh-4.0p1-local-forward.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
+Patch27: openssh-4.1p1-pam-loginuid.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -160,7 +160,7 @@ Group: System Environment/Daemons
 Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9, /usr/sbin/useradd
 %if ! %{build6x}
-Requires: /etc/pam.d/system-auth
+Requires: pam >= 0.78-7, /etc/pam.d/system-auth
 %endif
 
 %package askpass
@@ -237,8 +237,8 @@ environment.
 %patch22 -p1 -b .keep-above
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
-%patch25 -p1 -b .local-forward
 %patch26 -p0 -b .krb5-valid
+%patch27 -p1 -b .loginuid
 
 autoreconf
 
@@ -507,6 +507,10 @@ fi
 %endif
 
 %changelog
+* Mon Jun  6 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-1
+- upgrade to a new upstream version
+- call pam_loginuid as a pam session module
+
 * Mon May 16 2005 Tomas Mraz <tmraz@redhat.com> 4.0p1-3
 - link libselinux only to sshd (#157678)
 
