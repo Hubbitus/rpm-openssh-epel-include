@@ -101,6 +101,7 @@ Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-3.9p1-fromto-remote.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
 Patch27: openssh-4.1p1-pam-loginuid.patch
+Patch28: openssh-4.1p1-nologin.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -239,6 +240,7 @@ environment.
 %patch24 -p1 -b .fromto-remote
 %patch26 -p0 -b .krb5-valid
 %patch27 -p1 -b .loginuid
+%patch28 -p1 -b .nologin
 
 autoreconf
 
@@ -507,6 +509,9 @@ fi
 %endif
 
 %changelog
+* Thu Jun  9 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-2
+- use only pam_nologin for nologin testing
+
 * Mon Jun  6 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-1
 - upgrade to a new upstream version
 - call pam_loginuid as a pam session module
