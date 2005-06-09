@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.1p1
-%define rel 1
+%define rel 2
 %if %{rescue}
 Release: %{rel}rescue
 %else
