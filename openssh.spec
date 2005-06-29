@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.1p1
-%define rel 2
+%define rel 3
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -102,6 +102,7 @@ Patch24: openssh-3.9p1-fromto-remote.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
 Patch27: openssh-4.1p1-pam-loginuid.patch
 Patch28: openssh-4.1p1-nologin.patch
+Patch29: openssh-4.1p1-getpeername-race.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -241,6 +242,7 @@ environment.
 %patch26 -p0 -b .krb5-valid
 %patch27 -p1 -b .loginuid
 %patch28 -p1 -b .nologin
+%patch29 -p0 -b .getpeername-race
 
 autoreconf
 
@@ -509,6 +511,10 @@ fi
 %endif
 
 %changelog
+* Wed Jun 29 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-3
+- fix small regression caused by the nologin patch (#161956)
+- fix race in getpeername error checking (mindrot #1054)
+
 * Thu Jun  9 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-2
 - use only pam_nologin for nologin testing
 
