@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.1p1
-%define rel 3
+%define rel 4
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -103,6 +103,8 @@ Patch26: openssh-4.0p1-krb5-valid.patch
 Patch27: openssh-4.1p1-pam-loginuid.patch
 Patch28: openssh-4.1p1-nologin.patch
 Patch29: openssh-4.1p1-getpeername-race.patch
+Patch30: openssh-4.0p1-exit-deadlock.patch
+Patch31: openssh-3.9p1-skip-used.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -162,7 +164,7 @@ Group: System Environment/Daemons
 Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9, /usr/sbin/useradd
 %if ! %{build6x}
-Requires: pam >= 0.78-7, /etc/pam.d/system-auth
+Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
 %endif
 
 %package askpass
@@ -243,6 +245,8 @@ environment.
 %patch27 -p1 -b .loginuid
 %patch28 -p1 -b .nologin
 %patch29 -p0 -b .getpeername-race
+%patch30 -p1 -b .exit-deadlock
+%patch31 -p1 -b .skip-used
 
 autoreconf
 
@@ -511,6 +515,10 @@ fi
 %endif
 
 %changelog
+* Wed Jul 27 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-4
+- don't deadlock on exit with multiple X forwarded channels (#152432)
+- don't use X11 port which can't be bound on all IP families (#163732)
+
 * Wed Jun 29 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-3
 - fix small regression caused by the nologin patch (#161956)
 - fix race in getpeername error checking (mindrot #1054)
