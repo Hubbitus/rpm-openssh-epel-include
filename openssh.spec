@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.1p1
-%define rel 4
+%define rel 5
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -88,6 +88,8 @@ URL: http://www.openssh.com/portable.html
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
+Source3: x11-ssh-askpass.sh
+Source4: x11-ssh-askpass.csh
 Patch0: openssh-4.0p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
@@ -365,10 +367,15 @@ install -m755 contrib/redhat/sshd.init.old $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 contrib/redhat/sshd.pam      $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m755 contrib/redhat/sshd.init     $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 %endif
+install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
+install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
 %if ! %{no_x11_askpass}
 install -s x11-ssh-askpass-%{aversion}/x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/x11-ssh-askpass
 ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
+install -m 755 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
+install -m 755 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -476,10 +483,12 @@ fi
 %attr(0755,root,root) %{_bindir}/ssh-add
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
 %attr(0755,root,root) %{_bindir}/sftp
+%attr(0755,root,root) %{_bindir}/ssh-copy-id
 %attr(0644,root,root) %{_mandir}/man1/ssh-agent.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-add.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-keyscan.1*
 %attr(0644,root,root) %{_mandir}/man1/sftp.1*
+%attr(0644,root,root) %{_mandir}/man1/ssh-copy-id.1*
 %endif
 
 %if ! %{rescue}
@@ -505,6 +514,7 @@ fi
 %doc x11-ssh-askpass-%{aversion}/SshAskpass*.ad
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
 %attr(0755,root,root) %{_libexecdir}/openssh/x11-ssh-askpass
+%attr(0755,root,root) %config %{_sysconfdir}/profile.d/x11-ssh-askpass.*
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -515,6 +525,10 @@ fi
 %endif
 
 %changelog
+* Tue Aug 16 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-5
+- use x11-ssh-askpass if openssh-askpass-gnome is not installed (#165207)
+- install ssh-copy-id from contrib (#88707)
+
 * Wed Jul 27 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-4
 - don't deadlock on exit with multiple X forwarded channels (#152432)
 - don't use X11 port which can't be bound on all IP families (#163732)
