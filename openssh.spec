@@ -73,8 +73,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 4.1p1
-%define rel 5
+Version: 4.2p1
+%define rel 1
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -104,7 +104,6 @@ Patch24: openssh-3.9p1-fromto-remote.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
 Patch27: openssh-4.1p1-pam-loginuid.patch
 Patch28: openssh-4.1p1-nologin.patch
-Patch29: openssh-4.1p1-getpeername-race.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
 License: BSD
@@ -246,7 +245,6 @@ environment.
 %patch26 -p0 -b .krb5-valid
 %patch27 -p1 -b .loginuid
 %patch28 -p1 -b .nologin
-%patch29 -p0 -b .getpeername-race
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
 
@@ -293,6 +291,7 @@ fi
 	--with-privsep-path=%{_var}/empty/sshd \
 	--enable-vendor-patchlevel="FC-%{version}-%{release}" \
 	--disable-strip \
+	--without-zlib-version-check \
 %if %{scard}
 	--with-smartcard \
 %endif
@@ -525,6 +524,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 06 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-1
+- upgrade to a new upstream version
+
 * Tue Aug 16 2005 Tomas Mraz <tmraz@redhat.com> 4.1p1-5
 - use x11-ssh-askpass if openssh-askpass-gnome is not installed (#165207)
 - install ssh-copy-id from contrib (#88707)
