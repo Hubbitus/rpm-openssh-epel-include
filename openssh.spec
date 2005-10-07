@@ -102,7 +102,7 @@ Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-3.9p1-fromto-remote.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
-Patch27: openssh-4.2p1-pam-stack.patch
+Patch27: openssh-4.2p1-pam-no-stack.patch
 Patch28: openssh-4.1p1-nologin.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
