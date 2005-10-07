@@ -249,7 +249,7 @@ environment.
 %patch28 -p1 -b .nologin
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
-%patch32 -p1 -b .auth-fail-info
+%patch32 -p0 -b .auth-fail-info
 %patch33 -p1 -b .no-system
 
 autoreconf
