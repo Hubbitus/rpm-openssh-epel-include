@@ -74,7 +74,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 1
+%define rel 2
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -102,10 +102,12 @@ Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-3.9p1-fromto-remote.patch
 Patch26: openssh-4.0p1-krb5-valid.patch
-Patch27: openssh-4.1p1-pam-loginuid.patch
+Patch27: openssh-4.2p1-pam-stack.patch
 Patch28: openssh-4.1p1-nologin.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
+Patch32: openssh-4.2p1-pam-auth-fail-info.patch
+Patch33: openssh-4.2p1-scp-no-system.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -243,10 +245,12 @@ environment.
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
 %patch26 -p0 -b .krb5-valid
-%patch27 -p1 -b .loginuid
+%patch27 -p1 -b .stack
 %patch28 -p1 -b .nologin
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
+%patch32 -p1 -b .auth-fail-info
+%patch33 -p1 -b .no-system
 
 autoreconf
 
@@ -524,6 +528,11 @@ fi
 %endif
 
 %changelog
+* Fri Oct  7 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-2
+- use include instead of pam_stack in pam config
+- use fork+exec instead of system in scp (#168167)
+- upstream patch for displaying authentication errors
+
 * Tue Sep 06 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-1
 - upgrade to a new upstream version
 
