@@ -1,7 +1,4 @@
-%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
 %define WITH_SELINUX 1
-%endif
-
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
 %define sshd_gid    74
@@ -74,7 +71,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 2
+%define rel 3
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -150,10 +147,8 @@ BuildPreReq: XFree86-devel
 BuildPreReq: krb5-devel
 %endif
 
-%if %{WITH_SELINUX}
-Requires: libselinux >= 1.17.9
-BuildRequires: libselinux-devel >= 1.17.9
-%endif
+Requires: libselinux >= 1.27.7
+BuildRequires: libselinux-devel >= 1.27.7
 
 %package clients
 Summary: OpenSSH clients.
@@ -233,12 +228,7 @@ environment.
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
 %patch5 -p1 -b .noinitlog
-
-%if %{WITH_SELINUX}
-#SELinux
 %patch12 -p1 -b .selinux
-%endif
-
 #%patch20 -p0 -b .gssapimitm
 %patch21 -p1 -b .safe-stop
 %patch22 -p1 -b .keep-above
@@ -307,11 +297,7 @@ fi
 %else
 	--with-pam \
 %endif
-%if %{WITH_SELINUX}
 	--with-selinux \
-%else
-	--without-selinux \
-%endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}}
 %else
@@ -528,6 +514,9 @@ fi
 %endif
 
 %changelog
+* Thu Oct 13 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-3
+- Update selinux patch to use getseuserbyname
+
 * Fri Oct  7 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-2
 - use include instead of pam_stack in pam config
 - use fork+exec instead of system in scp (#168167)
