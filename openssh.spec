@@ -71,7 +71,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 3
+%define rel 4
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -514,6 +514,9 @@ fi
 %endif
 
 %changelog
+* Tue Oct 18 2005 Dan Walsh <dwalsh@redhat.com> 4.2p1-4
+- Change selinux patch to use get_default_context_with_rolelevel in libselinux.
+
 * Thu Oct 13 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-3
 - Update selinux patch to use getseuserbyname
 
