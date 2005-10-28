@@ -1,4 +1,9 @@
 %define WITH_SELINUX 1
+%if %{WITH_SELINUX}
+# Audit patch applicable only over SELinux patch
+%define WITH_AUDIT 1
+%endif
+
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
 %define sshd_gid    74
@@ -71,7 +76,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 4
+%define rel 5
 %if %{rescue}
 Release: %{rel}rescue
 %else
@@ -93,6 +98,7 @@ Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-4.0p1-vendor.patch
 Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
+Patch16: openssh-4.2p1-audit.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
 Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
@@ -147,8 +153,15 @@ BuildPreReq: XFree86-devel
 BuildPreReq: krb5-devel
 %endif
 
+%if %{WITH_SELINUX}
 Requires: libselinux >= 1.27.7
 BuildRequires: libselinux-devel >= 1.27.7
+%endif
+
+%if %{WITH_AUDIT}
+Requires: audit-libs >= 1.0.8
+BuildRequires: audit-libs >= 1.0.8
+%endif
 
 %package clients
 Summary: OpenSSH clients.
@@ -228,7 +241,16 @@ environment.
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
 %patch5 -p1 -b .noinitlog
+
+%if %{WITH_SELINUX}
+#SELinux
 %patch12 -p1 -b .selinux
+%endif
+
+%if %{WITH_AUDIT}
+%patch16 -p1 -b .audit
+%endif
+
 #%patch20 -p0 -b .gssapimitm
 %patch21 -p1 -b .safe-stop
 %patch22 -p1 -b .keep-above
@@ -297,7 +319,12 @@ fi
 %else
 	--with-pam \
 %endif
+%if %{WITH_SELINUX}
 	--with-selinux \
+%endif
+%if %{WITH_AUDIT}
+	--with-linux-audit \
+%endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}}
 %else
@@ -514,6 +541,10 @@ fi
 %endif
 
 %changelog
+* Fri Oct 28 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-5
+- put back the possibility to skip SELinux patch
+- add patch for user login auditing by Steve Grubb
+
 * Tue Oct 18 2005 Dan Walsh <dwalsh@redhat.com> 4.2p1-4
 - Change selinux patch to use get_default_context_with_rolelevel in libselinux.
 
