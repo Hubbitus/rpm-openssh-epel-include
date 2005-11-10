@@ -146,7 +146,7 @@ BuildPreReq: pam-devel
 %endif
 
 %if ! %{no_x11_askpass}
-BuildPreReq: XFree86-devel
+BuildPreReq: xorg-x11-devel
 %endif
 
 %if %{kerberos5}
