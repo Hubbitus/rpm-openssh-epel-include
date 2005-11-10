@@ -76,9 +76,9 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 5
+%define rel 6
 %if %{rescue}
-Release: %{rel}rescue
+%define %{rel}rescue
 %else
 Release: %{rel}
 %endif
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Wed Nov  9 2005 Jeremy Katz <katzj@redhat.com> - 4.2p1-6
+- rebuild against new openssl
+
 * Fri Oct 28 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-5
 - put back the possibility to skip SELinux patch
 - add patch for user login auditing by Steve Grubb
