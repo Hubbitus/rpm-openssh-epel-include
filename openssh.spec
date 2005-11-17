@@ -146,7 +146,7 @@ BuildPreReq: pam-devel
 %endif
 
 %if ! %{no_x11_askpass}
-BuildPreReq: xorg-x11-devel
+BuildPreReq: libXt-devel
 %endif
 
 %if %{kerberos5}
@@ -177,6 +177,7 @@ PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9, /usr/sbin/useradd
 %if ! %{build6x}
 Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
 %endif
+BuildRequires: xorg-x11-xauth
 
 %package askpass
 Summary: A passphrase dialog for OpenSSH and X.
@@ -542,7 +543,8 @@ fi
 
 %changelog
 * Thu Nov 17 2005 Warren Togami <wtogami@redhat.com> - 4.2p1-7
-- rebuild to pick up new xauth location so X forwarding works
+- xorg-x11-devel -> libXt-devel
+- rebuild for new xauth location so X forwarding works
 
 * Wed Nov  9 2005 Jeremy Katz <katzj@redhat.com> - 4.2p1-6
 - rebuild against new openssl
