@@ -76,7 +76,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 6
+%define rel 7
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Thu Nov 17 2005 Warren Togami <wtogami@redhat.com> - 4.2p1-7
+- rebuild to pick up new xauth location so X forwarding works
+
 * Wed Nov  9 2005 Jeremy Katz <katzj@redhat.com> - 4.2p1-6
 - rebuild against new openssl
 
