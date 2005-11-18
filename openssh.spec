@@ -127,7 +127,7 @@ PreReq: initscripts >= 5.20
 
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
-BuildPreReq: gtk2-devel, xauth
+BuildPreReq: gtk2-devel
 %else
 BuildPreReq: gnome-libs-devel
 %endif
@@ -554,6 +554,7 @@ fi
 %changelog
 * Fri Nov 18 2005 Nalin Dahyabhai <nalin@redhat.com> - 4.2p1-8
 - work around missing gccmakedep by wrapping makedepend in a local script
+- remove now-obsolete build dependency on "xauth"
 
 * Thu Nov 17 2005 Warren Togami <wtogami@redhat.com> - 4.2p1-7
 - xorg-x11-devel -> libXt-devel
