@@ -267,6 +267,9 @@ environment.
 %patch32 -p0 -b .auth-fail-info
 %patch33 -p1 -b .no-system
 
+echo 'makedepend "$@"' > x11-ssh-askpass-%{aversion}/gccmakedep
+chmod +x x11-ssh-askpass-%{aversion}/gccmakedep
+
 autoreconf
 
 %build
@@ -348,6 +351,7 @@ make
 pushd x11-ssh-askpass-%{aversion}
 # This configure can't handle platform strings.
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_libexecdir}/openssh
+PATH="$PATH:`pwd`" \
 xmkmf -a
 make
 popd
@@ -548,6 +552,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 18 2005 Nalin Dahyabhai <nalin@redhat.com> - 4.2p1-8
+- work around missing gccmakedep by wrapping makedepend in a local script
+
 * Thu Nov 17 2005 Warren Togami <wtogami@redhat.com> - 4.2p1-7
 - xorg-x11-devel -> libXt-devel
 - rebuild for new xauth location so X forwarding works
