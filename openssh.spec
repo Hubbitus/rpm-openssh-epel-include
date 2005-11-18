@@ -136,7 +136,9 @@ BuildPreReq: gnome-libs-devel
 %if %{scard}
 BuildPreReq: sharutils
 %endif
-BuildPreReq: autoconf, openssl-devel, perl, tcp_wrappers, zlib-devel
+BuildPreReq: autoconf, automake, openssl-devel, perl, tcp_wrappers, zlib-devel
+BuildPreReq: audit-libs-devel
+BuildPreReq: imake
 BuildPreReq: util-linux, groff, man
 
 %if %{build6x}
@@ -268,7 +270,11 @@ environment.
 autoreconf
 
 %build
-CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+#CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+# Ugly hack to workaround openssh defining __USE_GNU which is 
+# not allowed and causes problems according to Ulrich Drepper
+# fix this the correct way after FC5test1
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"; export CFLAGS
 %if %{rescue}
 CFLAGS="$CFLAGS -Os"
 %endif
@@ -545,6 +551,13 @@ fi
 * Thu Nov 17 2005 Warren Togami <wtogami@redhat.com> - 4.2p1-7
 - xorg-x11-devel -> libXt-devel
 - rebuild for new xauth location so X forwarding works
+- buildreq audit-libs-devel
+- buildreq automake for aclocal
+- buildreq imake for xmkmf
+-  -D_GNU_SOURCE in flags in order to get it to build
+   Ugly hack to workaround openssh defining __USE_GNU which is
+   not allowed and causes problems according to Ulrich Drepper
+   fix this the correct way after FC5test1
 
 * Wed Nov  9 2005 Jeremy Katz <katzj@redhat.com> - 4.2p1-6
 - rebuild against new openssl
