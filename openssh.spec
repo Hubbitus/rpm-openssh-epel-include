@@ -8,12 +8,6 @@
 %define sshd_uid    74
 %define sshd_gid    74
 
-# Version of ssh-askpass
-%define aversion 1.2.4.1
-
-# Do we want to disable building of x11-askpass? (1=yes 0=no)
-%define no_x11_askpass 0
-
 # Do we want to disable building of gnome-askpass? (1=yes 0=no)
 %define no_gnome_askpass 0
 
@@ -26,9 +20,6 @@
 # Use GTK2 instead of GNOME in gnome-ssh-askpass
 %define gtk2 1
 
-# Is this build for RHL 6.x?
-%define build6x 0
-
 # Build position-independent executables (requires toolchain support)?
 %define pie 1
 
@@ -40,21 +31,12 @@
 
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
-%{?skip_x11_askpass:%define no_x11_askpass 1}
 %{?skip_gnome_askpass:%define no_gnome_askpass 1}
 
 # Add option to build without GTK2 for older platforms with only GTK+.
 # Red Hat Linux <= 7.2 and Red Hat Advanced Server 2.1 are examples.
 # rpm -ba|--rebuild --define 'no_gtk2 1'
 %{?no_gtk2:%define gtk2 0}
-
-# Is this a build for RHL 6.x or earlier?
-%{?build_6x:%define build6x 1}
-
-# If this is RHL 6.x, the default configuration has sysconfdir in /usr/etc.
-%if %{build6x}
-%define _sysconfdir /etc
-%endif
 
 # Options for static OpenSSL link:
 # rpm -ba|--rebuild --define "static_openssl 1"
@@ -76,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 8
+%define rel 9
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -89,9 +71,6 @@ URL: http://www.openssh.com/portable.html
 # removes the ACSS cipher.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
-Source2: http://www.pobox.com/~jmknoble/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
-Source3: x11-ssh-askpass.sh
-Source4: x11-ssh-askpass.csh
 Patch0: openssh-4.0p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
@@ -111,6 +90,8 @@ Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
 Patch32: openssh-4.2p1-pam-auth-fail-info.patch
 Patch33: openssh-4.2p1-scp-no-system.patch
+Patch34: openssh-4.2p1-gnu-source.patch
+Patch35: openssh-4.2p1-askpass-progress.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -119,15 +100,12 @@ Obsoletes: ssh
 Requires: /sbin/nologin
 %endif
 
-%if %{build6x}
-PreReq: initscripts >= 5.00
-%else
 PreReq: initscripts >= 5.20
-%endif
 
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
 BuildPreReq: gtk2-devel
+BuildPreReq: libX11-devel
 %else
 BuildPreReq: gnome-libs-devel
 %endif
@@ -138,18 +116,9 @@ BuildPreReq: sharutils
 %endif
 BuildPreReq: autoconf, automake, openssl-devel, perl, tcp_wrappers, zlib-devel
 BuildPreReq: audit-libs-devel
-BuildPreReq: imake
 BuildPreReq: util-linux, groff, man
 
-%if %{build6x}
-BuildPreReq: glibc-devel, pam-devel
-%else
 BuildPreReq: pam-devel
-%endif
-
-%if ! %{no_x11_askpass}
-BuildPreReq: libXt-devel
-%endif
 
 %if %{kerberos5}
 BuildPreReq: krb5-devel
@@ -176,22 +145,14 @@ Summary: The OpenSSH server daemon.
 Group: System Environment/Daemons
 Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9, /usr/sbin/useradd
-%if ! %{build6x}
 Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
-%endif
 BuildRequires: xorg-x11-xauth
 
 %package askpass
 Summary: A passphrase dialog for OpenSSH and X.
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
-Obsoletes: ssh-extras
-
-%package askpass-gnome
-Summary: A passphrase dialog for OpenSSH, X, and GNOME.
-Group: Applications/Internet
-Requires: openssh = %{version}-%{release}
-Obsoletes: ssh-extras
+Obsoletes: ssh-extras, openssh-askpass-gnome
 
 %description
 SSH (Secure SHell) is a program for logging into and executing
@@ -226,19 +187,9 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 an X11 passphrase dialog for OpenSSH.
 
-%description askpass-gnome
-OpenSSH is a free version of SSH (Secure SHell), a program for logging
-into and executing commands on a remote machine. This package contains
-an X11 passphrase dialog for OpenSSH and the GNOME GUI desktop
-environment.
-
 %prep
 
-%if ! %{no_x11_askpass}
-%setup -q -a 2
-%else
 %setup -q
-%endif
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
@@ -266,18 +217,17 @@ environment.
 %patch31 -p1 -b .skip-used
 %patch32 -p0 -b .auth-fail-info
 %patch33 -p1 -b .no-system
-
-echo 'makedepend "$@"' > x11-ssh-askpass-%{aversion}/gccmakedep
-chmod +x x11-ssh-askpass-%{aversion}/gccmakedep
+%patch34 -p1 -b .gnu-source
+%patch35 -p1 -b .progress
 
 autoreconf
 
 %build
-#CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 # Ugly hack to workaround openssh defining __USE_GNU which is 
 # not allowed and causes problems according to Ulrich Drepper
 # fix this the correct way after FC5test1
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"; export CFLAGS
+#CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"; export CFLAGS
 %if %{rescue}
 CFLAGS="$CFLAGS -Os"
 %endif
@@ -289,9 +239,6 @@ CFLAGS="$CFLAGS -fpie"
 %endif
 export CFLAGS
 LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
-%endif
-%if %{build6x}
-export CFLAGS="$CFLAGS -D__func__=__FUNCTION__"
 %endif
 %if %{kerberos5}
 krb5_prefix=`krb5-config --prefix`
@@ -321,9 +268,6 @@ fi
 %if %{scard}
 	--with-smartcard \
 %endif
-%if %{build6x}
-	--with-ipv4-default \
-%endif
 %if %{rescue}
 	--without-pam \
 %else
@@ -346,16 +290,6 @@ perl -pi -e "s|-lcrypto|%{_libdir}/libcrypto.a|g" Makefile
 %endif
 
 make
-
-%if ! %{no_x11_askpass}
-pushd x11-ssh-askpass-%{aversion}
-# This configure can't handle platform strings.
-./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_libexecdir}/openssh
-PATH="$PATH:`pwd`" \
-xmkmf -a
-make
-popd
-%endif
 
 # Define a variable to toggle gnome1/gtk2 building.  This is necessary
 # because RPM doesn't handle nested %if statements.
@@ -387,23 +321,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
-%if %{build6x}
-install -m644 contrib/redhat/sshd.pam.old  $RPM_BUILD_ROOT/etc/pam.d/sshd
-install -m755 contrib/redhat/sshd.init.old $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
-%else
 install -m644 contrib/redhat/sshd.pam      $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m755 contrib/redhat/sshd.init     $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
-%endif
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
-
-%if ! %{no_x11_askpass}
-install -s x11-ssh-askpass-%{aversion}/x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/x11-ssh-askpass
-ln -s x11-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
-install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
-install -m 755 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
-install -m 755 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
-%endif
 
 %if ! %{no_gnome_askpass}
 install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
@@ -414,6 +335,7 @@ install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome
 %endif
 
 %if ! %{no_gnome_askpass}
+ln -s gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 contrib/redhat/gnome-ssh-askpass.csh $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
 install -m 755 contrib/redhat/gnome-ssh-askpass.sh $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
@@ -533,25 +455,22 @@ fi
 %attr(0755,root,root) %config /etc/rc.d/init.d/sshd
 %endif
 
-%if ! %{no_x11_askpass}
-%files askpass
-%defattr(-,root,root)
-%doc x11-ssh-askpass-%{aversion}/README
-%doc x11-ssh-askpass-%{aversion}/ChangeLog
-%doc x11-ssh-askpass-%{aversion}/SshAskpass*.ad
-%attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
-%attr(0755,root,root) %{_libexecdir}/openssh/x11-ssh-askpass
-%attr(0755,root,root) %config %{_sysconfdir}/profile.d/x11-ssh-askpass.*
-%endif
-
 %if ! %{no_gnome_askpass}
-%files askpass-gnome
+%files askpass
 %defattr(-,root,root)
 %attr(0755,root,root) %config %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
 %attr(0755,root,root) %{_libexecdir}/openssh/gnome-ssh-askpass
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
 %endif
 
 %changelog
+* Tue Nov 22 2005 Tomas Mraz <tmraz@redhat.com> - 4.2p1-9
+- drop x11-ssh-askpass from the package
+- drop old build_6x ifs from spec file
+- improve gnome-ssh-askpass so it doesn't reveal number of passphrase 
+  characters to person looking at the display
+- less hackish fix for the __USE_GNU problem
+
 * Fri Nov 18 2005 Nalin Dahyabhai <nalin@redhat.com> - 4.2p1-8
 - work around missing gccmakedep by wrapping makedepend in a local script
 - remove now-obsolete build dependency on "xauth"
