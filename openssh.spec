@@ -58,11 +58,11 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 9
+%define rel 9.1
 %if %{rescue}
 %define %{rel}rescue
 %else
-Release: %{rel}
+Release: %{rel}.1
 %endif
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -464,6 +464,9 @@ fi
 %endif
 
 %changelog
+* Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
+- rebuilt
+
 * Tue Nov 22 2005 Tomas Mraz <tmraz@redhat.com> - 4.2p1-9
 - drop x11-ssh-askpass from the package
 - drop old build_6x ifs from spec file
