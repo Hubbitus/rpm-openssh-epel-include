@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.2p1
-%define rel 9.1
+%define rel 10
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -464,6 +464,9 @@ fi
 %endif
 
 %changelog
+* Tue Dec 20 2005 Tomas Mraz <tmraz@redhat.com> - 4.2p1-10
+- hopefully make the askpass dialog less confusing (#174765)
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
