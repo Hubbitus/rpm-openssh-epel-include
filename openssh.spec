@@ -62,7 +62,7 @@ Version: 4.2p1
 %if %{rescue}
 %define %{rel}rescue
 %else
-Release: %{rel}.1
+Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
