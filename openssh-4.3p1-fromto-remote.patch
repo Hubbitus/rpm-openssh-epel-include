@@ -1,0 +1,11 @@
+--- openssh-4.3p1/scp.c.fromto-remote	2006-01-31 12:11:38.000000000 +0100
++++ openssh-4.3p1/scp.c	2006-02-01 16:59:46.000000000 +0100
+@@ -446,7 +446,7 @@
+ 				addargs(&alist, "-v");
+ 			addargs(&alist, "-x");
+ 			addargs(&alist, "-oClearAllForwardings yes");
+-			addargs(&alist, "-n");
++			addargs(&alist, "-t");
+ 
+ 			*src++ = 0;
+ 			if (*src == 0)

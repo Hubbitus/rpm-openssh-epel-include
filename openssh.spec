@@ -57,8 +57,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 4.2p1
-%define rel 10
+Version: 4.3p1
+%define rel 1
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -71,26 +71,21 @@ URL: http://www.openssh.com/portable.html
 # removes the ACSS cipher.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
-Patch0: openssh-4.0p1-redhat.patch
+Patch0: openssh-4.3p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-4.0p1-vendor.patch
+Patch4: openssh-4.3p1-vendor.patch
 Patch5: openssh-3.9p1-noinitlog.patch
 Patch12: openssh-selinux.patch
-Patch16: openssh-4.2p1-audit.patch
+Patch16: openssh-4.3p1-audit.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
 Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
-Patch24: openssh-3.9p1-fromto-remote.patch
-Patch26: openssh-4.0p1-krb5-valid.patch
+Patch24: openssh-4.3p1-fromto-remote.patch
 Patch27: openssh-4.2p1-pam-no-stack.patch
-Patch28: openssh-4.1p1-nologin.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
-Patch32: openssh-4.2p1-pam-auth-fail-info.patch
-Patch33: openssh-4.2p1-scp-no-system.patch
-Patch34: openssh-4.2p1-gnu-source.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
 License: BSD
 Group: Applications/Internet
@@ -210,24 +205,15 @@ an X11 passphrase dialog for OpenSSH.
 %patch22 -p1 -b .keep-above
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
-%patch26 -p0 -b .krb5-valid
 %patch27 -p1 -b .stack
-%patch28 -p1 -b .nologin
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
-%patch32 -p0 -b .auth-fail-info
-%patch33 -p1 -b .no-system
-%patch34 -p1 -b .gnu-source
 %patch35 -p1 -b .progress
 
 autoreconf
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
-# Ugly hack to workaround openssh defining __USE_GNU which is 
-# not allowed and causes problems according to Ulrich Drepper
-# fix this the correct way after FC5test1
-#CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"; export CFLAGS
 %if %{rescue}
 CFLAGS="$CFLAGS -Os"
 %endif
@@ -464,6 +450,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb  1 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p1-1
+- new version, dropped obsolete patches
+
 * Tue Dec 20 2005 Tomas Mraz <tmraz@redhat.com> - 4.2p1-10
 - hopefully make the askpass dialog less confusing (#174765)
 
@@ -507,7 +496,7 @@ fi
 
 * Fri Oct  7 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-2
 - use include instead of pam_stack in pam config
-- use fork+exec instead of system in scp (#168167)
+- use fork+exec instead of system in scp - CVE-2006-0225 (#168167)
 - upstream patch for displaying authentication errors
 
 * Tue Sep 06 2005 Tomas Mraz <tmraz@redhat.com> 4.2p1-1
