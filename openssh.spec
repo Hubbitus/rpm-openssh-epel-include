@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.3p1
-%define rel 1
+%define rel 2
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -450,6 +450,10 @@ fi
 %endif
 
 %changelog
+* Mon Feb  6 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p1-2
+- fixed another place where syslog was called in signal handler
+- pass locale environment variables to server, accept them there (#179851)
+
 * Wed Feb  1 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p1-1
 - new version, dropped obsolete patches
 
