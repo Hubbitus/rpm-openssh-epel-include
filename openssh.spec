@@ -57,8 +57,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
-Version: 4.3p1
-%define rel 2.1
+Version: 4.3p2
+%define rel 1
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -450,6 +450,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 13 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-1
+- new version
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 4.3p1-2.1
 - bump again for double-long bug on ppc(64)
 
