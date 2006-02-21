@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.3p2
-%define rel 1
+%define rel 2
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -83,6 +83,7 @@ Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
+Patch25: openssh-4.3p2-scp-print-err.patch
 Patch27: openssh-4.2p1-pam-no-stack.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
@@ -205,6 +206,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch22 -p1 -b .keep-above
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
+%patch25 -p1 -b .print-err
 %patch27 -p1 -b .stack
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
@@ -450,6 +452,9 @@ fi
 %endif
 
 %changelog
+* Tue Feb 21 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-2
+- print error from scp if not remote (patch by Bjorn Augustsson #178923)
+
 * Mon Feb 13 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-1
 - new version
 
