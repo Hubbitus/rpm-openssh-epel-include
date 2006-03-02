@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.3p2
-%define rel 3
+%define rel 4
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -454,6 +454,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar  2 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-4
+- allow access if audit is not compiled in kernel (#183243)
+
 * Fri Feb 24 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-3
 - enable the subprocess in chroot to send messages to system log
 - sshd should prevent login if audit call fails
