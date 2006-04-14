@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.3p2
-%define rel 4
+%define rel 5
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -454,6 +454,9 @@ fi
 %endif
 
 %changelog
+* Fri Apr 14 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-5
+- don't request pseudoterminal allocation if stdin is not tty (#188983)
+
 * Thu Mar  2 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-4
 - allow access if audit is not compiled in kernel (#183243)
 
