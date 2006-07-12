@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: 4.3p2
-%define rel 5
+%define rel 5.1
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -454,6 +454,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 4.3p2-5.1
+- rebuild
+
 * Fri Apr 14 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-5
 - don't request pseudoterminal allocation if stdin is not tty (#188983)
 
