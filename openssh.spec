@@ -55,10 +55,10 @@
 %define kerberos5 0
 %endif
 
-Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
+Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-%define rel 5.1
+%define rel 6
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -89,36 +89,39 @@ Patch27: openssh-3.9p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
+Patch36: openssh-4.3p2-buffer-len.patch
+Patch37: openssh-4.3p2-configure-typo.patch
+Patch38: openssh-4.3p2-askpass-grab-info.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Obsoletes: ssh
+Provides: ssh
 %if %{nologin}
 Requires: /sbin/nologin
 %endif
 
-PreReq: initscripts >= 5.20
+Requires: initscripts >= 5.20
 
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
-BuildPreReq: gtk2-devel
-BuildPreReq: libX11-devel
+BuildRequires: gtk2-devel
+BuildRequires: libX11-devel
 %else
-BuildPreReq: gnome-libs-devel
+BuildRequires: gnome-libs-devel
 %endif
 %endif
 
 %if %{scard}
-BuildPreReq: sharutils
+BuildRequires: sharutils
 %endif
-BuildPreReq: autoconf, automake, openssl-devel, perl, tcp_wrappers, zlib-devel
-BuildPreReq: audit-libs-devel
-BuildPreReq: util-linux, groff, man
-
-BuildPreReq: pam-devel
+BuildRequires: autoconf, automake, openssl-devel, perl, tcp_wrappers, zlib-devel
+BuildRequires: audit-libs-devel
+BuildRequires: util-linux, groff, man
+BuildRequires: pam-devel
 
 %if %{kerberos5}
-BuildPreReq: krb5-devel
+BuildRequires: krb5-devel
 %endif
 
 %if %{WITH_SELINUX}
@@ -131,25 +134,31 @@ Requires: audit-libs >= 1.0.8
 BuildRequires: audit-libs >= 1.0.8
 %endif
 
+BuildRequires: xauth
+
 %package clients
-Summary: OpenSSH clients.
+Summary: The OpenSSH client applications
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 Obsoletes: ssh-clients
+Provides: ssh-clients
 
 %package server
-Summary: The OpenSSH server daemon.
+Summary: The OpenSSH server daemon
 Group: System Environment/Daemons
 Obsoletes: ssh-server
-PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9, /usr/sbin/useradd
+Provides: ssh-server
+Requires: openssh = %{version}-%{release}
+Requires(post): chkconfig >= 0.9, /sbin/service
+Requires(pre): /usr/sbin/useradd
 Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
-BuildRequires: xorg-x11-xauth
 
 %package askpass
-Summary: A passphrase dialog for OpenSSH and X.
+Summary: A passphrase dialog for OpenSSH and X
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
 Obsoletes: ssh-extras, openssh-askpass-gnome
+Provides: ssh-extras, openssh-askpass-gnome
 
 %description
 SSH (Secure SHell) is a program for logging into and executing
@@ -213,6 +222,9 @@ an X11 passphrase dialog for OpenSSH.
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
 %patch35 -p1 -b .progress
+%patch36 -p0 -b .buffer-len
+%patch37 -p1 -b .typo
+%patch38 -p1 -b .grab-info
 
 autoreconf
 
@@ -399,7 +411,7 @@ fi
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
-%attr(4711,root,root) %{_libexecdir}/openssh/ssh-keysign
+%attr(4755,root,root) %{_libexecdir}/openssh/ssh-keysign
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -414,7 +426,7 @@ fi
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
-%attr(-,root,root) %{_bindir}/slogin
+%attr(0755,root,root) %{_bindir}/slogin
 %attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
@@ -433,7 +445,7 @@ fi
 %if ! %{rescue}
 %files server
 %defattr(-,root,root)
-%dir %attr(0111,root,root) %{_var}/empty/sshd
+%dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
@@ -442,7 +454,7 @@ fi
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
-%attr(0755,root,root) %config /etc/rc.d/init.d/sshd
+%attr(0755,root,root) /etc/rc.d/init.d/sshd
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -454,6 +466,16 @@ fi
 %endif
 
 %changelog
+* Mon Jul 17 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-6
+- improve selinux patch (by Jan Kiszka)
+- upstream patch for buffer append space error (#191940)
+- fixed typo in configure.ac (#198986)
+- added pam_keyinit to pam configuration (#198628)
+- improved error message when askpass dialog cannot grab
+  keyboard input (#198332)
+- buildrequires xauth instead of xorg-x11-xauth
+- fixed a few rpmlint warnings
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 4.3p2-5.1
 - rebuild
 
