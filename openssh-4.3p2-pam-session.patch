@@ -1,0 +1,91 @@
+Index: auth-pam.c
+===================================================================
+RCS file: /usr/local/src/security/openssh/cvs/openssh_cvs/auth-pam.c,v
+retrieving revision 1.134
+diff -u -p -r1.134 auth-pam.c
+--- auth-pam.c	15 May 2006 07:22:33 -0000	1.134
++++ auth-pam.c	22 May 2006 08:50:59 -0000
+@@ -573,15 +573,17 @@ static struct pam_conv store_conv = { ss
+ void
+ sshpam_cleanup(void)
+ {
+-	debug("PAM: cleanup");
+-	if (sshpam_handle == NULL)
++	if (sshpam_handle == NULL || (use_privsep && !mm_is_monitor()))
+ 		return;
++	debug("PAM: cleanup");
+ 	pam_set_item(sshpam_handle, PAM_CONV, (const void *)&null_conv);
+ 	if (sshpam_cred_established) {
++		debug("PAM: deleting credentials");
+ 		pam_setcred(sshpam_handle, PAM_DELETE_CRED);
+ 		sshpam_cred_established = 0;
+ 	}
+ 	if (sshpam_session_open) {
++		debug("PAM: closing session");
+ 		pam_close_session(sshpam_handle, PAM_SILENT);
+ 		sshpam_session_open = 0;
+ 	}
+Index: monitor.c
+===================================================================
+RCS file: /usr/local/src/security/openssh/cvs/openssh_cvs/monitor.c,v
+retrieving revision 1.104
+diff -u -p -r1.104 monitor.c
+--- monitor.c	21 May 2006 08:26:40 -0000	1.104
++++ monitor.c	22 May 2006 08:37:58 -0000
+@@ -354,6 +354,10 @@ monitor_child_preauth(Authctxt *_authctx
+ 				    MONITOR_REQ_PAM_ACCOUNT, &m);
+ 				authenticated = mm_answer_pam_account(pmonitor->m_sendfd, &m);
+ 				buffer_free(&m);
++				if (authenticated) {
++					do_pam_session();
++					do_pam_setcred(0);
++				}
+ 			}
+ #endif
+ 		}
+@@ -1531,6 +1535,11 @@ mm_answer_term(int sock, Buffer *req)
+ 	/* The child is terminating */
+ 	session_destroy_all(&mm_session_close);
+ 
++#ifdef USE_PAM
++	if (options.use_pam)
++		sshpam_cleanup();
++#endif
++
+ 	while (waitpid(pmonitor->m_pid, &status, 0) == -1)
+ 		if (errno != EINTR)
+ 			exit(1);
+Index: session.c
+===================================================================
+RCS file: /usr/local/src/security/openssh/cvs/openssh_cvs/session.c,v
+retrieving revision 1.328
+diff -u -p -r1.328 session.c
+--- session.c	4 May 2006 06:24:34 -0000	1.328
++++ session.c	22 May 2006 08:14:24 -0000
+@@ -541,7 +541,7 @@ do_exec_pty(Session *s, const char *comm
+ 	ttyfd = s->ttyfd;
+ 
+ #if defined(USE_PAM)
+-	if (options.use_pam) {
++	if (options.use_pam && !use_privsep) {
+ 		do_pam_set_tty(s->tty);
+ 		if (!use_privsep)
+ 			do_pam_setcred(1);
+@@ -1284,7 +1284,7 @@ do_setusercontext(struct passwd *pw)
+ 		}
+ #endif
+ # ifdef USE_PAM
+-		if (options.use_pam) {
++		if (options.use_pam && !use_privsep) {
+ 			do_pam_session();
+ 			do_pam_setcred(0);
+ 		}
+@@ -1326,7 +1326,7 @@ do_setusercontext(struct passwd *pw)
+ 		 * These will have been wiped by the above initgroups() call.
+ 		 * Reestablish them here.
+ 		 */
+-		if (options.use_pam) {
++		if (options.use_pam && !use_privsep) {
+ 			do_pam_session();
+ 			do_pam_setcred(0);
+ 		}

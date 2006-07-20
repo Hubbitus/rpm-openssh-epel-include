@@ -58,7 +58,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-%define rel 6
+%define rel 7
 %if %{rescue}
 %define %{rel}rescue
 %else
@@ -92,11 +92,10 @@ Patch35: openssh-4.2p1-askpass-progress.patch
 Patch36: openssh-4.3p2-buffer-len.patch
 Patch37: openssh-4.3p2-configure-typo.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
+Patch39: openssh-4.3p2-pam-session.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-Obsoletes: ssh
-Provides: ssh
 %if %{nologin}
 Requires: /sbin/nologin
 %endif
@@ -140,14 +139,10 @@ BuildRequires: xauth
 Summary: The OpenSSH client applications
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
-Obsoletes: ssh-clients
-Provides: ssh-clients
 
 %package server
 Summary: The OpenSSH server daemon
 Group: System Environment/Daemons
-Obsoletes: ssh-server
-Provides: ssh-server
 Requires: openssh = %{version}-%{release}
 Requires(post): chkconfig >= 0.9, /sbin/service
 Requires(pre): /usr/sbin/useradd
@@ -157,8 +152,8 @@ Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
 Summary: A passphrase dialog for OpenSSH and X
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
-Obsoletes: ssh-extras, openssh-askpass-gnome
-Provides: ssh-extras, openssh-askpass-gnome
+Obsoletes: openssh-askpass-gnome
+Provides: openssh-askpass-gnome
 
 %description
 SSH (Secure SHell) is a program for logging into and executing
@@ -225,6 +220,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch36 -p0 -b .buffer-len
 %patch37 -p1 -b .typo
 %patch38 -p1 -b .grab-info
+%patch39 -p0 -b .pam-session
 
 autoreconf
 
@@ -466,6 +462,11 @@ fi
 %endif
 
 %changelog
+* Thu Jul 20 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-7
+- dropped old ssh obsoletes
+- call the pam_session_open/close from the monitor when privsep is
+  enabled so it is always called as root (patch by Darren Tucker)
+
 * Mon Jul 17 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-6
 - improve selinux patch (by Jan Kiszka)
 - upstream patch for buffer append space error (#191940)
