@@ -2,6 +2,8 @@
 %if %{WITH_SELINUX}
 # Audit patch applicable only over SELinux patch
 %define WITH_AUDIT 1
+%else
+%define WITH_AUDIT 0
 %endif
 
 # OpenSSH privilege separation requires a user & group ID
@@ -49,6 +51,7 @@
 # Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
 %define rescue 0
 %{?build_rescue:%define rescue 1}
+%{?build_rescue:%define rescue_rel rescue}
 
 # Turn off some stuff for resuce builds
 %if %{rescue}
@@ -58,12 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-%define rel 7
-%if %{rescue}
-%define %{rel}rescue
-%else
-Release: %{rel}
-%endif
+Release: 8%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -92,7 +90,7 @@ Patch35: openssh-4.2p1-askpass-progress.patch
 Patch36: openssh-4.3p2-buffer-len.patch
 Patch37: openssh-4.3p2-configure-typo.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
-Patch39: openssh-4.3p2-pam-session.patch
+Patch39: openssh-4.3p2-no-v6only.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -220,7 +218,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch36 -p0 -b .buffer-len
 %patch37 -p1 -b .typo
 %patch38 -p1 -b .grab-info
-%patch39 -p0 -b .pam-session
+%patch39 -p1 -b .no-v6only
 
 autoreconf
 
@@ -462,6 +460,10 @@ fi
 %endif
 
 %changelog
+* Tue Aug  8 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-8
+- drop the pam-session patch from the previous build (#201341)
+- don't set IPV6_V6ONLY sock opt when listening on wildcard addr (#201594)
+
 * Thu Jul 20 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-7
 - dropped old ssh obsoletes
 - call the pam_session_open/close from the monitor when privsep is
