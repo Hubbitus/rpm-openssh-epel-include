@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-Release: 8%{?rescue_rel}
+Release: 9%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -91,6 +91,11 @@ Patch36: openssh-4.3p2-buffer-len.patch
 Patch37: openssh-4.3p2-configure-typo.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
+Patch40: openssh-4.3p2-coverity-memleaks.patch
+Patch41: openssh-4.3p2-gssapi-no-spnego.patch
+Patch42: openssh-4.3p2-no-dup-logs.patch
+Patch43: openssh-4.3p2-localtime.patch
+Patch44: openssh-4.3p2-allow-ip-opts.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -219,6 +224,11 @@ an X11 passphrase dialog for OpenSSH.
 %patch37 -p1 -b .typo
 %patch38 -p1 -b .grab-info
 %patch39 -p1 -b .no-v6only
+%patch40 -p1 -b .memleaks
+%patch41 -p1 -b .no-spnego
+%patch42 -p1 -b .no-dups
+%patch43 -p1 -b .localtime
+%patch44 -p1 -b .ip-opts
 
 autoreconf
 
@@ -228,7 +238,7 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 CFLAGS="$CFLAGS -Os"
 %endif
 %if %{pie}
-%ifarch s390 s390x
+%ifarch s390 s390x sparc sparc64
 CFLAGS="$CFLAGS -fPIE"
 %else
 CFLAGS="$CFLAGS -fpie"
@@ -311,9 +321,10 @@ popd
 rm -rf $RPM_BUILD_ROOT
 mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
 mkdir -p -m755 $RPM_BUILD_ROOT%{_libexecdir}/openssh
-mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd
+mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd/etc
 make install DESTDIR=$RPM_BUILD_ROOT
 
+touch $RPM_BUILD_ROOT%{_var}/empty/sshd/etc/localtime
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
@@ -440,6 +451,8 @@ fi
 %files server
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
+%dir %attr(0755,root,root) %{_var}/empty/sshd/etc
+%ghost %verify(not md5 size mtime) %{_var}/empty/sshd/etc/localtime
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
@@ -460,6 +473,12 @@ fi
 %endif
 
 %changelog
+* Wed Aug 23 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-9
+- don't report duplicate syslog messages, use correct local time (#189158)
+- don't allow spnego as gssapi mechanism (from upstream)
+- fixed memleaks found by Coverity (from upstream)
+- allow ip options except source routing (#202856) (patch by HP)
+
 * Tue Aug  8 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-8
 - drop the pam-session patch from the previous build (#201341)
 - don't set IPV6_V6ONLY sock opt when listening on wildcard addr (#201594)
