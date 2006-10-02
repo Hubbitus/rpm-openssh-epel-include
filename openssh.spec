@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-Release: 9%{?rescue_rel}
+Release: 10%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -96,6 +96,8 @@ Patch41: openssh-4.3p2-gssapi-no-spnego.patch
 Patch42: openssh-4.3p2-no-dup-logs.patch
 Patch43: openssh-4.3p2-localtime.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
+Patch45: openssh-4.3p2-cve-2006-4924.patch
+Patch46: openssh-3.9p1-cve-2006-5051.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -229,6 +231,8 @@ an X11 passphrase dialog for OpenSSH.
 %patch42 -p1 -b .no-dups
 %patch43 -p1 -b .localtime
 %patch44 -p1 -b .ip-opts
+%patch45 -p1 -b .deattack-dos
+%patch46 -p1 -b .sig-no-cleanup
 
 autoreconf
 
@@ -473,6 +477,11 @@ fi
 %endif
 
 %changelog
+* Mon Oct  2 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-10
+- improve gssapi-no-spnego patch (#208102)
+- CVE-2006-4924 - prevent DoS on deattack detector (#207957)
+- CVE-2006-5051 - don't call cleanups from signal handler (#208459)
+
 * Wed Aug 23 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-9
 - don't report duplicate syslog messages, use correct local time (#189158)
 - don't allow spnego as gssapi mechanism (from upstream)
