@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-Release: 10%{?rescue_rel}
+Release: 11%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -73,11 +73,10 @@ Patch0: openssh-4.3p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-4.3p1-vendor.patch
-Patch5: openssh-3.9p1-noinitlog.patch
+Patch5: openssh-4.3p2-initscript.patch
 Patch12: openssh-selinux.patch
 Patch16: openssh-4.3p1-audit.patch
 Patch20: openssh-3.9p1-gssapimitm.patch
-Patch21: openssh-3.9p1-safe-stop.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
@@ -94,7 +93,6 @@ Patch39: openssh-4.3p2-no-v6only.patch
 Patch40: openssh-4.3p2-coverity-memleaks.patch
 Patch41: openssh-4.3p2-gssapi-no-spnego.patch
 Patch42: openssh-4.3p2-no-dup-logs.patch
-Patch43: openssh-4.3p2-localtime.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch45: openssh-4.3p2-cve-2006-4924.patch
 Patch46: openssh-3.9p1-cve-2006-5051.patch
@@ -200,7 +198,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
-%patch5 -p1 -b .noinitlog
+%patch5 -p1 -b .initscript
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -212,7 +210,6 @@ an X11 passphrase dialog for OpenSSH.
 %endif
 
 #%patch20 -p0 -b .gssapimitm
-%patch21 -p1 -b .safe-stop
 %patch22 -p1 -b .keep-above
 %patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
@@ -229,7 +226,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch40 -p1 -b .memleaks
 %patch41 -p1 -b .no-spnego
 %patch42 -p1 -b .no-dups
-%patch43 -p1 -b .localtime
 %patch44 -p1 -b .ip-opts
 %patch45 -p1 -b .deattack-dos
 %patch46 -p1 -b .sig-no-cleanup
@@ -477,6 +473,11 @@ fi
 %endif
 
 %changelog
+* Thu Nov  2 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-11
+- merge sshd initscript patches
+- kill all ssh sessions when stop is called in halt or reboot runlevel
+- remove -TERM option from killproc so we don't race on sshd restart
+
 * Mon Oct  2 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-10
 - improve gssapi-no-spnego patch (#208102)
 - CVE-2006-4924 - prevent DoS on deattack detector (#207957)

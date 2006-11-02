@@ -1,0 +1,60 @@
+--- openssh-4.3p2/contrib/redhat/sshd.init	2002-05-10 04:19:23.000000000 +0200
++++ sshd	2006-11-02 14:23:27.000000000 +0100
+@@ -29,6 +29,8 @@
+ DSA_KEY=/etc/ssh/ssh_host_dsa_key
+ PID_FILE=/var/run/sshd.pid
+ 
++runlevel=$(set -- $(runlevel); eval "echo \$$#" )
++
+ do_rsa1_keygen() {
+ 	if [ ! -s $RSA1_KEY ]; then
+ 		echo -n $"Generating SSH1 RSA host key: "
+@@ -93,9 +95,11 @@
+ 	do_rsa1_keygen
+ 	do_rsa_keygen
+ 	do_dsa_keygen
++	
++	cp -af /etc/localtime /var/empty/sshd/etc
+ 
+-	echo -n $"Starting $prog:"
+-	initlog -c "$SSHD $OPTIONS" && success || failure
++	echo -n $"Starting $prog: "
++	$SSHD $OPTIONS && success || failure
+ 	RETVAL=$?
+ 	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/sshd
+ 	echo
+@@ -103,17 +107,30 @@
+ 
+ stop()
+ {
+-	echo -n $"Stopping $prog:"
+-	killproc $SSHD -TERM
++	echo -n $"Stopping $prog: "
++	if [ -n "`pidfileofproc $SSHD`" ] ; then
++	    killproc $SSHD
++	else
++	    failure $"Stopping $prog"
++	fi
+ 	RETVAL=$?
++	# if we are in halt or reboot runlevel kill all running sessions
++	# so the TCP connections are closed cleanly
++	if [ "x$runlevel" = x0 -o "x$runlevel" = x6 ] ; then
++	    killall $prog 2>/dev/null
++	fi
+ 	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/sshd
+ 	echo
+ }
+ 
+ reload()
+ {
+-	echo -n $"Reloading $prog:"
+-	killproc $SSHD -HUP
++	echo -n $"Reloading $prog: "
++	if [ -n "`pidfileofproc $SSHD`" ] ; then
++	    killproc $SSHD -HUP
++	else
++	    failure $"Reloading $prog"
++	fi
+ 	RETVAL=$?
+ 	echo
+ }
