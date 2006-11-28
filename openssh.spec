@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.3p2
-Release: 12%{?dist}%{?rescue_rel}
+Release: 13%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -97,6 +97,7 @@ Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch45: openssh-4.3p2-cve-2006-4924.patch
 Patch46: openssh-3.9p1-cve-2006-5051.patch
 Patch47: openssh-4.3p2-cve-2006-5794.patch
+Patch48: openssh-4.3p2-pam-session.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -231,6 +232,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch45 -p1 -b .deattack-dos
 %patch46 -p1 -b .sig-no-cleanup
 %patch47 -p1 -b .verify
+%patch48 -p1 -b .pam-sesssion
 
 autoreconf
 
@@ -475,6 +477,10 @@ fi
 %endif
 
 %changelog
+* Tue Nov 28 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-13
+- improved pam_session patch so it doesn't regress, the patch is necessary
+  for the pam_session_close to be called correctly as uid 0
+
 * Fri Nov 10 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-12
 - CVE-2006-5794 - properly detect failed key verify in monitor (#214641)
 
