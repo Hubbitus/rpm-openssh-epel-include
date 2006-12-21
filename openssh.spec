@@ -60,8 +60,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 4.3p2
-Release: 14%{?dist}%{?rescue_rel}
+Version: 4.5p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -69,34 +69,23 @@ URL: http://www.openssh.com/portable.html
 # removes the ACSS cipher.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
-Patch0: openssh-4.3p1-redhat.patch
+Patch0: openssh-4.5p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-4.3p1-vendor.patch
+Patch4: openssh-4.5p1-vendor.patch
 Patch5: openssh-4.3p2-initscript.patch
-Patch12: openssh-selinux.patch
-Patch16: openssh-4.3p1-audit.patch
-Patch20: openssh-3.9p1-gssapimitm.patch
+Patch12: openssh-4.5p1-selinux.patch
+Patch16: openssh-4.5p1-audit.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
-Patch23: openssh-3.9p1-no-log-signal.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
-Patch25: openssh-4.3p2-scp-print-err.patch
 Patch26: openssh-4.2p1-pam-no-stack.patch
 Patch27: openssh-3.9p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
-Patch36: openssh-4.3p2-buffer-len.patch
-Patch37: openssh-4.3p2-configure-typo.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
-Patch40: openssh-4.3p2-coverity-memleaks.patch
-Patch41: openssh-4.3p2-gssapi-no-spnego.patch
-Patch42: openssh-4.3p2-no-dup-logs.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
-Patch45: openssh-4.3p2-cve-2006-4924.patch
-Patch46: openssh-3.9p1-cve-2006-5051.patch
-Patch47: openssh-4.3p2-cve-2006-5794.patch
 Patch48: openssh-4.3p2-pam-session.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 License: BSD
@@ -212,27 +201,16 @@ an X11 passphrase dialog for OpenSSH.
 %patch16 -p1 -b .audit
 %endif
 
-#%patch20 -p0 -b .gssapimitm
 %patch22 -p1 -b .keep-above
-%patch23 -p1 -b .signal
 %patch24 -p1 -b .fromto-remote
-%patch25 -p1 -b .print-err
 %patch26 -p1 -b .stack
 %patch27 -p1 -b .log-chroot
 %patch30 -p1 -b .exit-deadlock
 %patch31 -p1 -b .skip-used
 %patch35 -p1 -b .progress
-%patch36 -p0 -b .buffer-len
-%patch37 -p1 -b .typo
 %patch38 -p1 -b .grab-info
 %patch39 -p1 -b .no-v6only
-%patch40 -p1 -b .memleaks
-%patch41 -p1 -b .no-spnego
-%patch42 -p1 -b .no-dups
 %patch44 -p1 -b .ip-opts
-%patch45 -p1 -b .deattack-dos
-%patch46 -p1 -b .sig-no-cleanup
-%patch47 -p1 -b .verify
 %patch48 -p1 -b .pam-sesssion
 %patch49 -p1 -b .canohost
 
@@ -393,10 +371,10 @@ fi
 
 %pre server
 %if %{nologin}
-/usr/sbin/useradd -c "Privilege-separated SSH" -u 74 \
+/usr/sbin/useradd -c "Privilege-separated SSH" -u %{sshd_uid} \
 	-s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
 %else
-/usr/sbin/useradd -c "Privilege-separated SSH" -u 74 \
+/usr/sbin/useradd -c "Privilege-separated SSH" -u %{sshd_uid} \
 	-s /dev/null -r -d /var/empty/sshd sshd 2> /dev/null || :
 %endif
 
@@ -479,6 +457,9 @@ fi
 %endif
 
 %changelog
+* Thu Dec 21 2006 Tomas Mraz <tmraz@redhat.com> - 4.5p1-1
+- update to 4.5p1 (#212606)
+
 * Thu Nov 30 2006 Tomas Mraz <tmraz@redhat.com> - 4.3p2-14
 - fix gssapi with DNS loadbalanced clusters (#216857)
 
