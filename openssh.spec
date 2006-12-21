@@ -109,10 +109,11 @@ BuildRequires: gnome-libs-devel
 %if %{scard}
 BuildRequires: sharutils
 %endif
-BuildRequires: autoconf, automake, openssl-devel, perl, tcp_wrappers, zlib-devel
+BuildRequires: autoconf, automake, openssl-devel, perl, zlib-devel
 BuildRequires: audit-libs-devel
 BuildRequires: util-linux, groff, man
 BuildRequires: pam-devel
+BuildRequires: tcp_wrappers-devel
 
 %if %{kerberos5}
 BuildRequires: krb5-devel
