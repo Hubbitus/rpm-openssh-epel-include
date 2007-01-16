@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 1%{?dist}%{?rescue_rel}
+Release: 2%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -88,6 +88,7 @@ Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch48: openssh-4.3p2-pam-session.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
+Patch50: openssh-4.5p1-mls.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -214,6 +215,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch44 -p1 -b .ip-opts
 %patch48 -p1 -b .pam-sesssion
 %patch49 -p1 -b .canohost
+%patch50 -p1 -b .mls
 
 autoreconf
 
@@ -458,6 +460,11 @@ fi
 %endif
 
 %changelog
+* Tue Jan 16 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-2
+- support mls on labeled networks (#220487)
+- support mls level selection on unlabeled networks
+- allow / in usernames in scp (only beginning /, ./, and ../ is special) 
+
 * Thu Dec 21 2006 Tomas Mraz <tmraz@redhat.com> - 4.5p1-1
 - update to 4.5p1 (#212606)
 
