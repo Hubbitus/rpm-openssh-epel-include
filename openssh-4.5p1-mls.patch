@@ -1,5 +1,5 @@
---- openssh-4.5p1/openbsd-compat/port-linux.c.mls	2007-01-16 21:43:11.000000000 +0100
-+++ openssh-4.5p1/openbsd-compat/port-linux.c	2007-01-16 21:40:13.000000000 +0100
+--- openssh-4.5p1/openbsd-compat/port-linux.c.mls	2007-01-16 22:08:06.000000000 +0100
++++ openssh-4.5p1/openbsd-compat/port-linux.c	2007-01-16 22:11:05.000000000 +0100
 @@ -33,12 +33,22 @@
  #include "key.h"
  #include "hostfile.h"
@@ -14,7 +14,7 @@
 +
 +#ifdef HAVE_LINUX_AUDIT
 +#include <libaudit.h>
-+#include <sys/select.h>
++#include <unistd.h>
 +#endif
  
  extern Authctxt *the_authctxt;
@@ -94,14 +94,14 @@
 +	security_context_t *sc) {
 +#ifdef HAVE_GET_DEFAULT_CONTEXT_WITH_LEVEL
 +		if (role != NULL && role[0])
-+			return get_default_context_with_rolelevel(sename, role, lvl, NULL, &sc);
++			return get_default_context_with_rolelevel(sename, role, lvl, NULL, sc);
 +		else
-+			return get_default_context_with_level(sename, lvl, NULL, &sc);
++			return get_default_context_with_level(sename, lvl, NULL, sc);
 +#else
 +		if (role != NULL && role[0])
-+			return get_default_context_with_role(sename, role, NULL, &sc);
++			return get_default_context_with_role(sename, role, NULL, sc);
 +		else
-+			return get_default_context(sename, NULL, &sc);
++			return get_default_context(sename, NULL, sc);
 +#endif
 +}
 +
@@ -109,11 +109,10 @@
  static security_context_t
  ssh_selinux_getctxbyname(char *pwname)
  {
--	security_context_t sc = NULL;
-+	security_context_t usersc = NULL;
+ 	security_context_t sc = NULL;
 +	security_context_t defsc = NULL;
  	char *sename, *lvl;
-+	const char *reqlvl;
++	const char *reqlvl = NULL;
  	char *role = NULL;
  	int r = 0;
 +	context_t con = NULL;
@@ -132,7 +131,7 @@
 -	if (the_authctxt) 
 -		role=the_authctxt->role;
  #ifdef HAVE_GETSEUSERBYNAME
- 	if (r=getseuserbyname(pwname, &sename, &lvl) != 0) {
+ 	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
  		sename = NULL;
 @@ -72,23 +172,49 @@
  	}
@@ -174,14 +173,14 @@
 +		}
 +		
 +		if (reqlvl != NULL && reqlvl[0]) {
-+			r = get_user_context(sename, role, reqlvl, &usersc);
++			r = get_user_context(sename, role, reqlvl, &sc);
 +		
 +			if (r == 0) {
-+				if (mls_range_allowed(defsc, usersc)) {
-+					send_audit_message(1, defsc, usersc);
++				if (mls_range_allowed(defsc, sc)) {
++					send_audit_message(1, defsc, sc);
 +					logit("permit MLS level %s (user range %s)", reqlvl, lvl);
 +				} else {
-+					send_audit_message(0, defsc, usersc);
++					send_audit_message(0, defsc, sc);
 +					if (security_getenforce() > 0) 
 +						fatal("deny MLS level %s (user range %s)", reqlvl, lvl);
 +					else 
@@ -190,7 +189,7 @@
 +			}
 +			freecon(defsc);
 +		} else {
-+			usersc = defsc;
++			sc = defsc;
 +		}
 +	}
  	if (r != 0) {
@@ -212,7 +211,7 @@
  	debug3("%s: setting TTY context on %s", __func__, tty);
  
 -	user_ctx = ssh_selinux_getctxbyname(pwname);
-+	if (getexeccon(&user_context) < 0) {
++	if (getexeccon(&user_ctx) < 0) {
 +		error("%s: getexeccon: %s", __func__, strerror(errno));
 +		goto out;
 +	}

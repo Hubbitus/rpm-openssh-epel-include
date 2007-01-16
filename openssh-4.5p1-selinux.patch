@@ -125,7 +125,7 @@
  #ifdef HAVE_GETSEUSERBYNAME
 -	if (getseuserbyname(pwname, &sename, &lvl) != 0)
 -		return NULL;
-+	if (r=getseuserbyname(pwname, &sename, &lvl) != 0) {
++	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
 +		sename = NULL;
 +		lvl = NULL;
 +	}
