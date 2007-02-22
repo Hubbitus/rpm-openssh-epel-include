@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -91,7 +91,7 @@ Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch50: openssh-4.5p1-mls.patch
 License: BSD
 Group: Applications/Internet
-BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{nologin}
 Requires: /sbin/nologin
 %endif
@@ -445,7 +445,6 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man8/sshd.8*
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
-%attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
@@ -460,6 +459,10 @@ fi
 %endif
 
 %changelog
+* Wed Feb 22 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-3
+- improve Buildroot
+- remove duplicate /etc/ssh from files
+
 * Tue Jan 16 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-2
 - support mls on labeled networks (#220487)
 - support mls level selection on unlabeled networks
