@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 3%{?dist}%{?rescue_rel}
+Release: 4%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -459,6 +459,9 @@ fi
 %endif
 
 %changelog
+* Thu Feb 27 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-4
+- reject connection if requested mls range is not obtained (#229278)
+
 * Wed Feb 22 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-3
 - improve Buildroot
 - remove duplicate /etc/ssh from files
