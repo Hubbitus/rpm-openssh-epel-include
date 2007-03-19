@@ -61,12 +61,13 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 4%{?dist}%{?rescue_rel}
+Release: 5%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
-# This package differs from the upstream OpenSSH tarball in that it
-# removes the ACSS cipher.
+# This package differs from the upstream OpenSSH tarball in that
+# the ACSS cipher is removed by running openssh-nukeacss.sh in
+# the unpacked source directory.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Patch0: openssh-4.5p1-redhat.patch
@@ -453,12 +454,15 @@ fi
 %if ! %{no_gnome_askpass}
 %files askpass
 %defattr(-,root,root)
-%attr(0755,root,root) %config %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
+%attr(0644,root,root) %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
 %attr(0755,root,root) %{_libexecdir}/openssh/gnome-ssh-askpass
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
 %endif
 
 %changelog
+* Mon Mar 19 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-5
+- make profile.d/gnome-ssh-askpass.* regular files (#226218)
+
 * Thu Feb 27 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-4
 - reject connection if requested mls range is not obtained (#229278)
 
