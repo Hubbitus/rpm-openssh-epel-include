@@ -1,5 +1,5 @@
 --- openssh-4.5p1/openbsd-compat/port-linux.c.mls	2007-01-16 22:13:32.000000000 +0100
-+++ openssh-4.5p1/openbsd-compat/port-linux.c	2007-03-01 09:04:17.000000000 +0100
++++ openssh-4.5p1/openbsd-compat/port-linux.c	2007-03-20 10:07:39.000000000 +0100
 @@ -33,12 +33,23 @@
  #include "key.h"
  #include "hostfile.h"
@@ -24,7 +24,7 @@
  
  /* Wrapper around is_selinux_enabled() to log its return value once only */
  static int
-@@ -54,17 +65,172 @@
+@@ -54,17 +65,173 @@
  	return (enabled);
  }
  
@@ -83,6 +83,7 @@
 +	int retval;
 +	unsigned int bit = CONTEXT__CONTAINS;
 +
++	debug("%s: src:%s dst:%s", __func__, src, dst);
 +	retval = security_compute_av(src, dst, SECCLASS_CONTEXT, bit, &avd);
 +	if (retval || ((bit & avd.allowed) != bit))
 +		return 0;
@@ -203,7 +204,7 @@
  #ifdef HAVE_GETSEUSERBYNAME
  	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
  		sename = NULL;
-@@ -72,37 +238,56 @@
+@@ -72,37 +239,63 @@
  	}
  #else
  	sename = pwname;
@@ -262,13 +263,20 @@
 +			r = get_user_context(sename, role, reqlvl, user_sc);
 +		
 +			if (r == 0 && reqlvl != NULL && reqlvl[0]) {
++				security_context_t default_level_sc = *default_sc;
++				if (role != NULL && role[0]) {
++					if (get_user_context(sename, role, lvl, &default_level_sc) < 0)
++						default_level_sc = *default_sc;
++				}
 +				/* verify that the requested range is contained in the user range */
-+				if (mls_range_allowed(*default_sc, *user_sc)) {
++				if (mls_range_allowed(default_level_sc, *user_sc)) {
 +					logit("permit MLS level %s (user range %s)", reqlvl, lvl);
 +				} else {
 +					r = -1;
 +					error("deny MLS level %s (user range %s)", reqlvl, lvl);
 +				}
++				if (default_level_sc != *default_sc)
++					freecon(default_level_sc);
 +			}
 +		} else {
 +			*user_sc = *default_sc;
@@ -281,7 +289,7 @@
  
  #ifdef HAVE_GETSEUSERBYNAME
  	if (sename != NULL)
-@@ -110,14 +295,20 @@
+@@ -110,14 +303,20 @@
  	if (lvl != NULL)
  		xfree(lvl);
  #endif
@@ -303,7 +311,7 @@
  	security_context_t user_ctx = NULL;
  
  	if (!ssh_selinux_enabled())
-@@ -125,21 +316,39 @@
+@@ -125,21 +324,39 @@
  
  	debug3("%s: setting execution context", __func__);
  
@@ -350,7 +358,7 @@
  
  	debug3("%s: done", __func__);
  }
-@@ -157,7 +366,10 @@
+@@ -157,7 +374,10 @@
  
  	debug3("%s: setting TTY context on %s", __func__, tty);
  

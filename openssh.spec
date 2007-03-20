@@ -61,7 +61,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 5%{?dist}%{?rescue_rel}
+Release: 6%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -460,6 +460,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-6
+- mls level check must be done with default role same as requested
+
 * Mon Mar 19 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-5
 - make profile.d/gnome-ssh-askpass.* regular files (#226218)
 
