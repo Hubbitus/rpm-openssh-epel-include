@@ -28,6 +28,9 @@
 # Do we want kerberos5 support (1=yes 0=no)
 %define kerberos5 1
 
+# Do we want NSS tokens support
+%define nss 1
+
 # Whether or not /sbin/nologin exists.
 %define nologin 1
 
@@ -61,7 +64,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 6%{?dist}%{?rescue_rel}
+Release: 7%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -90,6 +93,7 @@ Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch48: openssh-4.3p2-pam-session.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch50: openssh-4.5p1-mls.patch
+Patch51: openssh-4.5p1-nss-keys.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -115,7 +119,7 @@ BuildRequires: autoconf, automake, openssl-devel, perl, zlib-devel
 BuildRequires: audit-libs-devel
 BuildRequires: util-linux, groff, man
 BuildRequires: pam-devel
-BuildRequires: tcp_wrappers-devel
+#BuildRequires: tcp_wrappers-devel
 
 %if %{kerberos5}
 BuildRequires: krb5-devel
@@ -217,6 +221,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch48 -p1 -b .pam-sesssion
 %patch49 -p1 -b .canohost
 %patch50 -p1 -b .mls
+%patch51 -p1 -b .nss-keys
 
 autoreconf
 
@@ -259,6 +264,9 @@ fi
 	--enable-vendor-patchlevel="FC-%{version}-%{release}" \
 	--disable-strip \
 	--without-zlib-version-check \
+%if %{nss}
+	--with-nss \
+%endif
 %if %{scard}
 	--with-smartcard \
 %endif
@@ -342,6 +350,10 @@ rm -f $RPM_BUILD_ROOT/etc/profile.d/gnome-ssh-askpass.*
 
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
 
+rm -f README.nss.nss-keys
+%if ! %{nss}
+rm -f README.nss
+%endif
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -460,6 +472,10 @@ fi
 %endif
 
 %changelog
+* Wed Jun 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-7
+- experimental NSS keys support
+- correctly setup context when empty level requested (#234951)
+
 * Tue Mar 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-6
 - mls level check must be done with default role same as requested
 

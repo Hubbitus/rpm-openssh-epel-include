@@ -49,15 +49,15 @@
 +	}
 +	if (selinux_trans_to_raw_context(default_context, &default_raw) < 0) {
 +		error("Error translating default context.");
-+		goto out;
++		default_raw = NULL;
 +	}
 +	if (selinux_trans_to_raw_context(selected_context, &selected_raw) < 0) {
 +		error("Error translating selected context.");
-+		goto out;
++		selected_raw = NULL;
 +	}
 +	if (asprintf(&msg, "sshd: default-context=%s selected-context=%s",
-+		     default_context ? default_raw : "?",
-+		     selected_context ? selected_raw : "?") < 0) {
++		     default_raw ? default_raw : (default_context ? default_context: "?"),
++		     selected_context ? selected_raw : (selected_context ? selected_context :"?")) < 0) {
 +		error("Error allocating memory.");
 +		goto out;
 +	}
@@ -95,7 +95,7 @@
 +get_user_context(const char *sename, const char *role, const char *lvl,
 +	security_context_t *sc) {
 +#ifdef HAVE_GET_DEFAULT_CONTEXT_WITH_LEVEL
-+	if (get_default_context_with_level(sename, lvl, NULL, sc) != 0) {
++	if (lvl == NULL || lvl[0] == '\0' || get_default_context_with_level(sename, lvl, NULL, sc) != 0) {
 +	        /* User may have requested a level completely outside of his 
 +	           allowed range. We get a context just for auditing as the
 +	           range check below will certainly fail for default context. */
