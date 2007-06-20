@@ -88,7 +88,7 @@ diff -urpN openssh-4.5p1/configure.ac openssh-4.5p1.nss/configure.ac
 +		AC_DEFINE(HAVE_LIBNSS,1,[Define if you want NSS support.])
 +		LIBNSS_MSG="yes"
 +		CPPFLAGS="$CPPFLAGS -I/usr/include/nss3 -I/usr/include/nspr4"
-+		AC_CHECK_HEADERS(nss.h)
++		AC_CHECK_HEADERS(pk11pub.h)
 +		LIBNSS="-lnss3"
 +	fi
 +	])
@@ -1127,7 +1127,7 @@ diff -urpN openssh-4.5p1/ssh.c openssh-4.5p1.nss/ssh.c
  
  extern char *__progname;
  
-@@ -1227,9 +1230,12 @@ load_public_identity_files(void)
+@@ -1227,9 +1230,11 @@ load_public_identity_files(void)
  	int i = 0;
  	Key *public;
  	struct passwd *pw;
@@ -1136,12 +1136,11 @@ diff -urpN openssh-4.5p1/ssh.c openssh-4.5p1.nss/ssh.c
  	Key **keys;
 +#endif
  
-+	debug("loaded %d keys", options.num_identity_files);
 +#ifdef SMARTCARD
  	if (options.smartcard_device != NULL &&
  	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
  	    (keys = sc_get_keys(options.smartcard_device, NULL)) != NULL) {
-@@ -1250,6 +1256,27 @@ load_public_identity_files(void)
+@@ -1250,6 +1255,27 @@ load_public_identity_files(void)
  		xfree(keys);
  	}
  #endif /* SMARTCARD */
@@ -1169,14 +1168,6 @@ diff -urpN openssh-4.5p1/ssh.c openssh-4.5p1.nss/ssh.c
  	if ((pw = getpwuid(original_real_uid)) == NULL)
  		fatal("load_public_identity_files: getpwuid failed");
  	if (gethostname(thishost, sizeof(thishost)) == -1)
-@@ -1269,6 +1296,7 @@ load_public_identity_files(void)
- 		options.identity_files[i] = filename;
- 		options.identity_keys[i] = public;
- 	}
-+	debug("loaded %d keys", options.num_identity_files);
- }
- 
- static void
 diff -urpN openssh-4.5p1/ssh-dss.c openssh-4.5p1.nss/ssh-dss.c
 --- openssh-4.5p1/ssh-dss.c	2006-11-07 13:14:42.000000000 +0100
 +++ openssh-4.5p1.nss/ssh-dss.c	2007-05-25 15:45:19.000000000 +0200

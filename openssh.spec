@@ -125,6 +125,10 @@ BuildRequires: pam-devel
 BuildRequires: krb5-devel
 %endif
 
+%if %{nss}
+BuildRequires: nss-devel
+%endif
+
 %if %{WITH_SELINUX}
 Requires: libselinux >= 1.27.7
 BuildRequires: libselinux-devel >= 1.27.7
