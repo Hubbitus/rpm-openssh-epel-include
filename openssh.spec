@@ -64,7 +64,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.5p1
-Release: 7%{?dist}%{?rescue_rel}
+Release: 8%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
@@ -94,6 +94,7 @@ Patch48: openssh-4.3p2-pam-session.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch50: openssh-4.5p1-mls.patch
 Patch51: openssh-4.5p1-nss-keys.patch
+Patch52: openssh-4.5p1-sftp-drain-acks.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -226,6 +227,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch49 -p1 -b .canohost
 %patch50 -p1 -b .mls
 %patch51 -p1 -b .nss-keys
+%patch52 -p1 -b .drain-acks
 
 autoreconf
 
@@ -476,6 +478,10 @@ fi
 %endif
 
 %changelog
+* Thu Aug  9 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-8
+- fix sftp client problems on write error (#247802)
+- allow disabling autocreation of server keys (#235466)
+
 * Wed Jun 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-7
 - experimental NSS keys support
 - correctly setup context when empty level requested (#234951)

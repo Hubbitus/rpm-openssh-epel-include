@@ -711,6 +711,8 @@ diff -urpN openssh-4.5p1/README.nss openssh-4.5p1.nss/README.nss
 +PKCS#11 tokens which are installed in your NSS database.
 +
 +As the code is experimental and preliminary only SSH protocol 2 is supported.
++The NSS certificate and token databases are looked for in the ~/.ssh
++directory or in a directory specified by environment variable NSS_DB_PATH.
 +
 +Common operations:
 +

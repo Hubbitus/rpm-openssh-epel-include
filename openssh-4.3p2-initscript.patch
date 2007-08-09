@@ -1,5 +1,5 @@
---- openssh-4.3p2/contrib/redhat/sshd.init	2002-05-10 04:19:23.000000000 +0200
-+++ sshd	2006-11-02 14:23:27.000000000 +0100
+--- openssh-4.5p1/contrib/redhat/sshd.init.initscript	2006-04-22 13:26:08.000000000 +0200
++++ openssh-4.5p1/contrib/redhat/sshd.init	2007-07-25 18:26:50.000000000 +0200
 @@ -29,6 +29,8 @@
  DSA_KEY=/etc/ssh/ssh_host_dsa_key
  PID_FILE=/var/run/sshd.pid
@@ -9,10 +9,18 @@
  do_rsa1_keygen() {
  	if [ ! -s $RSA1_KEY ]; then
  		echo -n $"Generating SSH1 RSA host key: "
-@@ -93,9 +95,11 @@
- 	do_rsa1_keygen
- 	do_rsa_keygen
- 	do_dsa_keygen
+@@ -99,12 +101,16 @@
+ start()
+ {
+ 	# Create keys if necessary
+-	do_rsa1_keygen
+-	do_rsa_keygen
+-	do_dsa_keygen
++	if [ "x${AUTOCREATE_SERVER_KEYS}" != xNO ]; then
++		do_rsa1_keygen
++		do_rsa_keygen
++		do_dsa_keygen
++	fi
 +	
 +	cp -af /etc/localtime /var/empty/sshd/etc
  
@@ -23,7 +31,7 @@
  	RETVAL=$?
  	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/sshd
  	echo
-@@ -103,17 +107,30 @@
+@@ -112,17 +118,30 @@
  
  stop()
  {
