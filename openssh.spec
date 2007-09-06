@@ -1,10 +1,5 @@
+# Do we want SELinux & Audit
 %define WITH_SELINUX 1
-%if %{WITH_SELINUX}
-# Audit patch applicable only over SELinux patch
-%define WITH_AUDIT 1
-%else
-%define WITH_AUDIT 0
-%endif
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -27,6 +22,9 @@
 
 # Do we want kerberos5 support (1=yes 0=no)
 %define kerberos5 1
+
+# Do we want libedit support
+%define libedit 1
 
 # Do we want NSS tokens support
 %define nss 1
@@ -59,42 +57,44 @@
 # Turn off some stuff for resuce builds
 %if %{rescue}
 %define kerberos5 0
+%define libedit 0
 %endif
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 4.5p1
-Release: 8%{?dist}%{?rescue_rel}
+Version: 4.7p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
-#Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.sig
+#Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
 # This package differs from the upstream OpenSSH tarball in that
 # the ACSS cipher is removed by running openssh-nukeacss.sh in
 # the unpacked source directory.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
-Patch0: openssh-4.5p1-redhat.patch
+Patch0: openssh-4.7p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-4.5p1-vendor.patch
+Patch4: openssh-4.7p1-vendor.patch
 Patch5: openssh-4.3p2-initscript.patch
-Patch12: openssh-4.5p1-selinux.patch
-Patch16: openssh-4.5p1-audit.patch
+Patch10: openssh-4.7p1-pam-session.patch
+Patch12: openssh-4.7p1-selinux.patch
+Patch13: openssh-4.7p1-mls.patch
+Patch16: openssh-4.7p1-audit.patch
+Patch17: openssh-4.3p2-cve-2007-3102.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 Patch26: openssh-4.2p1-pam-no-stack.patch
-Patch27: openssh-3.9p1-log-in-chroot.patch
+Patch27: openssh-4.7p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch31: openssh-3.9p1-skip-used.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
-Patch48: openssh-4.3p2-pam-session.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch50: openssh-4.5p1-mls.patch
-Patch51: openssh-4.5p1-nss-keys.patch
-Patch52: openssh-4.5p1-sftp-drain-acks.patch
+Patch51: openssh-4.7p1-nss-keys.patch
+Patch52: openssh-4.7p1-sftp-drain-acks.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -126,6 +126,10 @@ BuildRequires: tcp_wrappers-devel
 BuildRequires: krb5-devel
 %endif
 
+%if %{libedit}
+BuildRequires: libedit-devel
+%endif
+
 %if %{nss}
 BuildRequires: nss-devel
 %endif
@@ -133,9 +137,6 @@ BuildRequires: nss-devel
 %if %{WITH_SELINUX}
 Requires: libselinux >= 1.27.7
 BuildRequires: libselinux-devel >= 1.27.7
-%endif
-
-%if %{WITH_AUDIT}
 Requires: audit-libs >= 1.0.8
 BuildRequires: audit-libs >= 1.0.8
 %endif
@@ -204,13 +205,14 @@ an X11 passphrase dialog for OpenSSH.
 %patch4 -p1 -b .vendor
 %patch5 -p1 -b .initscript
 
+%patch10 -p1 -b .pam-session
+
 %if %{WITH_SELINUX}
 #SELinux
 %patch12 -p1 -b .selinux
-%endif
-
-%if %{WITH_AUDIT}
+%patch13 -p1 -b .mls
 %patch16 -p1 -b .audit
+%patch17 -p1 -b .inject-fix
 %endif
 
 %patch22 -p1 -b .keep-above
@@ -223,9 +225,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch38 -p1 -b .grab-info
 %patch39 -p1 -b .no-v6only
 %patch44 -p1 -b .ip-opts
-%patch48 -p1 -b .pam-sesssion
 %patch49 -p1 -b .canohost
-%patch50 -p1 -b .mls
 %patch51 -p1 -b .nss-keys
 %patch52 -p1 -b .drain-acks
 
@@ -282,15 +282,17 @@ fi
 	--with-pam \
 %endif
 %if %{WITH_SELINUX}
-	--with-selinux \
-%endif
-%if %{WITH_AUDIT}
-	--with-linux-audit \
+	--with-selinux --with-linux-audit \
 %endif
 %if %{kerberos5}
-	--with-kerberos5${krb5_prefix:+=${krb5_prefix}}
+	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
 %else
-	--without-kerberos5
+	--without-kerberos5 \
+%endif
+%if %{libedit}
+	--with-libedit
+%else
+	--without-libedit
 %endif
 
 %if %{static_libcrypto}
@@ -478,6 +480,11 @@ fi
 %endif
 
 %changelog
+* Thu Sep  6 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-1
+- upgrade to latest upstream
+- use libedit in sftp (#203009)
+- fixed audit log injection problem (CVE-2007-3102)
+
 * Thu Aug  9 2007 Tomas Mraz <tmraz@redhat.com> - 4.5p1-8
 - fix sftp client problems on write error (#247802)
 - allow disabling autocreation of server keys (#235466)

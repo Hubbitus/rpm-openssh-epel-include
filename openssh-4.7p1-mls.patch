@@ -1,5 +1,53 @@
---- openssh-4.5p1/openbsd-compat/port-linux.c.mls	2007-01-16 22:13:32.000000000 +0100
-+++ openssh-4.5p1/openbsd-compat/port-linux.c	2007-03-20 10:07:39.000000000 +0100
+diff -up openssh-4.7p1/misc.c.mls openssh-4.7p1/misc.c
+--- openssh-4.7p1/misc.c.mls	2007-01-05 06:24:48.000000000 +0100
++++ openssh-4.7p1/misc.c	2007-09-06 17:39:28.000000000 +0200
+@@ -418,6 +418,7 @@ char *
+ colon(char *cp)
+ {
+ 	int flag = 0;
++	int start = 1;
+ 
+ 	if (*cp == ':')		/* Leading colon is part of file name. */
+ 		return (0);
+@@ -431,8 +432,13 @@ colon(char *cp)
+ 			return (cp+1);
+ 		if (*cp == ':' && !flag)
+ 			return (cp);
+-		if (*cp == '/')
+-			return (0);
++		if (start) {
++		/* Slash on beginning or after dots only denotes file name. */
++			if (*cp == '/')
++				return (0);
++			if (*cp != '.')
++				start = 0;
++		}
+ 	}
+ 	return (0);
+ }
+diff -up openssh-4.7p1/session.c.mls openssh-4.7p1/session.c
+--- openssh-4.7p1/session.c.mls	2007-09-06 17:39:28.000000000 +0200
++++ openssh-4.7p1/session.c	2007-09-06 17:39:28.000000000 +0200
+@@ -1347,10 +1347,6 @@ do_setusercontext(struct passwd *pw)
+ #endif
+ 	if (getuid() != pw->pw_uid || geteuid() != pw->pw_uid)
+ 		fatal("Failed to set uids to %u.", (u_int) pw->pw_uid);
+-
+-#ifdef WITH_SELINUX
+-	ssh_selinux_setup_exec_context(pw->pw_name);
+-#endif
+ }
+ 
+ static void
+diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-compat/port-linux.c
+--- openssh-4.7p1/openbsd-compat/port-linux.c.mls	2007-09-06 17:39:28.000000000 +0200
++++ openssh-4.7p1/openbsd-compat/port-linux.c	2007-08-07 17:38:18.000000000 +0200
+@@ -1,4 +1,4 @@
+-/* $Id: port-linux.c,v 1.4 2007/06/27 22:48:03 djm Exp $ */
++/* $Id: port-linux.c,v 1.3 2006/09/01 05:38:41 djm Exp $ */
+ 
+ /*
+  * Copyright (c) 2005 Daniel Walsh <dwalsh@redhat.com>
 @@ -33,12 +33,23 @@
  #include "key.h"
  #include "hostfile.h"
@@ -24,7 +72,7 @@
  
  /* Wrapper around is_selinux_enabled() to log its return value once only */
  static int
-@@ -54,17 +65,173 @@
+@@ -54,17 +65,173 @@ ssh_selinux_enabled(void)
  	return (enabled);
  }
  
@@ -204,7 +252,7 @@
  #ifdef HAVE_GETSEUSERBYNAME
  	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
  		sename = NULL;
-@@ -72,37 +239,63 @@
+@@ -72,37 +239,62 @@ ssh_selinux_getctxbyname(char *pwname)
  	}
  #else
  	sename = pwname;
@@ -236,6 +284,7 @@
 -		case 0:
 -			error("%s: Failed to get default SELinux security "
 -			    "context for %s", __func__, pwname);
+-			break;
 -		default:
 -			fatal("%s: Failed to get default SELinux security "
 -			    "context for %s (in enforcing mode)",
@@ -257,7 +306,7 @@
 +			    reqlvl = "";
 +
 +			debug("%s: current connection level '%s'", __func__, reqlvl);
-+		}
+ 		}
 +		
 +		if ((reqlvl != NULL && reqlvl[0]) || (role != NULL && role[0])) {
 +			r = get_user_context(sename, role, reqlvl, user_sc);
@@ -280,16 +329,15 @@
 +			}
 +		} else {
 +			*user_sc = *default_sc;
- 		}
- 	}
++		}
++	}
 +	if (r != 0) {
 +		error("%s: Failed to get default SELinux security "
 +		    "context for %s", __func__, pwname);
-+	}
+ 	}
  
  #ifdef HAVE_GETSEUSERBYNAME
- 	if (sename != NULL)
-@@ -110,14 +303,20 @@
+@@ -111,14 +303,20 @@ ssh_selinux_getctxbyname(char *pwname)
  	if (lvl != NULL)
  		xfree(lvl);
  #endif
@@ -311,7 +359,7 @@
  	security_context_t user_ctx = NULL;
  
  	if (!ssh_selinux_enabled())
-@@ -125,21 +324,39 @@
+@@ -126,22 +324,39 @@ ssh_selinux_setup_exec_context(char *pwn
  
  	debug3("%s: setting execution context", __func__);
  
@@ -342,7 +390,7 @@
 -			    "context for %s", __func__, pwname);
 +			error("%s: SELinux failure. Continuing in permissive mode.",
 +			    __func__);
-+			break;
+ 			break;
  		default:
 -			fatal("%s: Failed to set SELinux execution context "
 -			    "for %s (in enforcing mode)", __func__, pwname);
@@ -358,7 +406,7 @@
  
  	debug3("%s: done", __func__);
  }
-@@ -157,7 +374,10 @@
+@@ -159,7 +374,10 @@ ssh_selinux_setup_pty(char *pwname, cons
  
  	debug3("%s: setting TTY context on %s", __func__, tty);
  
@@ -370,9 +418,10 @@
  
  	/* XXX: should these calls fatal() upon failure in enforcing mode? */
  
---- openssh-4.5p1/sshd.c.mls	2007-01-16 22:13:32.000000000 +0100
-+++ openssh-4.5p1/sshd.c	2007-01-16 22:13:32.000000000 +0100
-@@ -1833,6 +1833,9 @@
+diff -up openssh-4.7p1/sshd.c.mls openssh-4.7p1/sshd.c
+--- openssh-4.7p1/sshd.c.mls	2007-09-06 17:39:28.000000000 +0200
++++ openssh-4.7p1/sshd.c	2007-09-06 17:39:28.000000000 +0200
+@@ -1838,6 +1838,9 @@ main(int ac, char **av)
  		restore_uid();
  	}
  #endif
@@ -382,42 +431,3 @@
  #ifdef USE_PAM
  	if (options.use_pam) {
  		do_pam_setcred(1);
---- openssh-4.5p1/misc.c.mls	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-4.5p1/misc.c	2007-01-16 22:13:32.000000000 +0100
-@@ -418,6 +418,7 @@
- colon(char *cp)
- {
- 	int flag = 0;
-+	int start = 1;
- 
- 	if (*cp == ':')		/* Leading colon is part of file name. */
- 		return (0);
-@@ -431,8 +432,13 @@
- 			return (cp+1);
- 		if (*cp == ':' && !flag)
- 			return (cp);
--		if (*cp == '/')
--			return (0);
-+		if (start) {
-+		/* Slash on beginning or after dots only denotes file name. */
-+			if (*cp == '/')
-+				return (0);
-+			if (*cp != '.')
-+				start = 0;
-+		}
- 	}
- 	return (0);
- }
---- openssh-4.5p1/session.c.mls	2007-01-16 22:13:32.000000000 +0100
-+++ openssh-4.5p1/session.c	2007-01-16 22:13:32.000000000 +0100
-@@ -1347,10 +1347,6 @@
- #endif
- 	if (getuid() != pw->pw_uid || geteuid() != pw->pw_uid)
- 		fatal("Failed to set uids to %u.", (u_int) pw->pw_uid);
--
--#ifdef WITH_SELINUX
--	ssh_selinux_setup_exec_context(pw->pw_name);
--#endif
- }
- 
- static void

@@ -1,6 +1,6 @@
-diff -up openssh-4.5p1/sftp-client.c.drain-acks openssh-4.5p1/sftp-client.c
---- openssh-4.5p1/sftp-client.c.drain-acks	2006-10-23 19:03:02.000000000 +0200
-+++ openssh-4.5p1/sftp-client.c	2007-08-07 17:46:16.000000000 +0200
+diff -up openssh-4.7p1/sftp-client.c.drain-acks openssh-4.7p1/sftp-client.c
+--- openssh-4.7p1/sftp-client.c.drain-acks	2007-02-19 12:13:39.000000000 +0100
++++ openssh-4.7p1/sftp-client.c	2007-09-06 17:54:41.000000000 +0200
 @@ -992,7 +992,8 @@ int
  do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
      int pflag)
@@ -20,7 +20,7 @@ diff -up openssh-4.5p1/sftp-client.c.drain-acks openssh-4.5p1/sftp-client.c
  			len = 0;
  		else do
  			len = read(local_fd, data, conn->transfer_buflen);
-@@ -1131,17 +1132,6 @@ do_upload(struct sftp_conn *conn, char *
+@@ -1131,18 +1132,6 @@ do_upload(struct sftp_conn *conn, char *
  				fatal("Can't find request for ID %u", r_id);
  			TAILQ_REMOVE(&acks, ack, tq);
  
@@ -33,12 +33,13 @@ diff -up openssh-4.5p1/sftp-client.c.drain-acks openssh-4.5p1/sftp-client.c
 -				close(local_fd);
 -				xfree(data);
 -				xfree(ack);
+-				status = -1;
 -				goto done;
 -			}
  			debug3("In write loop, ack for %u %u bytes at %llu",
  			    ack->id, ack->len, (unsigned long long)ack->offset);
  			++ackid;
-@@ -1153,21 +1143,25 @@ do_upload(struct sftp_conn *conn, char *
+@@ -1154,21 +1143,25 @@ do_upload(struct sftp_conn *conn, char *
  		stop_progress_meter();
  	xfree(data);
  
