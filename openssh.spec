@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 1%{?dist}%{?rescue_rel}
+Release: 2%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -95,6 +95,7 @@ Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
 Patch52: openssh-4.7p1-sftp-drain-acks.patch
+Patch53: openssh-4.7p1-revert-wsize.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -228,6 +229,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch49 -p1 -b .canohost
 %patch51 -p1 -b .nss-keys
 %patch52 -p1 -b .drain-acks
+%patch53 -p1 -b .revert-wsize
 
 autoreconf
 
@@ -480,6 +482,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 17 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-2
+- revert default window size adjustments (#286181)
+
 * Thu Sep  6 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-1
 - upgrade to latest upstream
 - use libedit in sftp (#203009)
