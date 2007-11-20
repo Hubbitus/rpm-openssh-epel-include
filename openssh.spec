@@ -327,10 +327,9 @@ popd
 rm -rf $RPM_BUILD_ROOT
 mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
 mkdir -p -m755 $RPM_BUILD_ROOT%{_libexecdir}/openssh
-mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd/etc
+mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd
 make install DESTDIR=$RPM_BUILD_ROOT
 
-touch $RPM_BUILD_ROOT%{_var}/empty/sshd/etc/localtime
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
