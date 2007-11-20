@@ -128,7 +128,7 @@ BuildRequires: krb5-devel
 %endif
 
 %if %{libedit}
-BuildRequires: libedit-devel
+BuildRequires: libedit-devel ncurses-devel
 %endif
 
 %if %{nss}
