@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -461,8 +461,6 @@ fi
 %files server
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
-%dir %attr(0755,root,root) %{_var}/empty/sshd/etc
-%ghost %verify(not md5 size mtime) %{_var}/empty/sshd/etc/localtime
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
@@ -482,6 +480,13 @@ fi
 %endif
 
 %changelog
+* Tue Nov 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-3
+- do not copy /etc/localtime into the chroot as it is not
+  necessary anymore (#193184)
+- call setkeycreatecon when selinux context is established
+- test for NULL privk when freeing key (#391871) - patch by
+  Pierre Ossman
+
 * Mon Sep 17 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-2
 - revert default window size adjustments (#286181)
 

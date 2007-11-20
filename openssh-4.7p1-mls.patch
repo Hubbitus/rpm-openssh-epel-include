@@ -359,7 +359,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
  	security_context_t user_ctx = NULL;
  
  	if (!ssh_selinux_enabled())
-@@ -126,22 +324,39 @@ ssh_selinux_setup_exec_context(char *pwn
+@@ -126,22 +324,45 @@ ssh_selinux_setup_exec_context(char *pwn
  
  	debug3("%s: setting execution context", __func__);
  
@@ -371,7 +371,13 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
 +		if (r < 0) {
 +			error("%s: Failed to set SELinux execution context %s for %s",
 +			    __func__, user_ctx, pwname);
++		} 
++#ifdef HAVE_SETKEYCREATECON
++		else if (setkeycreatecon(user_ctx) < 0) {
++			error("%s: Failed to set SELinux keyring creation context %s for %s",
++			    __func__, user_ctx, pwname);
 +		}
++#endif
 +	}
 +	if (user_ctx == NULL) {
 +		user_ctx = default_ctx;
@@ -406,7 +412,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
  
  	debug3("%s: done", __func__);
  }
-@@ -159,7 +374,10 @@ ssh_selinux_setup_pty(char *pwname, cons
+@@ -159,7 +380,10 @@ ssh_selinux_setup_pty(char *pwname, cons
  
  	debug3("%s: setting TTY context on %s", __func__, tty);
  
@@ -418,6 +424,17 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
  
  	/* XXX: should these calls fatal() upon failure in enforcing mode? */
  
+diff -up openssh-4.7p1/configure.ac.mls openssh-4.7p1/configure.ac
+--- openssh-4.7p1/configure.ac.mls	2007-10-17 19:05:10.000000000 +0200
++++ openssh-4.7p1/configure.ac	2007-10-17 19:05:38.000000000 +0200
+@@ -3213,6 +3213,7 @@ AC_ARG_WITH(selinux,
+ 		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
+ 		LIBS="$LIBS $LIBSELINUX"
+ 		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
++		AC_CHECK_FUNCS(setkeycreatecon)
+ 		LIBS="$save_LIBS"
+ 	fi ]
+ )
 diff -up openssh-4.7p1/sshd.c.mls openssh-4.7p1/sshd.c
 --- openssh-4.7p1/sshd.c.mls	2007-09-06 17:39:28.000000000 +0200
 +++ openssh-4.7p1/sshd.c	2007-09-06 17:39:28.000000000 +0200

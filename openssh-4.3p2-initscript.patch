@@ -9,7 +9,7 @@
  do_rsa1_keygen() {
  	if [ ! -s $RSA1_KEY ]; then
  		echo -n $"Generating SSH1 RSA host key: "
-@@ -99,12 +101,16 @@
+@@ -99,12 +101,14 @@
  start()
  {
  	# Create keys if necessary
@@ -21,8 +21,6 @@
 +		do_rsa_keygen
 +		do_dsa_keygen
 +	fi
-+	
-+	cp -af /etc/localtime /var/empty/sshd/etc
  
 -	echo -n $"Starting $prog:"
 -	initlog -c "$SSHD $OPTIONS" && success || failure
@@ -31,7 +29,7 @@
  	RETVAL=$?
  	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/sshd
  	echo
-@@ -112,17 +118,30 @@
+@@ -112,17 +116,30 @@
  
  stop()
  {
