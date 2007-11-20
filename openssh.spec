@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 3%{?dist}%{?rescue_rel}
+Release: 4%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -480,7 +480,7 @@ fi
 %endif
 
 %changelog
-* Tue Nov 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-3
+* Tue Nov 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-4
 - do not copy /etc/localtime into the chroot as it is not
   necessary anymore (#193184)
 - call setkeycreatecon when selinux context is established
