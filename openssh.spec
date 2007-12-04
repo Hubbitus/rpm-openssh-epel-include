@@ -248,6 +248,7 @@ export CFLAGS
 LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
 %endif
 %if %{kerberos5}
+source /etc/profile.d/krb5-devel.sh
 krb5_prefix=`krb5-config --prefix`
 if test "$krb5_prefix" != "%{_prefix}" ; then
 	CPPFLAGS="$CPPFLAGS -I${krb5_prefix}/include -I${krb5_prefix}/include/gssapi"; export CPPFLAGS
@@ -479,8 +480,9 @@ fi
 %endif
 
 %changelog
-* Tue Dec 04 2007 Release Engineering <rel-eng at fedoraproject dot org> - 4.7p1-5
- - Rebuild for openssl bump
+* Tue Dec  4 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-5
+- explicitly source krb5-devel profile script
+- rebuild for openssl bump
 
 * Tue Nov 20 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-4
 - do not copy /etc/localtime into the chroot as it is not
