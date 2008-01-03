@@ -1,0 +1,34 @@
+Written-by: Nalin Dahyabhai <nalin@redhat.com>
+Reviewed-by: Tomas Mraz <tmraz@redhat.com>
+--- auth2-gss.c	2008-01-02 16:34:03.000000000 -0500
++++ auth2-gss.c	2008-01-02 16:33:19.000000000 -0500
+@@ -258,6 +258,7 @@
+ 	Authctxt *authctxt = ctxt;
+ 	Gssctxt *gssctxt;
+ 	int authenticated = 0;
++	char *micuser;
+ 	Buffer b;
+ 	gss_buffer_desc mic, gssbuf;
+ 	u_int len;
+@@ -270,7 +271,11 @@
+ 	mic.value = packet_get_string(&len);
+ 	mic.length = len;
+ 
+-	ssh_gssapi_buildmic(&b, authctxt->user, authctxt->service,
++	if (authctxt->role && (strlen(authctxt->role) > 0))
++		xasprintf(&micuser, "%s/%s", authctxt->user, authctxt->role);
++	else
++		micuser = authctxt->user;
++	ssh_gssapi_buildmic(&b, micuser, authctxt->service,
+ 	    "gssapi-with-mic");
+ 
+ 	gssbuf.value = buffer_ptr(&b);
+@@ -285,6 +290,8 @@
+ 	}
+ 
+ 	buffer_free(&b);
++	if (micuser != authctxt->user)
++		xfree(micuser);
+ 	xfree(mic.value);
+ 
+ 	authctxt->postponed = 0;

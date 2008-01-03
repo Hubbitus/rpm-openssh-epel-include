@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 6%{?dist}%{?rescue_rel}
+Release: 7%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -96,6 +96,7 @@ Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
 Patch52: openssh-4.7p1-sftp-drain-acks.patch
 Patch53: openssh-4.7p1-revert-wsize.patch
+Patch54: openssh-4.7p1-gssapi-role.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -230,6 +231,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch51 -p1 -b .nss-keys
 %patch52 -p1 -b .drain-acks
 %patch53 -p1 -b .revert-wsize
+%patch54 -p0 -b .gssapi-role
 
 autoreconf
 
@@ -480,6 +482,10 @@ fi
 %endif
 
 %changelog
+* Thu Jan  3 2008 Tomas Mraz <tmraz@redhat.com> - 4.7p1-7
+- fix gssapi auth with explicit selinux role requested (#427303) - patch
+  by Nalin Dahyabhai
+
 * Tue Dec  4 2007 Tomas Mraz <tmraz@redhat.com> - 4.7p1-6
 - explicitly source krb5-devel profile script
 
