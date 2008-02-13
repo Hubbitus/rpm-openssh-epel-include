@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 7%{?dist}%{?rescue_rel}
+Release: 8%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -241,7 +241,7 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 CFLAGS="$CFLAGS -Os"
 %endif
 %if %{pie}
-%ifarch s390 s390x sparc sparc64
+%ifarch s390 s390x sparc sparcv9 sparc64
 CFLAGS="$CFLAGS -fPIE"
 %else
 CFLAGS="$CFLAGS -fpie"
@@ -482,6 +482,9 @@ fi
 %endif
 
 %changelog
+* Tue Feb 12 2008 Dennis Gilmore <dennis@ausil.us> - 4.7p1-8
+- we build for sparcv9 now  and it needs -fPIE
+
 * Thu Jan  3 2008 Tomas Mraz <tmraz@redhat.com> - 4.7p1-7
 - fix gssapi auth with explicit selinux role requested (#427303) - patch
   by Nalin Dahyabhai
