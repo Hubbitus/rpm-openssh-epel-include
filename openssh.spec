@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 4.7p1
-Release: 8%{?dist}%{?rescue_rel}
+Release: 9%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -95,8 +95,12 @@ Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
 Patch52: openssh-4.7p1-sftp-drain-acks.patch
-Patch53: openssh-4.7p1-revert-wsize.patch
+Patch53: openssh-4.7p1-packetdefsize.patch
 Patch54: openssh-4.7p1-gssapi-role.patch
+Patch55: openssh-4.7p1-cloexec.patch
+Patch56: openssh-4.7p1-sshd-v6only.patch
+Patch57: openssh-4.7p1-sftp-doclose.patch
+
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -230,8 +234,11 @@ an X11 passphrase dialog for OpenSSH.
 %patch49 -p1 -b .canohost
 %patch51 -p1 -b .nss-keys
 %patch52 -p1 -b .drain-acks
-%patch53 -p1 -b .revert-wsize
+%patch53 -p0 -b .defsize
 %patch54 -p0 -b .gssapi-role
+%patch55 -p1 -b .cloexec
+%patch56 -p0 -b .sshd-v6only
+%patch57 -p3 -b .doclose
 
 autoreconf
 
@@ -482,6 +489,12 @@ fi
 %endif
 
 %changelog
+* Fri Feb 29 2008 Tomas Mraz <tmraz@redhat.com> - 4.7p1-9
+- set FD_CLOEXEC on client socket
+- apply real fix for window size problem (#286181) from upstream
+- apply fix for the spurious failed bind from upstream
+- apply open handle leak in sftp fix from upstream
+
 * Tue Feb 12 2008 Dennis Gilmore <dennis@ausil.us> - 4.7p1-8
 - we build for sparcv9 now  and it needs -fPIE
 
