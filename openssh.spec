@@ -62,8 +62,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 4.7p1
-Release: 9%{?dist}%{?rescue_rel}
+Version: 5.0p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -72,34 +72,30 @@ URL: http://www.openssh.com/portable.html
 # the unpacked source directory.
 Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
+Source2: sshd.pam
+Source3: sshd.init
 Patch0: openssh-4.7p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-4.7p1-vendor.patch
-Patch5: openssh-4.3p2-initscript.patch
-Patch10: openssh-4.7p1-pam-session.patch
 Patch12: openssh-4.7p1-selinux.patch
 Patch13: openssh-4.7p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
 Patch17: openssh-4.3p2-cve-2007-3102.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
-Patch26: openssh-4.2p1-pam-no-stack.patch
 Patch27: openssh-4.7p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
-Patch31: openssh-3.9p1-skip-used.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
-Patch52: openssh-4.7p1-sftp-drain-acks.patch
-Patch53: openssh-4.7p1-packetdefsize.patch
 Patch54: openssh-4.7p1-gssapi-role.patch
 Patch55: openssh-4.7p1-cloexec.patch
-Patch56: openssh-4.7p1-sshd-v6only.patch
-Patch57: openssh-4.7p1-sftp-doclose.patch
+Patch58: openssh-4.5p1-controlcleanup.patch
+Patch59: openssh-4.7p1-master-race.patch
 
 License: BSD
 Group: Applications/Internet
@@ -209,9 +205,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch2 -p1 -b .skip-initial
 %patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
-%patch5 -p1 -b .initscript
-
-%patch10 -p1 -b .pam-session
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -223,22 +216,18 @@ an X11 passphrase dialog for OpenSSH.
 
 %patch22 -p1 -b .keep-above
 %patch24 -p1 -b .fromto-remote
-%patch26 -p1 -b .stack
 %patch27 -p1 -b .log-chroot
 %patch30 -p1 -b .exit-deadlock
-%patch31 -p1 -b .skip-used
 %patch35 -p1 -b .progress
 %patch38 -p1 -b .grab-info
 %patch39 -p1 -b .no-v6only
 %patch44 -p1 -b .ip-opts
 %patch49 -p1 -b .canohost
 %patch51 -p1 -b .nss-keys
-%patch52 -p1 -b .drain-acks
-%patch53 -p0 -b .defsize
 %patch54 -p0 -b .gssapi-role
 %patch55 -p1 -b .cloexec
-%patch56 -p0 -b .sshd-v6only
-%patch57 -p3 -b .doclose
+%patch58 -p1 -b .controlcleanup
+%patch59 -p1 -b .master-race
 
 autoreconf
 
@@ -343,8 +332,8 @@ make install DESTDIR=$RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
-install -m644 contrib/redhat/sshd.pam      $RPM_BUILD_ROOT/etc/pam.d/sshd
-install -m755 contrib/redhat/sshd.init     $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
+install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
+install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -489,6 +478,16 @@ fi
 %endif
 
 %changelog
+* Mon Apr  7 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-1
+- upgrade to new upstream (#441066)
+- prevent initscript from killing itself on halt with upstart (#438449)
+- initscript status should show that the daemon is running
+  only when the main daemon is still alive (#430882)
+
+* Thu Mar  6 2008 Tomas Mraz <tmraz@redhat.com> - 4.7p1-10
+- fix race on control master and cleanup stale control socket (#436311)
+  patches by David Woodhouse
+
 * Fri Feb 29 2008 Tomas Mraz <tmraz@redhat.com> - 4.7p1-9
 - set FD_CLOEXEC on client socket
 - apply real fix for window size problem (#286181) from upstream
