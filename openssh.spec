@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.0p1
-Release: 1%{?dist}%{?rescue_rel}
+Release: 2%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -96,6 +96,9 @@ Patch54: openssh-4.7p1-gssapi-role.patch
 Patch55: openssh-4.7p1-cloexec.patch
 Patch58: openssh-4.5p1-controlcleanup.patch
 Patch59: openssh-4.7p1-master-race.patch
+Patch60: openssh-5.0p1-pam_selinux.patch
+Patch61: openssh-5.0p1-unbreakalive.patch
+Patch62: openssh-3.9p1-scp-manpage.patch
 
 License: BSD
 Group: Applications/Internet
@@ -156,7 +159,7 @@ Group: System Environment/Daemons
 Requires: openssh = %{version}-%{release}
 Requires(post): chkconfig >= 0.9, /sbin/service
 Requires(pre): /usr/sbin/useradd
-Requires: /etc/pam.d/system-auth, /%{_lib}/security/pam_loginuid.so
+Requires: pam >= 1.0.1-3
 
 %package askpass
 Summary: A passphrase dialog for OpenSSH and X
@@ -228,6 +231,9 @@ an X11 passphrase dialog for OpenSSH.
 %patch55 -p1 -b .cloexec
 %patch58 -p1 -b .controlcleanup
 %patch59 -p1 -b .master-race
+%patch60 -p1 -b .pam_selinux
+%patch61 -p0 -b .unbreakalive
+%patch62 -p0 -b .manpage
 
 autoreconf
 
@@ -478,6 +484,12 @@ fi
 %endif
 
 %changelog
+* Mon May 19 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-2
+- add LANGUAGE to accepted/sent environment variables (#443231)
+- use pam_selinux to obtain the user context instead of doing it itself
+- unbreak server keep alive settings (patch from upstream)
+- small addition to scp manpage
+
 * Mon Apr  7 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-1
 - upgrade to new upstream (#441066)
 - prevent initscript from killing itself on halt with upstart (#438449)

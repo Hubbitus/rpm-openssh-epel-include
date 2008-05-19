@@ -40,7 +40,7 @@ diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
 +# Accept locale-related environment variables
 +AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
 +AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
-+AcceptEnv LC_IDENTIFICATION LC_ALL
++AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
  #AllowTcpForwarding yes
  #GatewayPorts no
  #X11Forwarding no
@@ -64,7 +64,7 @@ diff -up openssh-4.7p1/ssh_config.redhat openssh-4.7p1/ssh_config
 +# Send locale-related environment variables
 +	SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
 +	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
-+	SendEnv LC_IDENTIFICATION LC_ALL
++	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
 diff -up openssh-4.7p1/sshd_config.0.redhat openssh-4.7p1/sshd_config.0
 --- openssh-4.7p1/sshd_config.0.redhat	2007-09-04 08:50:11.000000000 +0200
 +++ openssh-4.7p1/sshd_config.0	2007-09-06 16:21:49.000000000 +0200
