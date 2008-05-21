@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.0p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -484,6 +484,9 @@ fi
 %endif
 
 %changelog
+* Wed May 21 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-3
+- pass the connection socket to ssh-keysign (#447680)
+
 * Mon May 19 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-2
 - add LANGUAGE to accepted/sent environment variables (#443231)
 - use pam_selinux to obtain the user context instead of doing it itself
