@@ -75,13 +75,14 @@ Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
 Patch0: openssh-5.1p1-redhat.patch
-Patch2: openssh-3.8.1p1-skip-initial.patch
+Patch2: openssh-5.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-5.1p1-vendor.patch
 Patch12: openssh-5.1p1-selinux.patch
 Patch13: openssh-4.7p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
 Patch17: openssh-4.3p2-cve-2007-3102.patch
+Patch18: openssh-5.0p1-pam_selinux.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 Patch27: openssh-5.1p1-log-in-chroot.patch
@@ -94,7 +95,6 @@ Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
 Patch54: openssh-4.7p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
-Patch60: openssh-5.0p1-pam_selinux.patch
 Patch62: openssh-3.9p1-scp-manpage.patch
 
 License: BSD
@@ -199,7 +199,6 @@ into and executing commands on a remote machine. This package contains
 an X11 passphrase dialog for OpenSSH.
 
 %prep
-
 %setup -q
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
@@ -212,6 +211,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch13 -p1 -b .mls
 %patch16 -p1 -b .audit
 %patch17 -p1 -b .inject-fix
+%patch18 -p1 -b .pam_selinux
 %endif
 
 %patch22 -p1 -b .keep-above
@@ -226,7 +226,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch51 -p1 -b .nss-keys
 %patch54 -p0 -b .gssapi-role
 %patch55 -p1 -b .cloexec
-%patch60 -p1 -b .pam_selinux
 %patch62 -p0 -b .manpage
 
 autoreconf
