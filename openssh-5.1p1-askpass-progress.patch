@@ -1,5 +1,6 @@
---- openssh-4.2p1/contrib/gnome-ssh-askpass2.c.progress	2005-11-28 11:11:24.000000000 +0100
-+++ openssh-4.2p1/contrib/gnome-ssh-askpass2.c	2005-12-20 15:22:42.000000000 +0100
+diff -up openssh-5.1p1/contrib/gnome-ssh-askpass2.c.progress openssh-5.1p1/contrib/gnome-ssh-askpass2.c
+--- openssh-5.1p1/contrib/gnome-ssh-askpass2.c.progress	2008-07-23 19:05:26.000000000 +0200
++++ openssh-5.1p1/contrib/gnome-ssh-askpass2.c	2008-07-23 19:05:26.000000000 +0200
 @@ -53,6 +53,7 @@
  #include <string.h>
  #include <unistd.h>
@@ -8,7 +9,7 @@
  #include <gtk/gtk.h>
  #include <gdk/gdkx.h>
  
-@@ -83,13 +84,24 @@
+@@ -83,13 +84,24 @@ ok_dialog(GtkWidget *entry, gpointer dia
  	gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
  }
  
@@ -34,7 +35,7 @@
  	GdkGrabStatus status;
  
  	grab_server = (getenv("GNOME_SSH_ASKPASS_GRAB_SERVER") != NULL);
-@@ -102,13 +114,31 @@
+@@ -102,13 +114,31 @@ passphrase_dialog(char *message)
  					"%s",
  					message);
  
@@ -66,8 +67,8 @@
 +
  	gtk_window_set_title(GTK_WINDOW(dialog), "OpenSSH");
  	gtk_window_set_position (GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
- 	gtk_label_set_line_wrap(GTK_LABEL((GTK_MESSAGE_DIALOG(dialog))->label),
-@@ -118,6 +148,8 @@
+ 	gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+@@ -119,6 +149,8 @@ passphrase_dialog(char *message)
  	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
  	g_signal_connect(G_OBJECT(entry), "activate",
  			 G_CALLBACK(ok_dialog), dialog);

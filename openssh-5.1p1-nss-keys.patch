@@ -1,7 +1,7 @@
-diff -up openssh-4.7p1/key.c.nss-keys openssh-4.7p1/key.c
---- openssh-4.7p1/key.c.nss-keys	2007-08-08 06:28:26.000000000 +0200
-+++ openssh-4.7p1/key.c	2007-11-20 14:40:17.000000000 +0100
-@@ -93,6 +93,54 @@ key_new(int type)
+diff -up openssh-5.1p1/key.c.nss-keys openssh-5.1p1/key.c
+--- openssh-5.1p1/key.c.nss-keys	2008-07-11 09:35:09.000000000 +0200
++++ openssh-5.1p1/key.c	2008-07-23 19:16:00.000000000 +0200
+@@ -96,6 +96,54 @@ key_new(int type)
  	return k;
  }
  
@@ -56,7 +56,7 @@ diff -up openssh-4.7p1/key.c.nss-keys openssh-4.7p1/key.c
  Key *
  key_new_private(int type)
  {
-@@ -148,6 +196,19 @@ key_free(Key *k)
+@@ -151,6 +199,19 @@ key_free(Key *k)
  		fatal("key_free: bad key type %d", k->type);
  		break;
  	}
@@ -76,9 +76,9 @@ diff -up openssh-4.7p1/key.c.nss-keys openssh-4.7p1/key.c
  	xfree(k);
  }
  
-diff -up openssh-4.7p1/ssh-dss.c.nss-keys openssh-4.7p1/ssh-dss.c
---- openssh-4.7p1/ssh-dss.c.nss-keys	2006-11-07 13:14:42.000000000 +0100
-+++ openssh-4.7p1/ssh-dss.c	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/ssh-dss.c.nss-keys openssh-5.1p1/ssh-dss.c
+--- openssh-5.1p1/ssh-dss.c.nss-keys	2006-11-07 13:14:42.000000000 +0100
++++ openssh-5.1p1/ssh-dss.c	2008-07-23 19:16:00.000000000 +0200
 @@ -39,6 +39,10 @@
  #include "log.h"
  #include "key.h"
@@ -136,10 +136,10 @@ diff -up openssh-4.7p1/ssh-dss.c.nss-keys openssh-4.7p1/ssh-dss.c
  	if (datafellows & SSH_BUG_SIGBLOB) {
  		if (lenp != NULL)
  			*lenp = SIGBLOB_LEN;
-diff -up openssh-4.7p1/ssh-agent.c.nss-keys openssh-4.7p1/ssh-agent.c
---- openssh-4.7p1/ssh-agent.c.nss-keys	2007-03-21 10:45:07.000000000 +0100
-+++ openssh-4.7p1/ssh-agent.c	2007-11-20 14:26:43.000000000 +0100
-@@ -79,6 +79,10 @@
+diff -up openssh-5.1p1/ssh-agent.c.nss-keys openssh-5.1p1/ssh-agent.c
+--- openssh-5.1p1/ssh-agent.c.nss-keys	2008-07-04 15:10:49.000000000 +0200
++++ openssh-5.1p1/ssh-agent.c	2008-07-23 19:16:00.000000000 +0200
+@@ -80,6 +80,10 @@
  #include "scard.h"
  #endif
  
@@ -150,7 +150,7 @@ diff -up openssh-4.7p1/ssh-agent.c.nss-keys openssh-4.7p1/ssh-agent.c
  #if defined(HAVE_SYS_PRCTL_H)
  #include <sys/prctl.h>	/* For prctl() and PR_SET_DUMPABLE */
  #endif
-@@ -701,6 +705,114 @@ send:
+@@ -714,6 +718,114 @@ send:
  }
  #endif /* SMARTCARD */
  
@@ -265,7 +265,7 @@ diff -up openssh-4.7p1/ssh-agent.c.nss-keys openssh-4.7p1/ssh-agent.c
  /* dispatch incoming messages */
  
  static void
-@@ -793,6 +905,15 @@ process_message(SocketEntry *e)
+@@ -806,6 +918,15 @@ process_message(SocketEntry *e)
  		process_remove_smartcard_key(e);
  		break;
  #endif /* SMARTCARD */
@@ -281,9 +281,9 @@ diff -up openssh-4.7p1/ssh-agent.c.nss-keys openssh-4.7p1/ssh-agent.c
  	default:
  		/* Unknown message.  Respond with failure. */
  		error("Unknown message %d", type);
-diff -up openssh-4.7p1/authfd.h.nss-keys openssh-4.7p1/authfd.h
---- openssh-4.7p1/authfd.h.nss-keys	2006-08-05 04:39:39.000000000 +0200
-+++ openssh-4.7p1/authfd.h	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/authfd.h.nss-keys openssh-5.1p1/authfd.h
+--- openssh-5.1p1/authfd.h.nss-keys	2006-08-05 04:39:39.000000000 +0200
++++ openssh-5.1p1/authfd.h	2008-07-23 19:16:00.000000000 +0200
 @@ -49,6 +49,12 @@
  #define SSH2_AGENTC_ADD_ID_CONSTRAINED		25
  #define SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED 26
@@ -306,10 +306,10 @@ diff -up openssh-4.7p1/authfd.h.nss-keys openssh-4.7p1/authfd.h
  
  int
  ssh_decrypt_challenge(AuthenticationConnection *, Key *, BIGNUM *, u_char[16],
-diff -up openssh-4.7p1/configure.ac.nss-keys openssh-4.7p1/configure.ac
---- openssh-4.7p1/configure.ac.nss-keys	2007-11-20 14:26:43.000000000 +0100
-+++ openssh-4.7p1/configure.ac	2007-11-20 14:26:43.000000000 +0100
-@@ -3230,6 +3230,20 @@ AC_ARG_WITH(linux-audit,
+diff -up openssh-5.1p1/configure.ac.nss-keys openssh-5.1p1/configure.ac
+--- openssh-5.1p1/configure.ac.nss-keys	2008-07-23 19:16:00.000000000 +0200
++++ openssh-5.1p1/configure.ac	2008-07-23 19:16:00.000000000 +0200
+@@ -3328,6 +3328,20 @@ AC_ARG_WITH(linux-audit,
  	fi ]
  )
  
@@ -330,7 +330,7 @@ diff -up openssh-4.7p1/configure.ac.nss-keys openssh-4.7p1/configure.ac
  # Check whether user wants Kerberos 5 support
  KRB5_MSG="no"
  AC_ARG_WITH(kerberos5,
-@@ -4052,6 +4066,7 @@ echo "                   OSF SIA support
+@@ -4157,6 +4171,7 @@ echo "                   OSF SIA support
  echo "                 KerberosV support: $KRB5_MSG"
  echo "                   SELinux support: $SELINUX_MSG"
  echo "               Linux audit support: $LINUX_AUDIT_MSG"
@@ -338,9 +338,9 @@ diff -up openssh-4.7p1/configure.ac.nss-keys openssh-4.7p1/configure.ac
  echo "                 Smartcard support: $SCARD_MSG"
  echo "                     S/KEY support: $SKEY_MSG"
  echo "              TCP Wrappers support: $TCPW_MSG"
-diff -up /dev/null openssh-4.7p1/README.nss
---- /dev/null	2007-11-05 08:22:09.502001637 +0100
-+++ openssh-4.7p1/README.nss	2007-11-20 14:26:43.000000000 +0100
+diff -up /dev/null openssh-5.1p1/README.nss
+--- /dev/null	2008-07-15 11:15:04.125063641 +0200
++++ openssh-5.1p1/README.nss	2008-07-23 19:16:00.000000000 +0200
 @@ -0,0 +1,36 @@
 +How to use NSS tokens with OpenSSH?
 +
@@ -378,9 +378,9 @@ diff -up /dev/null openssh-4.7p1/README.nss
 +	if you want to use a specific token and/or key:
 +	
 +	$ ssh-keygen -n -D 'My PKCS11 Token' 'My Key ID'
-diff -up openssh-4.7p1/authfd.c.nss-keys openssh-4.7p1/authfd.c
---- openssh-4.7p1/authfd.c.nss-keys	2006-09-01 07:38:36.000000000 +0200
-+++ openssh-4.7p1/authfd.c	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/authfd.c.nss-keys openssh-5.1p1/authfd.c
+--- openssh-5.1p1/authfd.c.nss-keys	2006-09-01 07:38:36.000000000 +0200
++++ openssh-5.1p1/authfd.c	2008-07-23 19:16:00.000000000 +0200
 @@ -626,6 +626,45 @@ ssh_update_card(AuthenticationConnection
  	return decode_reply(type);
  }
@@ -427,9 +427,9 @@ diff -up openssh-4.7p1/authfd.c.nss-keys openssh-4.7p1/authfd.c
  /*
   * Removes all identities from the agent.  This call is not meant to be used
   * by normal applications.
-diff -up openssh-4.7p1/readconf.h.nss-keys openssh-4.7p1/readconf.h
---- openssh-4.7p1/readconf.h.nss-keys	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-4.7p1/readconf.h	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/readconf.h.nss-keys openssh-5.1p1/readconf.h
+--- openssh-5.1p1/readconf.h.nss-keys	2008-06-29 16:04:03.000000000 +0200
++++ openssh-5.1p1/readconf.h	2008-07-23 19:16:00.000000000 +0200
 @@ -84,6 +84,8 @@ typedef struct {
  	char   *preferred_authentications;
  	char   *bind_address;	/* local socket address for connection to sshd */
@@ -439,9 +439,9 @@ diff -up openssh-4.7p1/readconf.h.nss-keys openssh-4.7p1/readconf.h
  	int	verify_host_key_dns;	/* Verify host key using DNS */
  
  	int     num_identity_files;	/* Number of files for RSA/DSA identities. */
-diff -up /dev/null openssh-4.7p1/nsskeys.c
---- /dev/null	2007-11-05 08:22:09.502001637 +0100
-+++ openssh-4.7p1/nsskeys.c	2007-11-20 14:26:43.000000000 +0100
+diff -up /dev/null openssh-5.1p1/nsskeys.c
+--- /dev/null	2008-07-15 11:15:04.125063641 +0200
++++ openssh-5.1p1/nsskeys.c	2008-07-23 19:16:00.000000000 +0200
 @@ -0,0 +1,327 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
@@ -770,9 +770,9 @@ diff -up /dev/null openssh-4.7p1/nsskeys.c
 +}
 +
 +#endif /* HAVE_LIBNSS */
-diff -up openssh-4.7p1/ssh.c.nss-keys openssh-4.7p1/ssh.c
---- openssh-4.7p1/ssh.c.nss-keys	2007-08-08 06:32:41.000000000 +0200
-+++ openssh-4.7p1/ssh.c	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/ssh.c.nss-keys openssh-5.1p1/ssh.c
+--- openssh-5.1p1/ssh.c.nss-keys	2008-07-04 04:53:50.000000000 +0200
++++ openssh-5.1p1/ssh.c	2008-07-23 19:16:00.000000000 +0200
 @@ -104,6 +104,9 @@
  #ifdef SMARTCARD
  #include "scard.h"
@@ -783,7 +783,7 @@ diff -up openssh-4.7p1/ssh.c.nss-keys openssh-4.7p1/ssh.c
  
  extern char *__progname;
  
-@@ -1217,9 +1220,11 @@ load_public_identity_files(void)
+@@ -1235,9 +1238,11 @@ load_public_identity_files(void)
  	int i = 0;
  	Key *public;
  	struct passwd *pw;
@@ -796,7 +796,7 @@ diff -up openssh-4.7p1/ssh.c.nss-keys openssh-4.7p1/ssh.c
  	if (options.smartcard_device != NULL &&
  	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
  	    (keys = sc_get_keys(options.smartcard_device, NULL)) != NULL) {
-@@ -1240,6 +1245,27 @@ load_public_identity_files(void)
+@@ -1260,6 +1265,27 @@ load_public_identity_files(void)
  		xfree(keys);
  	}
  #endif /* SMARTCARD */
@@ -823,10 +823,10 @@ diff -up openssh-4.7p1/ssh.c.nss-keys openssh-4.7p1/ssh.c
 +
  	if ((pw = getpwuid(original_real_uid)) == NULL)
  		fatal("load_public_identity_files: getpwuid failed");
- 	if (gethostname(thishost, sizeof(thishost)) == -1)
-diff -up /dev/null openssh-4.7p1/nsskeys.h
---- /dev/null	2007-11-05 08:22:09.502001637 +0100
-+++ openssh-4.7p1/nsskeys.h	2007-11-20 14:26:43.000000000 +0100
+ 	pwname = xstrdup(pw->pw_name);
+diff -up /dev/null openssh-5.1p1/nsskeys.h
+--- /dev/null	2008-07-15 11:15:04.125063641 +0200
++++ openssh-5.1p1/nsskeys.h	2008-07-23 19:16:00.000000000 +0200
 @@ -0,0 +1,39 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
@@ -867,9 +867,9 @@ diff -up /dev/null openssh-4.7p1/nsskeys.h
 +
 +#endif
 +#endif
-diff -up openssh-4.7p1/Makefile.in.nss-keys openssh-4.7p1/Makefile.in
---- openssh-4.7p1/Makefile.in.nss-keys	2007-06-11 06:01:42.000000000 +0200
-+++ openssh-4.7p1/Makefile.in	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/Makefile.in.nss-keys openssh-5.1p1/Makefile.in
+--- openssh-5.1p1/Makefile.in.nss-keys	2008-07-08 16:21:12.000000000 +0200
++++ openssh-5.1p1/Makefile.in	2008-07-23 19:16:00.000000000 +0200
 @@ -71,7 +71,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
  	atomicio.o key.o dispatch.o kex.o mac.o uidswap.o uuencode.o misc.o \
  	monitor_fdpass.o rijndael.o ssh-dss.o ssh-rsa.o dh.o kexdh.o \
@@ -878,10 +878,10 @@ diff -up openssh-4.7p1/Makefile.in.nss-keys openssh-4.7p1/Makefile.in
 +	entropy.o scard-opensc.o gss-genr.o umac.o nsskeys.o
  
  SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
- 	sshconnect.o sshconnect1.o sshconnect2.o
-diff -up openssh-4.7p1/key.h.nss-keys openssh-4.7p1/key.h
---- openssh-4.7p1/key.h.nss-keys	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-4.7p1/key.h	2007-11-20 14:26:43.000000000 +0100
+ 	sshconnect.o sshconnect1.o sshconnect2.o mux.o
+diff -up openssh-5.1p1/key.h.nss-keys openssh-5.1p1/key.h
+--- openssh-5.1p1/key.h.nss-keys	2008-06-12 20:40:35.000000000 +0200
++++ openssh-5.1p1/key.h	2008-07-23 19:16:00.000000000 +0200
 @@ -29,11 +29,17 @@
  #include <openssl/rsa.h>
  #include <openssl/dsa.h>
@@ -900,7 +900,7 @@ diff -up openssh-4.7p1/key.h.nss-keys openssh-4.7p1/key.h
  	KEY_UNSPEC
  };
  enum fp_type {
-@@ -47,16 +53,30 @@ enum fp_rep {
+@@ -48,16 +54,30 @@ enum fp_rep {
  
  /* key is stored in external hardware */
  #define KEY_FLAG_EXT		0x0001
@@ -931,12 +931,12 @@ diff -up openssh-4.7p1/key.h.nss-keys openssh-4.7p1/key.h
  void		 key_free(Key *);
  Key		*key_demote(const Key *);
  int		 key_equal(const Key *, const Key *);
-diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
---- openssh-4.7p1/ssh-add.c.nss-keys	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-4.7p1/ssh-add.c	2007-11-20 14:26:43.000000000 +0100
-@@ -43,6 +43,14 @@
- 
+diff -up openssh-5.1p1/ssh-add.c.nss-keys openssh-5.1p1/ssh-add.c
+--- openssh-5.1p1/ssh-add.c.nss-keys	2008-02-28 09:13:52.000000000 +0100
++++ openssh-5.1p1/ssh-add.c	2008-07-23 19:16:00.000000000 +0200
+@@ -44,6 +44,14 @@
  #include <openssl/evp.h>
+ #include "openbsd-compat/openssl-compat.h"
  
 +#ifdef HAVE_LIBNSS
 +#include <nss.h>
@@ -949,7 +949,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  #include <fcntl.h>
  #include <pwd.h>
  #include <stdarg.h>
-@@ -56,6 +64,7 @@
+@@ -57,6 +65,7 @@
  #include "rsa.h"
  #include "log.h"
  #include "key.h"
@@ -957,7 +957,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  #include "buffer.h"
  #include "authfd.h"
  #include "authfile.h"
-@@ -306,6 +315,117 @@ do_file(AuthenticationConnection *ac, in
+@@ -307,6 +316,117 @@ do_file(AuthenticationConnection *ac, in
  	return 0;
  }
  
@@ -1075,7 +1075,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  static void
  usage(void)
  {
-@@ -333,6 +453,10 @@ main(int argc, char **argv)
+@@ -334,6 +454,10 @@ main(int argc, char **argv)
  	AuthenticationConnection *ac = NULL;
  	char *sc_reader_id = NULL;
  	int i, ch, deleting = 0, ret = 0;
@@ -1086,7 +1086,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  
  	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
  	sanitise_stdfd();
-@@ -350,7 +474,7 @@ main(int argc, char **argv)
+@@ -351,7 +475,7 @@ main(int argc, char **argv)
  		    "Could not open a connection to your authentication agent.\n");
  		exit(2);
  	}
@@ -1095,7 +1095,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  		switch (ch) {
  		case 'l':
  		case 'L':
-@@ -372,6 +496,11 @@ main(int argc, char **argv)
+@@ -373,6 +497,11 @@ main(int argc, char **argv)
  			if (delete_all(ac) == -1)
  				ret = 1;
  			goto done;
@@ -1107,7 +1107,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  		case 's':
  			sc_reader_id = optarg;
  			break;
-@@ -386,6 +515,11 @@ main(int argc, char **argv)
+@@ -387,6 +516,11 @@ main(int argc, char **argv)
  				goto done;
  			}
  			break;
@@ -1119,7 +1119,7 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  		default:
  			usage();
  			ret = 1;
-@@ -399,6 +533,40 @@ main(int argc, char **argv)
+@@ -400,6 +534,40 @@ main(int argc, char **argv)
  			ret = 1;
  		goto done;
  	}
@@ -1160,9 +1160,9 @@ diff -up openssh-4.7p1/ssh-add.c.nss-keys openssh-4.7p1/ssh-add.c
  	if (argc == 0) {
  		char buf[MAXPATHLEN];
  		struct passwd *pw;
-diff -up openssh-4.7p1/ssh-rsa.c.nss-keys openssh-4.7p1/ssh-rsa.c
---- openssh-4.7p1/ssh-rsa.c.nss-keys	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-4.7p1/ssh-rsa.c	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/ssh-rsa.c.nss-keys openssh-5.1p1/ssh-rsa.c
+--- openssh-5.1p1/ssh-rsa.c.nss-keys	2006-09-01 07:38:37.000000000 +0200
++++ openssh-5.1p1/ssh-rsa.c	2008-07-23 19:16:00.000000000 +0200
 @@ -32,6 +32,10 @@
  #include "compat.h"
  #include "ssh.h"
@@ -1233,10 +1233,10 @@ diff -up openssh-4.7p1/ssh-rsa.c.nss-keys openssh-4.7p1/ssh-rsa.c
  	/* encode signature */
  	buffer_init(&b);
  	buffer_put_cstring(&b, "ssh-rsa");
-diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
---- openssh-4.7p1/ssh-keygen.c.nss-keys	2007-02-19 12:10:25.000000000 +0100
-+++ openssh-4.7p1/ssh-keygen.c	2007-11-20 14:26:43.000000000 +0100
-@@ -52,6 +52,11 @@
+diff -up openssh-5.1p1/ssh-keygen.c.nss-keys openssh-5.1p1/ssh-keygen.c
+--- openssh-5.1p1/ssh-keygen.c.nss-keys	2008-07-14 03:28:29.000000000 +0200
++++ openssh-5.1p1/ssh-keygen.c	2008-07-23 19:16:00.000000000 +0200
+@@ -53,6 +53,11 @@
  #include "scard.h"
  #endif
  
@@ -1248,7 +1248,7 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  /* Number of bits in the RSA/DSA key.  This value can be set on the command line. */
  #define DEFAULT_BITS		2048
  #define DEFAULT_BITS_DSA	1024
-@@ -499,6 +504,26 @@ do_download(struct passwd *pw, const cha
+@@ -501,6 +506,26 @@ do_download(struct passwd *pw, const cha
  }
  #endif /* SMARTCARD */
  
@@ -1275,7 +1275,7 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  static void
  do_fingerprint(struct passwd *pw)
  {
-@@ -1056,7 +1081,8 @@ main(int argc, char **argv)
+@@ -1083,7 +1108,8 @@ main(int argc, char **argv)
  	Key *private, *public;
  	struct passwd *pw;
  	struct stat st;
@@ -1284,8 +1284,8 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
 +	int use_nss = 0;
  	u_int32_t memory = 0, generator_wanted = 0, trials = 100;
  	int do_gen_candidates = 0, do_screen_candidates = 0;
- 	int log_level = SYSLOG_LEVEL_INFO;
-@@ -1090,7 +1116,7 @@ main(int argc, char **argv)
+ 	BIGNUM *start = NULL;
+@@ -1116,7 +1142,7 @@ main(int argc, char **argv)
  	}
  
  	while ((opt = getopt(argc, argv,
@@ -1294,7 +1294,7 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  		switch (opt) {
  		case 'b':
  			bits = (u_int32_t)strtonum(optarg, 768, 32768, &errstr);
-@@ -1130,6 +1156,10 @@ main(int argc, char **argv)
+@@ -1156,6 +1182,10 @@ main(int argc, char **argv)
  		case 'g':
  			print_generic = 1;
  			break;
@@ -1305,7 +1305,7 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  		case 'P':
  			identity_passphrase = optarg;
  			break;
-@@ -1161,10 +1191,10 @@ main(int argc, char **argv)
+@@ -1187,10 +1217,10 @@ main(int argc, char **argv)
  		case 't':
  			key_type_name = optarg;
  			break;
@@ -1319,7 +1319,7 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  			reader_id = optarg;
  			break;
  		case 'v':
-@@ -1269,6 +1299,17 @@ main(int argc, char **argv)
+@@ -1299,6 +1329,17 @@ main(int argc, char **argv)
  			exit(0);
  		}
  	}
@@ -1337,9 +1337,9 @@ diff -up openssh-4.7p1/ssh-keygen.c.nss-keys openssh-4.7p1/ssh-keygen.c
  	if (reader_id != NULL) {
  #ifdef SMARTCARD
  		if (download)
-diff -up openssh-4.7p1/readconf.c.nss-keys openssh-4.7p1/readconf.c
---- openssh-4.7p1/readconf.c.nss-keys	2007-03-21 10:46:03.000000000 +0100
-+++ openssh-4.7p1/readconf.c	2007-11-20 14:26:43.000000000 +0100
+diff -up openssh-5.1p1/readconf.c.nss-keys openssh-5.1p1/readconf.c
+--- openssh-5.1p1/readconf.c.nss-keys	2008-06-29 16:04:03.000000000 +0200
++++ openssh-5.1p1/readconf.c	2008-07-23 19:16:00.000000000 +0200
 @@ -124,6 +124,7 @@ typedef enum {
  	oKbdInteractiveAuthentication, oKbdInteractiveDevices, oHostKeyAlias,
  	oDynamicForward, oPreferredAuthentications, oHostbasedAuthentication,
@@ -1348,7 +1348,7 @@ diff -up openssh-4.7p1/readconf.c.nss-keys openssh-4.7p1/readconf.c
  	oClearAllForwardings, oNoHostAuthenticationForLocalhost,
  	oEnableSSHKeysign, oRekeyLimit, oVerifyHostKeyDNS, oConnectTimeout,
  	oAddressFamily, oGssAuthentication, oGssDelegateCreds,
-@@ -209,6 +210,13 @@ static struct {
+@@ -210,6 +211,13 @@ static struct {
  #else
  	{ "smartcarddevice", oUnsupported },
  #endif
@@ -1362,7 +1362,7 @@ diff -up openssh-4.7p1/readconf.c.nss-keys openssh-4.7p1/readconf.c
  	{ "clearallforwardings", oClearAllForwardings },
  	{ "enablesshkeysign", oEnableSSHKeysign },
  	{ "verifyhostkeydns", oVerifyHostKeyDNS },
-@@ -601,6 +609,14 @@ parse_string:
+@@ -603,6 +611,14 @@ parse_string:
  		charptr = &options->smartcard_device;
  		goto parse_string;
  
@@ -1377,7 +1377,7 @@ diff -up openssh-4.7p1/readconf.c.nss-keys openssh-4.7p1/readconf.c
  	case oProxyCommand:
  		charptr = &options->proxy_command;
  parse_command:
-@@ -1049,6 +1065,8 @@ initialize_options(Options * options)
+@@ -1055,6 +1071,8 @@ initialize_options(Options * options)
  	options->preferred_authentications = NULL;
  	options->bind_address = NULL;
  	options->smartcard_device = NULL;
@@ -1386,7 +1386,7 @@ diff -up openssh-4.7p1/readconf.c.nss-keys openssh-4.7p1/readconf.c
  	options->enable_ssh_keysign = - 1;
  	options->no_host_authentication_for_localhost = - 1;
  	options->identities_only = - 1;
-@@ -1177,6 +1195,8 @@ fill_default_options(Options * options)
+@@ -1184,6 +1202,8 @@ fill_default_options(Options * options)
  		options->no_host_authentication_for_localhost = 0;
  	if (options->identities_only == -1)
  		options->identities_only = 0;

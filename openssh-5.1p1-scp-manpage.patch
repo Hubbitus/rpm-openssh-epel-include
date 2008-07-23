@@ -1,8 +1,9 @@
---- scp.orig	2007-12-22 20:37:27.000000000 +0100
-+++ scp.1	2007-12-22 20:36:42.000000000 +0100
-@@ -60,6 +60,14 @@
- that the file is to be copied to/from that host.
- Copies between two remote hosts are permitted.
+diff -up openssh-5.1p1/scp.1.manpage openssh-5.1p1/scp.1
+--- openssh-5.1p1/scp.1.manpage	2008-07-12 09:12:49.000000000 +0200
++++ openssh-5.1p1/scp.1	2008-07-23 19:18:15.000000000 +0200
+@@ -66,6 +66,14 @@ treating file names containing
+ as host specifiers.
+ Copies between two remote hosts are also permitted.
  .Pp
 +When copying a source file to a target file which already exists,
 +.Nm 

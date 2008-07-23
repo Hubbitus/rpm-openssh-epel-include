@@ -1,7 +1,7 @@
-diff -up openssh-4.7p1/misc.c.mls openssh-4.7p1/misc.c
---- openssh-4.7p1/misc.c.mls	2007-01-05 06:24:48.000000000 +0100
-+++ openssh-4.7p1/misc.c	2007-09-06 17:39:28.000000000 +0200
-@@ -418,6 +418,7 @@ char *
+diff -up openssh-5.1p1/misc.c.mls openssh-5.1p1/misc.c
+--- openssh-5.1p1/misc.c.mls	2008-06-13 06:48:59.000000000 +0200
++++ openssh-5.1p1/misc.c	2008-07-23 18:53:37.000000000 +0200
+@@ -427,6 +427,7 @@ char *
  colon(char *cp)
  {
  	int flag = 0;
@@ -9,7 +9,7 @@ diff -up openssh-4.7p1/misc.c.mls openssh-4.7p1/misc.c
  
  	if (*cp == ':')		/* Leading colon is part of file name. */
  		return (0);
-@@ -431,8 +432,13 @@ colon(char *cp)
+@@ -440,8 +441,13 @@ colon(char *cp)
  			return (cp+1);
  		if (*cp == ':' && !flag)
  			return (cp);
@@ -25,10 +25,10 @@ diff -up openssh-4.7p1/misc.c.mls openssh-4.7p1/misc.c
  	}
  	return (0);
  }
-diff -up openssh-4.7p1/session.c.mls openssh-4.7p1/session.c
---- openssh-4.7p1/session.c.mls	2007-09-06 17:39:28.000000000 +0200
-+++ openssh-4.7p1/session.c	2007-09-06 17:39:28.000000000 +0200
-@@ -1347,10 +1347,6 @@ do_setusercontext(struct passwd *pw)
+diff -up openssh-5.1p1/session.c.mls openssh-5.1p1/session.c
+--- openssh-5.1p1/session.c.mls	2008-06-16 15:29:18.000000000 +0200
++++ openssh-5.1p1/session.c	2008-07-23 18:53:37.000000000 +0200
+@@ -1550,10 +1550,6 @@ do_setusercontext(struct passwd *pw)
  #endif
  	if (getuid() != pw->pw_uid || geteuid() != pw->pw_uid)
  		fatal("Failed to set uids to %u.", (u_int) pw->pw_uid);
@@ -39,9 +39,9 @@ diff -up openssh-4.7p1/session.c.mls openssh-4.7p1/session.c
  }
  
  static void
-diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-compat/port-linux.c
---- openssh-4.7p1/openbsd-compat/port-linux.c.mls	2007-09-06 17:39:28.000000000 +0200
-+++ openssh-4.7p1/openbsd-compat/port-linux.c	2007-08-07 17:38:18.000000000 +0200
+diff -up openssh-5.1p1/openbsd-compat/port-linux.c.mls openssh-5.1p1/openbsd-compat/port-linux.c
+--- openssh-5.1p1/openbsd-compat/port-linux.c.mls	2008-07-23 18:53:37.000000000 +0200
++++ openssh-5.1p1/openbsd-compat/port-linux.c	2008-07-23 18:53:37.000000000 +0200
 @@ -33,12 +33,23 @@
  #include "key.h"
  #include "hostfile.h"
@@ -65,7 +65,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
 +extern int rexeced_flag;
  
  /* Wrapper around is_selinux_enabled() to log its return value once only */
- static int
+ int
 @@ -54,17 +65,173 @@ ssh_selinux_enabled(void)
  	return (enabled);
  }
@@ -246,7 +246,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
  #ifdef HAVE_GETSEUSERBYNAME
  	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
  		sename = NULL;
-@@ -72,37 +239,62 @@ ssh_selinux_getctxbyname(char *pwname)
+@@ -72,38 +239,63 @@ ssh_selinux_getctxbyname(char *pwname)
  	}
  #else
  	sename = pwname;
@@ -300,7 +300,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
 +			    reqlvl = "";
 +
 +			debug("%s: current connection level '%s'", __func__, reqlvl);
- 		}
++		}
 +		
 +		if ((reqlvl != NULL && reqlvl[0]) || (role != NULL && role[0])) {
 +			r = get_user_context(sename, role, reqlvl, user_sc);
@@ -323,14 +323,15 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
 +			}
 +		} else {
 +			*user_sc = *default_sc;
-+		}
-+	}
+ 		}
+ 	}
 +	if (r != 0) {
 +		error("%s: Failed to get default SELinux security "
 +		    "context for %s", __func__, pwname);
- 	}
++	}
  
  #ifdef HAVE_GETSEUSERBYNAME
+ 	if (sename != NULL)
 @@ -111,14 +303,20 @@ ssh_selinux_getctxbyname(char *pwname)
  	if (lvl != NULL)
  		xfree(lvl);
@@ -418,10 +419,10 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.mls openssh-4.7p1/openbsd-com
  
  	/* XXX: should these calls fatal() upon failure in enforcing mode? */
  
-diff -up openssh-4.7p1/configure.ac.mls openssh-4.7p1/configure.ac
---- openssh-4.7p1/configure.ac.mls	2007-10-17 19:05:10.000000000 +0200
-+++ openssh-4.7p1/configure.ac	2007-10-17 19:05:38.000000000 +0200
-@@ -3213,6 +3213,7 @@ AC_ARG_WITH(selinux,
+diff -up openssh-5.1p1/configure.ac.mls openssh-5.1p1/configure.ac
+--- openssh-5.1p1/configure.ac.mls	2008-07-23 18:53:37.000000000 +0200
++++ openssh-5.1p1/configure.ac	2008-07-23 18:53:37.000000000 +0200
+@@ -3311,6 +3311,7 @@ AC_ARG_WITH(selinux,
  		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
  		LIBS="$LIBS $LIBSELINUX"
  		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
@@ -429,10 +430,10 @@ diff -up openssh-4.7p1/configure.ac.mls openssh-4.7p1/configure.ac
  		LIBS="$save_LIBS"
  	fi ]
  )
-diff -up openssh-4.7p1/sshd.c.mls openssh-4.7p1/sshd.c
---- openssh-4.7p1/sshd.c.mls	2007-09-06 17:39:28.000000000 +0200
-+++ openssh-4.7p1/sshd.c	2007-09-06 17:39:28.000000000 +0200
-@@ -1838,6 +1838,9 @@ main(int ac, char **av)
+diff -up openssh-5.1p1/sshd.c.mls openssh-5.1p1/sshd.c
+--- openssh-5.1p1/sshd.c.mls	2008-07-23 18:53:37.000000000 +0200
++++ openssh-5.1p1/sshd.c	2008-07-23 18:53:37.000000000 +0200
+@@ -1896,6 +1896,9 @@ main(int ac, char **av)
  		restore_uid();
  	}
  #endif

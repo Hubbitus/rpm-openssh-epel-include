@@ -79,7 +79,7 @@ Patch2: openssh-5.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
 Patch4: openssh-5.1p1-vendor.patch
 Patch12: openssh-5.1p1-selinux.patch
-Patch13: openssh-4.7p1-mls.patch
+Patch13: openssh-5.1p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
 Patch17: openssh-4.3p2-cve-2007-3102.patch
 Patch18: openssh-5.0p1-pam_selinux.patch
@@ -87,15 +87,15 @@ Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 Patch27: openssh-5.1p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
-Patch35: openssh-4.2p1-askpass-progress.patch
+Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch51: openssh-4.7p1-nss-keys.patch
-Patch54: openssh-4.7p1-gssapi-role.patch
+Patch51: openssh-5.1p1-nss-keys.patch
+Patch54: openssh-5.1p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
-Patch62: openssh-3.9p1-scp-manpage.patch
+Patch62: openssh-5.1p1-scp-manpage.patch
 
 License: BSD
 Group: Applications/Internet
@@ -224,9 +224,9 @@ an X11 passphrase dialog for OpenSSH.
 %patch44 -p1 -b .ip-opts
 %patch49 -p1 -b .canohost
 %patch51 -p1 -b .nss-keys
-%patch54 -p0 -b .gssapi-role
+%patch54 -p1 -b .gssapi-role
 %patch55 -p1 -b .cloexec
-%patch62 -p0 -b .manpage
+%patch62 -p1 -b .manpage
 
 autoreconf
 
