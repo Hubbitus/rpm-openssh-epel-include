@@ -1,6 +1,6 @@
-diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
---- openssh-4.7p1/sshd_config.redhat	2007-03-21 10:42:25.000000000 +0100
-+++ openssh-4.7p1/sshd_config	2007-09-06 16:23:58.000000000 +0200
+diff -up openssh-5.1p1/sshd_config.redhat openssh-5.1p1/sshd_config
+--- openssh-5.1p1/sshd_config.redhat	2008-07-02 14:35:43.000000000 +0200
++++ openssh-5.1p1/sshd_config	2008-07-23 14:11:12.000000000 +0200
 @@ -33,6 +33,7 @@ Protocol 2
  # Logging
  # obsoletes QuietMode and FascistLogging
@@ -9,7 +9,7 @@ diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
  #LogLevel INFO
  
  # Authentication:
-@@ -59,9 +60,11 @@ Protocol 2
+@@ -60,9 +61,11 @@ Protocol 2
  # To disable tunneled clear text passwords, change to no here!
  #PasswordAuthentication yes
  #PermitEmptyPasswords no
@@ -21,7 +21,7 @@ diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
  
  # Kerberos options
  #KerberosAuthentication no
-@@ -71,7 +74,9 @@ Protocol 2
+@@ -72,7 +75,9 @@ Protocol 2
  
  # GSSAPI options
  #GSSAPIAuthentication no
@@ -31,16 +31,18 @@ diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
  
  # Set this to 'yes' to enable PAM authentication, account processing, 
  # and session processing. If this is enabled, PAM authentication will 
-@@ -83,10 +88,16 @@ Protocol 2
+@@ -84,11 +89,18 @@ Protocol 2
  # PAM authentication, then enable this but set PasswordAuthentication
  # and ChallengeResponseAuthentication to 'no'.
  #UsePAM no
 +UsePAM yes
++
++# Accept locale-related environment variables 
++AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES  
++AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT  
++AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE 
  
-+# Accept locale-related environment variables
-+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
-+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
-+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+ #AllowAgentForwarding yes
  #AllowTcpForwarding yes
  #GatewayPorts no
  #X11Forwarding no
@@ -48,9 +50,9 @@ diff -up openssh-4.7p1/sshd_config.redhat openssh-4.7p1/sshd_config
  #X11DisplayOffset 10
  #X11UseLocalhost yes
  #PrintMotd yes
-diff -up openssh-4.7p1/ssh_config.redhat openssh-4.7p1/ssh_config
---- openssh-4.7p1/ssh_config.redhat	2007-06-11 06:04:42.000000000 +0200
-+++ openssh-4.7p1/ssh_config	2007-09-06 16:21:49.000000000 +0200
+diff -up openssh-5.1p1/ssh_config.redhat openssh-5.1p1/ssh_config
+--- openssh-5.1p1/ssh_config.redhat	2007-06-11 06:04:42.000000000 +0200
++++ openssh-5.1p1/ssh_config	2008-07-23 14:07:29.000000000 +0200
 @@ -43,3 +43,13 @@
  #   Tunnel no
  #   TunnelDevice any:any
@@ -65,10 +67,10 @@ diff -up openssh-4.7p1/ssh_config.redhat openssh-4.7p1/ssh_config
 +	SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
 +	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
 +	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
-diff -up openssh-4.7p1/sshd_config.0.redhat openssh-4.7p1/sshd_config.0
---- openssh-4.7p1/sshd_config.0.redhat	2007-09-04 08:50:11.000000000 +0200
-+++ openssh-4.7p1/sshd_config.0	2007-09-06 16:21:49.000000000 +0200
-@@ -435,9 +435,9 @@ DESCRIPTION
+diff -up openssh-5.1p1/sshd_config.0.redhat openssh-5.1p1/sshd_config.0
+--- openssh-5.1p1/sshd_config.0.redhat	2008-07-21 10:30:51.000000000 +0200
++++ openssh-5.1p1/sshd_config.0	2008-07-23 14:07:29.000000000 +0200
+@@ -490,9 +490,9 @@ DESCRIPTION
  
       SyslogFacility
               Gives the facility code that is used when logging messages from
@@ -81,10 +83,10 @@ diff -up openssh-4.7p1/sshd_config.0.redhat openssh-4.7p1/sshd_config.0
  
       TCPKeepAlive
               Specifies whether the system should send TCP keepalive messages
-diff -up openssh-4.7p1/sshd_config.5.redhat openssh-4.7p1/sshd_config.5
---- openssh-4.7p1/sshd_config.5.redhat	2007-06-11 06:07:13.000000000 +0200
-+++ openssh-4.7p1/sshd_config.5	2007-09-06 16:21:49.000000000 +0200
-@@ -748,7 +748,7 @@ Note that this option applies to protoco
+diff -up openssh-5.1p1/sshd_config.5.redhat openssh-5.1p1/sshd_config.5
+--- openssh-5.1p1/sshd_config.5.redhat	2008-07-02 14:35:43.000000000 +0200
++++ openssh-5.1p1/sshd_config.5	2008-07-23 14:07:29.000000000 +0200
+@@ -846,7 +846,7 @@ Note that this option applies to protoco
  .It Cm SyslogFacility
  Gives the facility code that is used when logging messages from
  .Xr sshd 8 .

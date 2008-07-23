@@ -62,8 +62,8 @@
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 5.0p1
-Release: 3%{?dist}%{?rescue_rel}
+Version: 5.1p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -74,17 +74,17 @@ Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
-Patch0: openssh-4.7p1-redhat.patch
+Patch0: openssh-5.1p1-redhat.patch
 Patch2: openssh-3.8.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-4.7p1-vendor.patch
-Patch12: openssh-4.7p1-selinux.patch
+Patch4: openssh-5.1p1-vendor.patch
+Patch12: openssh-5.1p1-selinux.patch
 Patch13: openssh-4.7p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
 Patch17: openssh-4.3p2-cve-2007-3102.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
-Patch27: openssh-4.7p1-log-in-chroot.patch
+Patch27: openssh-5.1p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch35: openssh-4.2p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
@@ -93,11 +93,8 @@ Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-4.7p1-nss-keys.patch
 Patch54: openssh-4.7p1-gssapi-role.patch
-Patch55: openssh-4.7p1-cloexec.patch
-Patch58: openssh-4.5p1-controlcleanup.patch
-Patch59: openssh-4.7p1-master-race.patch
+Patch55: openssh-5.1p1-cloexec.patch
 Patch60: openssh-5.0p1-pam_selinux.patch
-Patch61: openssh-5.0p1-unbreakalive.patch
 Patch62: openssh-3.9p1-scp-manpage.patch
 
 License: BSD
@@ -229,10 +226,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch51 -p1 -b .nss-keys
 %patch54 -p0 -b .gssapi-role
 %patch55 -p1 -b .cloexec
-%patch58 -p1 -b .controlcleanup
-%patch59 -p1 -b .master-race
 %patch60 -p1 -b .pam_selinux
-%patch61 -p0 -b .unbreakalive
 %patch62 -p0 -b .manpage
 
 autoreconf
@@ -423,7 +417,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW README* RFC* TODO WARNING*
+%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README* TODO WARNING*
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -468,6 +462,7 @@ fi
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
+%attr(0644,root,root) %{_mandir}/man5/moduli.5*
 %attr(0644,root,root) %{_mandir}/man8/sshd.8*
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
@@ -484,6 +479,11 @@ fi
 %endif
 
 %changelog
+* Wed Jul 23 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-1
+- upgrade to new upstream release
+- fixed a problem with public key authentication and explicitely
+  specified SELinux role
+
 * Wed May 21 2008 Tomas Mraz <tmraz@redhat.com> - 5.0p1-3
 - pass the connection socket to ssh-keysign (#447680)
 

@@ -1,7 +1,7 @@
-diff -up openssh-4.7p1/configure.ac.selinux openssh-4.7p1/configure.ac
---- openssh-4.7p1/configure.ac.selinux	2007-09-06 19:46:32.000000000 +0200
-+++ openssh-4.7p1/configure.ac	2007-09-06 19:52:23.000000000 +0200
-@@ -3211,6 +3211,7 @@ AC_ARG_WITH(selinux,
+diff -up openssh-5.1p1/configure.ac.selinux openssh-5.1p1/configure.ac
+--- openssh-5.1p1/configure.ac.selinux	2008-07-23 16:32:13.000000000 +0200
++++ openssh-5.1p1/configure.ac	2008-07-23 16:32:13.000000000 +0200
+@@ -3309,6 +3309,7 @@ AC_ARG_WITH(selinux,
  		AC_CHECK_LIB(selinux, setexeccon, [ LIBSELINUX="-lselinux" ],
  		    AC_MSG_ERROR(SELinux support requires libselinux library))
  		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
@@ -9,10 +9,10 @@ diff -up openssh-4.7p1/configure.ac.selinux openssh-4.7p1/configure.ac
  		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
  		LIBS="$save_LIBS"
  	fi ]
-diff -up openssh-4.7p1/auth1.c.selinux openssh-4.7p1/auth1.c
---- openssh-4.7p1/auth1.c.selinux	2007-09-06 19:46:32.000000000 +0200
-+++ openssh-4.7p1/auth1.c	2007-09-06 19:46:32.000000000 +0200
-@@ -388,7 +388,7 @@ void
+diff -up openssh-5.1p1/auth1.c.selinux openssh-5.1p1/auth1.c
+--- openssh-5.1p1/auth1.c.selinux	2008-07-23 16:32:13.000000000 +0200
++++ openssh-5.1p1/auth1.c	2008-07-23 16:32:13.000000000 +0200
+@@ -391,7 +391,7 @@ void
  do_authentication(Authctxt *authctxt)
  {
  	u_int ulen;
@@ -21,7 +21,7 @@ diff -up openssh-4.7p1/auth1.c.selinux openssh-4.7p1/auth1.c
  
  	/* Get the name of the user that we wish to log in as. */
  	packet_read_expect(SSH_CMSG_USER);
-@@ -397,11 +397,19 @@ do_authentication(Authctxt *authctxt)
+@@ -400,11 +400,19 @@ do_authentication(Authctxt *authctxt)
  	user = packet_get_string(&ulen);
  	packet_check_eom();
  
@@ -41,9 +41,28 @@ diff -up openssh-4.7p1/auth1.c.selinux openssh-4.7p1/auth1.c
  
  	/* Verify that the user is a valid user. */
  	if ((authctxt->pw = PRIVSEP(getpwnamallow(user))) != NULL)
-diff -up openssh-4.7p1/monitor_wrap.h.selinux openssh-4.7p1/monitor_wrap.h
---- openssh-4.7p1/monitor_wrap.h.selinux	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-4.7p1/monitor_wrap.h	2007-09-06 19:46:32.000000000 +0200
+diff -up openssh-5.1p1/auth2-pubkey.c.selinux openssh-5.1p1/auth2-pubkey.c
+--- openssh-5.1p1/auth2-pubkey.c.selinux	2008-07-04 04:54:25.000000000 +0200
++++ openssh-5.1p1/auth2-pubkey.c	2008-07-23 16:32:13.000000000 +0200
+@@ -117,7 +117,14 @@ userauth_pubkey(Authctxt *authctxt)
+ 		}
+ 		/* reconstruct packet */
+ 		buffer_put_char(&b, SSH2_MSG_USERAUTH_REQUEST);
+-		buffer_put_cstring(&b, authctxt->user);
++		if (authctxt->role) {
++			buffer_put_int(&b, strlen(authctxt->user)+strlen(authctxt->role)+1);
++			buffer_append(&b, authctxt->user, strlen(authctxt->user));
++			buffer_put_char(&b, '/');
++			buffer_append(&b, authctxt->role, strlen(authctxt->role));
++		} else {
++			buffer_put_cstring(&b, authctxt->user);
++		}
+ 		buffer_put_cstring(&b,
+ 		    datafellows & SSH_BUG_PKSERVICE ?
+ 		    "ssh-userauth" :
+diff -up openssh-5.1p1/monitor_wrap.h.selinux openssh-5.1p1/monitor_wrap.h
+--- openssh-5.1p1/monitor_wrap.h.selinux	2006-08-05 04:39:40.000000000 +0200
++++ openssh-5.1p1/monitor_wrap.h	2008-07-23 16:32:13.000000000 +0200
 @@ -41,6 +41,7 @@ int mm_is_monitor(void);
  DH *mm_choose_dh(int, int, int);
  int mm_key_sign(Key *, u_char **, u_int *, u_char *, u_int);
@@ -52,9 +71,9 @@ diff -up openssh-4.7p1/monitor_wrap.h.selinux openssh-4.7p1/monitor_wrap.h
  struct passwd *mm_getpwnamallow(const char *);
  char *mm_auth2_read_banner(void);
  int mm_auth_password(struct Authctxt *, char *);
-diff -up openssh-4.7p1/monitor.h.selinux openssh-4.7p1/monitor.h
---- openssh-4.7p1/monitor.h.selinux	2006-03-26 05:30:02.000000000 +0200
-+++ openssh-4.7p1/monitor.h	2007-09-06 19:46:32.000000000 +0200
+diff -up openssh-5.1p1/monitor.h.selinux openssh-5.1p1/monitor.h
+--- openssh-5.1p1/monitor.h.selinux	2006-03-26 05:30:02.000000000 +0200
++++ openssh-5.1p1/monitor.h	2008-07-23 16:32:13.000000000 +0200
 @@ -30,7 +30,7 @@
  
  enum monitor_reqtype {
@@ -64,10 +83,29 @@ diff -up openssh-4.7p1/monitor.h.selinux openssh-4.7p1/monitor.h
  	MONITOR_REQ_SIGN, MONITOR_ANS_SIGN,
  	MONITOR_REQ_PWNAM, MONITOR_ANS_PWNAM,
  	MONITOR_REQ_AUTH2_READ_BANNER, MONITOR_ANS_AUTH2_READ_BANNER,
-diff -up openssh-4.7p1/monitor_wrap.c.selinux openssh-4.7p1/monitor_wrap.c
---- openssh-4.7p1/monitor_wrap.c.selinux	2007-06-11 06:01:42.000000000 +0200
-+++ openssh-4.7p1/monitor_wrap.c	2007-09-06 19:46:32.000000000 +0200
-@@ -294,6 +294,23 @@ mm_inform_authserv(char *service, char *
+diff -up openssh-5.1p1/auth2-hostbased.c.selinux openssh-5.1p1/auth2-hostbased.c
+--- openssh-5.1p1/auth2-hostbased.c.selinux	2008-07-17 10:57:19.000000000 +0200
++++ openssh-5.1p1/auth2-hostbased.c	2008-07-23 16:32:13.000000000 +0200
+@@ -106,7 +106,14 @@ userauth_hostbased(Authctxt *authctxt)
+ 	buffer_put_string(&b, session_id2, session_id2_len);
+ 	/* reconstruct packet */
+ 	buffer_put_char(&b, SSH2_MSG_USERAUTH_REQUEST);
+-	buffer_put_cstring(&b, authctxt->user);
++	if (authctxt->role) {
++		buffer_put_int(&b, strlen(authctxt->user)+strlen(authctxt->role)+1);
++		buffer_append(&b, authctxt->user, strlen(authctxt->user));
++		buffer_put_char(&b, '/');
++		buffer_append(&b, authctxt->role, strlen(authctxt->role));
++	} else {
++		buffer_put_cstring(&b, authctxt->user);
++	}
+ 	buffer_put_cstring(&b, service);
+ 	buffer_put_cstring(&b, "hostbased");
+ 	buffer_put_string(&b, pkalg, alen);
+diff -up openssh-5.1p1/monitor_wrap.c.selinux openssh-5.1p1/monitor_wrap.c
+--- openssh-5.1p1/monitor_wrap.c.selinux	2008-07-11 09:36:48.000000000 +0200
++++ openssh-5.1p1/monitor_wrap.c	2008-07-23 16:32:13.000000000 +0200
+@@ -296,6 +296,23 @@ mm_inform_authserv(char *service, char *
  	buffer_free(&m);
  }
  
@@ -91,9 +129,9 @@ diff -up openssh-4.7p1/monitor_wrap.c.selinux openssh-4.7p1/monitor_wrap.c
  /* Do the password authentication */
  int
  mm_auth_password(Authctxt *authctxt, char *password)
-diff -up openssh-4.7p1/openbsd-compat/port-linux.c.selinux openssh-4.7p1/openbsd-compat/port-linux.c
---- openssh-4.7p1/openbsd-compat/port-linux.c.selinux	2007-06-28 00:48:03.000000000 +0200
-+++ openssh-4.7p1/openbsd-compat/port-linux.c	2007-09-06 19:46:32.000000000 +0200
+diff -up openssh-5.1p1/openbsd-compat/port-linux.c.selinux openssh-5.1p1/openbsd-compat/port-linux.c
+--- openssh-5.1p1/openbsd-compat/port-linux.c.selinux	2008-03-26 21:27:21.000000000 +0100
++++ openssh-5.1p1/openbsd-compat/port-linux.c	2008-07-23 16:32:13.000000000 +0200
 @@ -30,11 +30,16 @@
  #ifdef WITH_SELINUX
  #include "log.h"
@@ -109,7 +147,7 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.selinux openssh-4.7p1/openbsd
 +extern Authctxt *the_authctxt;
 +
  /* Wrapper around is_selinux_enabled() to log its return value once only */
- static int
+ int
  ssh_selinux_enabled(void)
 @@ -53,23 +58,36 @@ ssh_selinux_enabled(void)
  static security_context_t
@@ -155,9 +193,9 @@ diff -up openssh-4.7p1/openbsd-compat/port-linux.c.selinux openssh-4.7p1/openbsd
  
  	if (r != 0) {
  		switch (security_getenforce()) {
-diff -up openssh-4.7p1/auth.h.selinux openssh-4.7p1/auth.h
---- openssh-4.7p1/auth.h.selinux	2006-08-18 16:32:46.000000000 +0200
-+++ openssh-4.7p1/auth.h	2007-09-06 19:46:32.000000000 +0200
+diff -up openssh-5.1p1/auth.h.selinux openssh-5.1p1/auth.h
+--- openssh-5.1p1/auth.h.selinux	2008-07-02 14:37:30.000000000 +0200
++++ openssh-5.1p1/auth.h	2008-07-23 16:32:13.000000000 +0200
 @@ -58,6 +58,7 @@ struct Authctxt {
  	char		*service;
  	struct passwd	*pw;		/* set if 'valid' */
@@ -166,10 +204,10 @@ diff -up openssh-4.7p1/auth.h.selinux openssh-4.7p1/auth.h
  	void		*kbdintctxt;
  #ifdef BSD_AUTH
  	auth_session_t	*as;
-diff -up openssh-4.7p1/auth2.c.selinux openssh-4.7p1/auth2.c
---- openssh-4.7p1/auth2.c.selinux	2007-05-20 06:58:41.000000000 +0200
-+++ openssh-4.7p1/auth2.c	2007-09-06 19:46:32.000000000 +0200
-@@ -141,7 +141,7 @@ input_userauth_request(int type, u_int32
+diff -up openssh-5.1p1/auth2.c.selinux openssh-5.1p1/auth2.c
+--- openssh-5.1p1/auth2.c.selinux	2008-07-05 01:44:53.000000000 +0200
++++ openssh-5.1p1/auth2.c	2008-07-23 16:32:13.000000000 +0200
+@@ -209,7 +209,7 @@ input_userauth_request(int type, u_int32
  {
  	Authctxt *authctxt = ctxt;
  	Authmethod *m = NULL;
@@ -178,7 +216,7 @@ diff -up openssh-4.7p1/auth2.c.selinux openssh-4.7p1/auth2.c
  	int authenticated = 0;
  
  	if (authctxt == NULL)
-@@ -153,6 +153,9 @@ input_userauth_request(int type, u_int32
+@@ -221,6 +221,9 @@ input_userauth_request(int type, u_int32
  	debug("userauth-request for user %s service %s method %s", user, service, method);
  	debug("attempt %d failures %d", authctxt->attempt, authctxt->failures);
  
@@ -188,7 +226,7 @@ diff -up openssh-4.7p1/auth2.c.selinux openssh-4.7p1/auth2.c
  	if ((style = strchr(user, ':')) != NULL)
  		*style++ = 0;
  
-@@ -178,8 +181,11 @@ input_userauth_request(int type, u_int32
+@@ -246,8 +249,11 @@ input_userauth_request(int type, u_int32
  		    use_privsep ? " [net]" : "");
  		authctxt->service = xstrdup(service);
  		authctxt->style = style ? xstrdup(style) : NULL;
@@ -198,13 +236,13 @@ diff -up openssh-4.7p1/auth2.c.selinux openssh-4.7p1/auth2.c
  			mm_inform_authserv(service, style);
 +			mm_inform_authrole(role);
 +		}
+ 		userauth_banner();
  	} else if (strcmp(user, authctxt->user) != 0 ||
  	    strcmp(service, authctxt->service) != 0) {
- 		packet_disconnect("Change of username or service not allowed: "
-diff -up openssh-4.7p1/monitor.c.selinux openssh-4.7p1/monitor.c
---- openssh-4.7p1/monitor.c.selinux	2007-05-20 07:10:16.000000000 +0200
-+++ openssh-4.7p1/monitor.c	2007-09-06 19:46:32.000000000 +0200
-@@ -133,6 +133,7 @@ int mm_answer_sign(int, Buffer *);
+diff -up openssh-5.1p1/monitor.c.selinux openssh-5.1p1/monitor.c
+--- openssh-5.1p1/monitor.c.selinux	2008-07-11 09:36:48.000000000 +0200
++++ openssh-5.1p1/monitor.c	2008-07-23 16:36:10.000000000 +0200
+@@ -134,6 +134,7 @@ int mm_answer_sign(int, Buffer *);
  int mm_answer_pwnamallow(int, Buffer *);
  int mm_answer_auth2_read_banner(int, Buffer *);
  int mm_answer_authserv(int, Buffer *);
@@ -212,7 +250,7 @@ diff -up openssh-4.7p1/monitor.c.selinux openssh-4.7p1/monitor.c
  int mm_answer_authpassword(int, Buffer *);
  int mm_answer_bsdauthquery(int, Buffer *);
  int mm_answer_bsdauthrespond(int, Buffer *);
-@@ -204,6 +205,7 @@ struct mon_table mon_dispatch_proto20[] 
+@@ -205,6 +206,7 @@ struct mon_table mon_dispatch_proto20[] 
      {MONITOR_REQ_SIGN, MON_ONCE, mm_answer_sign},
      {MONITOR_REQ_PWNAM, MON_ONCE, mm_answer_pwnamallow},
      {MONITOR_REQ_AUTHSERV, MON_ONCE, mm_answer_authserv},
@@ -220,7 +258,7 @@ diff -up openssh-4.7p1/monitor.c.selinux openssh-4.7p1/monitor.c
      {MONITOR_REQ_AUTH2_READ_BANNER, MON_ONCE, mm_answer_auth2_read_banner},
      {MONITOR_REQ_AUTHPASSWORD, MON_AUTH, mm_answer_authpassword},
  #ifdef USE_PAM
-@@ -657,6 +659,7 @@ mm_answer_pwnamallow(int sock, Buffer *m
+@@ -658,6 +660,7 @@ mm_answer_pwnamallow(int sock, Buffer *m
  	else {
  		/* Allow service/style information on the auth context */
  		monitor_permit(mon_dispatch, MONITOR_REQ_AUTHSERV, 1);
@@ -228,7 +266,7 @@ diff -up openssh-4.7p1/monitor.c.selinux openssh-4.7p1/monitor.c
  		monitor_permit(mon_dispatch, MONITOR_REQ_AUTH2_READ_BANNER, 1);
  	}
  
-@@ -702,6 +705,23 @@ mm_answer_authserv(int sock, Buffer *m)
+@@ -703,6 +706,23 @@ mm_answer_authserv(int sock, Buffer *m)
  }
  
  int
@@ -252,3 +290,39 @@ diff -up openssh-4.7p1/monitor.c.selinux openssh-4.7p1/monitor.c
  mm_answer_authpassword(int sock, Buffer *m)
  {
  	static int call_count;
+@@ -1080,7 +1100,7 @@ static int
+ monitor_valid_userblob(u_char *data, u_int datalen)
+ {
+ 	Buffer b;
+-	char *p;
++	char *p, *r;
+ 	u_int len;
+ 	int fail = 0;
+ 
+@@ -1106,6 +1126,8 @@ monitor_valid_userblob(u_char *data, u_i
+ 	if (buffer_get_char(&b) != SSH2_MSG_USERAUTH_REQUEST)
+ 		fail++;
+ 	p = buffer_get_string(&b, NULL);
++	if ((r = strchr(p, '/')) != NULL)
++		*r = '\0';
+ 	if (strcmp(authctxt->user, p) != 0) {
+ 		logit("wrong user name passed to monitor: expected %s != %.100s",
+ 		    authctxt->user, p);
+@@ -1137,7 +1159,7 @@ monitor_valid_hostbasedblob(u_char *data
+     char *chost)
+ {
+ 	Buffer b;
+-	char *p;
++	char *p, *r;
+ 	u_int len;
+ 	int fail = 0;
+ 
+@@ -1154,6 +1176,8 @@ monitor_valid_hostbasedblob(u_char *data
+ 	if (buffer_get_char(&b) != SSH2_MSG_USERAUTH_REQUEST)
+ 		fail++;
+ 	p = buffer_get_string(&b, NULL);
++	if ((r = strchr(p, '/')) != NULL)
++		*r = '\0';
+ 	if (strcmp(authctxt->user, p) != 0) {
+ 		logit("wrong user name passed to monitor: expected %s != %.100s",
+ 		    authctxt->user, p);
