@@ -63,7 +63,7 @@
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.1p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -97,6 +97,7 @@ Patch54: openssh-5.1p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch63: openssh-5.1p1-bannerlen.patch
+Patch64: openssh-5.1p1-compat-sessions.patch
 
 License: BSD
 Group: Applications/Internet
@@ -229,6 +230,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
 %patch63 -p1 -b .bannerlen
+%patch64 -p1 -b .compat-sessions
 
 autoreconf
 
@@ -480,6 +482,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 17 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-3
+- fix compatibility with some servers (#466818)
+
 * Thu Jul 31 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-2
 - fixed zero length banner problem (#457326)
 
