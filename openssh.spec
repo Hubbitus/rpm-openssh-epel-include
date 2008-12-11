@@ -60,10 +60,10 @@
 %define libedit 0
 %endif
 
-Summary: The OpenSSH implementation of SSH protocol versions 1 and 2
+Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.1p1
-Release: 3%{?dist}%{?rescue_rel}
+Release: 4%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -148,12 +148,12 @@ BuildRequires: audit-libs >= 1.0.8
 BuildRequires: xauth
 
 %package clients
-Summary: The OpenSSH client applications
+Summary: An open source SSH client applications
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 
 %package server
-Summary: The OpenSSH server daemon
+Summary: An open source SSH server daemon
 Group: System Environment/Daemons
 Requires: openssh = %{version}-%{release}
 Requires(post): chkconfig >= 0.9, /sbin/service
@@ -175,8 +175,7 @@ untrusted hosts over an insecure network. X11 connections and
 arbitrary TCP/IP ports can also be forwarded over the secure channel.
 
 OpenSSH is OpenBSD's version of the last free version of SSH, bringing
-it up to date in terms of security and features, as well as removing
-all patented algorithms to separate libraries.
+it up to date in terms of security and features.
 
 This package includes the core files necessary for both the OpenSSH
 client and server. To make this package useful, you should also
@@ -186,14 +185,12 @@ install openssh-clients, openssh-server, or both.
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package includes
 the clients necessary to make encrypted connections to SSH servers.
-You'll also need to install the openssh package on OpenSSH clients.
 
 %description server
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
-securely connect to your SSH server. You also need to have the openssh
-package installed.
+securely connect to your SSH server.
 
 %description askpass
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -482,6 +479,11 @@ fi
 %endif
 
 %changelog
+* Thu Dec 11 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-4
+- set FD_CLOEXEC on channel sockets (#475866)
+- adjust summary
+- adjust nss-keys patch so it is applicable without selinux patches (#470859)
+
 * Fri Oct 17 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-3
 - fix compatibility with some servers (#466818)
 
