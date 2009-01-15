@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.1p1
-Release: 4%{?dist}%{?rescue_rel}
+Release: 5%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -264,7 +264,6 @@ fi
 	--libexecdir=%{_libexecdir}/openssh \
 	--datadir=%{_datadir}/openssh \
 	--with-tcp-wrappers \
-	--with-rsh=%{_bindir}/rsh \
 	--with-default-path=/usr/local/bin:/bin:/usr/bin \
 	--with-superuser-path=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin \
 	--with-privsep-path=%{_var}/empty/sshd \
@@ -479,6 +478,12 @@ fi
 %endif
 
 %changelog
+* Thu Jan 15 2009 Tomas Mraz <tmraz@redhat.com> - 5.1p1-5
+- remove obsolete --with-rsh (#478298)
+- add pam_sepermit to allow blocking confined users in permissive mode
+  (#471746)
+- move system-auth after pam_selinux in the session stack
+
 * Thu Dec 11 2008 Tomas Mraz <tmraz@redhat.com> - 5.1p1-4
 - set FD_CLOEXEC on channel sockets (#475866)
 - adjust summary
