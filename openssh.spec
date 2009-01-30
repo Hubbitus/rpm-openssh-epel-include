@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.1p1
-Release: 5%{?dist}%{?rescue_rel}
+Release: 6%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -270,6 +270,7 @@ fi
 	--enable-vendor-patchlevel="FC-%{version}-%{release}" \
 	--disable-strip \
 	--without-zlib-version-check \
+	--with-ssl-engine \
 %if %{nss}
 	--with-nss \
 %endif
@@ -478,6 +479,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 30 2009 Tomas Mraz <tmraz@redhat.com> - 5.1p1-6
+- enable use of ssl engines (#481100)
+
 * Thu Jan 15 2009 Tomas Mraz <tmraz@redhat.com> - 5.1p1-5
 - remove obsolete --with-rsh (#478298)
 - add pam_sepermit to allow blocking confined users in permissive mode
