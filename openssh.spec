@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.1p1
-Release: 6%{?dist}%{?rescue_rel}
+Release: 7%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -98,6 +98,7 @@ Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch63: openssh-5.1p1-bannerlen.patch
 Patch64: openssh-5.1p1-compat-sessions.patch
+Patch65: openssh-5.1p1-fips.patch
 
 License: BSD
 Group: Applications/Internet
@@ -120,11 +121,13 @@ BuildRequires: gnome-libs-devel
 %if %{scard}
 BuildRequires: sharutils
 %endif
-BuildRequires: autoconf, automake, openssl-devel, perl, zlib-devel
+BuildRequires: autoconf, automake, perl, zlib-devel
 BuildRequires: audit-libs-devel
 BuildRequires: util-linux, groff, man
 BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
+BuildRequires: fipscheck-devel
+BuildRequires: openssl-devel >= 0.9.8j
 
 %if %{kerberos5}
 BuildRequires: krb5-devel
@@ -228,6 +231,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch62 -p1 -b .manpage
 %patch63 -p1 -b .bannerlen
 %patch64 -p1 -b .compat-sessions
+%patch65 -p1 -b .fips
 
 autoreconf
 
@@ -322,6 +326,20 @@ fi
 popd
 %endif
 
+# Add generation of HMAC checksums of the final stripped binaries
+%define __spec_install_post \
+    %{?__debug_package:%{__debug_install_post}} \
+    %{__arch_install_post} \
+    %{__os_install_post} \
+    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-keygen \
+    fipshmac $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-keysign \
+    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh \
+    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-agent \
+    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-add \
+    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-keyscan \
+    fipshmac $RPM_BUILD_ROOT%{_sbindir}/sshd \
+%{nil}
+
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
@@ -365,34 +383,6 @@ rm -f README.nss
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%triggerun server -- ssh-server
-if [ "$1" != 0 -a -r /var/run/sshd.pid ] ; then
-	touch /var/run/sshd.restart
-fi
-
-%triggerun server -- openssh-server < 2.5.0p1
-# Count the number of HostKey and HostDsaKey statements we have.
-gawk	'BEGIN {IGNORECASE=1}
-	 /^hostkey/ || /^hostdsakey/ {sawhostkey = sawhostkey + 1}
-	 END {exit sawhostkey}' /etc/ssh/sshd_config
-# And if we only found one, we know the client was relying on the old default
-# behavior, which loaded the the SSH2 DSA host key when HostDsaKey wasn't
-# specified.  Now that HostKey is used for both SSH1 and SSH2 keys, specifying
-# one nullifies the default, which would have loaded both.
-if [ $? -eq 1 ] ; then
-	echo HostKey /etc/ssh/ssh_host_rsa_key >> /etc/ssh/sshd_config
-	echo HostKey /etc/ssh/ssh_host_dsa_key >> /etc/ssh/sshd_config
-fi
-
-%triggerpostun server -- ssh-server
-if [ "$1" != 0 ] ; then
-	/sbin/chkconfig --add sshd
-	if test -f /var/run/sshd.restart ; then
-		rm -f /var/run/sshd.restart
-		/sbin/service sshd start > /dev/null 2>&1 || :
-	fi
-fi
-
 %pre server
 %if %{nologin}
 /usr/sbin/useradd -c "Privilege-separated SSH" -u %{sshd_uid} \
@@ -422,9 +412,11 @@ fi
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-keygen
+%attr(0644,root,root) %{_bindir}/.ssh-keygen.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
 %attr(4755,root,root) %{_libexecdir}/openssh/ssh-keysign
+%attr(0644,root,root) %{_libexecdir}/openssh/.ssh-keysign.hmac
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -435,6 +427,7 @@ fi
 %files clients
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
+%attr(0644,root,root) %{_bindir}/.ssh.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
@@ -444,8 +437,11 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(2755,root,nobody) %{_bindir}/ssh-agent
+%attr(0644,root,nobody) %{_bindir}/.ssh-agent.hmac
 %attr(0755,root,root) %{_bindir}/ssh-add
+%attr(0644,root,root) %{_bindir}/.ssh-add.hmac
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
+%attr(0644,root,root) %{_bindir}/.ssh-keyscan.hmac
 %attr(0755,root,root) %{_bindir}/sftp
 %attr(0755,root,root) %{_bindir}/ssh-copy-id
 %attr(0644,root,root) %{_mandir}/man1/ssh-agent.1*
@@ -460,6 +456,7 @@ fi
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
+%attr(0644,root,root) %{_sbindir}/.sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man5/moduli.5*
@@ -479,6 +476,11 @@ fi
 %endif
 
 %changelog
+* Thu Feb 12 2009 Tomas Mraz <tmraz@redhat.com> - 5.1p1-7
+- drop obsolete triggers
+- add testing FIPS mode support
+- LSBize the initscript (#247014)
+
 * Fri Jan 30 2009 Tomas Mraz <tmraz@redhat.com> - 5.1p1-6
 - enable use of ssl engines (#481100)
 

@@ -1,9 +1,10 @@
 #!/bin/bash
 #
-# Init file for OpenSSH server daemon
+# sshd		Start up the OpenSSH server daemon
 #
 # chkconfig: 2345 55 25
-# description: OpenSSH server daemon
+# description: SSH is a protocol for secure remote shell access. \
+#              This service starts up the OpenSSH server daemon.
 #
 # processname: sshd
 # config: /etc/ssh/ssh_host_key
@@ -11,6 +12,19 @@
 # config: /etc/ssh/ssh_random_seed
 # config: /etc/ssh/sshd_config
 # pidfile: /var/run/sshd.pid
+
+### BEGIN INIT INFO
+# Provides: sshd
+# Required-Start: $local_fs $network $syslog
+# Required-Stop: $local_fs $syslog
+# Should-Start: $syslog
+# Should-Stop: $network $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start up the OpenSSH server daemon
+# Description:       SSH is a protocol for secure remote shell access.
+#		     This service starts up the OpenSSH server daemon.
+### END INIT INFO
 
 # source function library
 . /etc/rc.d/init.d/functions
@@ -20,6 +34,7 @@
 
 RETVAL=0
 prog="sshd"
+lockfile=/var/lock/subsys/$prog
 
 # Some functions to make the below more readable
 KEYGEN=/usr/bin/ssh-keygen
@@ -100,6 +115,8 @@ do_restart_sanity_check()
 
 start()
 {
+	[ -x $SSHD ] || exit 5
+	[ -f /etc/ssh/sshd_config ] || exit 6
 	# Create keys if necessary
 	if [ "x${AUTOCREATE_SERVER_KEYS}" != xNO ]; then
 		do_rsa1_keygen
@@ -110,8 +127,9 @@ start()
 	echo -n $"Starting $prog: "
 	$SSHD $OPTIONS && success || failure
 	RETVAL=$?
-	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/sshd
+	[ "$RETVAL" = 0 ] && touch $lockfile
 	echo
+	return $RETVAL
 }
 
 stop()
@@ -130,7 +148,7 @@ stop()
 	    killall $prog 2>/dev/null
 	    trap TERM
 	fi
-	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/sshd
+	[ "$RETVAL" = 0 ] && rm -f $lockfile
 	echo
 }
 
@@ -146,37 +164,62 @@ reload()
 	echo
 }
 
+restart() {
+	stop
+	start
+}
+
+force_reload() {
+	restart
+}
+
+rh_status() {
+	status -p $PID_FILE openssh-daemon
+}
+
+rh_status_q() {
+	rh_status >/dev/null 2>&1
+}
+
 case "$1" in
 	start)
+		rh_status_q && exit 0
 		start
 		;;
 	stop)
+		rh_status_q || exit 0
 		stop
 		;;
 	restart)
-		stop
-		start
+		restart
 		;;
 	reload)
+		rh_status_q || exit 7
 		reload
 		;;
-	condrestart)
-		if [ -f /var/lock/subsys/sshd ] ; then
+	force-reload)
+		force_reload
+		;;
+	condrestart|try-restart)
+		rh_status_q || exit 0
+		if [ -f $lockfile ] ; then
 			do_restart_sanity_check
 			if [ "$RETVAL" = 0 ] ; then
 				stop
 				# avoid race
 				sleep 3
 				start
+			else
+				RETVAL=6
 			fi
 		fi
 		;;
 	status)
-		status -p $PID_FILE openssh-daemon
+		rh_status
 		RETVAL=$?
 		;;
 	*)
-		echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
-		RETVAL=1
+		echo $"Usage: $0 {start|stop|restart|reload|force-reload|condrestart|try-restart|status}"
+		RETVAL=2
 esac
 exit $RETVAL
