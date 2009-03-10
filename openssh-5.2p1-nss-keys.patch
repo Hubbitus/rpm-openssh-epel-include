@@ -1,112 +1,6 @@
-diff -up openssh-5.2p1/authfd.c.nss-keys openssh-5.2p1/authfd.c
---- openssh-5.2p1/authfd.c.nss-keys	2006-09-01 07:38:36.000000000 +0200
-+++ openssh-5.2p1/authfd.c	2009-03-10 03:51:55.866208145 +0100
-@@ -626,6 +626,45 @@ ssh_update_card(AuthenticationConnection
- 	return decode_reply(type);
- }
- 
-+int
-+ssh_update_nss_key(AuthenticationConnection *auth, int add,
-+    const char *tokenname, const char *keyname,
-+    const char *pass, u_int life, u_int confirm)
-+{
-+	Buffer msg;
-+	int type, constrained = (life || confirm);
-+
-+	if (add) {
-+		type = constrained ?
-+		    SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED :
-+		    SSH_AGENTC_ADD_NSS_KEY;
-+	} else
-+		type = SSH_AGENTC_REMOVE_NSS_KEY;
-+
-+	buffer_init(&msg);
-+	buffer_put_char(&msg, type);
-+	buffer_put_cstring(&msg, tokenname);
-+	buffer_put_cstring(&msg, keyname);
-+	buffer_put_cstring(&msg, pass);
-+
-+	if (constrained) {
-+		if (life != 0) {
-+			buffer_put_char(&msg, SSH_AGENT_CONSTRAIN_LIFETIME);
-+			buffer_put_int(&msg, life);
-+		}
-+		if (confirm != 0)
-+			buffer_put_char(&msg, SSH_AGENT_CONSTRAIN_CONFIRM);
-+	}
-+
-+	if (ssh_request_reply(auth, &msg, &msg) == 0) {
-+		buffer_free(&msg);
-+		return 0;
-+	}
-+	type = buffer_get_char(&msg);
-+	buffer_free(&msg);
-+	return decode_reply(type);
-+}
-+
- /*
-  * Removes all identities from the agent.  This call is not meant to be used
-  * by normal applications.
-diff -up openssh-5.2p1/authfd.h.nss-keys openssh-5.2p1/authfd.h
---- openssh-5.2p1/authfd.h.nss-keys	2006-08-05 04:39:39.000000000 +0200
-+++ openssh-5.2p1/authfd.h	2009-03-10 03:51:55.847449129 +0100
-@@ -49,6 +49,12 @@
- #define SSH2_AGENTC_ADD_ID_CONSTRAINED		25
- #define SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED 26
- 
-+/* nss */
-+#define SSH_AGENTC_ADD_NSS_KEY			30
-+#define SSH_AGENTC_REMOVE_NSS_KEY		31
-+#define SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED	32
-+
-+
- #define	SSH_AGENT_CONSTRAIN_LIFETIME		1
- #define	SSH_AGENT_CONSTRAIN_CONFIRM		2
- 
-@@ -83,6 +89,8 @@ int	 ssh_remove_all_identities(Authentic
- int	 ssh_lock_agent(AuthenticationConnection *, int, const char *);
- int	 ssh_update_card(AuthenticationConnection *, int, const char *,
-     const char *, u_int, u_int);
-+int	 ssh_update_nss_key(AuthenticationConnection *, int, const char *,
-+    const char *, const char *, u_int, u_int);
- 
- int
- ssh_decrypt_challenge(AuthenticationConnection *, Key *, BIGNUM *, u_char[16],
-diff -up openssh-5.2p1/configure.ac.nss-keys openssh-5.2p1/configure.ac
---- openssh-5.2p1/configure.ac.nss-keys	2009-03-10 03:51:55.285821039 +0100
-+++ openssh-5.2p1/configure.ac	2009-03-10 03:51:55.850215090 +0100
-@@ -3462,6 +3462,20 @@ AC_ARG_WITH(kerberos5,
- 	]
- )
- 
-+# Check whether user wants NSS support
-+LIBNSS_MSG="no"
-+AC_ARG_WITH(nss,
-+	[  --with-nss   Enable NSS support],
-+	[ if test "x$withval" != "xno" ; then
-+		AC_DEFINE(HAVE_LIBNSS,1,[Define if you want NSS support.])
-+		LIBNSS_MSG="yes"
-+		CPPFLAGS="$CPPFLAGS -I/usr/include/nss3 -I/usr/include/nspr4"
-+		AC_CHECK_HEADERS(pk11pub.h)
-+		LIBS="$LIBS -lnss3"
-+	fi
-+	])
-+AC_SUBST(LIBNSS)
-+
- # Looking for programs, paths and files
- 
- PRIVSEP_PATH=/var/empty
-@@ -4189,6 +4203,7 @@ echo "              TCP Wrappers support
- echo "              MD5 password support: $MD5_MSG"
- echo "                   libedit support: $LIBEDIT_MSG"
- echo "  Solaris process contract support: $SPC_MSG"
-+echo "                       NSS support: $LIBNSS_MSG"
- echo "       IP address in \$DISPLAY hack: $DISPLAY_HACK_MSG"
- echo "           Translate v4 in v6 hack: $IPV4_IN6_HACK_MSG"
- echo "                  BSD Auth support: $BSD_AUTH_MSG"
 diff -up openssh-5.2p1/key.c.nss-keys openssh-5.2p1/key.c
---- openssh-5.2p1/key.c.nss-keys	2008-11-03 09:24:17.000000000 +0100
-+++ openssh-5.2p1/key.c	2009-03-10 03:51:55.840226575 +0100
+--- openssh-5.2p1/key.c.nss-keys	2008-07-11 09:35:09.000000000 +0200
++++ openssh-5.2p1/key.c	2008-11-18 19:11:41.000000000 +0100
 @@ -96,6 +96,54 @@ key_new(int type)
  	return k;
  }
@@ -182,109 +76,372 @@ diff -up openssh-5.2p1/key.c.nss-keys openssh-5.2p1/key.c
  	xfree(k);
  }
  
-diff -up openssh-5.2p1/key.h.nss-keys openssh-5.2p1/key.h
---- openssh-5.2p1/key.h.nss-keys	2008-06-12 20:40:35.000000000 +0200
-+++ openssh-5.2p1/key.h	2009-03-10 03:51:55.925279322 +0100
-@@ -29,11 +29,17 @@
- #include <openssl/rsa.h>
- #include <openssl/dsa.h>
+diff -up openssh-5.2p1/ssh-dss.c.nss-keys openssh-5.2p1/ssh-dss.c
+--- openssh-5.2p1/ssh-dss.c.nss-keys	2006-11-07 13:14:42.000000000 +0100
++++ openssh-5.2p1/ssh-dss.c	2008-11-18 19:11:41.000000000 +0100
+@@ -39,6 +39,10 @@
+ #include "log.h"
+ #include "key.h"
  
 +#ifdef HAVE_LIBNSS
-+#include <nss.h>
-+#include <keyhi.h>
++#include <cryptohi.h>
 +#endif
 +
- typedef struct Key Key;
- enum types {
- 	KEY_RSA1,
- 	KEY_RSA,
- 	KEY_DSA,
-+	KEY_NSS,
- 	KEY_UNSPEC
- };
- enum fp_type {
-@@ -48,16 +54,30 @@ enum fp_rep {
+ #define INTBLOB_LEN	20
+ #define SIGBLOB_LEN	(2*INTBLOB_LEN)
  
- /* key is stored in external hardware */
- #define KEY_FLAG_EXT		0x0001
-+#define KEY_FLAG_NSS		0x0002
+@@ -57,6 +61,34 @@ ssh_dss_sign(const Key *key, u_char **si
+ 		error("ssh_dss_sign: no DSA key");
+ 		return -1;
+ 	}
++#ifdef HAVE_LIBNSS
++	if (key->flags & KEY_FLAG_NSS) {
++		SECItem sigitem;
++		SECItem *rawsig;
 +
-+#ifdef HAVE_LIBNSS
-+typedef struct NSSKey NSSKey;
-+struct NSSKey {
-+	SECKEYPrivateKey *privk;
-+	SECKEYPublicKey *pubk;
-+};
++		memset(&sigitem, 0, sizeof(sigitem));
++		if (SEC_SignData(&sigitem, (u_char *)data, datalen, key->nss->privk,
++			SEC_OID_ANSIX9_DSA_SIGNATURE_WITH_SHA1_DIGEST) != SECSuccess) {
++			error("ssh_dss_sign: sign failed");
++			return -1;
++		}
++		
++		if ((rawsig=DSAU_DecodeDerSig(&sigitem)) == NULL) {
++			error("ssh_dss_sign: der decode failed");
++			SECITEM_ZfreeItem(&sigitem, PR_FALSE);
++			return -1;
++		}
++		SECITEM_ZfreeItem(&sigitem, PR_FALSE);
++		if (rawsig->len != SIGBLOB_LEN) {
++			error("ssh_dss_sign: unsupported signature length %d",
++				rawsig->len);
++			SECITEM_ZfreeItem(rawsig, PR_TRUE);
++			return -1;
++		}
++		memcpy(sigblob, rawsig->data, SIGBLOB_LEN);
++		SECITEM_ZfreeItem(rawsig, PR_TRUE);
++	} else {
 +#endif
- 
- struct Key {
- 	int	 type;
- 	int	 flags;
- 	RSA	*rsa;
- 	DSA	*dsa;
+ 	EVP_DigestInit(&md, evp_md);
+ 	EVP_DigestUpdate(&md, data, datalen);
+ 	EVP_DigestFinal(&md, digest, &dlen);
+@@ -80,7 +112,9 @@ ssh_dss_sign(const Key *key, u_char **si
+ 	BN_bn2bin(sig->r, sigblob+ SIGBLOB_LEN - INTBLOB_LEN - rlen);
+ 	BN_bn2bin(sig->s, sigblob+ SIGBLOB_LEN - slen);
+ 	DSA_SIG_free(sig);
+-
 +#ifdef HAVE_LIBNSS
-+	NSSKey  *nss;
++	}
 +#endif
- };
+ 	if (datafellows & SSH_BUG_SIGBLOB) {
+ 		if (lenp != NULL)
+ 			*lenp = SIGBLOB_LEN;
+diff -up openssh-5.2p1/ssh-agent.c.nss-keys openssh-5.2p1/ssh-agent.c
+--- openssh-5.2p1/ssh-agent.c.nss-keys	2008-07-04 15:10:49.000000000 +0200
++++ openssh-5.2p1/ssh-agent.c	2008-11-18 19:11:41.000000000 +0100
+@@ -80,6 +80,10 @@
+ #include "scard.h"
+ #endif
  
- Key		*key_new(int);
- Key		*key_new_private(int);
-+Key 		*key_new_nss(int);
-+Key		*key_new_nss_copy(int, const Key *);
- void		 key_free(Key *);
- Key		*key_demote(const Key *);
- int		 key_equal(const Key *, const Key *);
-diff -up openssh-5.2p1/Makefile.in.nss-keys openssh-5.2p1/Makefile.in
---- openssh-5.2p1/Makefile.in.nss-keys	2008-11-05 06:20:46.000000000 +0100
-+++ openssh-5.2p1/Makefile.in	2009-03-10 03:51:56.222702935 +0100
-@@ -71,7 +71,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
- 	atomicio.o key.o dispatch.o kex.o mac.o uidswap.o uuencode.o misc.o \
- 	monitor_fdpass.o rijndael.o ssh-dss.o ssh-rsa.o dh.o kexdh.o \
- 	kexgex.o kexdhc.o kexgexc.o scard.o msg.o progressmeter.o dns.o \
--	entropy.o scard-opensc.o gss-genr.o umac.o jpake.o schnorr.o
-+	entropy.o scard-opensc.o gss-genr.o umac.o jpake.o schnorr.o nsskeys.o
++#ifdef HAVE_LIBNSS
++#include "nsskeys.h"
++#endif
++
+ #if defined(HAVE_SYS_PRCTL_H)
+ #include <sys/prctl.h>	/* For prctl() and PR_SET_DUMPABLE */
+ #endif
+@@ -714,6 +718,114 @@ send:
+ }
+ #endif /* SMARTCARD */
  
- SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
- 	sshconnect.o sshconnect1.o sshconnect2.o mux.o
-@@ -134,28 +134,28 @@ libssh.a: $(LIBSSH_OBJS)
- 	$(RANLIB) $@
++#ifdef HAVE_LIBNSS
++static void
++process_add_nss_key (SocketEntry *e)
++{
++	char *tokenname = NULL, *keyname = NULL, *password = NULL;
++	int i, version, success = 0, death = 0, confirm = 0;
++	Key **keys, *k;
++	Identity *id;
++	Idtab *tab;
++
++	tokenname = buffer_get_string(&e->request, NULL);
++	keyname = buffer_get_string(&e->request, NULL);
++	password = buffer_get_string(&e->request, NULL);
++
++	while (buffer_len(&e->request)) {
++		switch (buffer_get_char(&e->request)) {
++		case SSH_AGENT_CONSTRAIN_LIFETIME:
++			death = time(NULL) + buffer_get_int(&e->request);
++			break;
++		case SSH_AGENT_CONSTRAIN_CONFIRM:
++			confirm = 1;
++			break;
++		default:
++			break;
++		}
++	}
++	if (lifetime && !death)
++		death = time(NULL) + lifetime;
++
++	keys = nss_get_keys(tokenname, keyname, password);
++	/* password is owned by keys[0] now */
++	xfree(tokenname);
++	xfree(keyname);
++
++	if (keys == NULL) {
++		memset(password, 0, strlen(password));
++		xfree(password);
++		error("nss_get_keys failed");
++		goto send;
++	}
++	for (i = 0; keys[i] != NULL; i++) {
++		k = keys[i];
++		version = k->type == KEY_RSA1 ? 1 : 2;
++		tab = idtab_lookup(version);
++		if (lookup_identity(k, version) == NULL) {
++			id = xmalloc(sizeof(Identity));
++			id->key = k;
++			id->comment = nss_get_key_label(k);
++			id->death = death;
++			id->confirm = confirm;
++			TAILQ_INSERT_TAIL(&tab->idlist, id, next);
++			tab->nentries++;
++			success = 1;
++		} else {
++			key_free(k);
++		}
++		keys[i] = NULL;
++	}
++	xfree(keys);
++send:
++	buffer_put_int(&e->output, 1);
++	buffer_put_char(&e->output,
++	    success ? SSH_AGENT_SUCCESS : SSH_AGENT_FAILURE);
++}
++
++static void
++process_remove_nss_key(SocketEntry *e)
++{
++	char *tokenname = NULL, *keyname = NULL, *password = NULL;
++	int i, version, success = 0;
++	Key **keys, *k = NULL;
++	Identity *id;
++	Idtab *tab;
++
++	tokenname = buffer_get_string(&e->request, NULL);
++	keyname = buffer_get_string(&e->request, NULL);
++	password = buffer_get_string(&e->request, NULL);
++
++	keys = nss_get_keys(tokenname, keyname, password);
++	xfree(tokenname);
++	xfree(keyname);
++	xfree(password);
++
++	if (keys == NULL || keys[0] == NULL) {
++		error("nss_get_keys failed");
++		goto send;
++	}
++	for (i = 0; keys[i] != NULL; i++) {
++		k = keys[i];
++		version = k->type == KEY_RSA1 ? 1 : 2;
++		if ((id = lookup_identity(k, version)) != NULL) {
++			tab = idtab_lookup(version);
++			TAILQ_REMOVE(&tab->idlist, id, next);
++			tab->nentries--;
++			free_identity(id);
++			success = 1;
++		}
++		key_free(k);
++		keys[i] = NULL;
++	}
++	xfree(keys);
++send:
++	buffer_put_int(&e->output, 1);
++	buffer_put_char(&e->output,
++	    success ? SSH_AGENT_SUCCESS : SSH_AGENT_FAILURE);
++}
++#endif /* HAVE_LIBNSS */
++
+ /* dispatch incoming messages */
  
- ssh$(EXEEXT): $(LIBCOMPAT) libssh.a $(SSHOBJS)
--	$(LD) -o $@ $(SSHOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-+	$(LD) -o $@ $(SSHOBJS) $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
+ static void
+@@ -806,6 +918,15 @@ process_message(SocketEntry *e)
+ 		process_remove_smartcard_key(e);
+ 		break;
+ #endif /* SMARTCARD */
++#ifdef HAVE_LIBNSS
++	case SSH_AGENTC_ADD_NSS_KEY:
++	case SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED:
++		process_add_nss_key(e);
++		break;
++	case SSH_AGENTC_REMOVE_NSS_KEY:
++		process_remove_nss_key(e);
++		break;
++#endif /* SMARTCARD */
+ 	default:
+ 		/* Unknown message.  Respond with failure. */
+ 		error("Unknown message %d", type);
+diff -up openssh-5.2p1/authfd.h.nss-keys openssh-5.2p1/authfd.h
+--- openssh-5.2p1/authfd.h.nss-keys	2006-08-05 04:39:39.000000000 +0200
++++ openssh-5.2p1/authfd.h	2008-11-18 19:11:41.000000000 +0100
+@@ -49,6 +49,12 @@
+ #define SSH2_AGENTC_ADD_ID_CONSTRAINED		25
+ #define SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED 26
  
- sshd$(EXEEXT): libssh.a	$(LIBCOMPAT) $(SSHDOBJS)
--	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(SSHDLIBS) $(LIBS)
-+	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(SSHDLIBS) -lfipscheck $(LIBS)
++/* nss */
++#define SSH_AGENTC_ADD_NSS_KEY			30
++#define SSH_AGENTC_REMOVE_NSS_KEY		31
++#define SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED	32
++
++
+ #define	SSH_AGENT_CONSTRAIN_LIFETIME		1
+ #define	SSH_AGENT_CONSTRAIN_CONFIRM		2
  
- scp$(EXEEXT): $(LIBCOMPAT) libssh.a scp.o progressmeter.o
- 	$(LD) -o $@ scp.o progressmeter.o bufaux.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+@@ -83,6 +89,8 @@ int	 ssh_remove_all_identities(Authentic
+ int	 ssh_lock_agent(AuthenticationConnection *, int, const char *);
+ int	 ssh_update_card(AuthenticationConnection *, int, const char *,
+     const char *, u_int, u_int);
++int	 ssh_update_nss_key(AuthenticationConnection *, int, const char *,
++    const char *, const char *, u_int, u_int);
  
- ssh-add$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-add.o
--	$(LD) -o $@ ssh-add.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-+	$(LD) -o $@ ssh-add.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
+ int
+ ssh_decrypt_challenge(AuthenticationConnection *, Key *, BIGNUM *, u_char[16],
+diff -up openssh-5.2p1/configure.ac.nss-keys openssh-5.2p1/configure.ac
+--- openssh-5.2p1/configure.ac.nss-keys	2008-11-18 19:11:41.000000000 +0100
++++ openssh-5.2p1/configure.ac	2008-11-18 19:12:38.000000000 +0100
+@@ -3436,6 +3436,20 @@ AC_ARG_WITH(kerberos5,
+ 	]
+ )
  
- ssh-agent$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-agent.o
--	$(LD) -o $@ ssh-agent.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-+	$(LD) -o $@ ssh-agent.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
++# Check whether user wants NSS support
++LIBNSS_MSG="no"
++AC_ARG_WITH(nss,
++	[  --with-nss   Enable NSS support],
++	[ if test "x$withval" != "xno" ; then
++		AC_DEFINE(HAVE_LIBNSS,1,[Define if you want NSS support.])
++		LIBNSS_MSG="yes"
++		CPPFLAGS="$CPPFLAGS -I/usr/include/nss3 -I/usr/include/nspr4"
++		AC_CHECK_HEADERS(pk11pub.h)
++		LIBS="$LIBS -lnss3"
++	fi
++	])
++AC_SUBST(LIBNSS)
++
+ # Looking for programs, paths and files
  
- ssh-keygen$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keygen.o
--	$(LD) -o $@ ssh-keygen.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-+	$(LD) -o $@ ssh-keygen.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
+ PRIVSEP_PATH=/var/empty
+@@ -4163,6 +4177,7 @@ echo "              TCP Wrappers support
+ echo "              MD5 password support: $MD5_MSG"
+ echo "                   libedit support: $LIBEDIT_MSG"
+ echo "  Solaris process contract support: $SPC_MSG"
++echo "                       NSS support: $LIBNSS_MSG"
+ echo "       IP address in \$DISPLAY hack: $DISPLAY_HACK_MSG"
+ echo "           Translate v4 in v6 hack: $IPV4_IN6_HACK_MSG"
+ echo "                  BSD Auth support: $BSD_AUTH_MSG"
+diff -up /dev/null openssh-5.2p1/README.nss
+--- /dev/null	2008-11-17 17:51:52.160001870 +0100
++++ openssh-5.2p1/README.nss	2008-11-18 19:11:41.000000000 +0100
+@@ -0,0 +1,36 @@
++How to use NSS tokens with OpenSSH?
++
++This version of OpenSSH contains experimental support for authentication using
++keys stored in tokens stored in NSS database. This for example includes any
++PKCS#11 tokens which are installed in your NSS database.
++
++As the code is experimental and preliminary only SSH protocol 2 is supported.
++The NSS certificate and token databases are looked for in the ~/.ssh
++directory or in a directory specified by environment variable NSS_DB_PATH.
++
++Common operations:
++
++(1) tell the ssh client to use the NSS keys:
++
++	$ ssh -o 'UseNSS yes' otherhost
++	
++	if you want to use a specific token:
++	
++	$ ssh -o 'UseNSS yes' -o 'NSS Token My PKCS11 Token' otherhost
++
++(2) or tell the agent to use the NSS keys:
++
++	$ ssh-add -n
++	
++	if you want to use a specific token:
++	
++	$ ssh-add -n -T 'My PKCS11 Token'
++
++(3) extract the public key from token so it can be added to the
++server:
++
++	$ ssh-keygen -n
++	
++	if you want to use a specific token and/or key:
++	
++	$ ssh-keygen -n -D 'My PKCS11 Token' 'My Key ID'
+diff -up openssh-5.2p1/authfd.c.nss-keys openssh-5.2p1/authfd.c
+--- openssh-5.2p1/authfd.c.nss-keys	2006-09-01 07:38:36.000000000 +0200
++++ openssh-5.2p1/authfd.c	2008-11-18 19:11:41.000000000 +0100
+@@ -626,6 +626,45 @@ ssh_update_card(AuthenticationConnection
+ 	return decode_reply(type);
+ }
  
- ssh-keysign$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keysign.o
--	$(LD) -o $@ ssh-keysign.o readconf.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-+	$(LD) -o $@ ssh-keysign.o readconf.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
++int
++ssh_update_nss_key(AuthenticationConnection *auth, int add,
++    const char *tokenname, const char *keyname,
++    const char *pass, u_int life, u_int confirm)
++{
++	Buffer msg;
++	int type, constrained = (life || confirm);
++
++	if (add) {
++		type = constrained ?
++		    SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED :
++		    SSH_AGENTC_ADD_NSS_KEY;
++	} else
++		type = SSH_AGENTC_REMOVE_NSS_KEY;
++
++	buffer_init(&msg);
++	buffer_put_char(&msg, type);
++	buffer_put_cstring(&msg, tokenname);
++	buffer_put_cstring(&msg, keyname);
++	buffer_put_cstring(&msg, pass);
++
++	if (constrained) {
++		if (life != 0) {
++			buffer_put_char(&msg, SSH_AGENT_CONSTRAIN_LIFETIME);
++			buffer_put_int(&msg, life);
++		}
++		if (confirm != 0)
++			buffer_put_char(&msg, SSH_AGENT_CONSTRAIN_CONFIRM);
++	}
++
++	if (ssh_request_reply(auth, &msg, &msg) == 0) {
++		buffer_free(&msg);
++		return 0;
++	}
++	type = buffer_get_char(&msg);
++	buffer_free(&msg);
++	return decode_reply(type);
++}
++
+ /*
+  * Removes all identities from the agent.  This call is not meant to be used
+  * by normal applications.
+diff -up openssh-5.2p1/readconf.h.nss-keys openssh-5.2p1/readconf.h
+--- openssh-5.2p1/readconf.h.nss-keys	2008-06-29 16:04:03.000000000 +0200
++++ openssh-5.2p1/readconf.h	2008-11-18 19:11:41.000000000 +0100
+@@ -84,6 +84,8 @@ typedef struct {
+ 	char   *preferred_authentications;
+ 	char   *bind_address;	/* local socket address for connection to sshd */
+ 	char   *smartcard_device; /* Smartcard reader device */
++	int     use_nss;        /* Use NSS library for keys */
++	char   *nss_token;      /* Look for NSS keys on token */
+ 	int	verify_host_key_dns;	/* Verify host key using DNS */
  
- ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o
--	$(LD) -o $@ ssh-keyscan.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
-+	$(LD) -o $@ ssh-keyscan.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lfipscheck $(LIBS)
- 
- sftp-server$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-common.o sftp-server.o sftp-server-main.o
- 	$(LD) -o $@ sftp-server.o sftp-common.o sftp-server-main.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ 	int     num_identity_files;	/* Number of files for RSA/DSA identities. */
 diff -up /dev/null openssh-5.2p1/nsskeys.c
---- /dev/null	2009-03-09 14:26:59.819020596 +0100
-+++ openssh-5.2p1/nsskeys.c	2009-03-10 03:51:56.251363837 +0100
+--- /dev/null	2008-11-17 17:51:52.160001870 +0100
++++ openssh-5.2p1/nsskeys.c	2008-11-18 19:11:41.000000000 +0100
 @@ -0,0 +1,327 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
@@ -471,8 +628,8 @@ diff -up /dev/null openssh-5.2p1/nsskeys.c
 +			break;
 +	}
 +
-+	p = key_fingerprint(k, SSH_FP_SHA1, SSH_FP_HEX);
-+	debug("SHA1 fingerprint %u %s", key_size(k), p);
++	p = key_fingerprint(k, SSH_FP_MD5, SSH_FP_HEX);
++	debug("fingerprint %u %s", key_size(k), p);
 +	xfree(p);
 +
 +	return 0;
@@ -613,9 +770,63 @@ diff -up /dev/null openssh-5.2p1/nsskeys.c
 +}
 +
 +#endif /* HAVE_LIBNSS */
+diff -up openssh-5.2p1/ssh.c.nss-keys openssh-5.2p1/ssh.c
+--- openssh-5.2p1/ssh.c.nss-keys	2008-07-04 04:53:50.000000000 +0200
++++ openssh-5.2p1/ssh.c	2008-11-18 19:11:41.000000000 +0100
+@@ -104,6 +104,9 @@
+ #ifdef SMARTCARD
+ #include "scard.h"
+ #endif
++#ifdef HAVE_LIBNSS
++#include "nsskeys.h"
++#endif
+ 
+ extern char *__progname;
+ 
+@@ -1235,9 +1238,11 @@ load_public_identity_files(void)
+ 	int i = 0;
+ 	Key *public;
+ 	struct passwd *pw;
+-#ifdef SMARTCARD
++#if defined(SMARTCARD) || defined(HAVE_LIBNSS)
+ 	Key **keys;
++#endif
+ 
++#ifdef SMARTCARD
+ 	if (options.smartcard_device != NULL &&
+ 	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
+ 	    (keys = sc_get_keys(options.smartcard_device, NULL)) != NULL) {
+@@ -1260,6 +1265,27 @@ load_public_identity_files(void)
+ 		xfree(keys);
+ 	}
+ #endif /* SMARTCARD */
++#ifdef HAVE_LIBNSS
++	if (options.use_nss &&
++	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
++	    (keys = nss_get_keys(options.nss_token, NULL, NULL)) != NULL) {
++		int count;
++		for (count = 0; keys[count] != NULL; count++) {
++			memmove(&options.identity_files[1], &options.identity_files[0],
++			    sizeof(char *) * (SSH_MAX_IDENTITY_FILES - 1));
++			memmove(&options.identity_keys[1], &options.identity_keys[0],
++			    sizeof(Key *) * (SSH_MAX_IDENTITY_FILES - 1));
++			options.num_identity_files++;
++			options.identity_keys[0] = keys[count];
++			options.identity_files[0] = nss_get_key_label(keys[count]);
++		}
++		if (options.num_identity_files > SSH_MAX_IDENTITY_FILES)
++			options.num_identity_files = SSH_MAX_IDENTITY_FILES;
++		i += count;
++		xfree(keys);
++	}
++#endif /* HAVE_LIBNSS */
++
+ 	if ((pw = getpwuid(original_real_uid)) == NULL)
+ 		fatal("load_public_identity_files: getpwuid failed");
+ 	pwname = xstrdup(pw->pw_name);
 diff -up /dev/null openssh-5.2p1/nsskeys.h
---- /dev/null	2009-03-09 14:26:59.819020596 +0100
-+++ openssh-5.2p1/nsskeys.h	2009-03-10 03:51:55.908243644 +0100
+--- /dev/null	2008-11-17 17:51:52.160001870 +0100
++++ openssh-5.2p1/nsskeys.h	2008-11-18 19:11:41.000000000 +0100
 @@ -0,0 +1,39 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
@@ -656,85 +867,75 @@ diff -up /dev/null openssh-5.2p1/nsskeys.h
 +
 +#endif
 +#endif
-diff -up openssh-5.2p1/readconf.c.nss-keys openssh-5.2p1/readconf.c
---- openssh-5.2p1/readconf.c.nss-keys	2009-02-14 06:28:21.000000000 +0100
-+++ openssh-5.2p1/readconf.c	2009-03-10 03:51:55.950217925 +0100
-@@ -124,6 +124,7 @@ typedef enum {
- 	oKbdInteractiveAuthentication, oKbdInteractiveDevices, oHostKeyAlias,
- 	oDynamicForward, oPreferredAuthentications, oHostbasedAuthentication,
- 	oHostKeyAlgorithms, oBindAddress, oSmartcardDevice,
-+	oUseNSS, oNSSToken,
- 	oClearAllForwardings, oNoHostAuthenticationForLocalhost,
- 	oEnableSSHKeysign, oRekeyLimit, oVerifyHostKeyDNS, oConnectTimeout,
- 	oAddressFamily, oGssAuthentication, oGssDelegateCreds,
-@@ -210,6 +211,13 @@ static struct {
- #else
- 	{ "smartcarddevice", oUnsupported },
- #endif
+diff -up openssh-5.2p1/Makefile.in.nss-keys openssh-5.2p1/Makefile.in
+--- openssh-5.2p1/Makefile.in.nss-keys	2008-07-08 16:21:12.000000000 +0200
++++ openssh-5.2p1/Makefile.in	2008-11-18 19:11:41.000000000 +0100
+@@ -71,7 +71,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
+ 	atomicio.o key.o dispatch.o kex.o mac.o uidswap.o uuencode.o misc.o \
+ 	monitor_fdpass.o rijndael.o ssh-dss.o ssh-rsa.o dh.o kexdh.o \
+ 	kexgex.o kexdhc.o kexgexc.o scard.o msg.o progressmeter.o dns.o \
+-	entropy.o scard-opensc.o gss-genr.o umac.o jpake.o schnorr.o
++	entropy.o scard-opensc.o gss-genr.o umac.o jpake.o schnorr.o nsskeys.o
+ 
+ SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
+ 	sshconnect.o sshconnect1.o sshconnect2.o mux.o
+diff -up openssh-5.2p1/key.h.nss-keys openssh-5.2p1/key.h
+--- openssh-5.2p1/key.h.nss-keys	2008-06-12 20:40:35.000000000 +0200
++++ openssh-5.2p1/key.h	2008-11-18 19:11:41.000000000 +0100
+@@ -29,11 +29,17 @@
+ #include <openssl/rsa.h>
+ #include <openssl/dsa.h>
+ 
 +#ifdef HAVE_LIBNSS
-+	{ "usenss", oUseNSS },
-+	{ "nsstoken", oNSSToken },
-+#else
-+	{ "usenss", oUnsupported },
-+	{ "nsstoken", oNSSToken },
++#include <nss.h>
++#include <keyhi.h>
 +#endif
- 	{ "clearallforwardings", oClearAllForwardings },
- 	{ "enablesshkeysign", oEnableSSHKeysign },
- 	{ "verifyhostkeydns", oVerifyHostKeyDNS },
-@@ -612,6 +620,14 @@ parse_string:
- 		charptr = &options->smartcard_device;
- 		goto parse_string;
- 
-+	case oUseNSS:
-+		intptr = &options->use_nss;
-+		goto parse_flag;
 +
-+	case oNSSToken:
-+		charptr = &options->nss_token;
-+		goto parse_command;
-+
- 	case oProxyCommand:
- 		charptr = &options->proxy_command;
- parse_command:
-@@ -1047,6 +1063,8 @@ initialize_options(Options * options)
- 	options->preferred_authentications = NULL;
- 	options->bind_address = NULL;
- 	options->smartcard_device = NULL;
-+	options->use_nss = -1;
-+	options->nss_token = NULL;
- 	options->enable_ssh_keysign = - 1;
- 	options->no_host_authentication_for_localhost = - 1;
- 	options->identities_only = - 1;
-@@ -1177,6 +1195,8 @@ fill_default_options(Options * options)
- 		options->no_host_authentication_for_localhost = 0;
- 	if (options->identities_only == -1)
- 		options->identities_only = 0;
-+	if (options->use_nss == -1)
-+		options->use_nss = 0;
- 	if (options->enable_ssh_keysign == -1)
- 		options->enable_ssh_keysign = 0;
- 	if (options->rekey_limit == -1)
-diff -up openssh-5.2p1/readconf.h.nss-keys openssh-5.2p1/readconf.h
---- openssh-5.2p1/readconf.h.nss-keys	2009-02-14 06:28:21.000000000 +0100
-+++ openssh-5.2p1/readconf.h	2009-03-10 03:51:55.868252768 +0100
-@@ -85,6 +85,8 @@ typedef struct {
- 	char   *preferred_authentications;
- 	char   *bind_address;	/* local socket address for connection to sshd */
- 	char   *smartcard_device; /* Smartcard reader device */
-+	int     use_nss;        /* Use NSS library for keys */
-+	char   *nss_token;      /* Look for NSS keys on token */
- 	int	verify_host_key_dns;	/* Verify host key using DNS */
+ typedef struct Key Key;
+ enum types {
+ 	KEY_RSA1,
+ 	KEY_RSA,
+ 	KEY_DSA,
++	KEY_NSS,
+ 	KEY_UNSPEC
+ };
+ enum fp_type {
+@@ -48,16 +54,30 @@ enum fp_rep {
  
- 	int     num_identity_files;	/* Number of files for RSA/DSA identities. */
+ /* key is stored in external hardware */
+ #define KEY_FLAG_EXT		0x0001
++#define KEY_FLAG_NSS		0x0002
++
++#ifdef HAVE_LIBNSS
++typedef struct NSSKey NSSKey;
++struct NSSKey {
++	SECKEYPrivateKey *privk;
++	SECKEYPublicKey *pubk;
++};
++#endif
+ 
+ struct Key {
+ 	int	 type;
+ 	int	 flags;
+ 	RSA	*rsa;
+ 	DSA	*dsa;
++#ifdef HAVE_LIBNSS
++	NSSKey  *nss;
++#endif
+ };
+ 
+ Key		*key_new(int);
+ Key		*key_new_private(int);
++Key 		*key_new_nss(int);
++Key		*key_new_nss_copy(int, const Key *);
+ void		 key_free(Key *);
+ Key		*key_demote(const Key *);
+ int		 key_equal(const Key *, const Key *);
 diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
 --- openssh-5.2p1/ssh-add.c.nss-keys	2008-02-28 09:13:52.000000000 +0100
-+++ openssh-5.2p1/ssh-add.c	2009-03-10 03:51:56.254252403 +0100
-@@ -42,8 +42,18 @@
- #include <sys/param.h>
- 
++++ openssh-5.2p1/ssh-add.c	2008-11-18 19:11:41.000000000 +0100
+@@ -44,6 +44,14 @@
  #include <openssl/evp.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
  
 +#ifdef HAVE_LIBNSS
@@ -748,7 +949,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  #include <fcntl.h>
  #include <pwd.h>
  #include <stdarg.h>
-@@ -57,6 +67,7 @@
+@@ -57,6 +65,7 @@
  #include "rsa.h"
  #include "log.h"
  #include "key.h"
@@ -756,16 +957,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  #include "buffer.h"
  #include "authfd.h"
  #include "authfile.h"
-@@ -245,7 +256,7 @@ list_identities(AuthenticationConnection
- 		    key = ssh_get_next_identity(ac, &comment, version)) {
- 			had_identities = 1;
- 			if (do_fp) {
--				fp = key_fingerprint(key, SSH_FP_MD5,
-+				fp = key_fingerprint(key, FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5,
- 				    SSH_FP_HEX);
- 				printf("%d %s %s (%s)\n",
- 				    key_size(key), fp, comment, key_type(key));
-@@ -307,6 +318,117 @@ do_file(AuthenticationConnection *ac, in
+@@ -307,6 +316,117 @@ do_file(AuthenticationConnection *ac, in
  	return 0;
  }
  
@@ -883,7 +1075,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  static void
  usage(void)
  {
-@@ -334,16 +456,25 @@ main(int argc, char **argv)
+@@ -334,6 +454,10 @@ main(int argc, char **argv)
  	AuthenticationConnection *ac = NULL;
  	char *sc_reader_id = NULL;
  	int i, ch, deleting = 0, ret = 0;
@@ -894,24 +1086,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  
  	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
  	sanitise_stdfd();
- 
- 	__progname = ssh_get_progname(argv[0]);
-+	SSLeay_add_all_algorithms();
-+	if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+		fprintf(stderr,
-+		    "FIPS integrity verification test failed.\n");
-+		exit(3);
-+	}
-+
- 	init_rng();
- 	seed_rng();
- 
--	SSLeay_add_all_algorithms();
--
- 	/* At first, get a connection to the authentication agent. */
- 	ac = ssh_get_authentication_connection();
- 	if (ac == NULL) {
-@@ -351,7 +482,7 @@ main(int argc, char **argv)
+@@ -351,7 +475,7 @@ main(int argc, char **argv)
  		    "Could not open a connection to your authentication agent.\n");
  		exit(2);
  	}
@@ -920,7 +1095,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  		switch (ch) {
  		case 'l':
  		case 'L':
-@@ -373,6 +504,11 @@ main(int argc, char **argv)
+@@ -373,6 +497,11 @@ main(int argc, char **argv)
  			if (delete_all(ac) == -1)
  				ret = 1;
  			goto done;
@@ -932,7 +1107,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  		case 's':
  			sc_reader_id = optarg;
  			break;
-@@ -387,6 +523,11 @@ main(int argc, char **argv)
+@@ -387,6 +516,11 @@ main(int argc, char **argv)
  				goto done;
  			}
  			break;
@@ -944,7 +1119,7 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  		default:
  			usage();
  			ret = 1;
-@@ -400,6 +541,40 @@ main(int argc, char **argv)
+@@ -400,6 +534,40 @@ main(int argc, char **argv)
  			ret = 1;
  		goto done;
  	}
@@ -985,485 +1160,9 @@ diff -up openssh-5.2p1/ssh-add.c.nss-keys openssh-5.2p1/ssh-add.c
  	if (argc == 0) {
  		char buf[MAXPATHLEN];
  		struct passwd *pw;
-diff -up openssh-5.2p1/ssh-agent.c.nss-keys openssh-5.2p1/ssh-agent.c
---- openssh-5.2p1/ssh-agent.c.nss-keys	2008-07-04 15:10:49.000000000 +0200
-+++ openssh-5.2p1/ssh-agent.c	2009-03-10 03:51:56.171221623 +0100
-@@ -51,6 +51,8 @@
- 
- #include <openssl/evp.h>
- #include <openssl/md5.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- #include "openbsd-compat/openssl-compat.h"
- 
- #include <errno.h>
-@@ -80,6 +82,10 @@
- #include "scard.h"
- #endif
- 
-+#ifdef HAVE_LIBNSS
-+#include "nsskeys.h"
-+#endif
-+
- #if defined(HAVE_SYS_PRCTL_H)
- #include <sys/prctl.h>	/* For prctl() and PR_SET_DUMPABLE */
- #endif
-@@ -196,9 +202,9 @@ confirm_key(Identity *id)
- 	char *p;
- 	int ret = -1;
- 
--	p = key_fingerprint(id->key, SSH_FP_MD5, SSH_FP_HEX);
--	if (ask_permission("Allow use of key %s?\nKey fingerprint %s.",
--	    id->comment, p))
-+	p = key_fingerprint(id->key, FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5, SSH_FP_HEX);
-+	if (ask_permission("Allow use of key %s?\nKey %sfingerprint %s.",
-+	    id->comment, FIPS_mode() ? "SHA1 " : "", p))
- 		ret = 0;
- 	xfree(p);
- 
-@@ -714,6 +720,114 @@ send:
- }
- #endif /* SMARTCARD */
- 
-+#ifdef HAVE_LIBNSS
-+static void
-+process_add_nss_key (SocketEntry *e)
-+{
-+	char *tokenname = NULL, *keyname = NULL, *password = NULL;
-+	int i, version, success = 0, death = 0, confirm = 0;
-+	Key **keys, *k;
-+	Identity *id;
-+	Idtab *tab;
-+
-+	tokenname = buffer_get_string(&e->request, NULL);
-+	keyname = buffer_get_string(&e->request, NULL);
-+	password = buffer_get_string(&e->request, NULL);
-+
-+	while (buffer_len(&e->request)) {
-+		switch (buffer_get_char(&e->request)) {
-+		case SSH_AGENT_CONSTRAIN_LIFETIME:
-+			death = time(NULL) + buffer_get_int(&e->request);
-+			break;
-+		case SSH_AGENT_CONSTRAIN_CONFIRM:
-+			confirm = 1;
-+			break;
-+		default:
-+			break;
-+		}
-+	}
-+	if (lifetime && !death)
-+		death = time(NULL) + lifetime;
-+
-+	keys = nss_get_keys(tokenname, keyname, password);
-+	/* password is owned by keys[0] now */
-+	xfree(tokenname);
-+	xfree(keyname);
-+
-+	if (keys == NULL) {
-+		memset(password, 0, strlen(password));
-+		xfree(password);
-+		error("nss_get_keys failed");
-+		goto send;
-+	}
-+	for (i = 0; keys[i] != NULL; i++) {
-+		k = keys[i];
-+		version = k->type == KEY_RSA1 ? 1 : 2;
-+		tab = idtab_lookup(version);
-+		if (lookup_identity(k, version) == NULL) {
-+			id = xmalloc(sizeof(Identity));
-+			id->key = k;
-+			id->comment = nss_get_key_label(k);
-+			id->death = death;
-+			id->confirm = confirm;
-+			TAILQ_INSERT_TAIL(&tab->idlist, id, next);
-+			tab->nentries++;
-+			success = 1;
-+		} else {
-+			key_free(k);
-+		}
-+		keys[i] = NULL;
-+	}
-+	xfree(keys);
-+send:
-+	buffer_put_int(&e->output, 1);
-+	buffer_put_char(&e->output,
-+	    success ? SSH_AGENT_SUCCESS : SSH_AGENT_FAILURE);
-+}
-+
-+static void
-+process_remove_nss_key(SocketEntry *e)
-+{
-+	char *tokenname = NULL, *keyname = NULL, *password = NULL;
-+	int i, version, success = 0;
-+	Key **keys, *k = NULL;
-+	Identity *id;
-+	Idtab *tab;
-+
-+	tokenname = buffer_get_string(&e->request, NULL);
-+	keyname = buffer_get_string(&e->request, NULL);
-+	password = buffer_get_string(&e->request, NULL);
-+
-+	keys = nss_get_keys(tokenname, keyname, password);
-+	xfree(tokenname);
-+	xfree(keyname);
-+	xfree(password);
-+
-+	if (keys == NULL || keys[0] == NULL) {
-+		error("nss_get_keys failed");
-+		goto send;
-+	}
-+	for (i = 0; keys[i] != NULL; i++) {
-+		k = keys[i];
-+		version = k->type == KEY_RSA1 ? 1 : 2;
-+		if ((id = lookup_identity(k, version)) != NULL) {
-+			tab = idtab_lookup(version);
-+			TAILQ_REMOVE(&tab->idlist, id, next);
-+			tab->nentries--;
-+			free_identity(id);
-+			success = 1;
-+		}
-+		key_free(k);
-+		keys[i] = NULL;
-+	}
-+	xfree(keys);
-+send:
-+	buffer_put_int(&e->output, 1);
-+	buffer_put_char(&e->output,
-+	    success ? SSH_AGENT_SUCCESS : SSH_AGENT_FAILURE);
-+}
-+#endif /* HAVE_LIBNSS */
-+
- /* dispatch incoming messages */
- 
- static void
-@@ -806,6 +920,15 @@ process_message(SocketEntry *e)
- 		process_remove_smartcard_key(e);
- 		break;
- #endif /* SMARTCARD */
-+#ifdef HAVE_LIBNSS
-+	case SSH_AGENTC_ADD_NSS_KEY:
-+	case SSH_AGENTC_ADD_NSS_KEY_CONSTRAINED:
-+		process_add_nss_key(e);
-+		break;
-+	case SSH_AGENTC_REMOVE_NSS_KEY:
-+		process_remove_nss_key(e);
-+		break;
-+#endif /* SMARTCARD */
- 	default:
- 		/* Unknown message.  Respond with failure. */
- 		error("Unknown message %d", type);
-@@ -1075,6 +1198,11 @@ main(int ac, char **av)
- #endif
- 
- 	SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fprintf(stderr,
-+                    "FIPS integrity verification test failed.\n");
-+                exit(3);
-+        }
- 
- 	__progname = ssh_get_progname(av[0]);
- 	init_rng();
-diff -up openssh-5.2p1/ssh.c.nss-keys openssh-5.2p1/ssh.c
---- openssh-5.2p1/ssh.c.nss-keys	2009-02-14 06:28:21.000000000 +0100
-+++ openssh-5.2p1/ssh.c	2009-03-10 03:51:56.176206362 +0100
-@@ -71,6 +71,8 @@
- 
- #include <openssl/evp.h>
- #include <openssl/err.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- #include "openbsd-compat/openssl-compat.h"
- #include "openbsd-compat/sys-queue.h"
- 
-@@ -104,6 +106,9 @@
- #ifdef SMARTCARD
- #include "scard.h"
- #endif
-+#ifdef HAVE_LIBNSS
-+#include "nsskeys.h"
-+#endif
- 
- extern char *__progname;
- 
-@@ -217,6 +222,10 @@ main(int ac, char **av)
- 	sanitise_stdfd();
- 
- 	__progname = ssh_get_progname(av[0]);
-+        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fatal("FIPS integrity verification test failed.");
-+        }
- 	init_rng();
- 
- 	/*
-@@ -547,7 +556,6 @@ main(int ac, char **av)
- 	if (!host)
- 		usage();
- 
--	SSLeay_add_all_algorithms();
- 	ERR_load_crypto_strings();
- 
- 	/* Initialize the command to execute on remote host. */
-@@ -1231,9 +1239,11 @@ load_public_identity_files(void)
- 	int i = 0;
- 	Key *public;
- 	struct passwd *pw;
--#ifdef SMARTCARD
-+#if defined(SMARTCARD) || defined(HAVE_LIBNSS)
- 	Key **keys;
-+#endif
- 
-+#ifdef SMARTCARD
- 	if (options.smartcard_device != NULL &&
- 	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
- 	    (keys = sc_get_keys(options.smartcard_device, NULL)) != NULL) {
-@@ -1256,6 +1266,27 @@ load_public_identity_files(void)
- 		xfree(keys);
- 	}
- #endif /* SMARTCARD */
-+#ifdef HAVE_LIBNSS
-+	if (options.use_nss &&
-+	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
-+	    (keys = nss_get_keys(options.nss_token, NULL, NULL)) != NULL) {
-+		int count;
-+		for (count = 0; keys[count] != NULL; count++) {
-+			memmove(&options.identity_files[1], &options.identity_files[0],
-+			    sizeof(char *) * (SSH_MAX_IDENTITY_FILES - 1));
-+			memmove(&options.identity_keys[1], &options.identity_keys[0],
-+			    sizeof(Key *) * (SSH_MAX_IDENTITY_FILES - 1));
-+			options.num_identity_files++;
-+			options.identity_keys[0] = keys[count];
-+			options.identity_files[0] = nss_get_key_label(keys[count]);
-+		}
-+		if (options.num_identity_files > SSH_MAX_IDENTITY_FILES)
-+			options.num_identity_files = SSH_MAX_IDENTITY_FILES;
-+		i += count;
-+		xfree(keys);
-+	}
-+#endif /* HAVE_LIBNSS */
-+
- 	if ((pw = getpwuid(original_real_uid)) == NULL)
- 		fatal("load_public_identity_files: getpwuid failed");
- 	pwname = xstrdup(pw->pw_name);
-diff -up openssh-5.2p1/ssh-dss.c.nss-keys openssh-5.2p1/ssh-dss.c
---- openssh-5.2p1/ssh-dss.c.nss-keys	2006-11-07 13:14:42.000000000 +0100
-+++ openssh-5.2p1/ssh-dss.c	2009-03-10 03:51:55.843232632 +0100
-@@ -39,6 +39,10 @@
- #include "log.h"
- #include "key.h"
- 
-+#ifdef HAVE_LIBNSS
-+#include <cryptohi.h>
-+#endif
-+
- #define INTBLOB_LEN	20
- #define SIGBLOB_LEN	(2*INTBLOB_LEN)
- 
-@@ -57,6 +61,34 @@ ssh_dss_sign(const Key *key, u_char **si
- 		error("ssh_dss_sign: no DSA key");
- 		return -1;
- 	}
-+#ifdef HAVE_LIBNSS
-+	if (key->flags & KEY_FLAG_NSS) {
-+		SECItem sigitem;
-+		SECItem *rawsig;
-+
-+		memset(&sigitem, 0, sizeof(sigitem));
-+		if (SEC_SignData(&sigitem, (u_char *)data, datalen, key->nss->privk,
-+			SEC_OID_ANSIX9_DSA_SIGNATURE_WITH_SHA1_DIGEST) != SECSuccess) {
-+			error("ssh_dss_sign: sign failed");
-+			return -1;
-+		}
-+		
-+		if ((rawsig=DSAU_DecodeDerSig(&sigitem)) == NULL) {
-+			error("ssh_dss_sign: der decode failed");
-+			SECITEM_ZfreeItem(&sigitem, PR_FALSE);
-+			return -1;
-+		}
-+		SECITEM_ZfreeItem(&sigitem, PR_FALSE);
-+		if (rawsig->len != SIGBLOB_LEN) {
-+			error("ssh_dss_sign: unsupported signature length %d",
-+				rawsig->len);
-+			SECITEM_ZfreeItem(rawsig, PR_TRUE);
-+			return -1;
-+		}
-+		memcpy(sigblob, rawsig->data, SIGBLOB_LEN);
-+		SECITEM_ZfreeItem(rawsig, PR_TRUE);
-+	} else {
-+#endif
- 	EVP_DigestInit(&md, evp_md);
- 	EVP_DigestUpdate(&md, data, datalen);
- 	EVP_DigestFinal(&md, digest, &dlen);
-@@ -80,7 +112,9 @@ ssh_dss_sign(const Key *key, u_char **si
- 	BN_bn2bin(sig->r, sigblob+ SIGBLOB_LEN - INTBLOB_LEN - rlen);
- 	BN_bn2bin(sig->s, sigblob+ SIGBLOB_LEN - slen);
- 	DSA_SIG_free(sig);
--
-+#ifdef HAVE_LIBNSS
-+	}
-+#endif
- 	if (datafellows & SSH_BUG_SIGBLOB) {
- 		if (lenp != NULL)
- 			*lenp = SIGBLOB_LEN;
-diff -up openssh-5.2p1/ssh-keygen.c.nss-keys openssh-5.2p1/ssh-keygen.c
---- openssh-5.2p1/ssh-keygen.c.nss-keys	2009-02-21 22:47:02.000000000 +0100
-+++ openssh-5.2p1/ssh-keygen.c	2009-03-10 03:51:56.249239228 +0100
-@@ -21,6 +21,8 @@
- 
- #include <openssl/evp.h>
- #include <openssl/pem.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- #include "openbsd-compat/openssl-compat.h"
- 
- #include <errno.h>
-@@ -53,6 +55,11 @@
- #include "scard.h"
- #endif
- 
-+#ifdef HAVE_LIBNSS
-+#include <nss.h>
-+#include "nsskeys.h"
-+#endif
-+
- /* Number of bits in the RSA/DSA key.  This value can be set on the command line. */
- #define DEFAULT_BITS		2048
- #define DEFAULT_BITS_DSA	1024
-@@ -501,6 +508,26 @@ do_download(struct passwd *pw, const cha
- }
- #endif /* SMARTCARD */
- 
-+#ifdef HAVE_LIBNSS
-+static void
-+do_nss_download(struct passwd *pw, const char *tokenname, const char *keyname)
-+{
-+	Key **keys = NULL;
-+	int i;
-+	
-+	keys = nss_get_keys(tokenname, keyname, NULL);
-+	if (keys == NULL)
-+		fatal("cannot find public key in NSS");
-+	for (i = 0; keys[i]; i++) {
-+		key_write(keys[i], stdout);
-+		key_free(keys[i]);
-+		fprintf(stdout, "\n");
-+	}
-+	xfree(keys);
-+	exit(0);
-+}
-+#endif /* HAVE_LIBNSS */
-+
- static void
- do_fingerprint(struct passwd *pw)
- {
-@@ -512,7 +539,7 @@ do_fingerprint(struct passwd *pw)
- 	enum fp_type fptype;
- 	struct stat st;
- 
--	fptype = print_bubblebabble ? SSH_FP_SHA1 : SSH_FP_MD5;
-+	fptype = print_bubblebabble ? SSH_FP_SHA1 : FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5;
- 	rep =    print_bubblebabble ? SSH_FP_BUBBLEBABBLE : SSH_FP_HEX;
- 
- 	if (!have_identity)
-@@ -1083,7 +1110,8 @@ main(int argc, char **argv)
- 	Key *private, *public;
- 	struct passwd *pw;
- 	struct stat st;
--	int opt, type, fd, download = 0;
-+	int opt, type, fd, download = 1;
-+	int use_nss = 0;
- 	u_int32_t memory = 0, generator_wanted = 0, trials = 100;
- 	int do_gen_candidates = 0, do_screen_candidates = 0;
- 	BIGNUM *start = NULL;
-@@ -1099,6 +1127,12 @@ main(int argc, char **argv)
- 	__progname = ssh_get_progname(argv[0]);
- 
- 	SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fprintf(stderr,
-+                    "FIPS integrity verification test failed.\n");
-+                exit(3);
-+        }
-+
- 	log_init(argv[0], SYSLOG_LEVEL_INFO, SYSLOG_FACILITY_USER, 1);
- 
- 	init_rng();
-@@ -1116,7 +1150,7 @@ main(int argc, char **argv)
- 	}
- 
- 	while ((opt = getopt(argc, argv,
--	    "degiqpclBHvxXyF:b:f:t:U:D:P:N:C:r:g:R:T:G:M:S:a:W:")) != -1) {
-+	    "degiqpclnBHvxXyF:b:f:t:U:D:P:N:C:r:g:R:T:G:M:S:a:W:")) != -1) {
- 		switch (opt) {
- 		case 'b':
- 			bits = (u_int32_t)strtonum(optarg, 768, 32768, &errstr);
-@@ -1156,6 +1190,10 @@ main(int argc, char **argv)
- 		case 'g':
- 			print_generic = 1;
- 			break;
-+		case 'n':
-+			use_nss = 1;
-+			download = 1;
-+			break;
- 		case 'P':
- 			identity_passphrase = optarg;
- 			break;
-@@ -1187,10 +1225,10 @@ main(int argc, char **argv)
- 		case 't':
- 			key_type_name = optarg;
- 			break;
--		case 'D':
--			download = 1;
--			/*FALLTHROUGH*/
- 		case 'U':
-+			download = 0;
-+			/*FALLTHROUGH*/
-+		case 'D':
- 			reader_id = optarg;
- 			break;
- 		case 'v':
-@@ -1299,6 +1337,17 @@ main(int argc, char **argv)
- 			exit(0);
- 		}
- 	}
-+
-+	if (use_nss) {
-+#ifdef HAVE_LIBNSS
-+		if (download)
-+			do_nss_download(pw, reader_id, identity_file);
-+		else
-+			fatal("no support for NSS key upload.");
-+#else
-+		fatal("no support for NSS keys.");
-+#endif
-+	}
- 	if (reader_id != NULL) {
- #ifdef SMARTCARD
- 		if (download)
-@@ -1465,14 +1514,15 @@ passphrase_again:
- 	fclose(f);
- 
- 	if (!quiet) {
--		char *fp = key_fingerprint(public, SSH_FP_MD5, SSH_FP_HEX);
--		char *ra = key_fingerprint(public, SSH_FP_MD5,
-+		int fips_on = FIPS_mode();
-+		char *fp = key_fingerprint(public, fips_on ? SSH_FP_SHA1 : SSH_FP_MD5, SSH_FP_HEX);
-+		char *ra = key_fingerprint(public, fips_on ? SSH_FP_SHA1 : SSH_FP_MD5,
- 		    SSH_FP_RANDOMART);
- 		printf("Your public key has been saved in %s.\n",
- 		    identity_file);
--		printf("The key fingerprint is:\n");
-+		printf("The key %sfingerprint is:\n", fips_on ? "SHA1 " : "");
- 		printf("%s %s\n", fp, comment);
--		printf("The key's randomart image is:\n");
-+		printf("The key's %srandomart image is:\n", fips_on ? "SHA1 " :"");
- 		printf("%s\n", ra);
- 		xfree(ra);
- 		xfree(fp);
 diff -up openssh-5.2p1/ssh-rsa.c.nss-keys openssh-5.2p1/ssh-rsa.c
 --- openssh-5.2p1/ssh-rsa.c.nss-keys	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-5.2p1/ssh-rsa.c	2009-03-10 03:51:55.930219040 +0100
++++ openssh-5.2p1/ssh-rsa.c	2008-11-18 19:11:41.000000000 +0100
 @@ -32,6 +32,10 @@
  #include "compat.h"
  #include "ssh.h"
@@ -1534,3 +1233,165 @@ diff -up openssh-5.2p1/ssh-rsa.c.nss-keys openssh-5.2p1/ssh-rsa.c
  	/* encode signature */
  	buffer_init(&b);
  	buffer_put_cstring(&b, "ssh-rsa");
+diff -up openssh-5.2p1/ssh-keygen.c.nss-keys openssh-5.2p1/ssh-keygen.c
+--- openssh-5.2p1/ssh-keygen.c.nss-keys	2008-07-14 03:28:29.000000000 +0200
++++ openssh-5.2p1/ssh-keygen.c	2008-11-18 19:11:41.000000000 +0100
+@@ -53,6 +53,11 @@
+ #include "scard.h"
+ #endif
+ 
++#ifdef HAVE_LIBNSS
++#include <nss.h>
++#include "nsskeys.h"
++#endif
++
+ /* Number of bits in the RSA/DSA key.  This value can be set on the command line. */
+ #define DEFAULT_BITS		2048
+ #define DEFAULT_BITS_DSA	1024
+@@ -501,6 +506,26 @@ do_download(struct passwd *pw, const cha
+ }
+ #endif /* SMARTCARD */
+ 
++#ifdef HAVE_LIBNSS
++static void
++do_nss_download(struct passwd *pw, const char *tokenname, const char *keyname)
++{
++	Key **keys = NULL;
++	int i;
++	
++	keys = nss_get_keys(tokenname, keyname, NULL);
++	if (keys == NULL)
++		fatal("cannot find public key in NSS");
++	for (i = 0; keys[i]; i++) {
++		key_write(keys[i], stdout);
++		key_free(keys[i]);
++		fprintf(stdout, "\n");
++	}
++	xfree(keys);
++	exit(0);
++}
++#endif /* HAVE_LIBNSS */
++
+ static void
+ do_fingerprint(struct passwd *pw)
+ {
+@@ -1083,7 +1108,8 @@ main(int argc, char **argv)
+ 	Key *private, *public;
+ 	struct passwd *pw;
+ 	struct stat st;
+-	int opt, type, fd, download = 0;
++	int opt, type, fd, download = 1;
++	int use_nss = 0;
+ 	u_int32_t memory = 0, generator_wanted = 0, trials = 100;
+ 	int do_gen_candidates = 0, do_screen_candidates = 0;
+ 	BIGNUM *start = NULL;
+@@ -1116,7 +1142,7 @@ main(int argc, char **argv)
+ 	}
+ 
+ 	while ((opt = getopt(argc, argv,
+-	    "degiqpclBHvxXyF:b:f:t:U:D:P:N:C:r:g:R:T:G:M:S:a:W:")) != -1) {
++	    "degiqpclnBHvxXyF:b:f:t:U:D:P:N:C:r:g:R:T:G:M:S:a:W:")) != -1) {
+ 		switch (opt) {
+ 		case 'b':
+ 			bits = (u_int32_t)strtonum(optarg, 768, 32768, &errstr);
+@@ -1156,6 +1182,10 @@ main(int argc, char **argv)
+ 		case 'g':
+ 			print_generic = 1;
+ 			break;
++		case 'n':
++			use_nss = 1;
++			download = 1;
++			break;
+ 		case 'P':
+ 			identity_passphrase = optarg;
+ 			break;
+@@ -1187,10 +1217,10 @@ main(int argc, char **argv)
+ 		case 't':
+ 			key_type_name = optarg;
+ 			break;
+-		case 'D':
+-			download = 1;
+-			/*FALLTHROUGH*/
+ 		case 'U':
++			download = 0;
++			/*FALLTHROUGH*/
++		case 'D':
+ 			reader_id = optarg;
+ 			break;
+ 		case 'v':
+@@ -1299,6 +1329,17 @@ main(int argc, char **argv)
+ 			exit(0);
+ 		}
+ 	}
++
++	if (use_nss) {
++#ifdef HAVE_LIBNSS
++		if (download)
++			do_nss_download(pw, reader_id, identity_file);
++		else
++			fatal("no support for NSS key upload.");
++#else
++		fatal("no support for NSS keys.");
++#endif
++	}
+ 	if (reader_id != NULL) {
+ #ifdef SMARTCARD
+ 		if (download)
+diff -up openssh-5.2p1/readconf.c.nss-keys openssh-5.2p1/readconf.c
+--- openssh-5.2p1/readconf.c.nss-keys	2008-06-29 16:04:03.000000000 +0200
++++ openssh-5.2p1/readconf.c	2008-11-18 19:11:41.000000000 +0100
+@@ -124,6 +124,7 @@ typedef enum {
+ 	oKbdInteractiveAuthentication, oKbdInteractiveDevices, oHostKeyAlias,
+ 	oDynamicForward, oPreferredAuthentications, oHostbasedAuthentication,
+ 	oHostKeyAlgorithms, oBindAddress, oSmartcardDevice,
++	oUseNSS, oNSSToken,
+ 	oClearAllForwardings, oNoHostAuthenticationForLocalhost,
+ 	oEnableSSHKeysign, oRekeyLimit, oVerifyHostKeyDNS, oConnectTimeout,
+ 	oAddressFamily, oGssAuthentication, oGssDelegateCreds,
+@@ -210,6 +211,13 @@ static struct {
+ #else
+ 	{ "smartcarddevice", oUnsupported },
+ #endif
++#ifdef HAVE_LIBNSS
++	{ "usenss", oUseNSS },
++	{ "nsstoken", oNSSToken },
++#else
++	{ "usenss", oUnsupported },
++	{ "nsstoken", oNSSToken },
++#endif
+ 	{ "clearallforwardings", oClearAllForwardings },
+ 	{ "enablesshkeysign", oEnableSSHKeysign },
+ 	{ "verifyhostkeydns", oVerifyHostKeyDNS },
+@@ -603,6 +611,14 @@ parse_string:
+ 		charptr = &options->smartcard_device;
+ 		goto parse_string;
+ 
++	case oUseNSS:
++		intptr = &options->use_nss;
++		goto parse_flag;
++
++	case oNSSToken:
++		charptr = &options->nss_token;
++		goto parse_command;
++
+ 	case oProxyCommand:
+ 		charptr = &options->proxy_command;
+ parse_command:
+@@ -1055,6 +1071,8 @@ initialize_options(Options * options)
+ 	options->preferred_authentications = NULL;
+ 	options->bind_address = NULL;
+ 	options->smartcard_device = NULL;
++	options->use_nss = -1;
++	options->nss_token = NULL;
+ 	options->enable_ssh_keysign = - 1;
+ 	options->no_host_authentication_for_localhost = - 1;
+ 	options->identities_only = - 1;
+@@ -1184,6 +1202,8 @@ fill_default_options(Options * options)
+ 		options->no_host_authentication_for_localhost = 0;
+ 	if (options->identities_only == -1)
+ 		options->identities_only = 0;
++	if (options->use_nss == -1)
++		options->use_nss = 0;
+ 	if (options->enable_ssh_keysign == -1)
+ 		options->enable_ssh_keysign = 0;
+ 	if (options->rekey_limit == -1)

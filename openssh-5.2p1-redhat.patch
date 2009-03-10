@@ -1,78 +1,6 @@
-diff -up openssh-5.2p1/ssh_config.redhat openssh-5.2p1/ssh_config
---- openssh-5.2p1/ssh_config.redhat	2009-02-21 02:45:02.000000000 +0100
-+++ openssh-5.2p1/ssh_config	2009-03-10 03:51:54.749290375 +0100
-@@ -44,3 +44,13 @@
- #   TunnelDevice any:any
- #   PermitLocalCommand no
- #   VisualHostKey no
-+Host *
-+	GSSAPIAuthentication yes
-+# If this option is set to yes then remote X11 clients will have full access
-+# to the original X11 display. As virtually no X11 client supports the untrusted
-+# mode correctly we set this to yes.
-+	ForwardX11Trusted yes
-+# Send locale-related environment variables
-+	SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
-+	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
-+	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
-diff -up openssh-5.2p1/sshd_config.0.redhat openssh-5.2p1/sshd_config.0
---- openssh-5.2p1/sshd_config.0.redhat	2009-02-23 01:18:15.000000000 +0100
-+++ openssh-5.2p1/sshd_config.0	2009-03-10 03:51:54.958364611 +0100
-@@ -467,6 +467,11 @@ DESCRIPTION
-              Defines the number of bits in the ephemeral protocol version 1
-              server key.  The minimum value is 512, and the default is 1024.
- 
-+     ShowPatchLevel
-+	     Specifies whether sshd will display the specific patch level of
-+	     the binary in the server identification string.  The patch level
-+	     is set at compile-time.  The default is M-bM-^@M-^\noM-bM-^@M-^].
-+
-      StrictModes
-              Specifies whether sshd(8) should check file modes and ownership
-              of the user's files and home directory before accepting login.
-@@ -491,9 +496,9 @@ DESCRIPTION
- 
-      SyslogFacility
-              Gives the facility code that is used when logging messages from
--             sshd(8).  The possible values are: DAEMON, USER, AUTH, LOCAL0,
--             LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.  The de-
--             fault is AUTH.
-+             sshd(8).  The possible values are: DAEMON, USER, AUTH, AUTHPRIV,
-+             LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
-+             The default is AUTH.
- 
-      TCPKeepAlive
-              Specifies whether the system should send TCP keepalive messages
-diff -up openssh-5.2p1/sshd_config.5.redhat openssh-5.2p1/sshd_config.5
---- openssh-5.2p1/sshd_config.5.redhat	2009-02-23 01:00:24.000000000 +0100
-+++ openssh-5.2p1/sshd_config.5	2009-03-10 03:51:54.931352756 +0100
-@@ -814,6 +814,14 @@ This option applies to protocol version 
- .It Cm ServerKeyBits
- Defines the number of bits in the ephemeral protocol version 1 server key.
- The minimum value is 512, and the default is 1024.
-+.It Cm ShowPatchLevel 
-+Specifies whether 
-+.Nm sshd 
-+will display the patch level of the binary in the identification string. 
-+The patch level is set at compile-time. 
-+The default is 
-+.Dq no . 
-+This option applies to protocol version 1 only. 
- .It Cm StrictModes
- Specifies whether
- .Xr sshd 8
-@@ -848,7 +856,7 @@ Note that this option applies to protoco
- .It Cm SyslogFacility
- Gives the facility code that is used when logging messages from
- .Xr sshd 8 .
--The possible values are: DAEMON, USER, AUTH, LOCAL0, LOCAL1, LOCAL2,
-+The possible values are: DAEMON, USER, AUTH, AUTHPRIV, LOCAL0, LOCAL1, LOCAL2,
- LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
- The default is AUTH.
- .It Cm TCPKeepAlive
 diff -up openssh-5.2p1/sshd_config.redhat openssh-5.2p1/sshd_config
 --- openssh-5.2p1/sshd_config.redhat	2008-07-02 14:35:43.000000000 +0200
-+++ openssh-5.2p1/sshd_config	2009-03-10 03:51:54.960221540 +0100
++++ openssh-5.2p1/sshd_config	2008-07-23 14:11:12.000000000 +0200
 @@ -33,6 +33,7 @@ Protocol 2
  # Logging
  # obsoletes QuietMode and FascistLogging
@@ -122,11 +50,48 @@ diff -up openssh-5.2p1/sshd_config.redhat openssh-5.2p1/sshd_config
  #X11DisplayOffset 10
  #X11UseLocalhost yes
  #PrintMotd yes
-@@ -100,6 +112,7 @@ Protocol 2
- #Compression delayed
- #ClientAliveInterval 0
- #ClientAliveCountMax 3
-+#ShowPatchLevel no
- #UseDNS yes
- #PidFile /var/run/sshd.pid
- #MaxStartups 10
+diff -up openssh-5.2p1/ssh_config.redhat openssh-5.2p1/ssh_config
+--- openssh-5.2p1/ssh_config.redhat	2007-06-11 06:04:42.000000000 +0200
++++ openssh-5.2p1/ssh_config	2008-07-23 14:07:29.000000000 +0200
+@@ -44,3 +44,13 @@
+ #   TunnelDevice any:any
+ #   PermitLocalCommand no
+ #   VisualHostKey no
++Host *
++	GSSAPIAuthentication yes
++# If this option is set to yes then remote X11 clients will have full access
++# to the original X11 display. As virtually no X11 client supports the untrusted
++# mode correctly we set this to yes.
++	ForwardX11Trusted yes
++# Send locale-related environment variables
++	SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
++	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
++	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+diff -up openssh-5.2p1/sshd_config.0.redhat openssh-5.2p1/sshd_config.0
+--- openssh-5.2p1/sshd_config.0.redhat	2008-07-21 10:30:51.000000000 +0200
++++ openssh-5.2p1/sshd_config.0	2008-07-23 14:07:29.000000000 +0200
+@@ -490,9 +490,9 @@ DESCRIPTION
+ 
+      SyslogFacility
+              Gives the facility code that is used when logging messages from
+-             sshd(8).  The possible values are: DAEMON, USER, AUTH, LOCAL0,
+-             LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.  The de-
+-             fault is AUTH.
++             sshd(8).  The possible values are: DAEMON, USER, AUTH, AUTHPRIV,
++             LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
++             The default is AUTH.
+ 
+      TCPKeepAlive
+              Specifies whether the system should send TCP keepalive messages
+diff -up openssh-5.2p1/sshd_config.5.redhat openssh-5.2p1/sshd_config.5
+--- openssh-5.2p1/sshd_config.5.redhat	2008-07-02 14:35:43.000000000 +0200
++++ openssh-5.2p1/sshd_config.5	2008-07-23 14:07:29.000000000 +0200
+@@ -846,7 +846,7 @@ Note that this option applies to protoco
+ .It Cm SyslogFacility
+ Gives the facility code that is used when logging messages from
+ .Xr sshd 8 .
+-The possible values are: DAEMON, USER, AUTH, LOCAL0, LOCAL1, LOCAL2,
++The possible values are: DAEMON, USER, AUTH, AUTHPRIV, LOCAL0, LOCAL1, LOCAL2,
+ LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
+ The default is AUTH.
+ .It Cm TCPKeepAlive

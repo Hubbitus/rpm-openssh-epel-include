@@ -1,54 +1,7 @@
 diff -up openssh-5.2p1/configure.ac.vendor openssh-5.2p1/configure.ac
---- openssh-5.2p1/configure.ac.vendor	2009-03-10 03:51:54.862255585 +0100
-+++ openssh-5.2p1/configure.ac	2009-03-10 03:51:55.850215090 +0100
-@@ -3335,11 +3335,25 @@ AC_ARG_WITH(selinux,
- 		AC_CHECK_LIB(selinux, setexeccon, [ LIBSELINUX="-lselinux" ],
- 		    AC_MSG_ERROR(SELinux support requires libselinux library))
- 		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
-+		LIBS="$LIBS $LIBSELINUX"
- 		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
-+		AC_CHECK_FUNCS(setkeycreatecon)
- 		LIBS="$save_LIBS"
- 	fi ]
- )
- 
-+# Check whether user wants Linux audit support
-+LINUX_AUDIT_MSG="no"
-+AC_ARG_WITH(linux-audit,
-+	[  --with-linux-audit   Enable Linux audit support],
-+	[ if test "x$withval" != "xno" ; then
-+		AC_DEFINE(HAVE_LINUX_AUDIT,1,[Define if you want Linux audit support.])
-+		LINUX_AUDIT_MSG="yes"
-+		AC_CHECK_HEADERS(libaudit.h)
-+		SSHDLIBS="$SSHDLIBS -laudit"
-+	fi ]
-+)
-+
- # Check whether user wants Kerberos 5 support
- KRB5_MSG="no"
- AC_ARG_WITH(kerberos5,
-@@ -3448,6 +3462,20 @@ AC_ARG_WITH(kerberos5,
- 	]
- )
- 
-+# Check whether user wants NSS support
-+LIBNSS_MSG="no"
-+AC_ARG_WITH(nss,
-+	[  --with-nss   Enable NSS support],
-+	[ if test "x$withval" != "xno" ; then
-+		AC_DEFINE(HAVE_LIBNSS,1,[Define if you want NSS support.])
-+		LIBNSS_MSG="yes"
-+		CPPFLAGS="$CPPFLAGS -I/usr/include/nss3 -I/usr/include/nspr4"
-+		AC_CHECK_HEADERS(pk11pub.h)
-+		LIBS="$LIBS -lnss3"
-+	fi
-+	])
-+AC_SUBST(LIBNSS)
-+
- # Looking for programs, paths and files
- 
- PRIVSEP_PATH=/var/empty
-@@ -3916,6 +3944,12 @@ AC_ARG_WITH(lastlog,
+--- openssh-5.2p1/configure.ac.vendor	2008-07-23 14:13:22.000000000 +0200
++++ openssh-5.2p1/configure.ac	2008-07-23 14:13:22.000000000 +0200
+@@ -3890,6 +3890,12 @@ AC_ARG_WITH(lastlog,
  		fi
  	]
  )
@@ -61,19 +14,7 @@ diff -up openssh-5.2p1/configure.ac.vendor openssh-5.2p1/configure.ac
  
  dnl lastlog, [uw]tmpx? detection
  dnl  NOTE: set the paths in the platform section to avoid the
-@@ -4162,16 +4196,19 @@ echo "                       PAM support
- echo "                   OSF SIA support: $SIA_MSG"
- echo "                 KerberosV support: $KRB5_MSG"
- echo "                   SELinux support: $SELINUX_MSG"
-+echo "               Linux audit support: $LINUX_AUDIT_MSG"
- echo "                 Smartcard support: $SCARD_MSG"
- echo "                     S/KEY support: $SKEY_MSG"
- echo "              TCP Wrappers support: $TCPW_MSG"
- echo "              MD5 password support: $MD5_MSG"
- echo "                   libedit support: $LIBEDIT_MSG"
- echo "  Solaris process contract support: $SPC_MSG"
-+echo "                       NSS support: $LIBNSS_MSG"
- echo "       IP address in \$DISPLAY hack: $DISPLAY_HACK_MSG"
+@@ -4146,6 +4152,7 @@ echo "       IP address in \$DISPLAY hac
  echo "           Translate v4 in v6 hack: $IPV4_IN6_HACK_MSG"
  echo "                  BSD Auth support: $BSD_AUTH_MSG"
  echo "              Random number source: $RAND_MSG"
@@ -81,9 +22,38 @@ diff -up openssh-5.2p1/configure.ac.vendor openssh-5.2p1/configure.ac
  if test ! -z "$USE_RAND_HELPER" ; then
  echo "     ssh-rand-helper collects from: $RAND_HELPER_MSG"
  fi
+diff -up openssh-5.2p1/sshd_config.5.vendor openssh-5.2p1/sshd_config.5
+--- openssh-5.2p1/sshd_config.5.vendor	2008-07-23 14:13:22.000000000 +0200
++++ openssh-5.2p1/sshd_config.5	2008-07-23 14:19:23.000000000 +0200
+@@ -812,6 +812,14 @@ This option applies to protocol version 
+ .It Cm ServerKeyBits
+ Defines the number of bits in the ephemeral protocol version 1 server key.
+ The minimum value is 512, and the default is 1024.
++.It Cm ShowPatchLevel 
++Specifies whether 
++.Nm sshd 
++will display the patch level of the binary in the identification string. 
++The patch level is set at compile-time. 
++The default is 
++.Dq no . 
++This option applies to protocol version 1 only. 
+ .It Cm StrictModes
+ Specifies whether
+ .Xr sshd 8
+diff -up openssh-5.2p1/servconf.h.vendor openssh-5.2p1/servconf.h
+--- openssh-5.2p1/servconf.h.vendor	2008-06-10 15:01:51.000000000 +0200
++++ openssh-5.2p1/servconf.h	2008-07-23 14:13:22.000000000 +0200
+@@ -126,6 +126,7 @@ typedef struct {
+ 	int	max_authtries;
+ 	int	max_sessions;
+ 	char   *banner;			/* SSH-2 banner message */
++	int	show_patchlevel;	/* Show vendor patch level to clients */
+ 	int	use_dns;
+ 	int	client_alive_interval;	/*
+ 					 * poke the client this often to
 diff -up openssh-5.2p1/servconf.c.vendor openssh-5.2p1/servconf.c
---- openssh-5.2p1/servconf.c.vendor	2009-01-28 06:31:23.000000000 +0100
-+++ openssh-5.2p1/servconf.c	2009-03-10 03:51:54.956273911 +0100
+--- openssh-5.2p1/servconf.c.vendor	2008-07-04 05:51:12.000000000 +0200
++++ openssh-5.2p1/servconf.c	2008-07-23 14:32:27.000000000 +0200
 @@ -117,6 +117,7 @@ initialize_server_options(ServerOptions 
  	options->max_authtries = -1;
  	options->max_sessions = -1;
@@ -138,21 +108,10 @@ diff -up openssh-5.2p1/servconf.c.vendor openssh-5.2p1/servconf.c
  	dump_cfg_fmtint(sUseDNS, o->use_dns);
  	dump_cfg_fmtint(sAllowTcpForwarding, o->allow_tcp_forwarding);
  	dump_cfg_fmtint(sUsePrivilegeSeparation, use_privsep);
-diff -up openssh-5.2p1/servconf.h.vendor openssh-5.2p1/servconf.h
---- openssh-5.2p1/servconf.h.vendor	2009-01-28 06:31:23.000000000 +0100
-+++ openssh-5.2p1/servconf.h	2009-03-10 03:51:54.933236643 +0100
-@@ -128,6 +128,7 @@ typedef struct {
- 	int	max_authtries;
- 	int	max_sessions;
- 	char   *banner;			/* SSH-2 banner message */
-+	int	show_patchlevel;	/* Show vendor patch level to clients */
- 	int	use_dns;
- 	int	client_alive_interval;	/*
- 					 * poke the client this often to
 diff -up openssh-5.2p1/sshd_config.0.vendor openssh-5.2p1/sshd_config.0
---- openssh-5.2p1/sshd_config.0.vendor	2009-03-10 03:51:54.775230993 +0100
-+++ openssh-5.2p1/sshd_config.0	2009-03-10 03:51:54.958364611 +0100
-@@ -467,6 +467,11 @@ DESCRIPTION
+--- openssh-5.2p1/sshd_config.0.vendor	2008-07-23 14:13:22.000000000 +0200
++++ openssh-5.2p1/sshd_config.0	2008-07-23 14:13:22.000000000 +0200
+@@ -466,6 +466,11 @@ DESCRIPTION
               Defines the number of bits in the ephemeral protocol version 1
               server key.  The minimum value is 512, and the default is 1024.
  
@@ -164,27 +123,9 @@ diff -up openssh-5.2p1/sshd_config.0.vendor openssh-5.2p1/sshd_config.0
       StrictModes
               Specifies whether sshd(8) should check file modes and ownership
               of the user's files and home directory before accepting login.
-diff -up openssh-5.2p1/sshd_config.5.vendor openssh-5.2p1/sshd_config.5
---- openssh-5.2p1/sshd_config.5.vendor	2009-03-10 03:51:54.785628316 +0100
-+++ openssh-5.2p1/sshd_config.5	2009-03-10 03:51:54.931352756 +0100
-@@ -814,6 +814,14 @@ This option applies to protocol version 
- .It Cm ServerKeyBits
- Defines the number of bits in the ephemeral protocol version 1 server key.
- The minimum value is 512, and the default is 1024.
-+.It Cm ShowPatchLevel 
-+Specifies whether 
-+.Nm sshd 
-+will display the patch level of the binary in the identification string. 
-+The patch level is set at compile-time. 
-+The default is 
-+.Dq no . 
-+This option applies to protocol version 1 only. 
- .It Cm StrictModes
- Specifies whether
- .Xr sshd 8
 diff -up openssh-5.2p1/sshd_config.vendor openssh-5.2p1/sshd_config
---- openssh-5.2p1/sshd_config.vendor	2009-03-10 03:51:54.747256884 +0100
-+++ openssh-5.2p1/sshd_config	2009-03-10 03:51:54.960221540 +0100
+--- openssh-5.2p1/sshd_config.vendor	2008-07-23 14:13:22.000000000 +0200
++++ openssh-5.2p1/sshd_config	2008-07-23 14:13:22.000000000 +0200
 @@ -112,6 +112,7 @@ X11Forwarding yes
  #Compression delayed
  #ClientAliveInterval 0
@@ -194,18 +135,9 @@ diff -up openssh-5.2p1/sshd_config.vendor openssh-5.2p1/sshd_config
  #PidFile /var/run/sshd.pid
  #MaxStartups 10
 diff -up openssh-5.2p1/sshd.c.vendor openssh-5.2p1/sshd.c
---- openssh-5.2p1/sshd.c.vendor	2009-01-28 06:31:23.000000000 +0100
-+++ openssh-5.2p1/sshd.c	2009-03-10 03:51:56.224238563 +0100
-@@ -76,6 +76,8 @@
- #include <openssl/bn.h>
- #include <openssl/md5.h>
- #include <openssl/rand.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- #include "openbsd-compat/openssl-compat.h"
- 
- #ifdef HAVE_SECUREWARE
-@@ -415,7 +417,7 @@ sshd_exchange_identification(int sock_in
+--- openssh-5.2p1/sshd.c.vendor	2008-07-11 09:36:49.000000000 +0200
++++ openssh-5.2p1/sshd.c	2008-07-23 14:35:43.000000000 +0200
+@@ -416,7 +416,7 @@ sshd_exchange_identification(int sock_in
  		minor = PROTOCOL_MINOR_1;
  	}
  	snprintf(buf, sizeof buf, "SSH-%d.%d-%.100s%s", major, minor,
@@ -214,40 +146,7 @@ diff -up openssh-5.2p1/sshd.c.vendor openssh-5.2p1/sshd.c
  	server_version_string = xstrdup(buf);
  
  	/* Send our protocol version identification. */
-@@ -590,6 +592,10 @@ privsep_preauth_child(void)
- 	/* Demote the private keys to public keys. */
- 	demote_sensitive_data();
- 
-+	/* Open the syslog permanently so the chrooted process still
-+	   can write to syslog. */
-+	open_log();
-+	
- 	/* Change our root directory */
- 	if (chroot(_PATH_PRIVSEP_CHROOT_DIR) == -1)
- 		fatal("chroot(\"%s\"): %s", _PATH_PRIVSEP_CHROOT_DIR,
-@@ -1256,6 +1262,12 @@ main(int ac, char **av)
- 	(void)set_auth_parameters(ac, av);
- #endif
- 	__progname = ssh_get_progname(av[0]);
-+
-+        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fatal("FIPS integrity verification test failed.");
-+        }
-+
- 	init_rng();
- 
- 	/* Save argv. Duplicate so setproctitle emulation doesn't clobber it */
-@@ -1408,8 +1420,6 @@ main(int ac, char **av)
- 	else
- 		closefrom(REEXEC_DEVCRYPTO_RESERVED_FD);
- 
--	SSLeay_add_all_algorithms();
--
- 	/*
- 	 * Force logging to stderr until we have loaded the private host
- 	 * key (unless started from inetd)
-@@ -1483,7 +1493,8 @@ main(int ac, char **av)
+@@ -1484,7 +1484,8 @@ main(int ac, char **av)
  		exit(1);
  	}
  
@@ -257,33 +156,3 @@ diff -up openssh-5.2p1/sshd.c.vendor openssh-5.2p1/sshd.c
  
  	/* Store privilege separation user for later use if required. */
  	if ((privsep_pw = getpwnam(SSH_PRIVSEP_USER)) == NULL) {
-@@ -1894,6 +1905,9 @@ main(int ac, char **av)
- 		restore_uid();
- 	}
- #endif
-+#ifdef WITH_SELINUX
-+	ssh_selinux_setup_exec_context(authctxt->pw->pw_name);
-+#endif
- #ifdef USE_PAM
- 	if (options.use_pam) {
- 		do_pam_setcred(1);
-@@ -2174,6 +2188,9 @@ do_ssh2_kex(void)
- 	if (options.ciphers != NULL) {
- 		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
- 		myproposal[PROPOSAL_ENC_ALGS_STOC] = options.ciphers;
-+	} else if (FIPS_mode()) {
-+		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
-+		myproposal[PROPOSAL_ENC_ALGS_STOC] = KEX_FIPS_ENCRYPT;
- 	}
- 	myproposal[PROPOSAL_ENC_ALGS_CTOS] =
- 	    compat_cipher_proposal(myproposal[PROPOSAL_ENC_ALGS_CTOS]);
-@@ -2183,6 +2200,9 @@ do_ssh2_kex(void)
- 	if (options.macs != NULL) {
- 		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
- 		myproposal[PROPOSAL_MAC_ALGS_STOC] = options.macs;
-+	} else if (FIPS_mode()) {
-+		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
-+		myproposal[PROPOSAL_MAC_ALGS_STOC] = KEX_FIPS_MAC;
- 	}
- 	if (options.compression == COMP_NONE) {
- 		myproposal[PROPOSAL_COMP_ALGS_CTOS] =
