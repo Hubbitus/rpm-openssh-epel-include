@@ -62,8 +62,8 @@
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 5.1p1
-Release: 8%{?dist}%{?rescue_rel}
+Version: 5.2p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -74,11 +74,11 @@ Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
-Patch0: openssh-5.1p1-redhat.patch
+Patch0: openssh-5.2p1-redhat.patch
 Patch2: openssh-5.1p1-skip-initial.patch
 Patch3: openssh-3.8.1p1-krb5-config.patch
-Patch4: openssh-5.1p1-vendor.patch
-Patch12: openssh-5.1p1-selinux.patch
+Patch4: openssh-5.2p1-vendor.patch
+Patch12: openssh-5.2p1-selinux.patch
 Patch13: openssh-5.1p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
 Patch17: openssh-4.3p2-cve-2007-3102.patch
@@ -92,13 +92,11 @@ Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch51: openssh-5.1p1-nss-keys.patch
+Patch51: openssh-5.2p1-nss-keys.patch
 Patch54: openssh-5.1p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
-Patch63: openssh-5.1p1-bannerlen.patch
-Patch64: openssh-5.1p1-compat-sessions.patch
-Patch65: openssh-5.1p1-fips.patch
+Patch65: openssh-5.2p1-fips.patch
 
 License: BSD
 Group: Applications/Internet
@@ -229,8 +227,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch54 -p1 -b .gssapi-role
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
-%patch63 -p1 -b .bannerlen
-%patch64 -p1 -b .compat-sessions
 %patch65 -p1 -b .fips
 
 autoreconf
@@ -476,6 +472,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar  9 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-1
+- upgrade to new upstream release
+
 * Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.1p1-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
