@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 1%{?dist}%{?rescue_rel}
+Release: 2%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -472,7 +472,10 @@ fi
 %endif
 
 %changelog
-* Thu Mar  9 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-1
+* Fri Mar 13 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-2
+- add AES-CTR ciphers to the FIPS mode proposal
+
+* Mon Mar  9 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-1
 - upgrade to new upstream release
 
 * Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.1p1-8
