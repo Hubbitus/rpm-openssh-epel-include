@@ -476,7 +476,7 @@ fi
 %changelog
 * Fri Apr  3 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-3
 - fix logging after chroot
-- enable non root users to use chroot %h in internal-sftp
+- enable non root users to use chroot %%h in internal-sftp
 
 * Fri Mar 13 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-2
 - add AES-CTR ciphers to the FIPS mode proposal
