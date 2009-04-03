@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -97,6 +97,7 @@ Patch54: openssh-5.1p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.2p1-fips.patch
+Patch66: openssh-5.2p1-homechroot.patch
 
 License: BSD
 Group: Applications/Internet
@@ -228,6 +229,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
+%patch66 -p1 -b .homechroot
 
 autoreconf
 
@@ -472,6 +474,10 @@ fi
 %endif
 
 %changelog
+* Fri Apr  3 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-3
+- fix logging after chroot
+- enable non root users to use chroot %h in internal-sftp
+
 * Fri Mar 13 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-2
 - add AES-CTR ciphers to the FIPS mode proposal
 
