@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 3%{?dist}%{?rescue_rel}
+Release: 4%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -474,6 +474,10 @@ fi
 %endif
 
 %changelog
+* Mon Apr 20 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-4
+- log if FIPS mode is initialized
+- make aes-ctr cipher modes work in the FIPS mode
+
 * Fri Apr  3 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-3
 - fix logging after chroot
 - enable non root users to use chroot %%h in internal-sftp
