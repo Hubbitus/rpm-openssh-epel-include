@@ -1,6 +1,6 @@
 diff -up openssh-5.2p1/auth2-pubkey.c.fips openssh-5.2p1/auth2-pubkey.c
---- openssh-5.2p1/auth2-pubkey.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/auth2-pubkey.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/auth2-pubkey.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/auth2-pubkey.c	2009-04-17 23:23:42.000000000 +0200
 @@ -33,6 +33,7 @@
  #include <stdio.h>
  #include <stdarg.h>
@@ -20,7 +20,7 @@ diff -up openssh-5.2p1/auth2-pubkey.c.fips openssh-5.2p1/auth2-pubkey.c
  			xfree(fp);
 diff -up openssh-5.2p1/cipher.c.fips openssh-5.2p1/cipher.c
 --- openssh-5.2p1/cipher.c.fips	2009-03-06 18:23:21.000000000 +0100
-+++ openssh-5.2p1/cipher.c	2009-04-17 14:52:11.000000000 +0200
++++ openssh-5.2p1/cipher.c	2009-04-17 23:23:42.000000000 +0200
 @@ -40,6 +40,7 @@
  #include <sys/types.h>
  
@@ -81,7 +81,7 @@ diff -up openssh-5.2p1/cipher.c.fips openssh-5.2p1/cipher.c
  	return -1;
 diff -up openssh-5.2p1/cipher-ctr.c.fips openssh-5.2p1/cipher-ctr.c
 --- openssh-5.2p1/cipher-ctr.c.fips	2007-06-14 15:21:33.000000000 +0200
-+++ openssh-5.2p1/cipher-ctr.c	2009-04-17 23:23:06.000000000 +0200
++++ openssh-5.2p1/cipher-ctr.c	2009-04-17 23:23:42.000000000 +0200
 @@ -140,7 +140,8 @@ evp_aes_128_ctr(void)
  	aes_ctr.do_cipher = ssh_aes_ctr;
  #ifndef SSH_OLD_EVP
@@ -94,7 +94,7 @@ diff -up openssh-5.2p1/cipher-ctr.c.fips openssh-5.2p1/cipher-ctr.c
  }
 diff -up openssh-5.2p1/mac.c.fips openssh-5.2p1/mac.c
 --- openssh-5.2p1/mac.c.fips	2008-06-13 02:58:50.000000000 +0200
-+++ openssh-5.2p1/mac.c	2009-04-17 14:52:11.000000000 +0200
++++ openssh-5.2p1/mac.c	2009-04-17 23:23:42.000000000 +0200
 @@ -28,6 +28,7 @@
  #include <sys/types.h>
  
@@ -145,8 +145,8 @@ diff -up openssh-5.2p1/mac.c.fips openssh-5.2p1/mac.c
  	for (i = 0; macs[i].name; i++) {
  		if (strcmp(name, macs[i].name) == 0) {
 diff -up openssh-5.2p1/Makefile.in.fips openssh-5.2p1/Makefile.in
---- openssh-5.2p1/Makefile.in.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/Makefile.in	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/Makefile.in.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/Makefile.in	2009-04-17 23:23:42.000000000 +0200
 @@ -134,28 +134,28 @@ libssh.a: $(LIBSSH_OBJS)
  	$(RANLIB) $@
  
@@ -185,7 +185,7 @@ diff -up openssh-5.2p1/Makefile.in.fips openssh-5.2p1/Makefile.in
  	$(LD) -o $@ sftp-server.o sftp-common.o sftp-server-main.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
 diff -up openssh-5.2p1/myproposal.h.fips openssh-5.2p1/myproposal.h
 --- openssh-5.2p1/myproposal.h.fips	2009-01-28 06:33:31.000000000 +0100
-+++ openssh-5.2p1/myproposal.h	2009-04-17 14:52:11.000000000 +0200
++++ openssh-5.2p1/myproposal.h	2009-04-17 23:23:42.000000000 +0200
 @@ -53,7 +53,12 @@
  	"hmac-sha1-96,hmac-md5-96"
  #define	KEX_DEFAULT_COMP	"none,zlib@openssh.com,zlib"
@@ -201,8 +201,8 @@ diff -up openssh-5.2p1/myproposal.h.fips openssh-5.2p1/myproposal.h
  static char *myproposal[PROPOSAL_MAX] = {
  	KEX_DEFAULT_KEX,
 diff -up openssh-5.2p1/nsskeys.c.fips openssh-5.2p1/nsskeys.c
---- openssh-5.2p1/nsskeys.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/nsskeys.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/nsskeys.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/nsskeys.c	2009-04-17 23:23:42.000000000 +0200
 @@ -183,8 +183,8 @@ nss_convert_pubkey(Key *k)
  			break;
  	}
@@ -216,7 +216,7 @@ diff -up openssh-5.2p1/nsskeys.c.fips openssh-5.2p1/nsskeys.c
  	return 0;
 diff -up openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips openssh-5.2p1/openbsd-compat/bsd-arc4random.c
 --- openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips	2008-06-04 02:54:00.000000000 +0200
-+++ openssh-5.2p1/openbsd-compat/bsd-arc4random.c	2009-04-17 14:52:11.000000000 +0200
++++ openssh-5.2p1/openbsd-compat/bsd-arc4random.c	2009-04-17 23:23:42.000000000 +0200
 @@ -39,6 +39,7 @@
  static int rc4_ready = 0;
  static RC4_KEY rc4;
@@ -259,18 +259,17 @@ diff -up openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips openssh-5.2p1/openbs
  
  #ifndef ARC4RANDOM_BUF
 diff -up openssh-5.2p1/ssh-add.c.fips openssh-5.2p1/ssh-add.c
---- openssh-5.2p1/ssh-add.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/ssh-add.c	2009-04-17 14:52:11.000000000 +0200
-@@ -42,6 +42,8 @@
+--- openssh-5.2p1/ssh-add.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/ssh-add.c	2009-04-30 13:56:56.000000000 +0200
+@@ -42,6 +42,7 @@
  #include <sys/param.h>
  
  #include <openssl/evp.h>
 +#include <openssl/fips.h>
-+#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
  
  #ifdef HAVE_LIBNSS
-@@ -254,7 +256,7 @@ list_identities(AuthenticationConnection
+@@ -254,7 +255,7 @@ list_identities(AuthenticationConnection
  		    key = ssh_get_next_identity(ac, &comment, version)) {
  			had_identities = 1;
  			if (do_fp) {
@@ -279,40 +278,18 @@ diff -up openssh-5.2p1/ssh-add.c.fips openssh-5.2p1/ssh-add.c
  				    SSH_FP_HEX);
  				printf("%d %s %s (%s)\n",
  				    key_size(key), fp, comment, key_type(key));
-@@ -463,10 +465,19 @@ main(int argc, char **argv)
- 	sanitise_stdfd();
- 
- 	__progname = ssh_get_progname(argv[0]);
-+	SSLeay_add_all_algorithms();
-+	if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+		fprintf(stderr,
-+		    "FIPS integrity verification test failed.\n");
-+		exit(3);
-+	}
-+
- 	init_rng();
- 	seed_rng();
- 
--	SSLeay_add_all_algorithms();
-+	if (FIPS_mode()) {
-+		logit("FIPS mode initialized");
-+	}
- 
- 	/* At first, get a connection to the authentication agent. */
- 	ac = ssh_get_authentication_connection();
 diff -up openssh-5.2p1/ssh-agent.c.fips openssh-5.2p1/ssh-agent.c
---- openssh-5.2p1/ssh-agent.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/ssh-agent.c	2009-04-17 14:52:11.000000000 +0200
-@@ -51,6 +51,8 @@
+--- openssh-5.2p1/ssh-agent.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/ssh-agent.c	2009-04-30 13:57:34.000000000 +0200
+@@ -51,6 +51,7 @@
  
  #include <openssl/evp.h>
  #include <openssl/md5.h>
 +#include <openssl/fips.h>
-+#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
  
  #include <errno.h>
-@@ -200,9 +202,9 @@ confirm_key(Identity *id)
+@@ -200,9 +201,9 @@ confirm_key(Identity *id)
  	char *p;
  	int ret = -1;
  
@@ -325,32 +302,9 @@ diff -up openssh-5.2p1/ssh-agent.c.fips openssh-5.2p1/ssh-agent.c
  		ret = 0;
  	xfree(p);
  
-@@ -1196,6 +1198,11 @@ main(int ac, char **av)
- #endif
- 
- 	SSLeay_add_all_algorithms();
-+	if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+		fprintf(stderr,
-+			"FIPS integrity verification test failed.\n");
-+		exit(3);
-+	}
- 
- 	__progname = ssh_get_progname(av[0]);
- 	init_rng();
-@@ -1356,6 +1363,10 @@ main(int ac, char **av)
- 	/* child */
- 	log_init(__progname, SYSLOG_LEVEL_INFO, SYSLOG_FACILITY_AUTH, 0);
- 
-+	if (FIPS_mode()) {
-+		logit("FIPS mode initialized");
-+	}
-+
- 	if (setsid() == -1) {
- 		error("setsid: %s", strerror(errno));
- 		cleanup_exit(1);
 diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
---- openssh-5.2p1/ssh.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/ssh.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/ssh.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/ssh.c	2009-04-17 23:23:42.000000000 +0200
 @@ -71,6 +71,8 @@
  
  #include <openssl/evp.h>
@@ -391,8 +345,8 @@ diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
  		options.user = xstrdup(pw->pw_name);
  
 diff -up openssh-5.2p1/sshconnect2.c.fips openssh-5.2p1/sshconnect2.c
---- openssh-5.2p1/sshconnect2.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/sshconnect2.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/sshconnect2.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/sshconnect2.c	2009-04-17 23:23:42.000000000 +0200
 @@ -44,6 +44,8 @@
  #include <vis.h>
  #endif
@@ -437,8 +391,8 @@ diff -up openssh-5.2p1/sshconnect2.c.fips openssh-5.2p1/sshconnect2.c
  
  	/*
 diff -up openssh-5.2p1/sshconnect.c.fips openssh-5.2p1/sshconnect.c
---- openssh-5.2p1/sshconnect.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/sshconnect.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/sshconnect.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/sshconnect.c	2009-04-17 23:23:42.000000000 +0200
 @@ -40,6 +40,8 @@
  #include <unistd.h>
  #include <fcntl.h>
@@ -526,8 +480,8 @@ diff -up openssh-5.2p1/sshconnect.c.fips openssh-5.2p1/sshconnect.c
  
  	xfree(fp);
 diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
---- openssh-5.2p1/sshd.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/sshd.c	2009-04-17 14:52:11.000000000 +0200
+--- openssh-5.2p1/sshd.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/sshd.c	2009-04-17 23:23:42.000000000 +0200
 @@ -76,6 +76,8 @@
  #include <openssl/bn.h>
  #include <openssl/md5.h>
@@ -591,18 +545,17 @@ diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
  	if (options.compression == COMP_NONE) {
  		myproposal[PROPOSAL_COMP_ALGS_CTOS] =
 diff -up openssh-5.2p1/ssh-keygen.c.fips openssh-5.2p1/ssh-keygen.c
---- openssh-5.2p1/ssh-keygen.c.fips	2009-04-17 14:52:11.000000000 +0200
-+++ openssh-5.2p1/ssh-keygen.c	2009-04-17 14:52:11.000000000 +0200
-@@ -21,6 +21,8 @@
+--- openssh-5.2p1/ssh-keygen.c.fips	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/ssh-keygen.c	2009-04-30 13:58:02.000000000 +0200
+@@ -21,6 +21,7 @@
  
  #include <openssl/evp.h>
  #include <openssl/pem.h>
 +#include <openssl/fips.h>
-+#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
  
  #include <errno.h>
-@@ -537,7 +539,7 @@ do_fingerprint(struct passwd *pw)
+@@ -537,7 +538,7 @@ do_fingerprint(struct passwd *pw)
  	enum fp_type fptype;
  	struct stat st;
  
@@ -611,29 +564,7 @@ diff -up openssh-5.2p1/ssh-keygen.c.fips openssh-5.2p1/ssh-keygen.c
  	rep =    print_bubblebabble ? SSH_FP_BUBBLEBABBLE : SSH_FP_HEX;
  
  	if (!have_identity)
-@@ -1125,11 +1127,21 @@ main(int argc, char **argv)
- 	__progname = ssh_get_progname(argv[0]);
- 
- 	SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fprintf(stderr,
-+                    "FIPS integrity verification test failed.\n");
-+                exit(3);
-+        }
-+
- 	log_init(argv[0], SYSLOG_LEVEL_INFO, SYSLOG_FACILITY_USER, 1);
- 
- 	init_rng();
- 	seed_rng();
- 
-+	if (FIPS_mode()) {
-+		logit("FIPS mode initialized");
-+	}
-+
- 	/* we need this for the home * directory.  */
- 	pw = getpwuid(getuid());
- 	if (!pw) {
-@@ -1506,14 +1518,15 @@ passphrase_again:
+@@ -1506,14 +1507,15 @@ passphrase_again:
  	fclose(f);
  
  	if (!quiet) {
@@ -653,83 +584,3 @@ diff -up openssh-5.2p1/ssh-keygen.c.fips openssh-5.2p1/ssh-keygen.c
  		printf("%s\n", ra);
  		xfree(ra);
  		xfree(fp);
-diff -up openssh-5.2p1/ssh-keyscan.c.fips openssh-5.2p1/ssh-keyscan.c
---- openssh-5.2p1/ssh-keyscan.c.fips	2009-01-28 06:31:23.000000000 +0100
-+++ openssh-5.2p1/ssh-keyscan.c	2009-04-17 14:52:11.000000000 +0200
-@@ -19,6 +19,8 @@
- #include <arpa/inet.h>
- 
- #include <openssl/bn.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- 
- #include <netdb.h>
- #include <errno.h>
-@@ -731,6 +733,13 @@ main(int argc, char **argv)
- 	extern char *optarg;
- 
- 	__progname = ssh_get_progname(argv[0]);
-+        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fprintf(stderr,
-+                    "FIPS integrity verification test failed.\n");
-+                exit(3);
-+        }
-+
- 	init_rng();
- 	seed_rng();
- 	TAILQ_INIT(&tq);
-@@ -812,6 +821,10 @@ main(int argc, char **argv)
- 
- 	log_init("ssh-keyscan", log_level, SYSLOG_FACILITY_USER, 1);
- 
-+	if (FIPS_mode()) {
-+		logit("FIPS mode initialized");
-+	}
-+
- 	maxfd = fdlim_get(1);
- 	if (maxfd < 0)
- 		fatal("%s: fdlim_get: bad value", __progname);
-diff -up openssh-5.2p1/ssh-keysign.c.fips openssh-5.2p1/ssh-keysign.c
---- openssh-5.2p1/ssh-keysign.c.fips	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-5.2p1/ssh-keysign.c	2009-04-17 14:52:11.000000000 +0200
-@@ -38,6 +38,8 @@
- #include <openssl/evp.h>
- #include <openssl/rand.h>
- #include <openssl/rsa.h>
-+#include <openssl/fips.h>
-+#include <fipscheck.h>
- 
- #include "xmalloc.h"
- #include "log.h"
-@@ -175,6 +177,11 @@ main(int argc, char **argv)
- 
- 	permanently_set_uid(pw);
- 
-+        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fatal("FIPS integrity verification test failed");
-+        }
-+
- 	init_rng();
- 	seed_rng();
- 	arc4random_stir();
-@@ -183,6 +190,10 @@ main(int argc, char **argv)
- 	log_init("ssh-keysign", SYSLOG_LEVEL_DEBUG3, SYSLOG_FACILITY_AUTH, 0);
- #endif
- 
-+	if (FIPS_mode()) {
-+		logit("FIPS mode initialized");
-+	}
-+
- 	/* verify that ssh-keysign is enabled by the admin */
- 	initialize_options(&options);
- 	(void)read_config_file(_PATH_HOST_CONFIG_FILE, "", &options, 0);
-@@ -194,7 +205,6 @@ main(int argc, char **argv)
- 	if (key_fd[0] == -1 && key_fd[1] == -1)
- 		fatal("could not open any host key");
- 
--	SSLeay_add_all_algorithms();
- 	for (i = 0; i < 256; i++)
- 		rnd[i] = arc4random();
- 	RAND_seed(rnd, sizeof(rnd));

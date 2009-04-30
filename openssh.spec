@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 4%{?dist}%{?rescue_rel}
+Release: 5%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -329,12 +329,7 @@ popd
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-keygen \
-    fipshmac $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-keysign \
     fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh \
-    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-agent \
-    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-add \
-    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh-keyscan \
     fipshmac $RPM_BUILD_ROOT%{_sbindir}/sshd \
 %{nil}
 
@@ -410,11 +405,9 @@ fi
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-keygen
-%attr(0644,root,root) %{_bindir}/.ssh-keygen.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
 %attr(4755,root,root) %{_libexecdir}/openssh/ssh-keysign
-%attr(0644,root,root) %{_libexecdir}/openssh/.ssh-keysign.hmac
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -435,11 +428,8 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(2755,root,nobody) %{_bindir}/ssh-agent
-%attr(0644,root,nobody) %{_bindir}/.ssh-agent.hmac
 %attr(0755,root,root) %{_bindir}/ssh-add
-%attr(0644,root,root) %{_bindir}/.ssh-add.hmac
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
-%attr(0644,root,root) %{_bindir}/.ssh-keyscan.hmac
 %attr(0755,root,root) %{_bindir}/sftp
 %attr(0755,root,root) %{_bindir}/ssh-copy-id
 %attr(0644,root,root) %{_mandir}/man1/ssh-agent.1*
@@ -474,6 +464,10 @@ fi
 %endif
 
 %changelog
+* Thu Apr 30 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-5
+- do integrity verification only on binaries which are part
+  of the OpenSSH FIPS modules
+
 * Mon Apr 20 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-4
 - log if FIPS mode is initialized
 - make aes-ctr cipher modes work in the FIPS mode
