@@ -1,6 +1,6 @@
 diff -up openssh-5.2p1/auth2-pubkey.c.fips openssh-5.2p1/auth2-pubkey.c
---- openssh-5.2p1/auth2-pubkey.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/auth2-pubkey.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/auth2-pubkey.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/auth2-pubkey.c	2009-05-15 15:51:01.000000000 +0200
 @@ -33,6 +33,7 @@
  #include <stdio.h>
  #include <stdarg.h>
@@ -18,9 +18,46 @@ diff -up openssh-5.2p1/auth2-pubkey.c.fips openssh-5.2p1/auth2-pubkey.c
  			verbose("Found matching %s key: %s",
  			    key_type(found), fp);
  			xfree(fp);
+diff -up openssh-5.2p1/authfile.c.fips openssh-5.2p1/authfile.c
+--- openssh-5.2p1/authfile.c.fips	2006-09-01 07:38:36.000000000 +0200
++++ openssh-5.2p1/authfile.c	2009-05-15 16:08:34.000000000 +0200
+@@ -143,8 +143,14 @@ key_save_private_rsa1(Key *key, const ch
+ 	/* Allocate space for the private part of the key in the buffer. */
+ 	cp = buffer_append_space(&encrypted, buffer_len(&buffer));
+ 
+-	cipher_set_key_string(&ciphercontext, cipher, passphrase,
+-	    CIPHER_ENCRYPT);
++	if (cipher_set_key_string(&ciphercontext, cipher, passphrase,
++	    CIPHER_ENCRYPT) < 0) {
++	    error("cipher_set_key_string failed.");
++	    buffer_free(&encrypted);
++	    buffer_free(&buffer);
++	    return 0;
++	}
++
+ 	cipher_crypt(&ciphercontext, cp,
+ 	    buffer_ptr(&buffer), buffer_len(&buffer));
+ 	cipher_cleanup(&ciphercontext);
+@@ -414,8 +420,14 @@ key_load_private_rsa1(int fd, const char
+ 	cp = buffer_append_space(&decrypted, buffer_len(&buffer));
+ 
+ 	/* Rest of the buffer is encrypted.  Decrypt it using the passphrase. */
+-	cipher_set_key_string(&ciphercontext, cipher, passphrase,
+-	    CIPHER_DECRYPT);
++	if (cipher_set_key_string(&ciphercontext, cipher, passphrase,
++	    CIPHER_DECRYPT) < 0) {
++	    error("cipher_set_key_string failed.");
++	    buffer_free(&decrypted);
++	    buffer_free(&buffer);
++	    goto fail;
++	}
++
+ 	cipher_crypt(&ciphercontext, cp,
+ 	    buffer_ptr(&buffer), buffer_len(&buffer));
+ 	cipher_cleanup(&ciphercontext);
 diff -up openssh-5.2p1/cipher.c.fips openssh-5.2p1/cipher.c
 --- openssh-5.2p1/cipher.c.fips	2009-03-06 18:23:21.000000000 +0100
-+++ openssh-5.2p1/cipher.c	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/cipher.c	2009-05-15 16:14:16.000000000 +0200
 @@ -40,6 +40,7 @@
  #include <sys/types.h>
  
@@ -79,9 +116,35 @@ diff -up openssh-5.2p1/cipher.c.fips openssh-5.2p1/cipher.c
  		if (strcasecmp(c->name, name) == 0)
  			return c->number;
  	return -1;
+@@ -296,14 +313,15 @@ cipher_cleanup(CipherContext *cc)
+  * passphrase and using the resulting 16 bytes as the key.
+  */
+ 
+-void
++int
+ cipher_set_key_string(CipherContext *cc, Cipher *cipher,
+     const char *passphrase, int do_encrypt)
+ {
+ 	MD5_CTX md;
+ 	u_char digest[16];
+ 
+-	MD5_Init(&md);
++	if (MD5_Init(&md) <= 0)
++		return -1;
+ 	MD5_Update(&md, (const u_char *)passphrase, strlen(passphrase));
+ 	MD5_Final(digest, &md);
+ 
+@@ -311,6 +329,7 @@ cipher_set_key_string(CipherContext *cc,
+ 
+ 	memset(digest, 0, sizeof(digest));
+ 	memset(&md, 0, sizeof(md));
++	return 0;
+ }
+ 
+ /*
 diff -up openssh-5.2p1/cipher-ctr.c.fips openssh-5.2p1/cipher-ctr.c
 --- openssh-5.2p1/cipher-ctr.c.fips	2007-06-14 15:21:33.000000000 +0200
-+++ openssh-5.2p1/cipher-ctr.c	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/cipher-ctr.c	2009-05-15 15:51:01.000000000 +0200
 @@ -140,7 +140,8 @@ evp_aes_128_ctr(void)
  	aes_ctr.do_cipher = ssh_aes_ctr;
  #ifndef SSH_OLD_EVP
@@ -92,9 +155,21 @@ diff -up openssh-5.2p1/cipher-ctr.c.fips openssh-5.2p1/cipher-ctr.c
  #endif
  	return (&aes_ctr);
  }
+diff -up openssh-5.2p1/cipher.h.fips openssh-5.2p1/cipher.h
+--- openssh-5.2p1/cipher.h.fips	2009-01-28 06:38:41.000000000 +0100
++++ openssh-5.2p1/cipher.h	2009-05-15 15:51:01.000000000 +0200
+@@ -78,7 +78,7 @@ void	 cipher_init(CipherContext *, Ciphe
+     const u_char *, u_int, int);
+ void	 cipher_crypt(CipherContext *, u_char *, const u_char *, u_int);
+ void	 cipher_cleanup(CipherContext *);
+-void	 cipher_set_key_string(CipherContext *, Cipher *, const char *, int);
++int	 cipher_set_key_string(CipherContext *, Cipher *, const char *, int);
+ u_int	 cipher_blocksize(const Cipher *);
+ u_int	 cipher_keylen(const Cipher *);
+ u_int	 cipher_is_cbc(const Cipher *);
 diff -up openssh-5.2p1/mac.c.fips openssh-5.2p1/mac.c
 --- openssh-5.2p1/mac.c.fips	2008-06-13 02:58:50.000000000 +0200
-+++ openssh-5.2p1/mac.c	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/mac.c	2009-05-15 15:51:01.000000000 +0200
 @@ -28,6 +28,7 @@
  #include <sys/types.h>
  
@@ -145,8 +220,8 @@ diff -up openssh-5.2p1/mac.c.fips openssh-5.2p1/mac.c
  	for (i = 0; macs[i].name; i++) {
  		if (strcmp(name, macs[i].name) == 0) {
 diff -up openssh-5.2p1/Makefile.in.fips openssh-5.2p1/Makefile.in
---- openssh-5.2p1/Makefile.in.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/Makefile.in	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/Makefile.in.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/Makefile.in	2009-05-15 15:51:01.000000000 +0200
 @@ -134,28 +134,28 @@ libssh.a: $(LIBSSH_OBJS)
  	$(RANLIB) $@
  
@@ -185,7 +260,7 @@ diff -up openssh-5.2p1/Makefile.in.fips openssh-5.2p1/Makefile.in
  	$(LD) -o $@ sftp-server.o sftp-common.o sftp-server-main.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
 diff -up openssh-5.2p1/myproposal.h.fips openssh-5.2p1/myproposal.h
 --- openssh-5.2p1/myproposal.h.fips	2009-01-28 06:33:31.000000000 +0100
-+++ openssh-5.2p1/myproposal.h	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/myproposal.h	2009-05-15 15:51:01.000000000 +0200
 @@ -53,7 +53,12 @@
  	"hmac-sha1-96,hmac-md5-96"
  #define	KEX_DEFAULT_COMP	"none,zlib@openssh.com,zlib"
@@ -201,8 +276,8 @@ diff -up openssh-5.2p1/myproposal.h.fips openssh-5.2p1/myproposal.h
  static char *myproposal[PROPOSAL_MAX] = {
  	KEX_DEFAULT_KEX,
 diff -up openssh-5.2p1/nsskeys.c.fips openssh-5.2p1/nsskeys.c
---- openssh-5.2p1/nsskeys.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/nsskeys.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/nsskeys.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/nsskeys.c	2009-05-15 15:51:01.000000000 +0200
 @@ -183,8 +183,8 @@ nss_convert_pubkey(Key *k)
  			break;
  	}
@@ -216,7 +291,7 @@ diff -up openssh-5.2p1/nsskeys.c.fips openssh-5.2p1/nsskeys.c
  	return 0;
 diff -up openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips openssh-5.2p1/openbsd-compat/bsd-arc4random.c
 --- openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips	2008-06-04 02:54:00.000000000 +0200
-+++ openssh-5.2p1/openbsd-compat/bsd-arc4random.c	2009-04-17 23:23:42.000000000 +0200
++++ openssh-5.2p1/openbsd-compat/bsd-arc4random.c	2009-05-15 15:51:01.000000000 +0200
 @@ -39,6 +39,7 @@
  static int rc4_ready = 0;
  static RC4_KEY rc4;
@@ -259,8 +334,8 @@ diff -up openssh-5.2p1/openbsd-compat/bsd-arc4random.c.fips openssh-5.2p1/openbs
  
  #ifndef ARC4RANDOM_BUF
 diff -up openssh-5.2p1/ssh-add.c.fips openssh-5.2p1/ssh-add.c
---- openssh-5.2p1/ssh-add.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/ssh-add.c	2009-04-30 13:56:56.000000000 +0200
+--- openssh-5.2p1/ssh-add.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/ssh-add.c	2009-05-15 15:51:01.000000000 +0200
 @@ -42,6 +42,7 @@
  #include <sys/param.h>
  
@@ -279,8 +354,8 @@ diff -up openssh-5.2p1/ssh-add.c.fips openssh-5.2p1/ssh-add.c
  				printf("%d %s %s (%s)\n",
  				    key_size(key), fp, comment, key_type(key));
 diff -up openssh-5.2p1/ssh-agent.c.fips openssh-5.2p1/ssh-agent.c
---- openssh-5.2p1/ssh-agent.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/ssh-agent.c	2009-04-30 13:57:34.000000000 +0200
+--- openssh-5.2p1/ssh-agent.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/ssh-agent.c	2009-05-15 15:51:01.000000000 +0200
 @@ -51,6 +51,7 @@
  
  #include <openssl/evp.h>
@@ -303,8 +378,8 @@ diff -up openssh-5.2p1/ssh-agent.c.fips openssh-5.2p1/ssh-agent.c
  	xfree(p);
  
 diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
---- openssh-5.2p1/ssh.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/ssh.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/ssh.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/ssh.c	2009-05-15 15:51:01.000000000 +0200
 @@ -71,6 +71,8 @@
  
  #include <openssl/evp.h>
@@ -325,7 +400,17 @@ diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
  	init_rng();
  
  	/*
-@@ -550,7 +556,6 @@ main(int ac, char **av)
+@@ -279,6 +285,9 @@ main(int ac, char **av)
+ 	    "ACD:F:I:KL:MNO:PR:S:TVw:XYy")) != -1) {
+ 		switch (opt) {
+ 		case '1':
++			if (FIPS_mode()) {
++				fatal("Protocol 1 not allowed in the FIPS mode.");
++			}
+ 			options.protocol = SSH_PROTO_1;
+ 			break;
+ 		case '2':
+@@ -550,7 +559,6 @@ main(int ac, char **av)
  	if (!host)
  		usage();
  
@@ -333,7 +418,7 @@ diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
  	ERR_load_crypto_strings();
  
  	/* Initialize the command to execute on remote host. */
-@@ -635,6 +640,10 @@ main(int ac, char **av)
+@@ -635,6 +643,10 @@ main(int ac, char **av)
  
  	seed_rng();
  
@@ -344,9 +429,22 @@ diff -up openssh-5.2p1/ssh.c.fips openssh-5.2p1/ssh.c
  	if (options.user == NULL)
  		options.user = xstrdup(pw->pw_name);
  
+@@ -701,6 +713,12 @@ main(int ac, char **av)
+ 
+ 	timeout_ms = options.connection_timeout * 1000;
+ 
++	if (FIPS_mode()) {
++		options.protocol &= SSH_PROTO_2;
++		if (options.protocol == 0)
++			fatal("Protocol 2 disabled by configuration but required in the FIPS mode.");
++	}
++
+ 	/* Open a connection to the remote host. */
+ 	if (ssh_connect(host, &hostaddr, options.port,
+ 	    options.address_family, options.connection_attempts, &timeout_ms,
 diff -up openssh-5.2p1/sshconnect2.c.fips openssh-5.2p1/sshconnect2.c
---- openssh-5.2p1/sshconnect2.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/sshconnect2.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/sshconnect2.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/sshconnect2.c	2009-05-15 15:51:01.000000000 +0200
 @@ -44,6 +44,8 @@
  #include <vis.h>
  #endif
@@ -391,8 +489,8 @@ diff -up openssh-5.2p1/sshconnect2.c.fips openssh-5.2p1/sshconnect2.c
  
  	/*
 diff -up openssh-5.2p1/sshconnect.c.fips openssh-5.2p1/sshconnect.c
---- openssh-5.2p1/sshconnect.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/sshconnect.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/sshconnect.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/sshconnect.c	2009-05-15 15:51:01.000000000 +0200
 @@ -40,6 +40,8 @@
  #include <unistd.h>
  #include <fcntl.h>
@@ -480,8 +578,8 @@ diff -up openssh-5.2p1/sshconnect.c.fips openssh-5.2p1/sshconnect.c
  
  	xfree(fp);
 diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
---- openssh-5.2p1/sshd.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/sshd.c	2009-04-17 23:23:42.000000000 +0200
+--- openssh-5.2p1/sshd.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/sshd.c	2009-05-15 15:51:01.000000000 +0200
 @@ -76,6 +76,8 @@
  #include <openssl/bn.h>
  #include <openssl/md5.h>
@@ -513,7 +611,18 @@ diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
  	/*
  	 * Force logging to stderr until we have loaded the private host
  	 * key (unless started from inetd)
-@@ -1655,6 +1661,10 @@ main(int ac, char **av)
+@@ -1531,6 +1537,10 @@ main(int ac, char **av)
+ 		debug("private host key: #%d type %d %s", i, key->type,
+ 		    key_type(key));
+ 	}
++	if ((options.protocol & SSH_PROTO_1) && FIPS_mode()) {
++		logit("Disabling protocol version 1. Not allowed in the FIPS mode.");
++		options.protocol &= ~SSH_PROTO_1;
++	}
+ 	if ((options.protocol & SSH_PROTO_1) && !sensitive_data.have_ssh1_key) {
+ 		logit("Disabling protocol version 1. Could not load host key");
+ 		options.protocol &= ~SSH_PROTO_1;
+@@ -1655,6 +1665,10 @@ main(int ac, char **av)
  	/* Initialize the random number generator. */
  	arc4random_stir();
  
@@ -524,7 +633,7 @@ diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
  	/* Chdir to the root directory so that the current disk can be
  	   unmounted if desired. */
  	chdir("/");
-@@ -2182,6 +2192,9 @@ do_ssh2_kex(void)
+@@ -2182,6 +2196,9 @@ do_ssh2_kex(void)
  	if (options.ciphers != NULL) {
  		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  		myproposal[PROPOSAL_ENC_ALGS_STOC] = options.ciphers;
@@ -534,7 +643,7 @@ diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
  	}
  	myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  	    compat_cipher_proposal(myproposal[PROPOSAL_ENC_ALGS_CTOS]);
-@@ -2191,6 +2204,9 @@ do_ssh2_kex(void)
+@@ -2191,6 +2208,9 @@ do_ssh2_kex(void)
  	if (options.macs != NULL) {
  		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
  		myproposal[PROPOSAL_MAC_ALGS_STOC] = options.macs;
@@ -545,8 +654,8 @@ diff -up openssh-5.2p1/sshd.c.fips openssh-5.2p1/sshd.c
  	if (options.compression == COMP_NONE) {
  		myproposal[PROPOSAL_COMP_ALGS_CTOS] =
 diff -up openssh-5.2p1/ssh-keygen.c.fips openssh-5.2p1/ssh-keygen.c
---- openssh-5.2p1/ssh-keygen.c.fips	2009-04-17 23:23:42.000000000 +0200
-+++ openssh-5.2p1/ssh-keygen.c	2009-04-30 13:58:02.000000000 +0200
+--- openssh-5.2p1/ssh-keygen.c.fips	2009-05-15 15:51:01.000000000 +0200
++++ openssh-5.2p1/ssh-keygen.c	2009-05-15 15:51:01.000000000 +0200
 @@ -21,6 +21,7 @@
  
  #include <openssl/evp.h>
