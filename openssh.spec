@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 6%{?dist}%{?rescue_rel}
+Release: 7%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -98,6 +98,8 @@ Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.2p1-fips.patch
 Patch66: openssh-5.2p1-homechroot.patch
+Patch67: openssh-5.2p1-hangup.patch
+Patch68: openssh-5.2p1-xmodifiers.patch
 
 License: BSD
 Group: Applications/Internet
@@ -230,6 +232,8 @@ an X11 passphrase dialog for OpenSSH.
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
 %patch66 -p1 -b .homechroot
+%patch67 -p1 -b .hangup
+%patch68 -p1 -b .xmodifiers
 
 autoreconf
 
@@ -464,6 +468,9 @@ fi
 %endif
 
 %changelog
+* Fri Jun 12 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-7
+- add XMODIFIERS to exported environment
+
 * Fri May 15 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-6
 - allow only protocol 2 in the FIPS mode
 
