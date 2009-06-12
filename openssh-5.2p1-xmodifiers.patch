@@ -1,0 +1,8 @@
+diff -up openssh-5.2p1/ssh_config.xmodifiers openssh-5.2p1/ssh_config
+--- openssh-5.2p1/ssh_config.xmodifiers	2009-06-12 13:32:36.000000000 +0200
++++ openssh-5.2p1/ssh_config	2009-06-12 13:39:12.365582705 +0200
+@@ -54,3 +54,4 @@ Host *
+ 	SendEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES 
+ 	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
+ 	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
++	SendEnv XMODIFIERS
