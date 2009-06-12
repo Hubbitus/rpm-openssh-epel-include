@@ -98,8 +98,7 @@ Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.2p1-fips.patch
 Patch66: openssh-5.2p1-homechroot.patch
-Patch67: openssh-5.2p1-hangup.patch
-Patch68: openssh-5.2p1-xmodifiers.patch
+Patch67: openssh-5.2p1-xmodifiers.patch
 
 License: BSD
 Group: Applications/Internet
@@ -232,8 +231,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
 %patch66 -p1 -b .homechroot
-%patch67 -p1 -b .hangup
-%patch68 -p1 -b .xmodifiers
+%patch67 -p1 -b .xmodifiers
 
 autoreconf
 
