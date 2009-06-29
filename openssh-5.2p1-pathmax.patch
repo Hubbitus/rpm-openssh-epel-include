@@ -1,0 +1,20 @@
+diff -up openssh-5.2p1/ssh.c.pathmax openssh-5.2p1/ssh.c
+--- openssh-5.2p1/ssh.c.pathmax	2009-06-29 22:13:17.251360372 +0200
++++ openssh-5.2p1/ssh.c	2009-06-29 22:14:46.036292525 +0200
+@@ -49,6 +49,7 @@
+ #include <sys/resource.h>
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ 
+ #include <ctype.h>
+ #include <errno.h>
+@@ -209,7 +210,7 @@ int
+ main(int ac, char **av)
+ {
+ 	int i, opt, exit_status, use_syslog;
+-	char *p, *cp, *line, buf[256];
++	char *p, *cp, *line, buf[PATH_MAX];
+ 	struct stat st;
+ 	struct passwd *pw;
+ 	int dummy, timeout_ms;

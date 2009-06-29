@@ -1,7 +1,7 @@
 diff -up /dev/null openssh-5.2p1/chrootenv.h
 --- /dev/null	2009-06-11 17:05:12.257284457 +0200
-+++ openssh-5.2p1/chrootenv.h	2009-06-26 22:51:32.627222598 +0200
-@@ -0,0 +1,33 @@
++++ openssh-5.2p1/chrootenv.h	2009-06-29 11:06:19.772277766 +0200
+@@ -0,0 +1,32 @@
 +/* $OpenBSD: session.h,v 1.30 2008/05/08 12:21:16 djm Exp $ */
 +
 +/*
@@ -31,24 +31,22 @@ diff -up /dev/null openssh-5.2p1/chrootenv.h
 +#define CHROOTENV_H
 +
 +extern int	chroot_no_tree;
-+extern time_t	timezone_diff;
 +
 +#endif
 +
 diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
---- openssh-5.2p1/session.c.homechroot	2009-06-26 22:51:32.327168352 +0200
-+++ openssh-5.2p1/session.c	2009-06-27 07:37:49.181631924 +0200
-@@ -119,6 +119,9 @@ void	do_child(Session *, const char *);
+--- openssh-5.2p1/session.c.homechroot	2009-06-29 10:58:43.715586616 +0200
++++ openssh-5.2p1/session.c	2009-06-29 11:04:58.684830462 +0200
+@@ -119,6 +119,8 @@ void	do_child(Session *, const char *);
  void	do_motd(void);
  int	check_quietlogin(Session *, const char *);
  
 +int	chroot_no_tree = 0;
-+time_t	timezone_diff;
 +
  static void do_authenticated1(Authctxt *);
  static void do_authenticated2(Authctxt *);
  
-@@ -784,6 +787,11 @@ do_exec(Session *s, const char *command)
+@@ -784,6 +786,11 @@ do_exec(Session *s, const char *command)
  {
  	int ret;
  
@@ -60,7 +58,7 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  	if (options.adm_forced_command) {
  		original_command = command;
  		command = options.adm_forced_command;
-@@ -1408,6 +1416,7 @@ safely_chroot(const char *path, uid_t ui
+@@ -1408,6 +1415,7 @@ safely_chroot(const char *path, uid_t ui
  	const char *cp;
  	char component[MAXPATHLEN];
  	struct stat st;
@@ -68,7 +66,7 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  
  	if (*path != '/')
  		fatal("chroot path does not begin at root");
-@@ -1419,7 +1428,7 @@ safely_chroot(const char *path, uid_t ui
+@@ -1419,7 +1427,7 @@ safely_chroot(const char *path, uid_t ui
  	 * root-owned directory with strict permissions.
  	 */
  	for (cp = path; cp != NULL;) {
@@ -77,7 +75,7 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  			strlcpy(component, path, sizeof(component));
  		else {
  			cp++;
-@@ -1432,16 +1441,26 @@ safely_chroot(const char *path, uid_t ui
+@@ -1432,15 +1440,19 @@ safely_chroot(const char *path, uid_t ui
  		if (stat(component, &st) != 0)
  			fatal("%s: stat(\"%s\"): %s", __func__,
  			    component, strerror(errno));
@@ -89,23 +87,17 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  		if (!S_ISDIR(st.st_mode))
  			fatal("chroot path %s\"%s\" is not a directory",
  			    cp == NULL ? "" : "component ", component);
-+	}
-+	{
-+		struct tm *tm;
-+		time_t bou	= time (NULL);
- 
-+		tm = localtime (&bou);
-+		timezone_diff = tm->tm_gmtoff; 
-+		debug ("timezone_diff %ld\n",  timezone_diff);
+-
  	}
- 
++	setenv ("TZ", "/etc/localtime", 0);
++	tzset ();
++
 +	if (st.st_uid != uid)
 +		++chroot_no_tree;
-+
+ 
  	if (chdir(path) == -1)
  		fatal("Unable to chdir to chroot path \"%s\": "
- 		    "%s", path, strerror(errno));
-@@ -1451,6 +1470,10 @@ safely_chroot(const char *path, uid_t ui
+@@ -1451,6 +1463,10 @@ safely_chroot(const char *path, uid_t ui
  	if (chdir("/") == -1)
  		fatal("%s: chdir(/) after chroot: %s",
  		    __func__, strerror(errno));
@@ -118,20 +110,19 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  
 diff -up openssh-5.2p1/sftp.c.homechroot openssh-5.2p1/sftp.c
 --- openssh-5.2p1/sftp.c.homechroot	2009-02-14 06:26:19.000000000 +0100
-+++ openssh-5.2p1/sftp.c	2009-06-26 22:51:32.635287402 +0200
-@@ -94,6 +94,9 @@ int remote_glob(struct sftp_conn *, cons
++++ openssh-5.2p1/sftp.c	2009-06-29 11:06:59.610415272 +0200
+@@ -94,6 +94,8 @@ int remote_glob(struct sftp_conn *, cons
  
  extern char *__progname;
  
 +int	chroot_no_tree = 0;
-+time_t	timezone_diff;
 +
  /* Separators for interactive commands */
  #define WHITESPACE " \t\r\n"
  
 diff -up openssh-5.2p1/sftp-common.c.homechroot openssh-5.2p1/sftp-common.c
 --- openssh-5.2p1/sftp-common.c.homechroot	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-5.2p1/sftp-common.c	2009-06-26 22:51:32.637218948 +0200
++++ openssh-5.2p1/sftp-common.c	2009-06-29 11:05:37.180134733 +0200
 @@ -40,6 +40,7 @@
  #include "xmalloc.h"
  #include "buffer.h"
@@ -140,32 +131,7 @@ diff -up openssh-5.2p1/sftp-common.c.homechroot openssh-5.2p1/sftp-common.c
  
  #include "sftp.h"
  #include "sftp-common.h"
-@@ -180,6 +181,18 @@ fx2txt(int status)
- 	/* NOTREACHED */
- }
- 
-+static struct tm *
-+x_localtime (time_t *t)
-+{
-+	if (chroot_no_tree) {
-+		time_t t2 = *t + timezone_diff;
-+
-+		return gmtime (&t2);
-+	} else {
-+		return localtime (t);
-+	}
-+}
-+
- /*
-  * drwxr-xr-x    5 markus   markus       1024 Jan 13 18:39 .ssh
-  */
-@@ -189,18 +202,18 @@ ls_file(const char *name, const struct s
- 	int ulen, glen, sz = 0;
- 	struct passwd *pw;
- 	struct group *gr;
--	struct tm *ltime = localtime(&st->st_mtime);
-+	struct tm *ltime = x_localtime(&st->st_mtime);
- 	char *user, *group;
+@@ -194,13 +195,13 @@ ls_file(const char *name, const struct s
  	char buf[1024], mode[11+1], tbuf[12+1], ubuf[11+1], gbuf[11+1];
  
  	strmode(st->st_mode, mode);
@@ -183,8 +149,8 @@ diff -up openssh-5.2p1/sftp-common.c.homechroot openssh-5.2p1/sftp-common.c
  		snprintf(gbuf, sizeof gbuf, "%u", (u_int)st->st_gid);
 diff -up openssh-5.2p1/sftp-server-main.c.homechroot openssh-5.2p1/sftp-server-main.c
 --- openssh-5.2p1/sftp-server-main.c.homechroot	2009-02-21 22:47:02.000000000 +0100
-+++ openssh-5.2p1/sftp-server-main.c	2009-06-26 22:51:32.639217850 +0200
-@@ -22,11 +22,15 @@
++++ openssh-5.2p1/sftp-server-main.c	2009-06-29 11:07:13.704123635 +0200
+@@ -22,11 +22,14 @@
  #include <stdarg.h>
  #include <stdio.h>
  #include <unistd.h>
@@ -195,7 +161,6 @@ diff -up openssh-5.2p1/sftp-server-main.c.homechroot openssh-5.2p1/sftp-server-m
  #include "misc.h"
  
 +int	chroot_no_tree = 0;
-+time_t	timezone_diff;
 +
  void
  cleanup_exit(int i)
