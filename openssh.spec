@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 11%{?dist}%{?rescue_rel}
+Release: 12%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -100,6 +100,7 @@ Patch65: openssh-5.2p1-fips.patch
 Patch66: openssh-5.2p1-homechroot.patch
 Patch67: openssh-5.2p1-xmodifiers.patch
 Patch68: openssh-5.2p1-pathmax.patch
+Patch69: openssh-5.2p1-selabel.patch
 
 License: BSD
 Group: Applications/Internet
@@ -234,6 +235,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch66 -p1 -b .homechroot
 %patch67 -p1 -b .xmodifiers
 %patch68 -p1 -b .pathmax
+%patch69 -p1 -b .selabel
 
 autoreconf
 
@@ -468,8 +470,12 @@ fi
 %endif
 
 %changelog
+* Tue Jun 30 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-11
+- create '~/.ssh/known_hosts' within proper context
+
 * Mon Jun 29 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-11
 - length of home path in ssh now limited by PATH_MAX
+- correct timezone with daylight processing
 
 * Sat Jun 27 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-10
 - final version chroot %%h (sftp only)
