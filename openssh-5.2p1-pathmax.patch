@@ -1,6 +1,6 @@
 diff -up openssh-5.2p1/ssh.c.pathmax openssh-5.2p1/ssh.c
---- openssh-5.2p1/ssh.c.pathmax	2009-06-29 22:13:17.251360372 +0200
-+++ openssh-5.2p1/ssh.c	2009-06-29 22:14:46.036292525 +0200
+--- openssh-5.2p1/ssh.c.pathmax	2009-07-08 14:23:19.000000000 +0200
++++ openssh-5.2p1/ssh.c	2009-07-08 14:26:26.000000000 +0200
 @@ -49,6 +49,7 @@
  #include <sys/resource.h>
  #include <sys/ioctl.h>
@@ -9,12 +9,39 @@ diff -up openssh-5.2p1/ssh.c.pathmax openssh-5.2p1/ssh.c
  
  #include <ctype.h>
  #include <errno.h>
-@@ -209,7 +210,7 @@ int
+@@ -208,8 +209,8 @@ void muxserver_listen(void);
+ int
  main(int ac, char **av)
  {
- 	int i, opt, exit_status, use_syslog;
+-	int i, opt, exit_status, use_syslog;
 -	char *p, *cp, *line, buf[256];
-+	char *p, *cp, *line, buf[PATH_MAX];
++	int i, r, opt, exit_status, use_syslog;
++	char *p, *cp, *line, buf[MAXPATHLEN];
  	struct stat st;
  	struct passwd *pw;
  	int dummy, timeout_ms;
+@@ -624,9 +625,10 @@ main(int ac, char **av)
+ 			fatal("Can't open user config file %.100s: "
+ 			    "%.100s", config, strerror(errno));
+ 	} else {
+-		snprintf(buf, sizeof buf, "%.100s/%.100s", pw->pw_dir,
++		r = snprintf(buf, sizeof buf, "%s/%s", pw->pw_dir,
+ 		    _PATH_SSH_USER_CONFFILE);
+-		(void)read_config_file(buf, host, &options, 1);
++		if (r > 0 && (size_t)r < sizeof(buf))
++			(void)read_config_file(buf, host, &options, 1);
+ 
+ 		/* Read systemwide configuration file after use config. */
+ 		(void)read_config_file(_PATH_HOST_CONFIG_FILE, host,
+@@ -787,9 +789,9 @@ main(int ac, char **av)
+ 	 * Now that we are back to our own permissions, create ~/.ssh
+ 	 * directory if it doesn't already exist.
+ 	 */
+-	snprintf(buf, sizeof buf, "%.100s%s%.100s", pw->pw_dir,
++	r = snprintf(buf, sizeof buf, "%s%s%s", pw->pw_dir,
+ 	    strcmp(pw->pw_dir, "/") ? "/" : "", _PATH_SSH_USER_DIR);
+-	if (stat(buf, &st) < 0)
++	if (r > 0 && (size_t)r < sizeof(buf) && stat(buf, &st) < 0)
+ 		if (mkdir(buf, 0700) < 0)
+ 			error("Could not create directory '%.200s'.", buf);
+ 

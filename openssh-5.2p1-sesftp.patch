@@ -1,0 +1,19 @@
+diff -up openssh-5.2p1/session.c.sesftp openssh-5.2p1/session.c
+--- openssh-5.2p1/session.c.sesftp	2009-07-16 22:34:26.000000000 +0200
++++ openssh-5.2p1/session.c	2009-07-16 22:59:22.000000000 +0200
+@@ -58,6 +58,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <selinux/selinux.h>
+ 
+ #include "openbsd-compat/sys-queue.h"
+ #include "xmalloc.h"
+@@ -1816,6 +1817,7 @@ do_child(Session *s, const char *command
+ 		argv[i] = NULL;
+ 		optind = optreset = 1;
+ 		__progname = argv[0];
++		setcon ("system_u:system_r:sftpd_t");
+ 		exit(sftp_server_main(i, argv, s->pw));
+ 	}
+ 
