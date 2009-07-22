@@ -1,6 +1,6 @@
 diff -up openssh-5.2p1/session.c.sesftp openssh-5.2p1/session.c
---- openssh-5.2p1/session.c.sesftp	2009-07-10 20:32:04.348435048 +0200
-+++ openssh-5.2p1/session.c	2009-07-10 21:10:42.247557847 +0200
+--- openssh-5.2p1/session.c.sesftp	2009-07-22 15:18:17.156499945 +0200
++++ openssh-5.2p1/session.c	2009-07-22 15:20:09.950319644 +0200
 @@ -58,6 +58,7 @@
  #include <stdlib.h>
  #include <string.h>
@@ -9,12 +9,41 @@ diff -up openssh-5.2p1/session.c.sesftp openssh-5.2p1/session.c
  
  #include "openbsd-compat/sys-queue.h"
  #include "xmalloc.h"
-@@ -1816,6 +1817,9 @@ do_child(Session *s, const char *command
+@@ -1805,8 +1806,8 @@ do_child(Session *s, const char *command
+ 
+ 	if (s->is_subsystem == SUBSYSTEM_INT_SFTP) {
+ 		extern int optind, optreset;
+-		int i;
+-		char *p, *args;
++		int i, l;
++		char *p, *args, *c1, *c2, *cx;
+ 
+ 		setproctitle("%s@internal-sftp-server", s->pw->pw_name);
+ 		args = xstrdup(command ? command : "sftp-server");
+@@ -1816,6 +1817,27 @@ do_child(Session *s, const char *command
  		argv[i] = NULL;
  		optind = optreset = 1;
  		__progname = argv[0];
-+		if (setcon ("unconfined_u:system_r:sftpd_t:s0-s0:c0.c1023") < 0) 
-+			logit("do_child: setcon failed witch %s", strerror (errno));
++		if (getcon (&c1) < 0) {
++			logit("do_child: getcon failed witch %s", strerror (errno));
++		} else {
++			c2 = xmalloc (strlen (c1) + 8);
++			if (!(cx = index (c1, ':')))
++				goto badcontext;
++			if (!(cx = index (cx + 1, ':'))) {
++badcontext:
++				logit ("do_child: unparseable context %s", c1);
++			} else {
++				l = cx - c1 + 1;
++				memcpy (c2, c1, l);
++				strcpy (c2 + l, "sftpd_t");
++				if ((cx = index (cx + 1, ':')))
++					strcat (c2, cx);
++logit ("<= %s", c1); logit ("=> %s", c2);				if (setcon ("system_u:system_r:sftpd_t:s0-s0:c0.c1023") < 0) 
++					logit("do_child: setcon failed witch %s", strerror (errno));
++			
++			}
++		}		
 +			
  		exit(sftp_server_main(i, argv, s->pw));
  	}
