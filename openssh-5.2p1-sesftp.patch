@@ -39,7 +39,7 @@ diff -up openssh-5.2p1/session.c.sesftp openssh-5.2p1/session.c
 +				strcpy (c2 + l, "sftpd_t");
 +				if ((cx = index (cx + 1, ':')))
 +					strcat (c2, cx);
-+logit ("<= %s", c1); logit ("=> %s", c2);				if (setcon ("system_u:system_r:sftpd_t:s0-s0:c0.c1023") < 0) 
++				if (setcon ("system_u:system_r:sftpd_t:s0-s0:c0.c1023") < 0) 
 +					logit("do_child: setcon failed witch %s", strerror (errno));
 +			
 +			}

@@ -1,6 +1,6 @@
 diff -up /dev/null openssh-5.2p1/chrootenv.h
---- /dev/null	2009-06-11 17:05:12.257284457 +0200
-+++ openssh-5.2p1/chrootenv.h	2009-06-29 11:06:19.772277766 +0200
+--- /dev/null	2009-07-23 14:57:23.604046842 +0200
++++ openssh-5.2p1/chrootenv.h	2009-07-24 07:11:29.000000000 +0200
 @@ -0,0 +1,32 @@
 +/* $OpenBSD: session.h,v 1.30 2008/05/08 12:21:16 djm Exp $ */
 +
@@ -35,8 +35,8 @@ diff -up /dev/null openssh-5.2p1/chrootenv.h
 +#endif
 +
 diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
---- openssh-5.2p1/session.c.homechroot	2009-06-29 10:58:43.715586616 +0200
-+++ openssh-5.2p1/session.c	2009-06-29 11:04:58.684830462 +0200
+--- openssh-5.2p1/session.c.homechroot	2009-07-24 07:11:22.000000000 +0200
++++ openssh-5.2p1/session.c	2009-07-24 07:33:14.000000000 +0200
 @@ -119,6 +119,8 @@ void	do_child(Session *, const char *);
  void	do_motd(void);
  int	check_quietlogin(Session *, const char *);
@@ -46,18 +46,18 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  static void do_authenticated1(Authctxt *);
  static void do_authenticated2(Authctxt *);
  
-@@ -784,6 +786,11 @@ do_exec(Session *s, const char *command)
- {
- 	int ret;
+@@ -802,6 +804,11 @@ do_exec(Session *s, const char *command)
+ 		debug("Forced command (key option) '%.900s'", command);
+ 	}
  
 +	if ((s->is_subsystem != SUBSYSTEM_INT_SFTP) && chroot_no_tree) {
 +		logit("You aren't welcomed, go away!");
 +		exit (1);
 +	}
 +
- 	if (options.adm_forced_command) {
- 		original_command = command;
- 		command = options.adm_forced_command;
+ #ifdef SSH_AUDIT_EVENTS
+ 	if (command != NULL)
+ 		PRIVSEP(audit_run_command(command));
 @@ -1408,6 +1415,7 @@ safely_chroot(const char *path, uid_t ui
  	const char *cp;
  	char component[MAXPATHLEN];
@@ -110,7 +110,7 @@ diff -up openssh-5.2p1/session.c.homechroot openssh-5.2p1/session.c
  
 diff -up openssh-5.2p1/sftp.c.homechroot openssh-5.2p1/sftp.c
 --- openssh-5.2p1/sftp.c.homechroot	2009-02-14 06:26:19.000000000 +0100
-+++ openssh-5.2p1/sftp.c	2009-06-29 11:06:59.610415272 +0200
++++ openssh-5.2p1/sftp.c	2009-07-24 07:11:29.000000000 +0200
 @@ -94,6 +94,8 @@ int remote_glob(struct sftp_conn *, cons
  
  extern char *__progname;
@@ -122,7 +122,7 @@ diff -up openssh-5.2p1/sftp.c.homechroot openssh-5.2p1/sftp.c
  
 diff -up openssh-5.2p1/sftp-common.c.homechroot openssh-5.2p1/sftp-common.c
 --- openssh-5.2p1/sftp-common.c.homechroot	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-5.2p1/sftp-common.c	2009-06-29 11:05:37.180134733 +0200
++++ openssh-5.2p1/sftp-common.c	2009-07-24 07:11:29.000000000 +0200
 @@ -40,6 +40,7 @@
  #include "xmalloc.h"
  #include "buffer.h"
@@ -149,7 +149,7 @@ diff -up openssh-5.2p1/sftp-common.c.homechroot openssh-5.2p1/sftp-common.c
  		snprintf(gbuf, sizeof gbuf, "%u", (u_int)st->st_gid);
 diff -up openssh-5.2p1/sftp-server-main.c.homechroot openssh-5.2p1/sftp-server-main.c
 --- openssh-5.2p1/sftp-server-main.c.homechroot	2009-02-21 22:47:02.000000000 +0100
-+++ openssh-5.2p1/sftp-server-main.c	2009-06-29 11:07:13.704123635 +0200
++++ openssh-5.2p1/sftp-server-main.c	2009-07-24 07:11:29.000000000 +0200
 @@ -22,11 +22,14 @@
  #include <stdarg.h>
  #include <stdio.h>
