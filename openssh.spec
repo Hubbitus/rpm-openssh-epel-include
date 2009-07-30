@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 16%{?dist}%{?rescue_rel}
+Release: 17%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -102,6 +102,7 @@ Patch67: openssh-5.2p1-xmodifiers.patch
 Patch68: openssh-5.2p1-pathmax.patch
 Patch69: openssh-5.2p1-selabel.patch
 Patch70: openssh-5.2p1-sesftp.patch
+Patch71: openssh-5.2p1-edns.patch
 
 License: BSD
 Group: Applications/Internet
@@ -238,6 +239,7 @@ an X11 passphrase dialog for OpenSSH.
 %patch68 -p1 -b .pathmax
 %patch69 -p1 -b .selabel
 %patch70 -p1 -b .sesftp
+%patch71 -p1 -b .edns
 
 autoreconf
 
@@ -472,6 +474,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 30 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-17
+- Added dnssec support.
+
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.2p1-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
