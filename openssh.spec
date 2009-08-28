@@ -473,6 +473,7 @@ fi
 - merged gssapi-role to selinux patch
 - merged cve-2007_3102 to audit patch
 - sesftp patch only with WITH_SELINUX flag
+- rearange sesftp patch according to upstream request
 
 * Wed Aug 26 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-19
 - minor change in sesftp patch
