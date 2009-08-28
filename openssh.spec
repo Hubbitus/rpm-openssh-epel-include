@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 19%{?dist}%{?rescue_rel}
+Release: 20%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -81,8 +81,8 @@ Patch4: openssh-5.2p1-vendor.patch
 Patch12: openssh-5.2p1-selinux.patch
 Patch13: openssh-5.1p1-mls.patch
 Patch16: openssh-4.7p1-audit.patch
-Patch17: openssh-4.3p2-cve-2007-3102.patch
 Patch18: openssh-5.0p1-pam_selinux.patch
+Patch19: openssh-5.2p1-sesftp.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 Patch27: openssh-5.1p1-log-in-chroot.patch
@@ -93,15 +93,12 @@ Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-4.3p2-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-5.2p1-nss-keys.patch
-Patch54: openssh-5.1p1-gssapi-role.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.2p1-fips.patch
 Patch66: openssh-5.2p1-homechroot.patch
-Patch67: openssh-5.2p1-xmodifiers.patch
 Patch68: openssh-5.2p1-pathmax.patch
 Patch69: openssh-5.2p1-selabel.patch
-Patch70: openssh-5.2p1-sesftp.patch
 Patch71: openssh-5.2p1-edns.patch
 
 License: BSD
@@ -216,8 +213,8 @@ an X11 passphrase dialog for OpenSSH.
 %patch12 -p1 -b .selinux
 %patch13 -p1 -b .mls
 %patch16 -p1 -b .audit
-%patch17 -p1 -b .inject-fix
 %patch18 -p1 -b .pam_selinux
+%patch19 -p1 -b .sesftp
 %endif
 
 %patch22 -p1 -b .keep-above
@@ -230,15 +227,12 @@ an X11 passphrase dialog for OpenSSH.
 %patch44 -p1 -b .ip-opts
 %patch49 -p1 -b .canohost
 %patch51 -p1 -b .nss-keys
-%patch54 -p1 -b .gssapi-role
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
 %patch66 -p1 -b .homechroot
-%patch67 -p1 -b .xmodifiers
 %patch68 -p1 -b .pathmax
 %patch69 -p1 -b .selabel
-%patch70 -p1 -b .sesftp
 %patch71 -p1 -b .edns
 
 autoreconf
@@ -474,6 +468,12 @@ fi
 %endif
 
 %changelog
+* Fri Aug 28 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-20
+- merged xmodifiers to redhat patch
+- merged gssapi-role to selinux patch
+- merged cve-2007_3102 to audit patch
+- sesftp patch only with WITH_SELINUX flag
+
 * Wed Aug 26 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-19
 - minor change in sesftp patch
 
