@@ -468,7 +468,7 @@ fi
 %endif
 
 %changelog
-* Mon Auc 31 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-21
+* Mon Aug 31 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-21
 - rearange selinux patch to be acceptable for upstream
 - replace seftp patch by an upstream version
 
