@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 21%{?dist}%{?rescue_rel}
+Release: 22%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -90,7 +90,7 @@ Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
-Patch44: openssh-4.3p2-allow-ip-opts.patch
+Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch51: openssh-5.2p1-nss-keys.patch
 Patch55: openssh-5.1p1-cloexec.patch
@@ -468,6 +468,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep  1 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-22
+- replace ip-opts patch by an upstream candidate version
+
 * Mon Aug 31 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-21
 - rearange selinux patch to be acceptable for upstream
 - replace seftp patch by an upstream version
