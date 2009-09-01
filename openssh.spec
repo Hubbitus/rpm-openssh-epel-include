@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 22%{?dist}%{?rescue_rel}
+Release: 23%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -468,6 +468,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep  1 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-23
+- add correct patch for ip-opts
+
 * Tue Sep  1 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-22
 - replace ip-opts patch by an upstream candidate version
 
