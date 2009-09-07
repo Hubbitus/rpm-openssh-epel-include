@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 23%{?dist}%{?rescue_rel}
+Release: 24%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -468,6 +468,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep  7 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-24
+- Add check for nosuid, nodev in homechroot
+
 * Tue Sep  1 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-23
 - add correct patch for ip-opts
 
