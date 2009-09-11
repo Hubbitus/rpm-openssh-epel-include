@@ -96,7 +96,6 @@ Patch51: openssh-5.2p1-nss-keys.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.2p1-fips.patch
-Patch66: openssh-5.2p1-homechroot.patch
 Patch68: openssh-5.2p1-pathmax.patch
 Patch69: openssh-5.2p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
@@ -230,7 +229,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
-%patch66 -p1 -b .homechroot
 %patch68 -p1 -b .pathmax
 %patch69 -p1 -b .selabel
 %patch71 -p1 -b .edns
@@ -468,6 +466,9 @@ fi
 %endif
 
 %changelog
+* Fri Sep 11 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-25
+- Dropped homechroot patch
+
 * Mon Sep  7 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-24
 - Add check for nosuid, nodev in homechroot
 
