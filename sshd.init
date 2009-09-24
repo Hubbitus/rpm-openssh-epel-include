@@ -174,7 +174,7 @@ force_reload() {
 }
 
 rh_status() {
-	status -p $PID_FILE openssh-daemon
+	status -p $PID_FILE $prog	#openssh-daemon
 }
 
 rh_status_q() {
@@ -200,7 +200,12 @@ case "$1" in
 	force-reload)
 		force_reload
 		;;
-	condrestart|try-restart)
+	condrestart)
+		if [ -f /var/lock/subsys/$prog ]; then
+		    	restart
+		fi
+		;;
+	try-restart)
 		rh_status_q || exit 0
 		if [ -f $lockfile ] ; then
 			do_restart_sanity_check

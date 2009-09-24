@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.2p1
-Release: 26%{?dist}%{?rescue_rel}
+Release: 27%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -466,6 +466,10 @@ fi
 %endif
 
 %changelog
+* Thu Sep 24 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-27
+- Repair initscript to be acord to guidelines (#521860)
+- Add bugzilla# to application of edns and xmodifiers patch
+
 * Wed Sep 16 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-26
 - Changed pam stack to password-auth
 
@@ -499,7 +503,7 @@ fi
 - rebuilt with new openssl
 
 * Thu Jul 30 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-17
-- Added dnssec support.
+- Added dnssec support. (#205842)
 
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.2p1-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
@@ -528,7 +532,7 @@ fi
 - repair broken ls in chroot %%h
 
 * Fri Jun 12 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-8
-- add XMODIFIERS to exported environment
+- add XMODIFIERS to exported environment (#495690)
 
 * Fri May 15 2009 Tomas Mraz <tmraz@redhat.com> - 5.2p1-6
 - allow only protocol 2 in the FIPS mode
