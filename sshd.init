@@ -107,7 +107,7 @@ do_restart_sanity_check()
 {
 	$SSHD -t
 	RETVAL=$?
-	if [ ! "$RETVAL" = 0 ]; then
+	if [ $RETVAL -ne  0 ]; then
 		failure $"Configuration file or keys are invalid"
 		echo
 	fi
@@ -127,7 +127,7 @@ start()
 	echo -n $"Starting $prog: "
 	$SSHD $OPTIONS && success || failure
 	RETVAL=$?
-	[ "$RETVAL" = 0 ] && touch $lockfile
+	[ $RETVAL -eq 0 ] && touch $lockfile
 	echo
 	return $RETVAL
 }
@@ -148,7 +148,7 @@ stop()
 	    killall $prog 2>/dev/null
 	    trap TERM
 	fi
-	[ "$RETVAL" = 0 ] && rm -f $lockfile
+	[ $RETVAL -eq 0 ] && rm -f $lockfile
 	echo
 }
 
@@ -174,7 +174,7 @@ force_reload() {
 }
 
 rh_status() {
-	status -p $PID_FILE $prog	#openssh-daemon
+	status -p $PID_FILE openssh-daemon
 }
 
 rh_status_q() {
@@ -187,7 +187,10 @@ case "$1" in
 		start
 		;;
 	stop)
-		rh_status_q || exit 0
+		if ! rh_status_q; then
+			rm -f $lockfile
+			exit 0
+		fi
 		stop
 		;;
 	restart)
@@ -200,16 +203,11 @@ case "$1" in
 	force-reload)
 		force_reload
 		;;
-	condrestart)
-		if [ -f /var/lock/subsys/$prog ]; then
-		    	restart
-		fi
-		;;
-	try-restart)
+	condrestart|try-restart)
 		rh_status_q || exit 0
 		if [ -f $lockfile ] ; then
 			do_restart_sanity_check
-			if [ "$RETVAL" = 0 ] ; then
+			if [ $RETVAL -eq 0 ] ; then
 				stop
 				# avoid race
 				sleep 3
@@ -222,6 +220,9 @@ case "$1" in
 	status)
 		rh_status
 		RETVAL=$?
+		if [ $RETVAL -eq 3 -a -f $lockfile ] ; then
+			RETVAL=2
+		fi
 		;;
 	*)
 		echo $"Usage: $0 {start|stop|restart|reload|force-reload|condrestart|try-restart|status}"
