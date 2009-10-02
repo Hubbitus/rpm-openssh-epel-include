@@ -62,8 +62,8 @@
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 5.2p1
-Release: 29%{?dist}%{?rescue_rel}
+Version: 5.3p1
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -75,12 +75,10 @@ Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
 Patch0: openssh-5.2p1-redhat.patch
-Patch2: openssh-5.1p1-skip-initial.patch
-Patch3: openssh-3.8.1p1-krb5-config.patch
+Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
 Patch12: openssh-5.2p1-selinux.patch
-Patch13: openssh-5.1p1-mls.patch
-Patch16: openssh-4.7p1-audit.patch
+Patch13: openssh-5.3p1-mls.patch
 Patch18: openssh-5.0p1-pam_selinux.patch
 Patch19: openssh-5.2p1-sesftp.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
@@ -92,12 +90,11 @@ Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch51: openssh-5.2p1-nss-keys.patch
+Patch51: openssh-5.3p1-nss-keys.patch
 Patch55: openssh-5.1p1-cloexec.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
-Patch65: openssh-5.2p1-fips.patch
-Patch68: openssh-5.2p1-pathmax.patch
-Patch69: openssh-5.2p1-selabel.patch
+Patch65: openssh-5.3p1-fips.patch
+Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
 
 License: BSD
@@ -204,14 +201,12 @@ an X11 passphrase dialog for OpenSSH.
 %setup -q
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
-%patch3 -p1 -b .krb5-config
 %patch4 -p1 -b .vendor
 
 %if %{WITH_SELINUX}
 #SELinux
 %patch12 -p1 -b .selinux
 %patch13 -p1 -b .mls
-%patch16 -p1 -b .audit
 %patch18 -p1 -b .pam_selinux
 %patch19 -p1 -b .sesftp
 %endif
@@ -229,7 +224,6 @@ an X11 passphrase dialog for OpenSSH.
 %patch55 -p1 -b .cloexec
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
-%patch68 -p1 -b .pathmax
 %patch69 -p1 -b .selabel
 %patch71 -p1 -b .edns
 
@@ -466,6 +460,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct  2 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-1
+- Upgrade to new wersion 5.3p1
+
 * Tue Sep 29 2009 Jan F. Chadima <jchadima@redhat.com> - 5.2p1-29
 - Resolve locking in ssh-add (#491312)
 
