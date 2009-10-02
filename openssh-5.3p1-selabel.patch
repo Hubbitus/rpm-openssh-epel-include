@@ -1,6 +1,6 @@
-diff -up openssh-5.2p1/contrib/ssh-copy-id.selabel openssh-5.2p1/contrib/ssh-copy-id
---- openssh-5.2p1/contrib/ssh-copy-id.selabel	2009-01-21 10:29:21.000000000 +0100
-+++ openssh-5.2p1/contrib/ssh-copy-id	2009-07-08 14:28:27.000000000 +0200
+diff -up openssh-5.3p1/contrib/ssh-copy-id.selabel openssh-5.3p1/contrib/ssh-copy-id
+--- openssh-5.3p1/contrib/ssh-copy-id.selabel	2009-01-21 10:29:21.000000000 +0100
++++ openssh-5.3p1/contrib/ssh-copy-id	2009-10-02 14:21:54.000000000 +0200
 @@ -38,7 +38,7 @@ if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || 
    exit 1
  fi
@@ -10,10 +10,10 @@ diff -up openssh-5.2p1/contrib/ssh-copy-id.selabel openssh-5.2p1/contrib/ssh-cop
  
  cat <<EOF
  Now try logging into the machine, with "ssh '$1'", and check in:
-diff -up openssh-5.2p1/Makefile.in.selabel openssh-5.2p1/Makefile.in
---- openssh-5.2p1/Makefile.in.selabel	2009-07-08 14:28:25.000000000 +0200
-+++ openssh-5.2p1/Makefile.in	2009-07-08 14:28:27.000000000 +0200
-@@ -134,7 +134,7 @@ libssh.a: $(LIBSSH_OBJS)
+diff -up openssh-5.3p1/Makefile.in.selabel openssh-5.3p1/Makefile.in
+--- openssh-5.3p1/Makefile.in.selabel	2009-10-02 14:21:54.000000000 +0200
++++ openssh-5.3p1/Makefile.in	2009-10-02 14:23:23.000000000 +0200
+@@ -136,7 +136,7 @@ libssh.a: $(LIBSSH_OBJS)
  	$(RANLIB) $@
  
  ssh$(EXEEXT): $(LIBCOMPAT) libssh.a $(SSHOBJS)
@@ -21,10 +21,10 @@ diff -up openssh-5.2p1/Makefile.in.selabel openssh-5.2p1/Makefile.in
 +	$(LD) -o $@ $(SSHOBJS) $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck -lselinux $(LIBS)
  
  sshd$(EXEEXT): libssh.a	$(LIBCOMPAT) $(SSHDOBJS)
- 	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(SSHDLIBS) -lfipscheck $(LIBS)
-diff -up openssh-5.2p1/ssh.c.selabel openssh-5.2p1/ssh.c
---- openssh-5.2p1/ssh.c.selabel	2009-07-08 14:28:27.000000000 +0200
-+++ openssh-5.2p1/ssh.c	2009-07-08 14:34:00.000000000 +0200
+ 	$(LD) -o $@ $(SSHDOBJS) $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(SSHDLIBS) $(LIBS)
+diff -up openssh-5.3p1/ssh.c.selabel openssh-5.3p1/ssh.c
+--- openssh-5.3p1/ssh.c.selabel	2009-10-02 14:21:54.000000000 +0200
++++ openssh-5.3p1/ssh.c	2009-10-02 14:21:54.000000000 +0200
 @@ -74,6 +74,7 @@
  #include <openssl/err.h>
  #include <openssl/fips.h>
@@ -33,7 +33,7 @@ diff -up openssh-5.2p1/ssh.c.selabel openssh-5.2p1/ssh.c
  #include "openbsd-compat/openssl-compat.h"
  #include "openbsd-compat/sys-queue.h"
  
-@@ -791,10 +792,15 @@ main(int ac, char **av)
+@@ -792,10 +793,15 @@ main(int ac, char **av)
  	 */
  	r = snprintf(buf, sizeof buf, "%s%s%s", pw->pw_dir,
  	    strcmp(pw->pw_dir, "/") ? "/" : "", _PATH_SSH_USER_DIR);
