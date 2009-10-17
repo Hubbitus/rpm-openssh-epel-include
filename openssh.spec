@@ -63,7 +63,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 2%{?dist}%{?rescue_rel}
+Release: 3%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -79,6 +79,7 @@ Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
 Patch12: openssh-5.2p1-selinux.patch
 Patch13: openssh-5.3p1-mls.patch
+Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.0p1-pam_selinux.patch
 Patch19: openssh-5.2p1-sesftp.patch
 Patch22: openssh-3.9p1-askpass-keep-above.patch
@@ -207,6 +208,7 @@ an X11 passphrase dialog for OpenSSH.
 #SELinux
 %patch12 -p1 -b .selinux
 %patch13 -p1 -b .mls
+%patch16 -p1 -b .audit
 %patch18 -p1 -b .pam_selinux
 %patch19 -p1 -b .sesftp
 %endif
@@ -460,6 +462,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 16 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-3
+- Reenable audit.
+
 * Fri Oct  2 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-2
 - Upgrade to new wersion 5.3p1
 
