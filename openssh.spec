@@ -32,6 +32,9 @@
 # Whether or not /sbin/nologin exists.
 %define nologin 1
 
+# Whether to build pam_ssh_agent_auth
+%define pam_ssh_agent 1
+
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
 %{?skip_gnome_askpass:%define no_gnome_askpass 1}
@@ -58,12 +61,15 @@
 %if %{rescue}
 %define kerberos5 0
 %define libedit 0
+%define pam_ssh_agent 0
 %endif
+
+%define pam_ssh_agent_ver 0.9
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 3%{?dist}%{?rescue_rel}
+Release: 4%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
@@ -74,9 +80,12 @@ Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
+Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
+Source5: pam_ssh_agent-rmheaders
 Patch0: openssh-5.2p1-redhat.patch
 Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
+Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch12: openssh-5.2p1-selinux.patch
 Patch13: openssh-5.3p1-mls.patch
 Patch16: openssh-5.3p1-audit.patch
@@ -168,6 +177,14 @@ Requires: openssh = %{version}-%{release}
 Obsoletes: openssh-askpass-gnome
 Provides: openssh-askpass-gnome
 
+%package -n pam_ssh_agent_auth
+Summary: PAM module for authentication with ssh-agent
+Group: System Environment/Base
+Version: %{pam_ssh_agent_ver}
+# There is special exception added to the GPLv3+ license to
+# permit linking with OpenSSL licensed code
+License: GPLv3+ and OpenSSL and BSD
+
 %description
 SSH (Secure SHell) is a program for logging into and executing
 commands on a remote machine. SSH is intended to replace rlogin and
@@ -198,11 +215,27 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 an X11 passphrase dialog for OpenSSH.
 
+%description -n pam_ssh_agent_auth
+This package contains a PAM module which can be used to authenticate
+users using ssh keys stored in a ssh-agent. Through the use of the
+forwarding of ssh-agent connection it also allows to authenticate with
+remote ssh-agent instance.
+
+The module is most useful for su and sudo service stacks.
+
 %prep
-%setup -q
+%setup -q -a 4
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
 %patch4 -p1 -b .vendor
+
+%if %{pam_ssh_agent}
+pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
+%patch10 -p1 -b .psaa-build
+# Remove duplicate headers
+rm -f $(cat %{SOURCE5})
+popd
+%endif
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -238,11 +271,12 @@ CFLAGS="$CFLAGS -Os"
 %endif
 %if %{pie}
 %ifarch s390 s390x sparc sparcv9 sparc64
-CFLAGS="$CFLAGS -fPIE"
+CFLAGS="$CFLAGS -fPIC"
 %else
-CFLAGS="$CFLAGS -fpie"
+CFLAGS="$CFLAGS -fpic"
 %endif
 export CFLAGS
+SAVE_LDFLAGS="$LDFLAGS"
 LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
 %endif
 %if %{kerberos5}
@@ -322,6 +356,14 @@ fi
 popd
 %endif
 
+%if %{pam_ssh_agent}
+pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
+LDFLAGS="$SAVE_LDFLAGS"
+%configure --with-selinux --libexecdir=/%{_lib}/security
+make
+popd
+%endif
+
 # Add generation of HMAC checksums of the final stripped binaries
 %define __spec_install_post \
     %{?__debug_package:%{__debug_install_post}} \
@@ -370,6 +412,12 @@ perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
 rm -f README.nss.nss-keys
 %if ! %{nss}
 rm -f README.nss
+%endif
+
+%if %{pam_ssh_agent}
+pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
+make install DESTDIR=$RPM_BUILD_ROOT
+popd
 %endif
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -461,7 +509,20 @@ fi
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
 %endif
 
+%if %{pam_ssh_agent}
+%files -n pam_ssh_agent_auth
+%defattr(-,root,root)
+%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/GPL_LICENSE
+%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
+%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/LICENSE.OpenSSL
+%attr(0755,root,root) /%{_lib}/security/pam_ssh_agent_auth.so
+%attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
+%endif
+
 %changelog
+* Mon Oct 19 2009 Tomas Mraz <tmraz@redhat.com> - 5.3p1-4
+- Add pam_ssh_agent_auth module to a subpackage.
+
 * Fri Oct 16 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-3
 - Reenable audit.
 
