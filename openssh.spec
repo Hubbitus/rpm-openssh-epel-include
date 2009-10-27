@@ -69,8 +69,9 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 4%{?dist}%{?rescue_rel}
+Release: 5%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
+#URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
 # This package differs from the upstream OpenSSH tarball in that
@@ -520,6 +521,9 @@ fi
 %endif
 
 %changelog
+* Tue Oct 27 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-5
+- Add README.nss
+
 * Mon Oct 19 2009 Tomas Mraz <tmraz@redhat.com> - 5.3p1-4
 - Add pam_ssh_agent_auth module to a subpackage.
 
