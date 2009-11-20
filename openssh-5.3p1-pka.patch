@@ -1,0 +1,440 @@
+diff -up openssh-5.3p1/auth2-pubkey.c.pka openssh-5.3p1/auth2-pubkey.c
+--- openssh-5.3p1/auth2-pubkey.c.pka	2009-10-15 06:26:25.000000000 +0200
++++ openssh-5.3p1/auth2-pubkey.c	2009-10-15 06:44:32.000000000 +0200
+@@ -184,26 +184,14 @@ done:
+ 
+ /* return 1 if user allows given key */
+ static int
+-user_key_allowed2(struct passwd *pw, Key *key, char *file)
++user_search_key_in_file(FILE *f, char *file, Key* key, struct passwd *pw)
+ {
+ 	char line[SSH_MAX_PUBKEY_BYTES];
+ 	int found_key = 0;
+-	FILE *f;
+ 	u_long linenum = 0;
+ 	Key *found;
+ 	char *fp;
+ 
+-	/* Temporarily use the user's uid. */
+-	temporarily_use_uid(pw);
+-
+-	debug("trying public key file %s", file);
+-	f = auth_openkeyfile(file, pw, options.strict_modes);
+-
+-	if (!f) {
+-		restore_uid();
+-		return 0;
+-	}
+-
+ 	found_key = 0;
+ 	found = key_new(key->type);
+ 
+@@ -248,21 +236,160 @@ user_key_allowed2(struct passwd *pw, Key
+ 			break;
+ 		}
+ 	}
+-	restore_uid();
+-	fclose(f);
+ 	key_free(found);
+ 	if (!found_key)
+ 		debug2("key not found");
+ 	return found_key;
+ }
+ 
+-/* check whether given key is in .ssh/authorized_keys* */
++
++/* return 1 if user allows given key */
++static int
++user_key_allowed2(struct passwd *pw, Key *key, char *file)
++{
++	FILE *f;
++	int found_key = 0;
++
++	/* Temporarily use the user's uid. */
++	temporarily_use_uid(pw);
++
++	debug("trying public key file %s", file);
++	f = auth_openkeyfile(file, pw, options.strict_modes);
++
++ 	if (f) {
++ 		found_key = user_search_key_in_file (f, file, key, pw);
++		fclose(f);
++	}
++
++	restore_uid();
++	return found_key;
++}
++
++#ifdef WITH_PUBKEY_AGENT
++
++#define WHITESPACE " \t\r\n"
++
++/* return 1 if user allows given key */
++static int
++user_key_via_agent_allowed2(struct passwd *pw, Key *key)
++{
++	FILE *f;
++	int found_key = 0;
++	char *pubkey_agent_string = NULL;
++	char *tmp_pubkey_agent_string = NULL;
++	char *progname;
++	char *cp;
++	struct passwd *runas_pw;
++	struct stat st;
++
++	if (options.pubkey_agent == NULL || options.pubkey_agent[0] != '/')
++		return -1;
++
++	/* get the run as identity from config */
++	runas_pw = (options.pubkey_agent_runas == NULL)? pw
++	    : getpwnam (options.pubkey_agent_runas);
++	if (!runas_pw) {
++		error("%s: getpwnam(\"%s\"): %s", __func__,
++		    options.pubkey_agent_runas, strerror(errno));
++		return 0;
++	}
++
++	/* Temporarily use the specified uid. */
++	if (runas_pw->pw_uid != 0)
++		temporarily_use_uid(runas_pw);
++
++	pubkey_agent_string = percent_expand(options.pubkey_agent,
++	    "h", pw->pw_dir, "u", pw->pw_name, (char *)NULL);
++
++	/* Test whether agent can be modified by non root user */
++	tmp_pubkey_agent_string = xstrdup (pubkey_agent_string);
++	progname = strtok (tmp_pubkey_agent_string, WHITESPACE);
++
++	debug3("%s: checking program '%s'", __func__, progname);
++
++	if (stat (progname, &st) < 0) {
++		error("%s: stat(\"%s\"): %s", __func__,
++		    progname, strerror(errno));
++		goto go_away;
++	}
++
++	if (st.st_uid != 0 || (st.st_mode & 022) != 0) {
++		error("bad ownership or modes for pubkey agent \"%s\"",
++		    progname);
++		goto go_away;
++	}
++
++	if (!S_ISREG(st.st_mode)) {
++		error("pubkey agent \"%s\" is not a regular file",
++		    progname);
++		goto go_away;
++	}
++
++	/*
++	 * Descend the path, checking that each component is a
++	 * root-owned directory with strict permissions.
++	 */
++	do {
++		if ((cp = strrchr(progname, '/')) == NULL)
++			break;
++		else 
++			*cp = '\0';
++	
++		debug3("%s: checking component '%s'", __func__, progname);
++
++		if (stat(progname, &st) != 0) {
++			error("%s: stat(\"%s\"): %s", __func__,
++			    progname, strerror(errno));
++			goto go_away;
++		}
++		if (st.st_uid != 0 || (st.st_mode & 022) != 0) {
++			error("bad ownership or modes for pubkey agent path component \"%s\"",
++			    progname);
++			goto go_away;
++		}
++		if (!S_ISDIR(st.st_mode)) {
++			error("pubkey agent path component \"%s\" is not a directory",
++			    progname);
++			goto go_away;
++		}
++	} while (0);
++
++	/* open the pipe and read the keys */
++	f = popen (pubkey_agent_string, "r");
++	if (!f) {
++		error("%s: popen (\"%s\", \"r\"): %s", __func__,
++		    pubkey_agent_string, strerror (errno));
++		goto go_away;
++	}
++
++	found_key = user_search_key_in_file (f, options.pubkey_agent, key, pw);
++	pclose (f);
++
++go_away:
++	if (tmp_pubkey_agent_string)
++		xfree (tmp_pubkey_agent_string);
++	if (pubkey_agent_string)
++		xfree (pubkey_agent_string);
++
++	if (runas_pw->pw_uid != 0)
++		restore_uid();
++	return found_key;
++}
++#endif
++
++/* check whether given key is in <pkey_agent or .ssh/authorized_keys* */
+ int
+ user_key_allowed(struct passwd *pw, Key *key)
+ {
+ 	int success;
+ 	char *file;
+ 
++#ifdef WITH_PUBKEY_AGENT
++	success = user_key_via_agent_allowed2(pw, key);
++	if (success >= 0)
++		return success;
++#endif
++
+ 	file = authorized_keys_file(pw);
+ 	success = user_key_allowed2(pw, key, file);
+ 	xfree(file);
+diff -up openssh-5.3p1/configure.ac.pka openssh-5.3p1/configure.ac
+--- openssh-5.3p1/configure.ac.pka	2009-10-15 06:26:25.000000000 +0200
++++ openssh-5.3p1/configure.ac	2009-10-15 06:26:26.000000000 +0200
+@@ -1319,6 +1319,18 @@ AC_ARG_WITH(audit,
+ 	esac ]
+ )
+ 
++# Check whether user wants pubkey agent support
++PKA_MSG="no"
++AC_ARG_WITH(pka,
++	[  --with-pka      Enable pubkey agent support],
++	[
++		if test "x$withval" != "xno" ; then
++			AC_DEFINE([WITH_PUBKEY_AGENT], 1, [Enable pubkey agent support])
++			PKA_MSG="yes"
++		fi
++	]
++)
++
+ dnl    Checks for library functions. Please keep in alphabetical order
+ AC_CHECK_FUNCS( \
+ 	arc4random \
+@@ -4264,6 +4276,7 @@ echo "               Linux audit support
+ echo "                 Smartcard support: $SCARD_MSG"
+ echo "                     S/KEY support: $SKEY_MSG"
+ echo "              TCP Wrappers support: $TCPW_MSG"
++echo "                       PKA support: $PKA_MSG"
+ echo "              MD5 password support: $MD5_MSG"
+ echo "                   libedit support: $LIBEDIT_MSG"
+ echo "  Solaris process contract support: $SPC_MSG"
+diff -up openssh-5.3p1/configure.pka openssh-5.3p1/configure
+--- openssh-5.3p1/configure.pka	2009-10-13 19:27:51.000000000 +0200
++++ openssh-5.3p1/configure	2009-10-15 06:26:33.000000000 +0200
+@@ -769,6 +769,7 @@ with_skey
+ with_tcp_wrappers
+ with_libedit
+ with_audit
++with_pka
+ with_ssl_dir
+ with_openssl_header_check
+ with_ssl_engine
+@@ -1473,6 +1474,7 @@ Optional Packages:
+   --with-tcp-wrappers[=PATH] Enable tcpwrappers support (optionally in PATH)
+   --with-libedit[=PATH]   Enable libedit support for sftp
+   --with-audit=module     Enable EXPERIMENTAL audit support (modules=debug,bsm)
++  --with-pka      Enable pubkey agent support
+   --with-ssl-dir=PATH     Specify path to OpenSSL installation
+   --without-openssl-header-check Disable OpenSSL version consistency check
+   --with-ssl-engine       Enable OpenSSL (hardware) ENGINE support
+@@ -13443,6 +13445,25 @@ $as_echo "$as_me: error: Unknown audit m
+ fi
+ 
+ 
++# Check whether user wants pubkey agent support
++PKA_MSG="no"
++
++# Check whether --with-pka was given.
++if test "${with_pka+set}" = set; then
++  withval=$with_pka;
++		if test "x$withval" != "xno" ; then
++
++cat >>confdefs.h <<\_ACEOF
++#define WITH_PUBKEY_AGENT 1
++_ACEOF
++
++			PKA_MSG="yes"
++		fi
++
++
++fi
++
++
+ 
+ 
+ 
+@@ -32772,6 +32793,7 @@ echo "               Linux audit support
+ echo "                 Smartcard support: $SCARD_MSG"
+ echo "                     S/KEY support: $SKEY_MSG"
+ echo "              TCP Wrappers support: $TCPW_MSG"
++echo "                       PKA support: $PKA_MSG"
+ echo "              MD5 password support: $MD5_MSG"
+ echo "                   libedit support: $LIBEDIT_MSG"
+ echo "  Solaris process contract support: $SPC_MSG"
+diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
+--- openssh-5.3p1/servconf.c.pka	2009-10-15 06:26:24.000000000 +0200
++++ openssh-5.3p1/servconf.c	2009-10-15 06:26:26.000000000 +0200
+@@ -128,6 +128,8 @@ initialize_server_options(ServerOptions 
+ 	options->num_permitted_opens = -1;
+ 	options->adm_forced_command = NULL;
+ 	options->chroot_directory = NULL;
++	options->pubkey_agent = NULL;
++	options->pubkey_agent_runas = NULL;
+ 	options->zero_knowledge_password_authentication = -1;
+ }
+ 
+@@ -310,6 +312,7 @@ typedef enum {
+ 	sMatch, sPermitOpen, sForceCommand, sChrootDirectory,
+ 	sUsePrivilegeSeparation, sAllowAgentForwarding,
+ 	sZeroKnowledgePasswordAuthentication,
++	sPubkeyAgent, sPubkeyAgentRunAs,
+ 	sDeprecated, sUnsupported
+ } ServerOpCodes;
+ 
+@@ -429,6 +432,13 @@ static struct {
+ 	{ "permitopen", sPermitOpen, SSHCFG_ALL },
+ 	{ "forcecommand", sForceCommand, SSHCFG_ALL },
+ 	{ "chrootdirectory", sChrootDirectory, SSHCFG_ALL },
++#ifdef WITH_PUBKEY_AGENT
++	{ "pubkeyagent", sPubkeyAgent, SSHCFG_ALL },
++	{ "pubkeyagentrunas", sPubkeyAgentRunAs, SSHCFG_ALL },
++#else
++	{ "pubkeyagent", sUnsupported, SSHCFG_ALL },
++	{ "pubkeyagentrunas", sUnsupported, SSHCFG_ALL },
++#endif
+ 	{ NULL, sBadOption, 0 }
+ };
+ 
+@@ -1303,6 +1313,16 @@ process_server_config_line(ServerOptions
+ 			*charptr = xstrdup(arg);
+ 		break;
+ 
++	case sPubkeyAgent:
++		len = strspn(cp, WHITESPACE);
++		if (*activep && options->pubkey_agent == NULL)
++			options->pubkey_agent = xstrdup(cp + len);
++		return 0;
++
++	case sPubkeyAgentRunAs:
++		charptr = &options->pubkey_agent_runas;
++		break;
++
+ 	case sDeprecated:
+ 		logit("%s line %d: Deprecated option %s",
+ 		    filename, linenum, arg);
+@@ -1396,6 +1416,8 @@ copy_set_server_options(ServerOptions *d
+ 	M_CP_INTOPT(gss_authentication);
+ 	M_CP_INTOPT(rsa_authentication);
+ 	M_CP_INTOPT(pubkey_authentication);
++	M_CP_STROPT(pubkey_agent);
++	M_CP_STROPT(pubkey_agent_runas);
+ 	M_CP_INTOPT(kerberos_authentication);
+ 	M_CP_INTOPT(hostbased_authentication);
+ 	M_CP_INTOPT(kbd_interactive_authentication);
+@@ -1636,6 +1658,10 @@ dump_config(ServerOptions *o)
+ 	dump_cfg_string(sAuthorizedKeysFile, o->authorized_keys_file);
+ 	dump_cfg_string(sAuthorizedKeysFile2, o->authorized_keys_file2);
+ 	dump_cfg_string(sForceCommand, o->adm_forced_command);
++#ifdef WITH_PUBKEY_AGENT
++	dump_cfg_string(sPubkeyAgent, o->pubkey_agent);
++	dump_cfg_string(sPubkeyAgentRunAs, o->pubkey_agent_runas);
++#endif
+ 
+ 	/* string arguments requiring a lookup */
+ 	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
+diff -up openssh-5.3p1/servconf.h.pka openssh-5.3p1/servconf.h
+--- openssh-5.3p1/servconf.h.pka	2009-10-15 06:26:24.000000000 +0200
++++ openssh-5.3p1/servconf.h	2009-10-15 06:26:26.000000000 +0200
+@@ -152,6 +152,8 @@ typedef struct {
+ 	int	num_permitted_opens;
+ 
+ 	char   *chroot_directory;
++	char   *pubkey_agent;
++	char   *pubkey_agent_runas;
+ }       ServerOptions;
+ 
+ void	 initialize_server_options(ServerOptions *);
+diff -up openssh-5.3p1/sshd_config.0.pka openssh-5.3p1/sshd_config.0
+--- openssh-5.3p1/sshd_config.0.pka	2009-10-15 06:26:24.000000000 +0200
++++ openssh-5.3p1/sshd_config.0	2009-10-15 06:26:26.000000000 +0200
+@@ -344,10 +344,11 @@ DESCRIPTION
+              AllowTcpForwarding, Banner, ChrootDirectory, ForceCommand,
+              GatewayPorts, GSSAPIAuthentication, HostbasedAuthentication,
+              KbdInteractiveAuthentication, KerberosAuthentication,
+-             MaxAuthTries, MaxSessions, PasswordAuthentication,
+-             PermitEmptyPasswords, PermitOpen, PermitRootLogin,
+-             RhostsRSAAuthentication, RSAAuthentication, X11DisplayOffset,
+-             X11Forwarding and X11UseLocalHost.
++             MaxAuthTries, MaxSessions, PubkeyAuthentication, PubkeyAgent,
++             PubkeyAgentRunAs, PasswordAuthentication, PermitEmptyPasswords,
++             PermitOpen, PermitRootLogin, RhostsRSAAuthentication,
++             RSAAuthentication, X11DisplayOffset, X11Forwarding and
++             X11UseLocalHost.
+ 
+      MaxAuthTries
+              Specifies the maximum number of authentication attempts permitted
+@@ -455,6 +456,17 @@ DESCRIPTION
+              fault is ``yes''.  Note that this option applies to protocol ver-
+              sion 2 only.
+ 
++     PubkeyAgent
++             Specifies which agent is used for lookup of the user's public
++             keys. Empty string means to use the authorized_keys file.  By
++             default there is no PubkeyAgent set.  Note that this option has
++             an effect only with PubkeyAuthentication switched on.
++
++     PubkeyAgentRunAs
++             Specifies the user under whose account the PubkeyAgent is run.
++             Empty string (the default value) means the user being authorized
++             is used.
++
+      RhostsRSAAuthentication
+              Specifies whether rhosts or /etc/hosts.equiv authentication to-
+              gether with successful RSA host authentication is allowed.  The
+diff -up openssh-5.3p1/sshd_config.5.pka openssh-5.3p1/sshd_config.5
+--- openssh-5.3p1/sshd_config.5.pka	2009-10-15 06:26:24.000000000 +0200
++++ openssh-5.3p1/sshd_config.5	2009-10-15 06:26:26.000000000 +0200
+@@ -610,6 +610,9 @@ Available keywords are
+ .Cm KerberosAuthentication ,
+ .Cm MaxAuthTries ,
+ .Cm MaxSessions ,
++.Cm PubkeyAuthentication ,
++.Cm PubkeyAgent ,
++.Cm PubkeyAgentRunAs ,
+ .Cm PasswordAuthentication ,
+ .Cm PermitEmptyPasswords ,
+ .Cm PermitOpen ,
+@@ -805,6 +808,16 @@ Specifies whether public key authenticat
+ The default is
+ .Dq yes .
+ Note that this option applies to protocol version 2 only.
++.It Cm PubkeyAgent
++Specifies which agent is used for lookup of the user's public
++keys. Empty string means to use the authorized_keys file.
++By default there is no PubkeyAgent set.
++Note that this option has an effect only with PubkeyAuthentication
++switched on.
++.It Cm PubkeyAgentRunAs
++Specifies the user under whose account the PubkeyAgent is run. Empty
++string (the default value) means the user being authorized is used.
++.Dq 
+ .It Cm RhostsRSAAuthentication
+ Specifies whether rhosts or /etc/hosts.equiv authentication together
+ with successful RSA host authentication is allowed.
+diff -up openssh-5.3p1/sshd_config.pka openssh-5.3p1/sshd_config
+--- openssh-5.3p1/sshd_config.pka	2009-10-15 06:26:24.000000000 +0200
++++ openssh-5.3p1/sshd_config	2009-10-15 06:26:26.000000000 +0200
+@@ -47,6 +47,8 @@ SyslogFacility AUTHPRIV
+ #RSAAuthentication yes
+ #PubkeyAuthentication yes
+ #AuthorizedKeysFile	.ssh/authorized_keys
++#PubkeyAgent none
++#PubkeyAgentRunAs nobody
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #RhostsRSAAuthentication no

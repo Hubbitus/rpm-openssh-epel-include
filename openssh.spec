@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 7%{?dist}%{?rescue_rel}
+Release: 8%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -107,6 +107,7 @@ Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.3p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
+Patch72: openssh-5.3p1-pka.patch
 
 License: BSD
 Group: Applications/Internet
@@ -262,6 +263,7 @@ popd
 %patch65 -p1 -b .fips
 %patch69 -p1 -b .selabel
 %patch71 -p1 -b .edns
+%patch72 -p1 -b .pka
 
 autoreconf
 
@@ -521,6 +523,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 20 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-8
+- Add public key agent patch (#455350)
+
 * Mon Nov  2 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-7
 - Repair canohost patch to allow gssapi to work when host is acessed via pipe proxy (#531849)
 
