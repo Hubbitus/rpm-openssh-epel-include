@@ -1,6 +1,6 @@
 diff -up openssh-5.3p1/authfd.c.nss-keys openssh-5.3p1/authfd.c
 --- openssh-5.3p1/authfd.c.nss-keys	2006-09-01 07:38:36.000000000 +0200
-+++ openssh-5.3p1/authfd.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/authfd.c	2009-11-24 14:18:12.000000000 +0100
 @@ -626,6 +626,45 @@ ssh_update_card(AuthenticationConnection
  	return decode_reply(type);
  }
@@ -49,7 +49,7 @@ diff -up openssh-5.3p1/authfd.c.nss-keys openssh-5.3p1/authfd.c
   * by normal applications.
 diff -up openssh-5.3p1/authfd.h.nss-keys openssh-5.3p1/authfd.h
 --- openssh-5.3p1/authfd.h.nss-keys	2006-08-05 04:39:39.000000000 +0200
-+++ openssh-5.3p1/authfd.h	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/authfd.h	2009-11-24 14:18:12.000000000 +0100
 @@ -49,6 +49,12 @@
  #define SSH2_AGENTC_ADD_ID_CONSTRAINED		25
  #define SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED 26
@@ -73,9 +73,9 @@ diff -up openssh-5.3p1/authfd.h.nss-keys openssh-5.3p1/authfd.h
  int
  ssh_decrypt_challenge(AuthenticationConnection *, Key *, BIGNUM *, u_char[16],
 diff -up openssh-5.3p1/configure.ac.nss-keys openssh-5.3p1/configure.ac
---- openssh-5.3p1/configure.ac.nss-keys	2009-10-02 14:09:01.000000000 +0200
-+++ openssh-5.3p1/configure.ac	2009-10-02 14:09:01.000000000 +0200
-@@ -3514,6 +3514,20 @@ AC_ARG_WITH(kerberos5,
+--- openssh-5.3p1/configure.ac.nss-keys	2009-11-24 14:18:05.000000000 +0100
++++ openssh-5.3p1/configure.ac	2009-11-24 14:18:12.000000000 +0100
+@@ -3526,6 +3526,20 @@ AC_ARG_WITH(kerberos5,
  	]
  )
  
@@ -96,7 +96,7 @@ diff -up openssh-5.3p1/configure.ac.nss-keys openssh-5.3p1/configure.ac
  # Looking for programs, paths and files
  
  PRIVSEP_PATH=/var/empty
-@@ -4240,6 +4254,7 @@ echo "              TCP Wrappers support
+@@ -4253,6 +4267,7 @@ echo "              TCP Wrappers support
  echo "              MD5 password support: $MD5_MSG"
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
@@ -106,7 +106,7 @@ diff -up openssh-5.3p1/configure.ac.nss-keys openssh-5.3p1/configure.ac
  echo "                  BSD Auth support: $BSD_AUTH_MSG"
 diff -up openssh-5.3p1/key.c.nss-keys openssh-5.3p1/key.c
 --- openssh-5.3p1/key.c.nss-keys	2008-11-03 09:24:17.000000000 +0100
-+++ openssh-5.3p1/key.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/key.c	2009-11-24 14:18:12.000000000 +0100
 @@ -96,6 +96,54 @@ key_new(int type)
  	return k;
  }
@@ -184,7 +184,7 @@ diff -up openssh-5.3p1/key.c.nss-keys openssh-5.3p1/key.c
  
 diff -up openssh-5.3p1/key.h.nss-keys openssh-5.3p1/key.h
 --- openssh-5.3p1/key.h.nss-keys	2008-06-12 20:40:35.000000000 +0200
-+++ openssh-5.3p1/key.h	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/key.h	2009-11-24 14:18:12.000000000 +0100
 @@ -29,11 +29,17 @@
  #include <openssl/rsa.h>
  #include <openssl/dsa.h>
@@ -236,7 +236,7 @@ diff -up openssh-5.3p1/key.h.nss-keys openssh-5.3p1/key.h
  int		 key_equal(const Key *, const Key *);
 diff -up openssh-5.3p1/Makefile.in.nss-keys openssh-5.3p1/Makefile.in
 --- openssh-5.3p1/Makefile.in.nss-keys	2009-08-28 02:47:38.000000000 +0200
-+++ openssh-5.3p1/Makefile.in	2009-10-02 14:09:53.000000000 +0200
++++ openssh-5.3p1/Makefile.in	2009-11-24 14:18:12.000000000 +0100
 @@ -71,7 +71,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
  	atomicio.o key.o dispatch.o kex.o mac.o uidswap.o uuencode.o misc.o \
  	monitor_fdpass.o rijndael.o ssh-dss.o ssh-rsa.o dh.o kexdh.o \
@@ -247,12 +247,13 @@ diff -up openssh-5.3p1/Makefile.in.nss-keys openssh-5.3p1/Makefile.in
  SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
  	sshconnect.o sshconnect1.o sshconnect2.o mux.o \
 diff -up /dev/null openssh-5.3p1/nsskeys.c
---- /dev/null	2009-09-11 09:35:58.778798825 +0200
-+++ openssh-5.3p1/nsskeys.c	2009-10-02 14:09:01.000000000 +0200
-@@ -0,0 +1,327 @@
+--- /dev/null	2009-11-18 14:38:34.628561123 +0100
++++ openssh-5.3p1/nsskeys.c	2009-11-24 14:30:23.000000000 +0100
+@@ -0,0 +1,442 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
 + * Copyright (c) 2007 Red Hat, Inc. All rights reserved.
++ * Copyright (c) 2009 Pierre Ossman for Cendio AB
 + *
 + * Redistribution and use in source and binary forms, with or without
 + * modification, are permitted provided that the following conditions
@@ -290,6 +291,8 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +#include <keyhi.h>
 +#include <pk11pub.h>
 +#include <cert.h>
++#include <secmod.h>
++#include <secerr.h>
 +
 +#include "xmalloc.h"
 +#include "key.h"
@@ -328,8 +331,11 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +		dbpath = buf;
 +	}
 +
-+	if (NSS_Init(dbpath) != SECSuccess)
-+		return -1;
++	if (NSS_Init(dbpath) != SECSuccess) {
++		debug("Failed to initialize NSS library. Attempting without DB...");
++		if (NSS_NoDB_Init(NULL) != SECSuccess)
++			return -1;
++	}
 +
 +	if (pwfn == NULL) {
 +		pwfn = password_cb;
@@ -337,6 +343,25 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +
 +	PK11_SetPasswordFunc(pwfn);
 +	
++	return 0;
++}
++
++int
++nss_load_module(const char *modpath)
++{
++	char spec[MAXPATHLEN + 40];
++	SECMODModule *module;
++
++	debug("loading PKCS#11 module '%s'", modpath);
++
++	snprintf(spec, sizeof(spec), "library=\"%s\" name=\"Foobar\"", modpath);
++	module = SECMOD_LoadUserModule(spec, NULL, PR_FALSE);
++	if (!module || !module->loaded) {
++		if (module)
++			SECMOD_DestroyModule(module);
++		return -1;
++	}
++
 +	return 0;
 +}
 +
@@ -442,9 +467,99 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +	return 0;
 +}
 +
++static int
++nss_authenticate(PK11SlotInfo *slot, char *password, int pwprompts, char **output)
++{
++	int i, quit;
++
++	*output = NULL;
++
++	if (!PK11_NeedLogin(slot))
++		return 0;
++
++	for (i = 0; i < pwprompts; i++) {
++		SECStatus rv;
++		CK_TOKEN_INFO info;
++
++		rv = PK11_GetTokenInfo(slot, &info);
++		if (rv != SECSuccess) {
++			error("Failed to get information for token %s",
++				PK11_GetTokenName(slot));
++			return -1;
++		}
++
++		if (info.flags & CKF_USER_PIN_LOCKED) {
++			error("Passphrase for token %s is locked",
++				PK11_GetTokenName(slot));
++			return -1;
++		}
++
++		if (info.flags & CKF_USER_PIN_FINAL_TRY)
++			debug2("Final passphrase attempt for token %s",
++				PK11_GetTokenName(slot));
++		else if (info.flags & CKF_USER_PIN_COUNT_LOW)
++			debug2("Previous failed passphrase attempt for token %s",
++				PK11_GetTokenName(slot));
++
++		if (password != NULL)
++			*output = xstrdup(password);
++		else {
++			char *prompt;
++			if (asprintf(&prompt, "Enter passphrase for token %s: ",
++				PK11_GetTokenName(slot)) < 0)
++				fatal("password_cb: asprintf failed");
++			*output = read_passphrase(prompt, RP_ALLOW_STDIN);
++		}
++
++		if (strcmp(*output, "") == 0) {
++			debug2("no passphrase given, ignoring slot");
++			quit = 1;
++			goto cleanup;
++		}
++
++		quit = 0;
++
++		rv = PK11_Authenticate(slot, PR_TRUE, *output);
++		if (rv == SECSuccess)
++			return 0;
++
++		switch (PORT_GetError()) {
++		case SEC_ERROR_BAD_PASSWORD:
++			debug2("Incorrect passphrase, try again...");
++			break;
++		case SEC_ERROR_INVALID_ARGS:
++		case SEC_ERROR_BAD_DATA:
++			debug2("Invalid passphrase, try again...");
++			break;
++//This nss error is currently undefined
++//		case SEC_ERROR_LOCKED_PASSWORD:
++//			error("Unable to authenticate, token passphrase is locked");
++//			quit = 1;
++//			break;
++		default:
++			error("Failure while authenticating against token");
++			quit = 1;
++		}
++
++cleanup:
++		memset(*output, 0, strlen(*output));
++		xfree(*output);
++		*output = NULL;
++
++		/* No point in retrying the same password */
++		if (password != NULL)
++			break;
++
++		if (quit)
++			break;
++	}
++
++	return -1;
++}
++
 +static Key **
 +nss_find_privkeys(const char *tokenname, const char *keyname,
-+    char *password)
++    char *password, int pwprompts)
 +{
 +	Key *k = NULL;
 +	Key **keys = NULL;
@@ -465,18 +580,10 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +	for (sle = slots->head; sle; sle = sle->next) {
 +		SECKEYPrivateKeyList *list;
 +		SECKEYPrivateKeyListNode *node;
-+		char *tmppass = password;
-+				
-+		if (PK11_NeedLogin(sle->slot)) {
-+			if (password == NULL) {
-+				char *prompt;
-+				if (asprintf(&prompt, "Enter passphrase for token %s: ",
-+					PK11_GetTokenName(sle->slot)) < 0)
-+					fatal("password_cb: asprintf failed");
-+				tmppass = read_passphrase(prompt, RP_ALLOW_STDIN);
-+			}
-+			PK11_Authenticate(sle->slot, PR_TRUE, tmppass);
-+		}
++		char *tmppass;
++
++		if (nss_authenticate(sle->slot, password, pwprompts, &tmppass) == -1)
++			break;
 +
 +		debug("Looking for: %s:%s", tokenname, keyname);
 +		list = PK11_ListPrivKeysInSlot(sle->slot, (char *)keyname,
@@ -521,7 +628,7 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +			SECKEY_DestroyPrivateKeyList(list);
 +		}
 +cleanup:
-+		if (password == NULL && tmppass != NULL) {
++		if (tmppass != NULL) {
 +			memset(tmppass, 0, strlen(tmppass));
 +			xfree(tmppass);
 +		}
@@ -533,8 +640,9 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +
 +Key **
 +nss_get_keys(const char *tokenname, const char *keyname,
-+    char *password)
++    char *password, int pwprompts, int num_modules, const char **modules)
 +{
++	int i;
 +	Key **keys;
 +
 +	if (nss_init(NULL) == -1) {
@@ -542,7 +650,14 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +		return NULL;
 +	}
 +
-+	keys = nss_find_privkeys(tokenname, keyname, password);
++	for (i = 0;i < num_modules;i++) {
++		if (nss_load_module(modules[i]) == -1) {
++			error("Failed to load PKCS#11 module '%s'", modules[i]);
++			return NULL;
++		}
++	}
++
++	keys = nss_find_privkeys(tokenname, keyname, password, pwprompts);
 +	if (keys == NULL && keyname != NULL) {
 +		error("Cannot find key in nss, token removed");
 +		return NULL;
@@ -578,8 +693,8 @@ diff -up /dev/null openssh-5.3p1/nsskeys.c
 +
 +#endif /* HAVE_LIBNSS */
 diff -up /dev/null openssh-5.3p1/nsskeys.h
---- /dev/null	2009-09-11 09:35:58.778798825 +0200
-+++ openssh-5.3p1/nsskeys.h	2009-10-02 14:09:01.000000000 +0200
+--- /dev/null	2009-11-18 14:38:34.628561123 +0100
++++ openssh-5.3p1/nsskeys.h	2009-11-24 14:18:13.000000000 +0100
 @@ -0,0 +1,39 @@
 +/*
 + * Copyright (c) 2001 Markus Friedl.  All rights reserved.
@@ -613,7 +728,7 @@ diff -up /dev/null openssh-5.3p1/nsskeys.h
 +#include <prtypes.h>
 +
 +int	nss_init(PK11PasswordFunc);
-+Key	**nss_get_keys(const char *, const char *, char *);
++Key	**nss_get_keys(const char *, const char *, char *, int , int , const char **);
 +char	*nss_get_key_label(Key *);
 +/*void	 sc_close(void);*/
 +/*int	 sc_put_key(Key *, const char *);*/
@@ -622,30 +737,32 @@ diff -up /dev/null openssh-5.3p1/nsskeys.h
 +#endif
 diff -up openssh-5.3p1/readconf.c.nss-keys openssh-5.3p1/readconf.c
 --- openssh-5.3p1/readconf.c.nss-keys	2009-07-05 23:12:27.000000000 +0200
-+++ openssh-5.3p1/readconf.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/readconf.c	2009-11-24 14:18:13.000000000 +0100
 @@ -124,6 +124,7 @@ typedef enum {
  	oKbdInteractiveAuthentication, oKbdInteractiveDevices, oHostKeyAlias,
  	oDynamicForward, oPreferredAuthentications, oHostbasedAuthentication,
  	oHostKeyAlgorithms, oBindAddress, oSmartcardDevice,
-+	oUseNSS, oNSSToken,
++	oUseNSS, oNSSToken, oNSSModule,
  	oClearAllForwardings, oNoHostAuthenticationForLocalhost,
  	oEnableSSHKeysign, oRekeyLimit, oVerifyHostKeyDNS, oConnectTimeout,
  	oAddressFamily, oGssAuthentication, oGssDelegateCreds,
-@@ -210,6 +211,13 @@ static struct {
+@@ -210,6 +211,15 @@ static struct {
  #else
  	{ "smartcarddevice", oUnsupported },
  #endif
 +#ifdef HAVE_LIBNSS
 +	{ "usenss", oUseNSS },
 +	{ "nsstoken", oNSSToken },
++	{ "nssmodule", oNSSModule },
 +#else
 +	{ "usenss", oUnsupported },
 +	{ "nsstoken", oNSSToken },
++	{ "nssmodule", oUnsupported },
 +#endif
  	{ "clearallforwardings", oClearAllForwardings },
  	{ "enablesshkeysign", oEnableSSHKeysign },
  	{ "verifyhostkeydns", oVerifyHostKeyDNS },
-@@ -613,6 +621,14 @@ parse_string:
+@@ -613,6 +623,28 @@ parse_string:
  		charptr = &options->smartcard_device;
  		goto parse_string;
  
@@ -657,19 +774,34 @@ diff -up openssh-5.3p1/readconf.c.nss-keys openssh-5.3p1/readconf.c
 +		charptr = &options->nss_token;
 +		goto parse_command;
 +
++	case oNSSModule:
++		arg = strdelim(&s);
++		if (!arg || *arg == '\0')
++			fatal("%.200s line %d: Missing argument.", filename, linenum);
++		if (*activep) {
++			intptr = &options->num_nss_modules;
++			if (*intptr >= SSH_MAX_NSS_MODULES)
++				fatal("%.200s line %d: Too many PKCS#11 modules specified (max %d).",
++				    filename, linenum, SSH_MAX_NSS_MODULES);
++			charptr = &options->nss_modules[*intptr];
++			*charptr = xstrdup(arg);
++			*intptr = *intptr + 1;
++		}
++		break;
  	case oProxyCommand:
  		charptr = &options->proxy_command;
  parse_command:
-@@ -1052,6 +1068,8 @@ initialize_options(Options * options)
+@@ -1052,6 +1084,9 @@ initialize_options(Options * options)
  	options->preferred_authentications = NULL;
  	options->bind_address = NULL;
  	options->smartcard_device = NULL;
 +	options->use_nss = -1;
 +	options->nss_token = NULL;
++	options->num_nss_modules = 0;
  	options->enable_ssh_keysign = - 1;
  	options->no_host_authentication_for_localhost = - 1;
  	options->identities_only = - 1;
-@@ -1183,6 +1201,8 @@ fill_default_options(Options * options)
+@@ -1183,6 +1218,8 @@ fill_default_options(Options * options)
  		options->no_host_authentication_for_localhost = 0;
  	if (options->identities_only == -1)
  		options->identities_only = 0;
@@ -680,19 +812,21 @@ diff -up openssh-5.3p1/readconf.c.nss-keys openssh-5.3p1/readconf.c
  	if (options->rekey_limit == -1)
 diff -up openssh-5.3p1/readconf.h.nss-keys openssh-5.3p1/readconf.h
 --- openssh-5.3p1/readconf.h.nss-keys	2009-07-05 23:12:27.000000000 +0200
-+++ openssh-5.3p1/readconf.h	2009-10-02 14:09:01.000000000 +0200
-@@ -85,6 +85,8 @@ typedef struct {
++++ openssh-5.3p1/readconf.h	2009-11-24 14:18:13.000000000 +0100
+@@ -85,6 +85,10 @@ typedef struct {
  	char   *preferred_authentications;
  	char   *bind_address;	/* local socket address for connection to sshd */
  	char   *smartcard_device; /* Smartcard reader device */
 +	int     use_nss;        /* Use NSS library for keys */
 +	char   *nss_token;      /* Look for NSS keys on token */
++	int     num_nss_modules; /* Number of PCKS#11 modules. */
++	char   *nss_modules[SSH_MAX_NSS_MODULES];
  	int	verify_host_key_dns;	/* Verify host key using DNS */
  
  	int     num_identity_files;	/* Number of files for RSA/DSA identities. */
 diff -up openssh-5.3p1/ssh-add.c.nss-keys openssh-5.3p1/ssh-add.c
 --- openssh-5.3p1/ssh-add.c.nss-keys	2008-02-28 09:13:52.000000000 +0100
-+++ openssh-5.3p1/ssh-add.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh-add.c	2009-11-24 14:18:13.000000000 +0100
 @@ -44,6 +44,14 @@
  #include <openssl/evp.h>
  #include "openbsd-compat/openssl-compat.h"
@@ -932,7 +1066,7 @@ diff -up openssh-5.3p1/ssh-add.c.nss-keys openssh-5.3p1/ssh-add.c
  		struct passwd *pw;
 diff -up openssh-5.3p1/ssh-agent.c.nss-keys openssh-5.3p1/ssh-agent.c
 --- openssh-5.3p1/ssh-agent.c.nss-keys	2009-06-21 09:50:15.000000000 +0200
-+++ openssh-5.3p1/ssh-agent.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh-agent.c	2009-11-24 14:18:13.000000000 +0100
 @@ -80,6 +80,10 @@
  #include "scard.h"
  #endif
@@ -977,7 +1111,7 @@ diff -up openssh-5.3p1/ssh-agent.c.nss-keys openssh-5.3p1/ssh-agent.c
 +	if (lifetime && !death)
 +		death = time(NULL) + lifetime;
 +
-+	keys = nss_get_keys(tokenname, keyname, password);
++	keys = nss_get_keys(tokenname, keyname, password, 1, 0, NULL);
 +	/* password is owned by keys[0] now */
 +	xfree(tokenname);
 +	xfree(keyname);
@@ -1026,7 +1160,7 @@ diff -up openssh-5.3p1/ssh-agent.c.nss-keys openssh-5.3p1/ssh-agent.c
 +	keyname = buffer_get_string(&e->request, NULL);
 +	password = buffer_get_string(&e->request, NULL);
 +
-+	keys = nss_get_keys(tokenname, keyname, password);
++	keys = nss_get_keys(tokenname, keyname, password, 1, 0, NULL);
 +	xfree(tokenname);
 +	xfree(keyname);
 +	xfree(password);
@@ -1077,7 +1211,7 @@ diff -up openssh-5.3p1/ssh-agent.c.nss-keys openssh-5.3p1/ssh-agent.c
  		error("Unknown message %d", type);
 diff -up openssh-5.3p1/ssh.c.nss-keys openssh-5.3p1/ssh.c
 --- openssh-5.3p1/ssh.c.nss-keys	2009-07-05 23:16:56.000000000 +0200
-+++ openssh-5.3p1/ssh.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh.c	2009-11-24 14:18:13.000000000 +0100
 @@ -105,6 +105,9 @@
  #ifdef SMARTCARD
  #include "scard.h"
@@ -1101,14 +1235,16 @@ diff -up openssh-5.3p1/ssh.c.nss-keys openssh-5.3p1/ssh.c
  	if (options.smartcard_device != NULL &&
  	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
  	    (keys = sc_get_keys(options.smartcard_device, NULL)) != NULL) {
-@@ -1259,6 +1264,27 @@ load_public_identity_files(void)
+@@ -1259,6 +1264,29 @@ load_public_identity_files(void)
  		xfree(keys);
  	}
  #endif /* SMARTCARD */
 +#ifdef HAVE_LIBNSS
 +	if (options.use_nss &&
 +	    options.num_identity_files < SSH_MAX_IDENTITY_FILES &&
-+	    (keys = nss_get_keys(options.nss_token, NULL, NULL)) != NULL) {
++	    (keys = nss_get_keys(options.nss_token, NULL, NULL, 
++	    	options.number_of_password_prompts, options.num_nss_modules,
++	    	options.nss_modules)) != NULL) {
 +		int count;
 +		for (count = 0; keys[count] != NULL; count++) {
 +			memmove(&options.identity_files[1], &options.identity_files[0],
@@ -1131,7 +1267,7 @@ diff -up openssh-5.3p1/ssh.c.nss-keys openssh-5.3p1/ssh.c
  	pwname = xstrdup(pw->pw_name);
 diff -up openssh-5.3p1/ssh-dss.c.nss-keys openssh-5.3p1/ssh-dss.c
 --- openssh-5.3p1/ssh-dss.c.nss-keys	2006-11-07 13:14:42.000000000 +0100
-+++ openssh-5.3p1/ssh-dss.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh-dss.c	2009-11-24 14:18:13.000000000 +0100
 @@ -39,6 +39,10 @@
  #include "log.h"
  #include "key.h"
@@ -1189,9 +1325,25 @@ diff -up openssh-5.3p1/ssh-dss.c.nss-keys openssh-5.3p1/ssh-dss.c
  	if (datafellows & SSH_BUG_SIGBLOB) {
  		if (lenp != NULL)
  			*lenp = SIGBLOB_LEN;
+diff -up openssh-5.3p1/ssh.h.nss-keys openssh-5.3p1/ssh.h
+--- openssh-5.3p1/ssh.h.nss-keys	2006-08-05 04:39:41.000000000 +0200
++++ openssh-5.3p1/ssh.h	2009-11-24 14:18:13.000000000 +0100
+@@ -28,6 +28,12 @@
+ #define SSH_MAX_IDENTITY_FILES		100
+ 
+ /*
++ * Maximum number of PKCS#11 modules that can be specified in configuration
++ * files or on the command line.
++ */
++#define SSH_MAX_NSS_MODULES			10
++
++/*
+  * Maximum length of lines in authorized_keys file.
+  * Current value permits 16kbit RSA and RSA1 keys and 8kbit DSA keys, with
+  * some room for options and comments.
 diff -up openssh-5.3p1/ssh-keygen.c.nss-keys openssh-5.3p1/ssh-keygen.c
 --- openssh-5.3p1/ssh-keygen.c.nss-keys	2009-06-22 08:11:07.000000000 +0200
-+++ openssh-5.3p1/ssh-keygen.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh-keygen.c	2009-11-24 14:18:13.000000000 +0100
 @@ -53,6 +53,11 @@
  #include "scard.h"
  #endif
@@ -1215,7 +1367,7 @@ diff -up openssh-5.3p1/ssh-keygen.c.nss-keys openssh-5.3p1/ssh-keygen.c
 +	Key **keys = NULL;
 +	int i;
 +	
-+	keys = nss_get_keys(tokenname, keyname, NULL);
++	keys = nss_get_keys(tokenname, keyname, NULL, 1, 0, NULL);
 +	if (keys == NULL)
 +		fatal("cannot find public key in NSS");
 +	for (i = 0; keys[i]; i++) {
@@ -1295,7 +1447,7 @@ diff -up openssh-5.3p1/ssh-keygen.c.nss-keys openssh-5.3p1/ssh-keygen.c
  		if (download)
 diff -up openssh-5.3p1/ssh-rsa.c.nss-keys openssh-5.3p1/ssh-rsa.c
 --- openssh-5.3p1/ssh-rsa.c.nss-keys	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-5.3p1/ssh-rsa.c	2009-10-02 14:09:01.000000000 +0200
++++ openssh-5.3p1/ssh-rsa.c	2009-11-24 14:18:13.000000000 +0100
 @@ -32,6 +32,10 @@
  #include "compat.h"
  #include "ssh.h"
@@ -1366,43 +1518,3 @@ diff -up openssh-5.3p1/ssh-rsa.c.nss-keys openssh-5.3p1/ssh-rsa.c
  	/* encode signature */
  	buffer_init(&b);
  	buffer_put_cstring(&b, "ssh-rsa");
-diff -up /dev/null openssh-5.2p1/README.nss
---- /dev/null	2008-11-17 17:51:52.160001870 +0100
-+++ openssh-5.2p1/README.nss	2008-11-18 19:11:41.000000000 +0100
-@@ -0,0 +1,36 @@
-+How to use NSS tokens with OpenSSH?
-+
-+This version of OpenSSH contains experimental support for authentication using
-+keys stored in tokens stored in NSS database. This for example includes any
-+PKCS#11 tokens which are installed in your NSS database.
-+
-+As the code is experimental and preliminary only SSH protocol 2 is supported.
-+The NSS certificate and token databases are looked for in the ~/.ssh
-+directory or in a directory specified by environment variable NSS_DB_PATH.
-+
-+Common operations:
-+
-+(1) tell the ssh client to use the NSS keys:
-+
-+	$ ssh -o 'UseNSS yes' otherhost
-+	
-+	if you want to use a specific token:
-+	
-+	$ ssh -o 'UseNSS yes' -o 'NSS Token My PKCS11 Token' otherhost
-+
-+(2) or tell the agent to use the NSS keys:
-+
-+	$ ssh-add -n
-+	
-+	if you want to use a specific token:
-+	
-+	$ ssh-add -n -T 'My PKCS11 Token'
-+
-+(3) extract the public key from token so it can be added to the
-+server:
-+
-+	$ ssh-keygen -n
-+	
-+	if you want to use a specific token and/or key:
-+	
-+	$ ssh-keygen -n -D 'My PKCS11 Token' 'My Key ID'
