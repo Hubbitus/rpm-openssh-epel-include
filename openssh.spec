@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 10%{?dist}%{?rescue_rel}
+Release: 11%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -525,6 +525,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 27 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-11
+- Prepare NSS key patch for future SEC_ERROR_LOCKED_PASSWORD (#537411)
+
 * Tue Nov 24 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-10
 - Update NSS key patch (#537411, #356451)
 
