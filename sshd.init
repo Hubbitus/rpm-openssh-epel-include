@@ -122,9 +122,11 @@ start()
 	[ -f /etc/ssh/sshd_config ] || exit 6
 	# Create keys if necessary
 	if [ "x${AUTOCREATE_SERVER_KEYS}" != xNO ]; then
-		do_rsa1_keygen
 		do_rsa_keygen
-		do_dsa_keygen
+		if [ "x${AUTOCREATE_SERVER_KEYS}" != xRSAONLY ]; then
+			do_rsa1_keygen
+			do_dsa_keygen
+		fi
 	fi
 
 	echo -n $"Starting $prog: "
