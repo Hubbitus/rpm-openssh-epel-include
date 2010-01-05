@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 13%{?dist}%{?rescue_rel}
+Release: 14%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -525,6 +525,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan  5 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-14
+- Update the pka patch
+
 * Mon Dec 21 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-13
 - Update the audit patch
 

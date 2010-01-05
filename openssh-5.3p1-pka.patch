@@ -1,7 +1,7 @@
 diff -up openssh-5.3p1/auth2-pubkey.c.pka openssh-5.3p1/auth2-pubkey.c
---- openssh-5.3p1/auth2-pubkey.c.pka	2009-10-15 06:26:25.000000000 +0200
-+++ openssh-5.3p1/auth2-pubkey.c	2009-10-15 06:44:32.000000000 +0200
-@@ -184,26 +184,14 @@ done:
+--- openssh-5.3p1/auth2-pubkey.c.pka	2009-03-08 01:40:28.000000000 +0100
++++ openssh-5.3p1/auth2-pubkey.c	2010-01-04 16:07:53.000000000 +0100
+@@ -175,26 +175,14 @@ done:
  
  /* return 1 if user allows given key */
  static int
@@ -29,7 +29,7 @@ diff -up openssh-5.3p1/auth2-pubkey.c.pka openssh-5.3p1/auth2-pubkey.c
  	found_key = 0;
  	found = key_new(key->type);
  
-@@ -248,21 +236,160 @@ user_key_allowed2(struct passwd *pw, Key
+@@ -239,21 +227,160 @@ user_key_allowed2(struct passwd *pw, Key
  			break;
  		}
  	}
@@ -193,36 +193,6 @@ diff -up openssh-5.3p1/auth2-pubkey.c.pka openssh-5.3p1/auth2-pubkey.c
  	file = authorized_keys_file(pw);
  	success = user_key_allowed2(pw, key, file);
  	xfree(file);
-diff -up openssh-5.3p1/configure.ac.pka openssh-5.3p1/configure.ac
---- openssh-5.3p1/configure.ac.pka	2009-10-15 06:26:25.000000000 +0200
-+++ openssh-5.3p1/configure.ac	2009-10-15 06:26:26.000000000 +0200
-@@ -1319,6 +1319,18 @@ AC_ARG_WITH(audit,
- 	esac ]
- )
- 
-+# Check whether user wants pubkey agent support
-+PKA_MSG="no"
-+AC_ARG_WITH(pka,
-+	[  --with-pka      Enable pubkey agent support],
-+	[
-+		if test "x$withval" != "xno" ; then
-+			AC_DEFINE([WITH_PUBKEY_AGENT], 1, [Enable pubkey agent support])
-+			PKA_MSG="yes"
-+		fi
-+	]
-+)
-+
- dnl    Checks for library functions. Please keep in alphabetical order
- AC_CHECK_FUNCS( \
- 	arc4random \
-@@ -4264,6 +4276,7 @@ echo "               Linux audit support
- echo "                 Smartcard support: $SCARD_MSG"
- echo "                     S/KEY support: $SKEY_MSG"
- echo "              TCP Wrappers support: $TCPW_MSG"
-+echo "                       PKA support: $PKA_MSG"
- echo "              MD5 password support: $MD5_MSG"
- echo "                   libedit support: $LIBEDIT_MSG"
- echo "  Solaris process contract support: $SPC_MSG"
 diff -up openssh-5.3p1/configure.pka openssh-5.3p1/configure
 --- openssh-5.3p1/configure.pka	2009-10-13 19:27:51.000000000 +0200
 +++ openssh-5.3p1/configure	2009-10-15 06:26:33.000000000 +0200
@@ -276,10 +246,40 @@ diff -up openssh-5.3p1/configure.pka openssh-5.3p1/configure
  echo "              MD5 password support: $MD5_MSG"
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
+diff -up openssh-5.3p1/configure.ac.pka openssh-5.3p1/configure.ac
+--- openssh-5.3p1/configure.ac.pka	2009-09-11 06:56:08.000000000 +0200
++++ openssh-5.3p1/configure.ac	2010-01-04 16:07:53.000000000 +0100
+@@ -1319,6 +1319,18 @@ AC_ARG_WITH(audit,
+ 	esac ]
+ )
+ 
++# Check whether user wants pubkey agent support
++PKA_MSG="no"
++AC_ARG_WITH(pka,
++	[  --with-pka      Enable pubkey agent support],
++	[
++		if test "x$withval" != "xno" ; then
++			AC_DEFINE([WITH_PUBKEY_AGENT], 1, [Enable pubkey agent support])
++			PKA_MSG="yes"
++		fi
++	]
++)
++
+ dnl    Checks for library functions. Please keep in alphabetical order
+ AC_CHECK_FUNCS( \
+ 	arc4random \
+@@ -4229,6 +4241,7 @@ echo "                   SELinux support
+ echo "                 Smartcard support: $SCARD_MSG"
+ echo "                     S/KEY support: $SKEY_MSG"
+ echo "              TCP Wrappers support: $TCPW_MSG"
++echo "                       PKA support: $PKA_MSG"
+ echo "              MD5 password support: $MD5_MSG"
+ echo "                   libedit support: $LIBEDIT_MSG"
+ echo "  Solaris process contract support: $SPC_MSG"
 diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
---- openssh-5.3p1/servconf.c.pka	2009-10-15 06:26:24.000000000 +0200
-+++ openssh-5.3p1/servconf.c	2009-10-15 06:26:26.000000000 +0200
-@@ -128,6 +128,8 @@ initialize_server_options(ServerOptions 
+--- openssh-5.3p1/servconf.c.pka	2009-06-21 12:26:17.000000000 +0200
++++ openssh-5.3p1/servconf.c	2010-01-04 16:07:53.000000000 +0100
+@@ -127,6 +127,8 @@ initialize_server_options(ServerOptions 
  	options->num_permitted_opens = -1;
  	options->adm_forced_command = NULL;
  	options->chroot_directory = NULL;
@@ -288,7 +288,7 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
  	options->zero_knowledge_password_authentication = -1;
  }
  
-@@ -310,6 +312,7 @@ typedef enum {
+@@ -306,6 +308,7 @@ typedef enum {
  	sMatch, sPermitOpen, sForceCommand, sChrootDirectory,
  	sUsePrivilegeSeparation, sAllowAgentForwarding,
  	sZeroKnowledgePasswordAuthentication,
@@ -296,7 +296,7 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
  	sDeprecated, sUnsupported
  } ServerOpCodes;
  
-@@ -429,6 +432,13 @@ static struct {
+@@ -424,6 +427,13 @@ static struct {
  	{ "permitopen", sPermitOpen, SSHCFG_ALL },
  	{ "forcecommand", sForceCommand, SSHCFG_ALL },
  	{ "chrootdirectory", sChrootDirectory, SSHCFG_ALL },
@@ -310,7 +310,7 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
  	{ NULL, sBadOption, 0 }
  };
  
-@@ -1303,6 +1313,16 @@ process_server_config_line(ServerOptions
+@@ -1294,6 +1304,20 @@ process_server_config_line(ServerOptions
  			*charptr = xstrdup(arg);
  		break;
  
@@ -322,12 +322,16 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
 +
 +	case sPubkeyAgentRunAs:
 +		charptr = &options->pubkey_agent_runas;
++
++		arg = strdelim(&cp);
++		if (*activep && *charptr == NULL)
++			*charptr = xstrdup(arg);
 +		break;
 +
  	case sDeprecated:
  		logit("%s line %d: Deprecated option %s",
  		    filename, linenum, arg);
-@@ -1396,6 +1416,8 @@ copy_set_server_options(ServerOptions *d
+@@ -1387,6 +1411,8 @@ copy_set_server_options(ServerOptions *d
  	M_CP_INTOPT(gss_authentication);
  	M_CP_INTOPT(rsa_authentication);
  	M_CP_INTOPT(pubkey_authentication);
@@ -336,7 +340,7 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
  	M_CP_INTOPT(kerberos_authentication);
  	M_CP_INTOPT(hostbased_authentication);
  	M_CP_INTOPT(kbd_interactive_authentication);
-@@ -1636,6 +1658,10 @@ dump_config(ServerOptions *o)
+@@ -1626,6 +1652,10 @@ dump_config(ServerOptions *o)
  	dump_cfg_string(sAuthorizedKeysFile, o->authorized_keys_file);
  	dump_cfg_string(sAuthorizedKeysFile2, o->authorized_keys_file2);
  	dump_cfg_string(sForceCommand, o->adm_forced_command);
@@ -348,9 +352,9 @@ diff -up openssh-5.3p1/servconf.c.pka openssh-5.3p1/servconf.c
  	/* string arguments requiring a lookup */
  	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
 diff -up openssh-5.3p1/servconf.h.pka openssh-5.3p1/servconf.h
---- openssh-5.3p1/servconf.h.pka	2009-10-15 06:26:24.000000000 +0200
-+++ openssh-5.3p1/servconf.h	2009-10-15 06:26:26.000000000 +0200
-@@ -152,6 +152,8 @@ typedef struct {
+--- openssh-5.3p1/servconf.h.pka	2009-01-28 06:31:23.000000000 +0100
++++ openssh-5.3p1/servconf.h	2010-01-04 16:07:53.000000000 +0100
+@@ -151,6 +151,8 @@ typedef struct {
  	int	num_permitted_opens;
  
  	char   *chroot_directory;
@@ -360,8 +364,8 @@ diff -up openssh-5.3p1/servconf.h.pka openssh-5.3p1/servconf.h
  
  void	 initialize_server_options(ServerOptions *);
 diff -up openssh-5.3p1/sshd_config.0.pka openssh-5.3p1/sshd_config.0
---- openssh-5.3p1/sshd_config.0.pka	2009-10-15 06:26:24.000000000 +0200
-+++ openssh-5.3p1/sshd_config.0	2009-10-15 06:26:26.000000000 +0200
+--- openssh-5.3p1/sshd_config.0.pka	2009-09-26 08:31:16.000000000 +0200
++++ openssh-5.3p1/sshd_config.0	2010-01-04 16:07:53.000000000 +0100
 @@ -344,10 +344,11 @@ DESCRIPTION
               AllowTcpForwarding, Banner, ChrootDirectory, ForceCommand,
               GatewayPorts, GSSAPIAuthentication, HostbasedAuthentication,
@@ -396,9 +400,21 @@ diff -up openssh-5.3p1/sshd_config.0.pka openssh-5.3p1/sshd_config.0
       RhostsRSAAuthentication
               Specifies whether rhosts or /etc/hosts.equiv authentication to-
               gether with successful RSA host authentication is allowed.  The
+diff -up openssh-5.3p1/sshd_config.pka openssh-5.3p1/sshd_config
+--- openssh-5.3p1/sshd_config.pka	2008-07-02 14:35:43.000000000 +0200
++++ openssh-5.3p1/sshd_config	2010-01-04 16:07:53.000000000 +0100
+@@ -46,6 +46,8 @@ Protocol 2
+ #RSAAuthentication yes
+ #PubkeyAuthentication yes
+ #AuthorizedKeysFile	.ssh/authorized_keys
++#PubkeyAgent none
++#PubkeyAgentRunAs nobody
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #RhostsRSAAuthentication no
 diff -up openssh-5.3p1/sshd_config.5.pka openssh-5.3p1/sshd_config.5
---- openssh-5.3p1/sshd_config.5.pka	2009-10-15 06:26:24.000000000 +0200
-+++ openssh-5.3p1/sshd_config.5	2009-10-15 06:26:26.000000000 +0200
+--- openssh-5.3p1/sshd_config.5.pka	2009-08-28 02:27:08.000000000 +0200
++++ openssh-5.3p1/sshd_config.5	2010-01-04 16:07:53.000000000 +0100
 @@ -610,6 +610,9 @@ Available keywords are
  .Cm KerberosAuthentication ,
  .Cm MaxAuthTries ,
@@ -426,15 +442,3 @@ diff -up openssh-5.3p1/sshd_config.5.pka openssh-5.3p1/sshd_config.5
  .It Cm RhostsRSAAuthentication
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful RSA host authentication is allowed.
-diff -up openssh-5.3p1/sshd_config.pka openssh-5.3p1/sshd_config
---- openssh-5.3p1/sshd_config.pka	2009-10-15 06:26:24.000000000 +0200
-+++ openssh-5.3p1/sshd_config	2009-10-15 06:26:26.000000000 +0200
-@@ -47,6 +47,8 @@ SyslogFacility AUTHPRIV
- #RSAAuthentication yes
- #PubkeyAuthentication yes
- #AuthorizedKeysFile	.ssh/authorized_keys
-+#PubkeyAgent none
-+#PubkeyAgentRunAs nobody
- 
- # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
- #RhostsRSAAuthentication no
