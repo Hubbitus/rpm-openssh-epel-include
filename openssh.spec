@@ -37,25 +37,25 @@
 
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
-%{?skip_gnome_askpass:%define no_gnome_askpass 1}
+%{?skip_gnome_askpass:%global no_gnome_askpass 1}
 
 # Add option to build without GTK2 for older platforms with only GTK+.
 # Red Hat Linux <= 7.2 and Red Hat Advanced Server 2.1 are examples.
 # rpm -ba|--rebuild --define 'no_gtk2 1'
-%{?no_gtk2:%define gtk2 0}
+%{?no_gtk2:%global gtk2 0}
 
 # Options for static OpenSSL link:
 # rpm -ba|--rebuild --define "static_openssl 1"
-%{?static_openssl:%define static_libcrypto 1}
+%{?static_openssl:%global static_libcrypto 1}
 
 # Options for Smartcard support: (needs libsectok and openssl-engine)
 # rpm -ba|--rebuild --define "smartcard 1"
-%{?smartcard:%define scard 1}
+%{?smartcard:%global scard 1}
 
 # Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
 %define rescue 0
-%{?build_rescue:%define rescue 1}
-%{?build_rescue:%define rescue_rel rescue}
+%{?build_rescue:%global rescue 1}
+%{?build_rescue:%global rescue_rel rescue}
 
 # Turn off some stuff for resuce builds
 %if %{rescue}
@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 14%{?dist}%{?rescue_rel}
+Release: 15%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -525,6 +525,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan  8 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-15
+- replaced define by global in macros
+
 * Tue Jan  5 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-14
 - Update the pka patch
 
