@@ -525,7 +525,7 @@ fi
 %endif
 
 %changelog
-* Fri Jan  8 2009 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-15
+* Fri Jan  8 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-15
 - replaced define by global in macros
 
 * Tue Jan  5 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-14
