@@ -1,6 +1,6 @@
-diff -up openssh-5.1p1/channels.c.cloexec openssh-5.1p1/channels.c
---- openssh-5.1p1/channels.c.cloexec	2008-12-11 22:24:49.000000000 +0100
-+++ openssh-5.1p1/channels.c	2008-12-11 22:29:52.000000000 +0100
+diff -up openssh-5.3p1/channels.c.cloexec openssh-5.3p1/channels.c
+--- openssh-5.3p1/channels.c.cloexec	2010-01-19 09:26:50.000000000 +0100
++++ openssh-5.3p1/channels.c	2010-01-19 09:26:51.000000000 +0100
 @@ -60,6 +60,7 @@
  #include <termios.h>
  #include <unistd.h>
@@ -28,10 +28,10 @@ diff -up openssh-5.1p1/channels.c.cloexec openssh-5.1p1/channels.c
  	c->rfd = rfd;
  	c->wfd = wfd;
  	c->sock = (rfd == wfd) ? rfd : -1;
-diff -up openssh-5.1p1/sshconnect2.c.cloexec openssh-5.1p1/sshconnect2.c
---- openssh-5.1p1/sshconnect2.c.cloexec	2008-12-11 22:24:49.000000000 +0100
-+++ openssh-5.1p1/sshconnect2.c	2008-12-11 22:24:49.000000000 +0100
-@@ -38,6 +38,7 @@
+diff -up openssh-5.3p1/sshconnect2.c.cloexec openssh-5.3p1/sshconnect2.c
+--- openssh-5.3p1/sshconnect2.c.cloexec	2010-01-19 09:26:50.000000000 +0100
++++ openssh-5.3p1/sshconnect2.c	2010-01-19 09:26:51.000000000 +0100
+@@ -39,6 +39,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <unistd.h>
@@ -39,7 +39,7 @@ diff -up openssh-5.1p1/sshconnect2.c.cloexec openssh-5.1p1/sshconnect2.c
  #if defined(HAVE_STRNVIS) && defined(HAVE_VIS_H)
  #include <vis.h>
  #endif
-@@ -1267,6 +1268,7 @@ ssh_keysign(Key *key, u_char **sigp, u_i
+@@ -1512,6 +1513,7 @@ ssh_keysign(Key *key, u_char **sigp, u_i
  		return -1;
  	}
  	if (pid == 0) {
@@ -47,9 +47,9 @@ diff -up openssh-5.1p1/sshconnect2.c.cloexec openssh-5.1p1/sshconnect2.c
  		permanently_drop_suid(getuid());
  		close(from[0]);
  		if (dup2(from[1], STDOUT_FILENO) < 0)
-diff -up openssh-5.1p1/sshconnect.c.cloexec openssh-5.1p1/sshconnect.c
---- openssh-5.1p1/sshconnect.c.cloexec	2008-07-02 14:34:30.000000000 +0200
-+++ openssh-5.1p1/sshconnect.c	2008-12-11 22:24:49.000000000 +0100
+diff -up openssh-5.3p1/sshconnect.c.cloexec openssh-5.3p1/sshconnect.c
+--- openssh-5.3p1/sshconnect.c.cloexec	2009-06-21 10:53:53.000000000 +0200
++++ openssh-5.3p1/sshconnect.c	2010-01-19 09:26:51.000000000 +0100
 @@ -38,6 +38,7 @@
  #include <stdlib.h>
  #include <string.h>
@@ -58,7 +58,7 @@ diff -up openssh-5.1p1/sshconnect.c.cloexec openssh-5.1p1/sshconnect.c
  
  #include "xmalloc.h"
  #include "key.h"
-@@ -194,8 +195,11 @@ ssh_create_socket(int privileged, struct
+@@ -191,8 +192,11 @@ ssh_create_socket(int privileged, struct
  		return sock;
  	}
  	sock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
@@ -71,3 +71,14 @@ diff -up openssh-5.1p1/sshconnect.c.cloexec openssh-5.1p1/sshconnect.c
  
  	/* Bind the socket to an alternative local IP address */
  	if (options.bind_address == NULL)
+diff -up openssh-5.3p1/sshd.c.cloexec openssh-5.3p1/sshd.c
+--- openssh-5.3p1/sshd.c.cloexec	2010-01-19 09:43:45.000000000 +0100
++++ openssh-5.3p1/sshd.c	2010-01-19 09:47:04.000000000 +0100
+@@ -1105,6 +1105,7 @@ server_accept_loop(int *sock_in, int *so
+ 					error("accept: %.100s", strerror(errno));
+ 				continue;
+ 			}
++			fcntl(*newsock, F_SETFD, FD_CLOEXEC);
+ 			if (unset_nonblock(*newsock) == -1) {
+ 				close(*newsock);
+ 				continue;

@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 15%{?dist}%{?rescue_rel}
+Release: 16%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -525,6 +525,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 19 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-16
+- set FD_CLOEXEC on accepted socket (#541809)
+
 * Fri Jan  8 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-15
 - replaced define by global in macros
 
@@ -1144,7 +1147,7 @@ fi
 - update to 3.6.1p2
 
 * Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
-- rebuilt
+6 rebuilt
 
 * Mon Mar 24 2003 Florian La Roche <Florian.LaRoche@redhat.de>
 - add patch for getsockopt() call to work on bigendian 64bit archs
