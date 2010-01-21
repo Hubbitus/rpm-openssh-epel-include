@@ -1,110 +1,13 @@
-diff -up openssh-5.3p1/ssh-add.c.randclean openssh-5.3p1/ssh-add.c
---- openssh-5.3p1/ssh-add.c.randclean	2010-01-20 19:13:28.000000000 +0100
-+++ openssh-5.3p1/ssh-add.c	2010-01-20 19:13:29.000000000 +0100
-@@ -41,6 +41,7 @@
- #include <sys/stat.h>
- #include <sys/param.h>
- 
-+#include <openssl/rand.h>
- #include <openssl/evp.h>
- #include <openssl/fips.h>
- #include "openbsd-compat/openssl-compat.h"
-@@ -471,6 +472,9 @@ main(int argc, char **argv)
- 	int use_nss = 0;
- #endif
+diff -up openssh-5.3p1/entropy.c.randclean openssh-5.3p1/entropy.c
+--- openssh-5.3p1/entropy.c.randclean	2010-01-21 09:26:30.000000000 +0100
++++ openssh-5.3p1/entropy.c	2010-01-21 09:26:37.000000000 +0100
+@@ -159,6 +159,9 @@ init_rng(void)
+ 		fatal("OpenSSL version mismatch. Built against %lx, you "
+ 		    "have %lx", OPENSSL_VERSION_NUMBER, SSLeay());
  
 +	/* clean the PRNG status when exiting the program */
 +	atexit(RAND_cleanup);
 +
- 	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
- 	sanitise_stdfd();
- 
-diff -up openssh-5.3p1/ssh.c.randclean openssh-5.3p1/ssh.c
---- openssh-5.3p1/ssh.c.randclean	2010-01-20 19:13:29.000000000 +0100
-+++ openssh-5.3p1/ssh.c	2010-01-20 19:13:29.000000000 +0100
-@@ -70,6 +70,7 @@
- #include <netinet/in.h>
- #include <arpa/inet.h>
- 
-+#include <openssl/rand.h>
- #include <openssl/evp.h>
- #include <openssl/err.h>
- #include <openssl/fips.h>
-@@ -220,6 +221,9 @@ main(int ac, char **av)
- 	struct servent *sp;
- 	Forward fwd;
- 
-+	/* clean the PRNG status when exiting the program */
-+	atexit(RAND_cleanup);
-+
- 	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
- 	sanitise_stdfd();
- 
-diff -up openssh-5.3p1/sshd.c.randclean openssh-5.3p1/sshd.c
---- openssh-5.3p1/sshd.c.randclean	2010-01-20 19:13:29.000000000 +0100
-+++ openssh-5.3p1/sshd.c	2010-01-20 19:13:29.000000000 +0100
-@@ -1263,6 +1263,9 @@ main(int ac, char **av)
- 	Key *key;
- 	Authctxt *authctxt;
- 
-+	/* clean the PRNG status when exiting the program */
-+	atexit(RAND_cleanup);
-+
- #ifdef HAVE_SECUREWARE
- 	(void)set_auth_parameters(ac, av);
- #endif
-diff -up openssh-5.3p1/ssh-keygen.c.randclean openssh-5.3p1/ssh-keygen.c
---- openssh-5.3p1/ssh-keygen.c.randclean	2010-01-20 19:13:29.000000000 +0100
-+++ openssh-5.3p1/ssh-keygen.c	2010-01-20 19:13:29.000000000 +0100
-@@ -19,6 +19,7 @@
- #include <sys/stat.h>
- #include <sys/param.h>
- 
-+#include <openssl/rand.h>
- #include <openssl/evp.h>
- #include <openssl/pem.h>
- #include <openssl/fips.h>
-@@ -1120,6 +1121,9 @@ main(int argc, char **argv)
- 	extern int optind;
- 	extern char *optarg;
- 
-+	/* clean the PRNG status when exiting the program */
-+	atexit(RAND_cleanup);
-+
- 	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
- 	sanitise_stdfd();
- 
-diff -up openssh-5.3p1/ssh-keyscan.c.randclean openssh-5.3p1/ssh-keyscan.c
---- openssh-5.3p1/ssh-keyscan.c.randclean	2009-01-28 06:31:23.000000000 +0100
-+++ openssh-5.3p1/ssh-keyscan.c	2010-01-20 19:21:16.000000000 +0100
-@@ -18,6 +18,7 @@
- #include <netinet/in.h>
- #include <arpa/inet.h>
- 
-+#include <openssl/rand.h>
- #include <openssl/bn.h>
- 
- #include <netdb.h>
-@@ -730,6 +731,9 @@ main(int argc, char **argv)
- 	extern int optind;
- 	extern char *optarg;
- 
-+	/* clean the PRNG status when exiting the program */
-+	atexit(RAND_cleanup);
-+
- 	__progname = ssh_get_progname(argv[0]);
- 	init_rng();
- 	seed_rng();
-diff -up openssh-5.3p1/ssh-keysign.c.randclean openssh-5.3p1/ssh-keysign.c
---- openssh-5.3p1/ssh-keysign.c.randclean	2006-09-01 07:38:37.000000000 +0200
-+++ openssh-5.3p1/ssh-keysign.c	2010-01-20 19:13:29.000000000 +0100
-@@ -158,6 +158,9 @@ main(int argc, char **argv)
- 	u_int slen, dlen;
- 	u_int32_t rnd[256];
- 
-+	/* clean the PRNG status when exiting the program */
-+	atexit(RAND_cleanup);
-+
- 	/* Ensure that stdin and stdout are connected */
- 	if ((fd = open(_PATH_DEVNULL, O_RDWR)) < 2)
- 		exit(1);
+ #ifndef OPENSSL_PRNG_ONLY
+ 	original_uid = getuid();
+ 	original_euid = geteuid();

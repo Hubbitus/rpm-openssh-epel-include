@@ -69,7 +69,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 17%{?dist}%{?rescue_rel}
+Release: 18%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -527,6 +527,9 @@ fi
 %endif
 
 %changelog
+* Thu Jan 21 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-18
+- optimized RAND_cleanup patch (#557166)
+
 * Wed Jan 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-17
 - add RAND_cleanup at the exit of each program using RAND (#557166)
 
