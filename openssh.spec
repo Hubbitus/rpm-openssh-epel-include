@@ -64,14 +64,16 @@
 %define pam_ssh_agent 0
 %endif
 
-%define pam_ssh_agent_ver 0.9
+%define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.3p1
-Release: 18%{?dist}%{?rescue_rel}
+# Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
+# is updated as well.
+Release: 19%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
-#URL1: http://pamsshauth.sourceforge.net
+#URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
 # This package differs from the upstream OpenSSH tarball in that
@@ -185,9 +187,7 @@ Provides: openssh-askpass-gnome
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-# There is special exception added to the GPLv3+ license to
-# permit linking with OpenSSL licensed code
-License: GPLv3+ and OpenSSL and BSD
+License: BSD
 
 %description
 SSH (Secure SHell) is a program for logging into and executing
@@ -519,14 +519,16 @@ fi
 %if %{pam_ssh_agent}
 %files -n pam_ssh_agent_auth
 %defattr(-,root,root)
-%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/GPL_LICENSE
 %doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
-%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/LICENSE.OpenSSL
 %attr(0755,root,root) /%{_lib}/security/pam_ssh_agent_auth.so
 %attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
 %endif
 
 %changelog
+* Mon Jan 25 2010 Tomas Mraz <tmraz@redhat.com> - 5.3p1-19
+- updated pam_ssh_agent_auth to new version from upstream (just
+  a licence change)
+
 * Thu Jan 21 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-18
 - optimized RAND_cleanup patch (#557166)
 
