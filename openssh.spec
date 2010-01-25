@@ -71,7 +71,7 @@ Name: openssh
 Version: 5.3p1
 # Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
 # is updated as well.
-Release: 19%{?dist}%{?rescue_rel}
+Release: 20%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -525,6 +525,9 @@ fi
 %endif
 
 %changelog
+* Mon Jan 25 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-20
+- optimized FD_CLOEXEC on accept socket (#541809)
+
 * Mon Jan 25 2010 Tomas Mraz <tmraz@redhat.com> - 5.3p1-19
 - updated pam_ssh_agent_auth to new version from upstream (just
   a licence change)
