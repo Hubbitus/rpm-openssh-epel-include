@@ -71,7 +71,7 @@ Name: openssh
 Version: 5.3p1
 # Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
 # is updated as well.
-Release: 20%{?dist}%{?rescue_rel}
+Release: 21%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -88,6 +88,7 @@ Source5: pam_ssh_agent-rmheaders
 Patch0: openssh-5.2p1-redhat.patch
 Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
+Patch5: openssh-5.2p1-engine.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch12: openssh-5.2p1-selinux.patch
 Patch13: openssh-5.3p1-mls.patch
@@ -232,6 +233,7 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
 %patch4 -p1 -b .vendor
+%patch5 -p1 -b .engine
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -525,6 +527,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-21
+- Allow to use hardware crypto if awailable (#559555)
+
 * Mon Jan 25 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-20
 - optimized FD_CLOEXEC on accept socket (#541809)
 
