@@ -71,7 +71,7 @@ Name: openssh
 Version: 5.3p1
 # Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
 # is updated as well.
-Release: 21%{?dist}%{?rescue_rel}
+Release: 22%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -113,6 +113,7 @@ Patch71: openssh-5.2p1-edns.patch
 Patch72: openssh-5.3p1-pka.patch
 Patch73: openssh-5.3p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
+Patch75: openssh-5.3p1-dso.patch
 
 License: BSD
 Group: Applications/Internet
@@ -270,6 +271,7 @@ popd
 %patch72 -p1 -b .pka
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
+%patch75 -p1 -b .dso
 
 autoreconf
 
@@ -527,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-22
+- ImplicitDSOLinking (#564824)
+
 * Fri Jan 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-21
 - Allow to use hardware crypto if awailable (#559555)
 

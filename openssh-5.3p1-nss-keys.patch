@@ -88,7 +88,7 @@ diff -up openssh-5.3p1/configure.ac.nss-keys openssh-5.3p1/configure.ac
 +		LIBNSS_MSG="yes"
 +		CPPFLAGS="$CPPFLAGS -I/usr/include/nss3 -I/usr/include/nspr4"
 +		AC_CHECK_HEADERS(pk11pub.h)
-+		LIBS="$LIBS -lnss3"
++		LIBS="$LIBS -lnss3 -lplc4"
 +		AC_CHECK_DECLS([SEC_ERROR_LOCKED_PASSWORD], [], [], [#include <secerr.h>])
 +	fi
 +	])
