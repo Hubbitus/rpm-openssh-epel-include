@@ -186,7 +186,7 @@ diff -up openssh-5.3p1/key.c.nss-keys openssh-5.3p1/key.c
 diff -up openssh-5.3p1/key.h.nss-keys openssh-5.3p1/key.h
 --- openssh-5.3p1/key.h.nss-keys	2008-06-12 20:40:35.000000000 +0200
 +++ openssh-5.3p1/key.h	2009-11-27 13:43:01.000000000 +0100
-@@ -29,11 +29,17 @@
+@@ -30,6 +30,11 @@
  #include <openssl/rsa.h>
  #include <openssl/dsa.h>
  
@@ -198,13 +198,15 @@ diff -up openssh-5.3p1/key.h.nss-keys openssh-5.3p1/key.h
  typedef struct Key Key;
  enum types {
  	KEY_RSA1,
- 	KEY_RSA,
+@@ -37,6 +42,7 @@
  	KEY_DSA,
+ 	KEY_RSA_CERT,
+ 	KEY_DSA_CERT,
 +	KEY_NSS,
  	KEY_UNSPEC
  };
  enum fp_type {
-@@ -48,16 +54,30 @@ enum fp_rep {
+@@ -51,6 +57,15 @@
  
  /* key is stored in external hardware */
  #define KEY_FLAG_EXT		0x0001
@@ -218,23 +220,25 @@ diff -up openssh-5.3p1/key.h.nss-keys openssh-5.3p1/key.h
 +};
 +#endif
  
- struct Key {
- 	int	 type;
- 	int	 flags;
+ #define CERT_MAX_PRINCIPALS	256
+ struct KeyCert {
+@@ -70,11 +85,16 @@
  	RSA	*rsa;
  	DSA	*dsa;
+ 	struct KeyCert *cert;
 +#ifdef HAVE_LIBNSS
 +	NSSKey  *nss;
 +#endif
  };
  
  Key		*key_new(int);
+ void		 key_add_private(Key *);
  Key		*key_new_private(int);
 +Key 		*key_new_nss(int);
 +Key		*key_new_nss_copy(int, const Key *);
  void		 key_free(Key *);
  Key		*key_demote(const Key *);
- int		 key_equal(const Key *, const Key *);
+ int		 key_equal_public(const Key *, const Key *);
 diff -up openssh-5.3p1/Makefile.in.nss-keys openssh-5.3p1/Makefile.in
 --- openssh-5.3p1/Makefile.in.nss-keys	2009-08-28 02:47:38.000000000 +0200
 +++ openssh-5.3p1/Makefile.in	2009-11-27 13:43:01.000000000 +0100

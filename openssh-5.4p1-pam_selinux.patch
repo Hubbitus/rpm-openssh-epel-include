@@ -1,18 +1,6 @@
-diff -up openssh-5.0p1/auth-pam.h.pam_selinux openssh-5.0p1/auth-pam.h
---- openssh-5.0p1/auth-pam.h.pam_selinux	2004-09-11 14:17:26.000000000 +0200
-+++ openssh-5.0p1/auth-pam.h	2008-04-30 14:25:28.000000000 +0200
-@@ -38,7 +38,7 @@ void do_pam_session(void);
- void do_pam_set_tty(const char *);
- void do_pam_setcred(int );
- void do_pam_chauthtok(void);
--int do_pam_putenv(char *, char *);
-+int do_pam_putenv(char *, const char *);
- char ** fetch_pam_environment(void);
- char ** fetch_pam_child_environment(void);
- void free_pam_environment(char **);
-diff -up openssh-5.0p1/auth-pam.c.pam_selinux openssh-5.0p1/auth-pam.c
---- openssh-5.0p1/auth-pam.c.pam_selinux	2008-03-11 12:58:25.000000000 +0100
-+++ openssh-5.0p1/auth-pam.c	2008-04-30 14:25:21.000000000 +0200
+diff -up openssh-5.4p1/auth-pam.c.pam_selinux openssh-5.4p1/auth-pam.c
+--- openssh-5.4p1/auth-pam.c.pam_selinux	2009-07-12 14:07:21.000000000 +0200
++++ openssh-5.4p1/auth-pam.c	2010-03-01 15:27:23.000000000 +0100
 @@ -1069,7 +1069,7 @@ is_pam_session_open(void)
   * during the ssh authentication process.
   */
@@ -22,18 +10,30 @@ diff -up openssh-5.0p1/auth-pam.c.pam_selinux openssh-5.0p1/auth-pam.c
  {
  	int ret = 1;
  #ifdef HAVE_PAM_PUTENV
-diff -up openssh-5.0p1/openbsd-compat/port-linux.c.pam_selinux openssh-5.0p1/openbsd-compat/port-linux.c
---- openssh-5.0p1/openbsd-compat/port-linux.c.pam_selinux	2008-04-07 22:01:37.000000000 +0200
-+++ openssh-5.0p1/openbsd-compat/port-linux.c	2008-04-30 14:26:17.000000000 +0200
-@@ -34,6 +34,7 @@
+diff -up openssh-5.4p1/auth-pam.h.pam_selinux openssh-5.4p1/auth-pam.h
+--- openssh-5.4p1/auth-pam.h.pam_selinux	2004-09-11 14:17:26.000000000 +0200
++++ openssh-5.4p1/auth-pam.h	2010-03-01 15:27:23.000000000 +0100
+@@ -38,7 +38,7 @@ void do_pam_session(void);
+ void do_pam_set_tty(const char *);
+ void do_pam_setcred(int );
+ void do_pam_chauthtok(void);
+-int do_pam_putenv(char *, char *);
++int do_pam_putenv(char *, const char *);
+ char ** fetch_pam_environment(void);
+ char ** fetch_pam_child_environment(void);
+ void free_pam_environment(char **);
+diff -up openssh-5.4p1/openbsd-compat/port-linux.c.pam_selinux openssh-5.4p1/openbsd-compat/port-linux.c
+--- openssh-5.4p1/openbsd-compat/port-linux.c.pam_selinux	2010-03-01 15:27:22.000000000 +0100
++++ openssh-5.4p1/openbsd-compat/port-linux.c	2010-03-01 15:27:53.000000000 +0100
+@@ -36,6 +36,7 @@
  #include "hostfile.h"
  #include "auth.h"
  #include "xmalloc.h"
 +#include "servconf.h"
  
+ #ifdef WITH_SELINUX
  #include <selinux/selinux.h>
- #include <selinux/flask.h>
-@@ -47,6 +48,7 @@
+@@ -50,6 +51,7 @@
  #include <unistd.h>
  #endif
  
@@ -41,7 +41,7 @@ diff -up openssh-5.0p1/openbsd-compat/port-linux.c.pam_selinux openssh-5.0p1/ope
  extern Authctxt *the_authctxt;
  extern int inetd_flag;
  extern int rexeced_flag;
-@@ -208,29 +210,38 @@ get_user_context(const char *sename, con
+@@ -211,29 +213,38 @@ get_user_context(const char *sename, con
          return -1;
  }
  
@@ -92,7 +92,7 @@ diff -up openssh-5.0p1/openbsd-compat/port-linux.c.pam_selinux openssh-5.0p1/ope
  
  #ifdef HAVE_GETSEUSERBYNAME
  	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
-@@ -311,6 +322,36 @@ ssh_selinux_getctxbyname(char *pwname,
+@@ -314,6 +325,36 @@ ssh_selinux_getctxbyname(char *pwname,
  	return (r);
  }
  
@@ -129,7 +129,7 @@ diff -up openssh-5.0p1/openbsd-compat/port-linux.c.pam_selinux openssh-5.0p1/ope
  /* Set the execution context to the default for the specified user */
  void
  ssh_selinux_setup_exec_context(char *pwname)
-@@ -322,6 +363,24 @@ ssh_selinux_setup_exec_context(char *pwn
+@@ -325,6 +366,24 @@ ssh_selinux_setup_exec_context(char *pwn
  	if (!ssh_selinux_enabled())
  		return;
  

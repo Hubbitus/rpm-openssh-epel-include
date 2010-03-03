@@ -27,7 +27,8 @@
 %define libedit 1
 
 # Do we want NSS tokens support
-%define nss 1
+#NSS support is broken from 5.4p1
+%define nss 0
 
 # Whether or not /sbin/nologin exists.
 %define nologin 1
@@ -68,10 +69,10 @@
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 5.3p1
+Version: 5.4p1
 # Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
 # is updated as well.
-Release: 22%{?dist}%{?rescue_rel}
+Release: 0.snap20100302.1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -79,39 +80,37 @@ URL: http://www.openssh.com/portable.html
 # This package differs from the upstream OpenSSH tarball in that
 # the ACSS cipher is removed by running openssh-nukeacss.sh in
 # the unpacked source directory.
-Source0: openssh-%{version}-noacss.tar.bz2
+Source0: openssh-%{version}-snap20100302-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
-Patch0: openssh-5.2p1-redhat.patch
+Patch0: openssh-5.4p1-redhat.patch
 Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
-Patch5: openssh-5.2p1-engine.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
-Patch12: openssh-5.2p1-selinux.patch
-Patch13: openssh-5.3p1-mls.patch
+Patch12: openssh-5.4p1-selinux.patch
+Patch13: openssh-5.4p1-mls.patch
 Patch16: openssh-5.3p1-audit.patch
-Patch18: openssh-5.0p1-pam_selinux.patch
-Patch19: openssh-5.2p1-sesftp.patch
-Patch22: openssh-3.9p1-askpass-keep-above.patch
+Patch18: openssh-5.4p1-pam_selinux.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 Patch27: openssh-5.1p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
+#??? - 201594
 Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch51: openssh-5.3p1-nss-keys.patch
-Patch55: openssh-5.1p1-cloexec.patch
+#???
+Patch51: openssh-5.4p1-nss-keys.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
-Patch65: openssh-5.3p1-fips.patch
+Patch65: openssh-5.4p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
-Patch72: openssh-5.3p1-pka.patch
-Patch73: openssh-5.3p1-gsskex.patch
+Patch72: openssh-5.4p1-pka.patch
+Patch73: openssh-5.4p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch75: openssh-5.3p1-dso.patch
 
@@ -189,6 +188,7 @@ Provides: openssh-askpass-gnome
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
+Release: 23%{?dist}%{?rescue_rel}
 License: BSD
 
 %description
@@ -234,7 +234,6 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .redhat
 %patch2 -p1 -b .skip-initial
 %patch4 -p1 -b .vendor
-%patch5 -p1 -b .engine
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -250,20 +249,17 @@ popd
 %patch13 -p1 -b .mls
 %patch16 -p1 -b .audit
 %patch18 -p1 -b .pam_selinux
-%patch19 -p1 -b .sesftp
 %endif
 
-%patch22 -p1 -b .keep-above
 %patch24 -p1 -b .fromto-remote
 %patch27 -p1 -b .log-chroot
 %patch30 -p1 -b .exit-deadlock
 %patch35 -p1 -b .progress
 %patch38 -p1 -b .grab-info
-%patch39 -p1 -b .no-v6only
+#???%patch39 -p1 -b .no-v6only
 %patch44 -p1 -b .ip-opts
 %patch49 -p1 -b .canohost
-%patch51 -p1 -b .nss-keys
-%patch55 -p1 -b .cloexec
+#???%patch51 -p1 -b .nss-keys
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
 %patch69 -p1 -b .selabel
@@ -316,6 +312,7 @@ fi
 	--disable-strip \
 	--without-zlib-version-check \
 	--with-ssl-engine \
+	--with-pka \
 %if %{nss}
 	--with-nss \
 %endif
@@ -489,11 +486,13 @@ fi
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
 %attr(0755,root,root) %{_bindir}/sftp
 %attr(0755,root,root) %{_bindir}/ssh-copy-id
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-pkcs11-helper
 %attr(0644,root,root) %{_mandir}/man1/ssh-agent.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-add.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-keyscan.1*
 %attr(0644,root,root) %{_mandir}/man1/sftp.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-copy-id.1*
+%attr(0644,root,root) %{_mandir}/man8/ssh-pkcs11-helper.8*
 %endif
 
 %if ! %{rescue}
@@ -529,6 +528,9 @@ fi
 %endif
 
 %changelog
+* Wed Mar  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-0.snap20100302.1
+- Prepare update to 5.4p1
+
 * Mon Feb 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.3p1-22
 - ImplicitDSOLinking (#564824)
 

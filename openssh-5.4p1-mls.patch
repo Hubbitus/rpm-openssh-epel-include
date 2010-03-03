@@ -1,7 +1,7 @@
-diff -up openssh-5.3p1/configure.ac.mls openssh-5.3p1/configure.ac
---- openssh-5.3p1/configure.ac.mls	2009-10-02 14:04:31.000000000 +0200
-+++ openssh-5.3p1/configure.ac	2009-10-02 14:04:31.000000000 +0200
-@@ -3404,6 +3404,7 @@ AC_ARG_WITH(selinux,
+diff -up openssh-5.4p1/configure.ac.mls openssh-5.4p1/configure.ac
+--- openssh-5.4p1/configure.ac.mls	2010-03-01 15:24:27.000000000 +0100
++++ openssh-5.4p1/configure.ac	2010-03-01 15:24:28.000000000 +0100
+@@ -3360,6 +3360,7 @@ AC_ARG_WITH(selinux,
  		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
  		LIBS="$LIBS $LIBSELINUX"
  		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
@@ -9,9 +9,9 @@ diff -up openssh-5.3p1/configure.ac.mls openssh-5.3p1/configure.ac
  		LIBS="$save_LIBS"
  	fi ]
  )
-diff -up openssh-5.3p1/misc.c.mls openssh-5.3p1/misc.c
---- openssh-5.3p1/misc.c.mls	2009-02-21 22:47:02.000000000 +0100
-+++ openssh-5.3p1/misc.c	2009-10-02 14:04:31.000000000 +0200
+diff -up openssh-5.4p1/misc.c.mls openssh-5.4p1/misc.c
+--- openssh-5.4p1/misc.c.mls	2010-01-10 00:31:12.000000000 +0100
++++ openssh-5.4p1/misc.c	2010-03-01 15:24:28.000000000 +0100
 @@ -423,6 +423,7 @@ char *
  colon(char *cp)
  {
@@ -36,15 +36,16 @@ diff -up openssh-5.3p1/misc.c.mls openssh-5.3p1/misc.c
  	}
  	return (0);
  }
-diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-compat/port-linux.c
---- openssh-5.3p1/openbsd-compat/port-linux.c.mls	2009-10-02 14:04:31.000000000 +0200
-+++ openssh-5.3p1/openbsd-compat/port-linux.c	2009-10-02 14:04:31.000000000 +0200
-@@ -33,12 +33,23 @@
+diff -up openssh-5.4p1/openbsd-compat/port-linux.c.mls openssh-5.4p1/openbsd-compat/port-linux.c
+--- openssh-5.4p1/openbsd-compat/port-linux.c.mls	2010-03-01 15:24:27.000000000 +0100
++++ openssh-5.4p1/openbsd-compat/port-linux.c	2010-03-01 15:25:50.000000000 +0100
+@@ -35,13 +35,24 @@
  #include "key.h"
  #include "hostfile.h"
  #include "auth.h"
 +#include "xmalloc.h"
  
+ #ifdef WITH_SELINUX
  #include <selinux/selinux.h>
  #include <selinux/flask.h>
 +#include <selinux/context.h>
@@ -63,7 +64,7 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  
  /* Wrapper around is_selinux_enabled() to log its return value once only */
  int
-@@ -54,17 +65,173 @@ ssh_selinux_enabled(void)
+@@ -57,17 +68,173 @@ ssh_selinux_enabled(void)
  	return (enabled);
  }
  
@@ -243,7 +244,7 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  #ifdef HAVE_GETSEUSERBYNAME
  	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
  		sename = NULL;
-@@ -72,38 +239,63 @@ ssh_selinux_getctxbyname(char *pwname)
+@@ -75,38 +242,63 @@ ssh_selinux_getctxbyname(char *pwname)
  	}
  #else
  	sename = pwname;
@@ -329,7 +330,7 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  
  #ifdef HAVE_GETSEUSERBYNAME
  	if (sename != NULL)
-@@ -111,14 +303,20 @@ ssh_selinux_getctxbyname(char *pwname)
+@@ -114,14 +306,20 @@ ssh_selinux_getctxbyname(char *pwname)
  	if (lvl != NULL)
  		xfree(lvl);
  #endif
@@ -351,7 +352,7 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  	security_context_t user_ctx = NULL;
  
  	if (!ssh_selinux_enabled())
-@@ -126,22 +324,45 @@ ssh_selinux_setup_exec_context(char *pwn
+@@ -129,22 +327,45 @@ ssh_selinux_setup_exec_context(char *pwn
  
  	debug3("%s: setting execution context", __func__);
  
@@ -404,7 +405,7 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  
  	debug3("%s: done", __func__);
  }
-@@ -159,7 +380,10 @@ ssh_selinux_setup_pty(char *pwname, cons
+@@ -162,7 +383,10 @@ ssh_selinux_setup_pty(char *pwname, cons
  
  	debug3("%s: setting TTY context on %s", __func__, tty);
  
@@ -416,10 +417,10 @@ diff -up openssh-5.3p1/openbsd-compat/port-linux.c.mls openssh-5.3p1/openbsd-com
  
  	/* XXX: should these calls fatal() upon failure in enforcing mode? */
  
-diff -up openssh-5.3p1/session.c.mls openssh-5.3p1/session.c
---- openssh-5.3p1/session.c.mls	2009-08-20 08:20:50.000000000 +0200
-+++ openssh-5.3p1/session.c	2009-10-02 14:06:12.000000000 +0200
-@@ -1550,10 +1550,6 @@ do_setusercontext(struct passwd *pw)
+diff -up openssh-5.4p1/session.c.mls openssh-5.4p1/session.c
+--- openssh-5.4p1/session.c.mls	2010-01-12 09:51:48.000000000 +0100
++++ openssh-5.4p1/session.c	2010-03-01 15:24:28.000000000 +0100
+@@ -1559,10 +1559,6 @@ do_setusercontext(struct passwd *pw)
  
  	if (getuid() != pw->pw_uid || geteuid() != pw->pw_uid)
  		fatal("Failed to set uids to %u.", (u_int) pw->pw_uid);
@@ -430,10 +431,10 @@ diff -up openssh-5.3p1/session.c.mls openssh-5.3p1/session.c
  }
  
  static void
-diff -up openssh-5.3p1/sshd.c.mls openssh-5.3p1/sshd.c
---- openssh-5.3p1/sshd.c.mls	2009-10-02 14:04:31.000000000 +0200
-+++ openssh-5.3p1/sshd.c	2009-10-02 14:04:31.000000000 +0200
-@@ -1896,6 +1896,9 @@ main(int ac, char **av)
+diff -up openssh-5.4p1/sshd.c.mls openssh-5.4p1/sshd.c
+--- openssh-5.4p1/sshd.c.mls	2010-03-01 15:24:27.000000000 +0100
++++ openssh-5.4p1/sshd.c	2010-03-01 15:24:28.000000000 +0100
+@@ -1987,6 +1987,9 @@ main(int ac, char **av)
  		restore_uid();
  	}
  #endif
