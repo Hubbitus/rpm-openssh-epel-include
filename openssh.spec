@@ -80,7 +80,7 @@ URL: http://www.openssh.com/portable.html
 # This package differs from the upstream OpenSSH tarball in that
 # the ACSS cipher is removed by running openssh-nukeacss.sh in
 # the unpacked source directory.
-Source0: openssh-%{version}-snap20100302-noacss.tar.bz2
+Source0: openssh-%{version}-noacss.tar.bz2
 Source1: openssh-nukeacss.sh
 Source2: sshd.pam
 Source3: sshd.init
