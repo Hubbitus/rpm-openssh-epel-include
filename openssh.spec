@@ -12,6 +12,7 @@
 %define static_libcrypto 0
 
 # Do we want smartcard support (1=yes 0=no)
+#Smartcard support is broken from 5.4p1
 %define scard 0
 
 # Use GTK2 instead of GNOME in gnome-ssh-askpass
@@ -65,14 +66,15 @@
 %define pam_ssh_agent 0
 %endif
 
+# Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
+%define openssh_rel 1
+%define pam_ssh_agent_rel 24
 %define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: 5.4p1
-# Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
-# is updated as well.
-Release: 1%{?dist}%{?rescue_rel}
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -184,7 +186,7 @@ Provides: openssh-askpass-gnome
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-Release: 23%{?dist}%{?rescue_rel}
+Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}
 License: BSD
 
 %description
@@ -524,6 +526,8 @@ fi
 %changelog
 * Tue Mar  9 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-1
 - Update to 5.4p1
+- discontinued support for nss-keys
+- discontinued support for scard
 
 * Wed Mar  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-0.snap20100302.1
 - Prepare update to 5.4p1
