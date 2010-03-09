@@ -72,7 +72,7 @@ Name: openssh
 Version: 5.4p1
 # Do not rewind release to 1 on version upgrades unless the pam_ssh_agent_auth
 # is updated as well.
-Release: 0.snap20100302.1%{?dist}%{?rescue_rel}
+Release: 1%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 #Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -99,12 +99,8 @@ Patch27: openssh-5.1p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
-#??? - 201594
-Patch39: openssh-4.3p2-no-v6only.patch
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
-#???
-Patch51: openssh-5.4p1-nss-keys.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.4p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
@@ -256,10 +252,8 @@ popd
 %patch30 -p1 -b .exit-deadlock
 %patch35 -p1 -b .progress
 %patch38 -p1 -b .grab-info
-#???%patch39 -p1 -b .no-v6only
 %patch44 -p1 -b .ip-opts
 %patch49 -p1 -b .canohost
-#???%patch51 -p1 -b .nss-keys
 %patch62 -p1 -b .manpage
 %patch65 -p1 -b .fips
 %patch69 -p1 -b .selabel
@@ -528,6 +522,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar  9 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-1
+- Update to 5.4p1
+
 * Wed Mar  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-0.snap20100302.1
 - Prepare update to 5.4p1
 
