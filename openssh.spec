@@ -67,7 +67,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_rel 24
 %define pam_ssh_agent_ver 0.9.2
 
@@ -283,7 +283,9 @@ SAVE_LDFLAGS="$LDFLAGS"
 LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
 %endif
 %if %{kerberos5}
-source /etc/profile.d/krb5-devel.sh
+if test -r /etc/profile.d/krb5-devel.sh ; then
+        source /etc/profile.d/krb5-devel.sh
+fi
 krb5_prefix=`krb5-config --prefix`
 if test "$krb5_prefix" != "%{_prefix}" ; then
 	CPPFLAGS="$CPPFLAGS -I${krb5_prefix}/include -I${krb5_prefix}/include/gssapi"; export CPPFLAGS
@@ -524,6 +526,9 @@ fi
 %endif
 
 %changelog
+* Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-2
+- source krb5-devel profile script only if exists
+
 * Tue Mar  9 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-1
 - Update to 5.4p1
 - discontinued support for nss-keys
