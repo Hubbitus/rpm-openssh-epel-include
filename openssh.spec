@@ -67,8 +67,13 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
+<<<<<<< openssh.spec
+%define openssh_rel 3
+%define pam_ssh_agent_rel 24
+=======
 %define openssh_rel 2
 %define pam_ssh_agent_rel 25
+>>>>>>> 1.199
 %define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
@@ -111,6 +116,7 @@ Patch72: openssh-5.4p1-pka.patch
 Patch73: openssh-5.4p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch75: openssh-5.3p1-dso.patch
+Patch76: openssh-5.4p1-staterr.patch
 
 License: BSD
 Group: Applications/Internet
@@ -264,6 +270,7 @@ popd
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
 %patch75 -p1 -b .dso
+%patch76 -p1 -b .staterr
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -529,8 +536,9 @@ fi
 %endif
 
 %changelog
-* Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-2 + 0.9.2-25
+* Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-3 + 0.9.2-25
 - repair configure script of pam_ssh_agent
+- repair error mesage in ssh-keygen
 
 * Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-2
 - source krb5-devel profile script only if exists
