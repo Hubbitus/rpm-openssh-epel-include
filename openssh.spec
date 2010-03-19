@@ -68,7 +68,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_rel 2
-%define pam_ssh_agent_rel 24
+%define pam_ssh_agent_rel 25
 %define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
@@ -266,6 +266,9 @@ popd
 %patch75 -p1 -b .dso
 
 autoreconf
+pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
+autoreconf
+popd
 
 %build
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
@@ -365,7 +368,7 @@ popd
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 LDFLAGS="$SAVE_LDFLAGS"
-%configure --with-selinux --libexecdir=/%{_lib}/security
+%configure --with-selinux --libexecdir=/%{_lib}/security --with-mantype=man
 make
 popd
 %endif
@@ -526,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-2 + 0.9.2-25
+- repair configure script of pam_ssh_agent
+
 * Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-2
 - source krb5-devel profile script only if exists
 
