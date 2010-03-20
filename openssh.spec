@@ -67,13 +67,8 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-<<<<<<< openssh.spec
 %define openssh_rel 3
-%define pam_ssh_agent_rel 24
-=======
-%define openssh_rel 2
 %define pam_ssh_agent_rel 25
->>>>>>> 1.199
 %define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
