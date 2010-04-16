@@ -67,13 +67,14 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 3
-%define pam_ssh_agent_rel 25
+%define openssh_rel 1
+%define openssh_ver 5.5p1
+%define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: 5.4p1
+Version: %{openssh_ver}
 Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
@@ -93,7 +94,7 @@ Patch2: openssh-5.3p1-skip-initial.patch
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch12: openssh-5.4p1-selinux.patch
-Patch13: openssh-5.4p1-mls.patch
+Patch13: openssh-5.5p1-mls.patch
 Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
@@ -104,13 +105,12 @@ Patch38: openssh-4.3p2-askpass-grab-info.patch
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
-Patch65: openssh-5.4p1-fips.patch
+Patch65: openssh-5.5p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
 Patch72: openssh-5.4p1-pka.patch
 Patch73: openssh-5.4p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
-Patch75: openssh-5.3p1-dso.patch
 Patch76: openssh-5.4p1-staterr.patch
 
 License: BSD
@@ -264,7 +264,6 @@ popd
 %patch72 -p1 -b .pka
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
-%patch75 -p1 -b .dso
 %patch76 -p1 -b .staterr
 
 autoreconf
@@ -531,6 +530,9 @@ fi
 %endif
 
 %changelog
+* Fri Apr 16 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-1 + 0.9.2-26
+- Update to 5.5p1
+
 * Fri Mar 12 2010 Jan F. Chadima <jchadima@redhat.com> - 5.4p1-3 + 0.9.2-25
 - repair configure script of pam_ssh_agent
 - repair error mesage in ssh-keygen
