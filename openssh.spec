@@ -67,7 +67,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 1
+%define openssh_rel 2
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -136,7 +136,7 @@ BuildRequires: sharutils
 %endif
 BuildRequires: autoconf, automake, perl, zlib-devel
 BuildRequires: audit-libs-devel
-BuildRequires: util-linux, groff, man
+BuildRequires: util-linux, groff
 BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
 BuildRequires: fipscheck-devel
@@ -530,6 +530,9 @@ fi
 %endif
 
 %changelog
+* Tue Apr 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-2 + 0.9.2-26
+- Drop dependency on man
+
 * Fri Apr 16 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-1 + 0.9.2-26
 - Update to 5.5p1
 
