@@ -67,7 +67,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 2
+%define openssh_rel 3
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -112,6 +112,7 @@ Patch72: openssh-5.4p1-pka.patch
 Patch73: openssh-5.4p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch76: openssh-5.4p1-staterr.patch
+Patch77: openssh-5.5p1-stderr.diff
 
 License: BSD
 Group: Applications/Internet
@@ -265,6 +266,7 @@ popd
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
 %patch76 -p1 -b .staterr
+%patch77 -p1 -b .stderr
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -530,6 +532,9 @@ fi
 %endif
 
 %changelog
+* Mon Apr 26 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-3 + 0.9.2-26
+- Ignore .bashrc output to stderr in the subsystems
+
 * Tue Apr 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-2 + 0.9.2-26
 - Drop dependency on man
 
