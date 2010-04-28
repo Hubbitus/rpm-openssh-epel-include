@@ -27,6 +27,9 @@
 # Do we want libedit support
 %define libedit 1
 
+# Do we want LDAP support
+%define ldap 1
+
 # Do we want NSS tokens support
 #NSS support is broken from 5.4p1
 %define nss 0
@@ -67,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 3
+%define openssh_rel 4
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -113,6 +116,7 @@ Patch73: openssh-5.4p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch76: openssh-5.4p1-staterr.patch
 Patch77: openssh-5.5p1-stderr.diff
+Patch78: openssh-5.5p1-ldap.patch
 
 License: BSD
 Group: Applications/Internet
@@ -134,6 +138,9 @@ BuildRequires: gnome-libs-devel
 
 %if %{scard}
 BuildRequires: sharutils
+%endif
+%if %{ldap}
+BuildRequires: openldap-devel
 %endif
 BuildRequires: autoconf, automake, perl, zlib-devel
 BuildRequires: audit-libs-devel
@@ -267,6 +274,9 @@ popd
 %patch74 -p1 -b .randclean
 %patch76 -p1 -b .staterr
 %patch77 -p1 -b .stderr
+%if %{ldap}
+%patch78 -p1 -b .ldap
+%endif
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -322,6 +332,9 @@ fi
 %endif
 %if %{scard}
 	--with-smartcard \
+%endif
+%if %{ldap}
+	--with-ldap \
 %endif
 %if %{rescue}
 	--without-pam \
@@ -502,14 +515,23 @@ fi
 %if ! %{rescue}
 %files server
 %defattr(-,root,root)
+%if %{ldap}
+%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema
+%endif
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0644,root,root) %{_sbindir}/.sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
+%if %{ldap}
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
+%endif
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man5/moduli.5*
 %attr(0644,root,root) %{_mandir}/man8/sshd.8*
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
+%if %{ldap}
+%attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
+%endif
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
@@ -532,6 +554,9 @@ fi
 %endif
 
 %changelog
+* Wed Apr 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-4 + 0.9.2-26
+- Added LDAP support
+
 * Mon Apr 26 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-3 + 0.9.2-26
 - Ignore .bashrc output to stderr in the subsystems
 
