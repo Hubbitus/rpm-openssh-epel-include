@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 4
+%define openssh_rel 5
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -111,12 +111,11 @@ Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.5p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
-Patch72: openssh-5.4p1-pka.patch
-Patch73: openssh-5.4p1-gsskex.patch
+Patch72: openssh-5.5p1-pka-ldap.patch
+Patch73: openssh-5.5p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch76: openssh-5.4p1-staterr.patch
-Patch77: openssh-5.5p1-stderr.diff
-Patch78: openssh-5.5p1-ldap.patch
+Patch77: openssh-5.5p1-stderr.patch
 
 License: BSD
 Group: Applications/Internet
@@ -184,6 +183,13 @@ Requires(post): chkconfig >= 0.9, /sbin/service
 Requires(pre): /usr/sbin/useradd
 Requires: pam >= 1.0.1-3
 
+%if %{ldap}
+%package ldap
+Summary: A LDAP support for open source SSH server daemon
+Requires: openssh = %{version}-%{release}
+Group: System Environment/Daemons
+%endif
+
 %package askpass
 Summary: A passphrase dialog for OpenSSH and X
 Group: Applications/Internet
@@ -223,6 +229,12 @@ into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server.
 
+%if %{ldap}
+%description ldap
+OpenSSH LDAP backend is a way how to distribute the authorized tokens
+among the servers in the network.
+%endif
+
 %description askpass
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
@@ -258,6 +270,7 @@ popd
 %patch18 -p1 -b .pam_selinux
 %endif
 
+%patch72 -p1 -b .pka
 %patch24 -p1 -b .fromto-remote
 %patch27 -p1 -b .log-chroot
 %patch30 -p1 -b .exit-deadlock
@@ -269,14 +282,10 @@ popd
 %patch65 -p1 -b .fips
 %patch69 -p1 -b .selabel
 %patch71 -p1 -b .edns
-%patch72 -p1 -b .pka
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
 %patch76 -p1 -b .staterr
 %patch77 -p1 -b .stderr
-%if %{ldap}
-%patch78 -p1 -b .ldap
-%endif
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -515,26 +524,25 @@ fi
 %if ! %{rescue}
 %files server
 %defattr(-,root,root)
-%if %{ldap}
-%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema
-%endif
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0644,root,root) %{_sbindir}/.sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
-%if %{ldap}
-%attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
-%endif
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man5/moduli.5*
 %attr(0644,root,root) %{_mandir}/man8/sshd.8*
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
-%if %{ldap}
-%attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
-%endif
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
+%endif
+
+%if %{ldap}
+%files ldap
+%defattr(-,root,root)
+%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
+%attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -554,6 +562,11 @@ fi
 %endif
 
 %changelog
+* Mon May  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-5 + 0.9.2-26
+- Create separate ldap package
+- Tweak the ldap patch
+- Rename stderr patch properly
+
 * Wed Apr 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-4 + 0.9.2-26
 - Added LDAP support
 

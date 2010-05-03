@@ -1,6 +1,202 @@
-diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
---- openssh-5.5p1/config.h.in.ldap	2010-04-16 02:17:09.000000000 +0200
-+++ openssh-5.5p1/config.h.in	2010-04-28 11:34:13.000000000 +0200
+diff -up openssh-5.5p1/auth2-pubkey.c.pka openssh-5.5p1/auth2-pubkey.c
+--- openssh-5.5p1/auth2-pubkey.c.pka	2010-03-21 19:51:21.000000000 +0100
++++ openssh-5.5p1/auth2-pubkey.c	2010-04-29 11:08:25.000000000 +0200
+@@ -178,27 +178,15 @@ done:
+ 
+ /* return 1 if user allows given key */
+ static int
+-user_key_allowed2(struct passwd *pw, Key *key, char *file)
++user_search_key_in_file(FILE *f, char *file, Key* key, struct passwd *pw)
+ {
+ 	char line[SSH_MAX_PUBKEY_BYTES];
+ 	const char *reason;
+ 	int found_key = 0;
+-	FILE *f;
+ 	u_long linenum = 0;
+ 	Key *found;
+ 	char *fp;
+ 
+-	/* Temporarily use the user's uid. */
+-	temporarily_use_uid(pw);
+-
+-	debug("trying public key file %s", file);
+-	f = auth_openkeyfile(file, pw, options.strict_modes);
+-
+-	if (!f) {
+-		restore_uid();
+-		return 0;
+-	}
+-
+ 	found_key = 0;
+ 	found = key_new(key_is_cert(key) ? KEY_UNSPEC : key->type);
+ 
+@@ -273,8 +261,6 @@ user_key_allowed2(struct passwd *pw, Key
+ 			break;
+ 		}
+ 	}
+-	restore_uid();
+-	fclose(f);
+ 	key_free(found);
+ 	if (!found_key)
+ 		debug2("key not found");
+@@ -321,13 +307,153 @@ user_cert_trusted_ca(struct passwd *pw, 
+ 	return ret;
+ }
+ 
+-/* check whether given key is in .ssh/authorized_keys* */
++/* return 1 if user allows given key */
++static int
++user_key_allowed2(struct passwd *pw, Key *key, char *file)
++{
++	FILE *f;
++	int found_key = 0;
++
++	/* Temporarily use the user's uid. */
++	temporarily_use_uid(pw);
++
++	debug("trying public key file %s", file);
++	f = auth_openkeyfile(file, pw, options.strict_modes);
++
++ 	if (f) {
++ 		found_key = user_search_key_in_file (f, file, key, pw);
++		fclose(f);
++	}
++
++	restore_uid();
++	return found_key;
++}
++
++#ifdef WITH_PUBKEY_AGENT
++
++#define WHITESPACE " \t\r\n"
++
++/* return 1 if user allows given key */
++static int
++user_key_via_agent_allowed2(struct passwd *pw, Key *key)
++{
++	FILE *f;
++	int found_key = 0;
++	char *pubkey_agent_string = NULL;
++	char *tmp_pubkey_agent_string = NULL;
++	char *progname;
++	char *cp;
++	struct passwd *runas_pw;
++	struct stat st;
++
++	if (options.pubkey_agent == NULL || options.pubkey_agent[0] != '/')
++		return -1;
++
++	/* get the run as identity from config */
++	runas_pw = (options.pubkey_agent_runas == NULL)? pw
++	    : getpwnam (options.pubkey_agent_runas);
++	if (!runas_pw) {
++		error("%s: getpwnam(\"%s\"): %s", __func__,
++		    options.pubkey_agent_runas, strerror(errno));
++		return 0;
++	}
++
++	/* Temporarily use the specified uid. */
++	if (runas_pw->pw_uid != 0)
++		temporarily_use_uid(runas_pw);
++
++	pubkey_agent_string = percent_expand(options.pubkey_agent,
++	    "h", pw->pw_dir, "u", pw->pw_name, (char *)NULL);
++
++	/* Test whether agent can be modified by non root user */
++	tmp_pubkey_agent_string = xstrdup (pubkey_agent_string);
++	progname = strtok (tmp_pubkey_agent_string, WHITESPACE);
++
++	debug3("%s: checking program '%s'", __func__, progname);
++
++	if (stat (progname, &st) < 0) {
++		error("%s: stat(\"%s\"): %s", __func__,
++		    progname, strerror(errno));
++		goto go_away;
++	}
++
++	if (st.st_uid != 0 || (st.st_mode & 022) != 0) {
++		error("bad ownership or modes for pubkey agent \"%s\"",
++		    progname);
++		goto go_away;
++	}
++
++	if (!S_ISREG(st.st_mode)) {
++		error("pubkey agent \"%s\" is not a regular file",
++		    progname);
++		goto go_away;
++	}
++
++	/*
++	 * Descend the path, checking that each component is a
++	 * root-owned directory with strict permissions.
++	 */
++	do {
++		if ((cp = strrchr(progname, '/')) == NULL)
++			break;
++		else 
++			*cp = '\0';
++	
++		debug3("%s: checking component '%s'", __func__, progname);
++
++		if (stat(progname, &st) != 0) {
++			error("%s: stat(\"%s\"): %s", __func__,
++			    progname, strerror(errno));
++			goto go_away;
++		}
++		if (st.st_uid != 0 || (st.st_mode & 022) != 0) {
++			error("bad ownership or modes for pubkey agent path component \"%s\"",
++			    progname);
++			goto go_away;
++		}
++		if (!S_ISDIR(st.st_mode)) {
++			error("pubkey agent path component \"%s\" is not a directory",
++			    progname);
++			goto go_away;
++		}
++	} while (0);
++
++	/* open the pipe and read the keys */
++	f = popen (pubkey_agent_string, "r");
++	if (!f) {
++		error("%s: popen (\"%s\", \"r\"): %s", __func__,
++		    pubkey_agent_string, strerror (errno));
++		goto go_away;
++	}
++
++	found_key = user_search_key_in_file (f, options.pubkey_agent, key, pw);
++	pclose (f);
++
++go_away:
++	if (tmp_pubkey_agent_string)
++		xfree (tmp_pubkey_agent_string);
++	if (pubkey_agent_string)
++		xfree (pubkey_agent_string);
++
++	if (runas_pw->pw_uid != 0)
++		restore_uid();
++	return found_key;
++}
++#endif
++
++/* check whether given key is in <pkey_agent or .ssh/authorized_keys* */
+ int
+ user_key_allowed(struct passwd *pw, Key *key)
+ {
+ 	int success;
+ 	char *file;
+ 
++#ifdef WITH_PUBKEY_AGENT
++	success = user_key_via_agent_allowed2(pw, key);
++	if (success >= 0)
++		return success;
++#endif
++
+ 	if (auth_key_is_revoked(key))
+ 		return 0;
+ 	if (key_is_cert(key) && auth_key_is_revoked(key->cert->signature_key))
+diff -up openssh-5.5p1/config.h.in.pka openssh-5.5p1/config.h.in
+--- openssh-5.5p1/config.h.in.pka	2010-04-16 02:17:09.000000000 +0200
++++ openssh-5.5p1/config.h.in	2010-04-29 09:40:17.000000000 +0200
 @@ -1,5 +1,8 @@
  /* config.h.in.  Generated from configure.ac by autoheader.  */
  
@@ -10,7 +206,7 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
  /* Define if you have a getaddrinfo that fails for the all-zeros IPv6 address
     */
  #undef AIX_GETNAMEINFO_HACK
-@@ -536,6 +539,57 @@
+@@ -536,6 +539,54 @@
  /* Define to 1 if you have the <lastlog.h> header file. */
  #undef HAVE_LASTLOG_H
  
@@ -62,33 +258,10 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
 +/* Define to 1 if you have the `ldap_start_tls_s' function. */
 +#undef HAVE_LDAP_START_TLS_S
 +
-+/* Define to 1 if you have the <libaudit.h> header file. */
-+#undef HAVE_LIBAUDIT_H
-+
  /* Define to 1 if you have the `bsm' library (-lbsm). */
  #undef HAVE_LIBBSM
  
-@@ -575,6 +629,9 @@
- /* Define to 1 if you have the <limits.h> header file. */
- #undef HAVE_LIMITS_H
- 
-+/* Define if you want Linux audit support. */
-+#undef HAVE_LINUX_AUDIT
-+
- /* Define to 1 if you have the <linux/if_tun.h> header file. */
- #undef HAVE_LINUX_IF_TUN_H
- 
-@@ -771,6 +828,9 @@
- /* Define to 1 if you have the `setgroups' function. */
- #undef HAVE_SETGROUPS
- 
-+/* Define to 1 if you have the `setkeycreatecon' function. */
-+#undef HAVE_SETKEYCREATECON
-+
- /* Define to 1 if you have the `setlogin' function. */
- #undef HAVE_SETLOGIN
- 
-@@ -921,13 +981,13 @@
+@@ -921,13 +972,13 @@
  /* define if you have struct sockaddr_in6 data type */
  #undef HAVE_STRUCT_SOCKADDR_IN6
  
@@ -104,7 +277,7 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
  #undef HAVE_STRUCT_STAT_ST_BLKSIZE
  
  /* Define to 1 if the system has the type `struct timespec'. */
-@@ -1191,6 +1251,9 @@
+@@ -1191,6 +1242,9 @@
  /* Define if pututxline updates lastlog too */
  #undef LASTLOG_WRITE_PUTUTXLINE
  
@@ -114,7 +287,7 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
  /* Define if you want TCP Wrappers support */
  #undef LIBWRAP
  
-@@ -1274,6 +1337,9 @@
+@@ -1274,6 +1328,9 @@
  /* Define to the one symbol short name of this package. */
  #undef PACKAGE_TARNAME
  
@@ -124,38 +297,7 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
  /* Define to the version of this package. */
  #undef PACKAGE_VERSION
  
-@@ -1360,6 +1426,10 @@
- /* Prepend the address family to IP tunnel traffic */
- #undef SSH_TUN_PREPEND_AF
- 
-+/* Define to your vendor patch level, if it has been modified from the
-+   upstream source release. */
-+#undef SSH_VENDOR_PATCHLEVEL
-+
- /* Define to 1 if you have the ANSI C header files. */
- #undef STDC_HEADERS
- 
-@@ -1384,6 +1454,9 @@
- /* Use btmp to log bad logins */
- #undef USE_BTMP
- 
-+/* platform uses an in-memory credentials cache */
-+#undef USE_CCAPI
-+
- /* Use libedit for sftp */
- #undef USE_LIBEDIT
- 
-@@ -1396,6 +1469,9 @@
- /* Use PIPES instead of a socketpair() */
- #undef USE_PIPES
- 
-+/* platform has the Security Authorization Session API */
-+#undef USE_SECURITY_SESSION_API
-+
- /* Define if you have Solaris process contracts */
- #undef USE_SOLARIS_PROCESS_CONTRACTS
- 
-@@ -1418,12 +1494,26 @@
+@@ -1418,12 +1475,26 @@
  /* Define if you want IRIX project management */
  #undef WITH_IRIX_PROJECT
  
@@ -185,13 +327,25 @@ diff -up openssh-5.5p1/config.h.in.ldap openssh-5.5p1/config.h.in
  
  /* Define if xauth is found in your path */
  #undef XAUTH_PATH
-diff -up openssh-5.5p1/configure.ac.ldap openssh-5.5p1/configure.ac
---- openssh-5.5p1/configure.ac.ldap	2010-04-28 11:34:09.000000000 +0200
-+++ openssh-5.5p1/configure.ac	2010-04-28 11:34:13.000000000 +0200
-@@ -1382,6 +1382,106 @@ AC_ARG_WITH(pka,
- 	]
+diff -up openssh-5.5p1/configure.ac.pka openssh-5.5p1/configure.ac
+--- openssh-5.5p1/configure.ac.pka	2010-04-10 14:58:01.000000000 +0200
++++ openssh-5.5p1/configure.ac	2010-04-29 11:08:25.000000000 +0200
+@@ -1346,6 +1346,118 @@ AC_ARG_WITH(audit,
+ 	esac ]
  )
  
++# Check whether user wants pubkey agent support
++PKA_MSG="no"
++AC_ARG_WITH(pka,
++	[  --with-pka      Enable pubkey agent support],
++	[
++		if test "x$withval" != "xno" ; then
++			AC_DEFINE([WITH_PUBKEY_AGENT], 1, [Enable pubkey agent support])
++			PKA_MSG="yes"
++		fi
++	]
++)
++
 +# Check whether user wants LDAP support
 +LDAP_MSG="no"
 +INSTALL_SSH_LDAP_HELPER=""
@@ -295,17 +449,18 @@ diff -up openssh-5.5p1/configure.ac.ldap openssh-5.5p1/configure.ac
  dnl    Checks for library functions. Please keep in alphabetical order
  AC_CHECK_FUNCS( \
  	arc4random \
-@@ -4239,6 +4339,7 @@ echo "                 Smartcard support
+@@ -4181,6 +4293,8 @@ echo "                   SELinux support
+ echo "                 Smartcard support: $SCARD_MSG"
  echo "                     S/KEY support: $SKEY_MSG"
  echo "              TCP Wrappers support: $TCPW_MSG"
- echo "                       PKA support: $PKA_MSG"
++echo "                       PKA support: $PKA_MSG"
 +echo "                      LDAP support: $LDAP_MSG"
  echo "              MD5 password support: $MD5_MSG"
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
-diff -up openssh-5.5p1/ldapbody.c.ldap openssh-5.5p1/ldapbody.c
---- openssh-5.5p1/ldapbody.c.ldap	2010-04-28 11:34:13.000000000 +0200
-+++ openssh-5.5p1/ldapbody.c	2010-04-28 11:34:13.000000000 +0200
+diff -up openssh-5.5p1/ldapbody.c.pka openssh-5.5p1/ldapbody.c
+--- openssh-5.5p1/ldapbody.c.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldapbody.c	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,494 @@
 +/* $OpenBSD: ldapbody.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -801,9 +956,9 @@ diff -up openssh-5.5p1/ldapbody.c.ldap openssh-5.5p1/ldapbody.c
 +	return;
 +}
 +
-diff -up openssh-5.5p1/ldapbody.h.ldap openssh-5.5p1/ldapbody.h
---- openssh-5.5p1/ldapbody.h.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapbody.h	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapbody.h.pka openssh-5.5p1/ldapbody.h
+--- openssh-5.5p1/ldapbody.h.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldapbody.h	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,37 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -842,9 +997,9 @@ diff -up openssh-5.5p1/ldapbody.h.ldap openssh-5.5p1/ldapbody.h
 +
 +#endif /* LDAPBODY_H */
 +
-diff -up openssh-5.5p1/ldapconf.c.ldap openssh-5.5p1/ldapconf.c
---- openssh-5.5p1/ldapconf.c.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapconf.c	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapconf.c.pka openssh-5.5p1/ldapconf.c
+--- openssh-5.5p1/ldapconf.c.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldapconf.c	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,665 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1511,9 +1666,9 @@ diff -up openssh-5.5p1/ldapconf.c.ldap openssh-5.5p1/ldapconf.c
 +	dump_cfg_string(lSSH_Filter, options.ssh_filter);
 +}
 +
-diff -up openssh-5.5p1/ldapconf.h.ldap openssh-5.5p1/ldapconf.h
---- openssh-5.5p1/ldapconf.h.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapconf.h	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapconf.h.pka openssh-5.5p1/ldapconf.h
+--- openssh-5.5p1/ldapconf.h.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldapconf.h	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,71 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1586,9 +1741,9 @@ diff -up openssh-5.5p1/ldapconf.h.ldap openssh-5.5p1/ldapconf.h
 +void dump_config(void);
 +
 +#endif /* LDAPCONF_H */
-diff -up openssh-5.5p1/ldap-helper.c.ldap openssh-5.5p1/ldap-helper.c
---- openssh-5.5p1/ldap-helper.c.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldap-helper.c	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldap-helper.c.pka openssh-5.5p1/ldap-helper.c
+--- openssh-5.5p1/ldap-helper.c.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldap-helper.c	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,154 @@
 +/* $OpenBSD: ssh-pka-ldap.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1744,9 +1899,9 @@ diff -up openssh-5.5p1/ldap-helper.c.ldap openssh-5.5p1/ldap-helper.c
 +void   *buffer_get_string(Buffer *b, u_int *l) {}
 +void    buffer_put_string(Buffer *b, const void *f, u_int l) {}
 +
-diff -up openssh-5.5p1/ldap-helper.h.ldap openssh-5.5p1/ldap-helper.h
---- openssh-5.5p1/ldap-helper.h.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldap-helper.h	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldap-helper.h.pka openssh-5.5p1/ldap-helper.h
+--- openssh-5.5p1/ldap-helper.h.pka	2010-04-29 11:08:25.000000000 +0200
++++ openssh-5.5p1/ldap-helper.h	2010-04-29 11:08:25.000000000 +0200
 @@ -0,0 +1,32 @@
 +/* $OpenBSD: ldap-helper.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1780,9 +1935,9 @@ diff -up openssh-5.5p1/ldap-helper.h.ldap openssh-5.5p1/ldap-helper.h
 +extern int config_warning_config_file;
 +
 +#endif /* LDAP_HELPER_H */
-diff -up openssh-5.5p1/ldapincludes.h.ldap openssh-5.5p1/ldapincludes.h
---- openssh-5.5p1/ldapincludes.h.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapincludes.h	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapincludes.h.pka openssh-5.5p1/ldapincludes.h
+--- openssh-5.5p1/ldapincludes.h.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/ldapincludes.h	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,41 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1825,9 +1980,9 @@ diff -up openssh-5.5p1/ldapincludes.h.ldap openssh-5.5p1/ldapincludes.h
 +#endif
 +
 +#endif /* LDAPINCLUDES_H */
-diff -up openssh-5.5p1/ldapmisc.c.ldap openssh-5.5p1/ldapmisc.c
---- openssh-5.5p1/ldapmisc.c.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapmisc.c	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapmisc.c.pka openssh-5.5p1/ldapmisc.c
+--- openssh-5.5p1/ldapmisc.c.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/ldapmisc.c	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,79 @@
 +
 +#include "ldapincludes.h"
@@ -1908,9 +2063,9 @@ diff -up openssh-5.5p1/ldapmisc.c.ldap openssh-5.5p1/ldapmisc.c
 +}
 +#endif
 +
-diff -up openssh-5.5p1/ldapmisc.h.ldap openssh-5.5p1/ldapmisc.h
---- openssh-5.5p1/ldapmisc.h.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/ldapmisc.h	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/ldapmisc.h.pka openssh-5.5p1/ldapmisc.h
+--- openssh-5.5p1/ldapmisc.h.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/ldapmisc.h	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,35 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1947,9 +2102,9 @@ diff -up openssh-5.5p1/ldapmisc.h.ldap openssh-5.5p1/ldapmisc.h
 +
 +#endif /* LDAPMISC_H */
 +
-diff -up openssh-5.5p1/lpk-user-example.txt.ldap openssh-5.5p1/lpk-user-example.txt
---- openssh-5.5p1/lpk-user-example.txt.ldap	2010-04-28 11:34:14.000000000 +0200
-+++ openssh-5.5p1/lpk-user-example.txt	2010-04-28 11:34:14.000000000 +0200
+diff -up openssh-5.5p1/lpk-user-example.txt.pka openssh-5.5p1/lpk-user-example.txt
+--- openssh-5.5p1/lpk-user-example.txt.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/lpk-user-example.txt	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,117 @@
 +
 +Post to ML -> User Made Quick Install Doc.
@@ -2068,9 +2223,9 @@ diff -up openssh-5.5p1/lpk-user-example.txt.ldap openssh-5.5p1/lpk-user-example.
 +puTTY). Login should succeed.
 +
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-diff -up openssh-5.5p1/Makefile.in.ldap openssh-5.5p1/Makefile.in
---- openssh-5.5p1/Makefile.in.ldap	2010-04-28 11:34:10.000000000 +0200
-+++ openssh-5.5p1/Makefile.in	2010-04-28 11:34:15.000000000 +0200
+diff -up openssh-5.5p1/Makefile.in.pka openssh-5.5p1/Makefile.in
+--- openssh-5.5p1/Makefile.in.pka	2010-03-13 22:41:34.000000000 +0100
++++ openssh-5.5p1/Makefile.in	2010-04-29 11:08:26.000000000 +0200
 @@ -26,6 +26,7 @@ ASKPASS_PROGRAM=$(libexecdir)/ssh-askpas
  SFTP_SERVER=$(libexecdir)/sftp-server
  SSH_KEYSIGN=$(libexecdir)/ssh-keysign
@@ -2092,7 +2247,7 @@ diff -up openssh-5.5p1/Makefile.in.ldap openssh-5.5p1/Makefile.in
  	canohost.o channels.o cipher.o cipher-acss.o cipher-aes.o \
 @@ -93,8 +95,8 @@ SSHDOBJS=sshd.o auth-rhosts.o auth-passw
  	audit.o audit-bsm.o platform.o sftp-server.o sftp-common.o \
- 	roaming_common.o roaming_serv.o kexgsss.o
+ 	roaming_common.o roaming_serv.o
  
 -MANPAGES	= moduli.5.out scp.1.out ssh-add.1.out ssh-agent.1.out ssh-keygen.1.out ssh-keyscan.1.out ssh.1.out sshd.8.out sftp-server.8.out sftp.1.out ssh-rand-helper.8.out ssh-keysign.8.out ssh-pkcs11-helper.8.out sshd_config.5.out ssh_config.5.out
 -MANPAGES_IN	= moduli.5 scp.1 ssh-add.1 ssh-agent.1 ssh-keygen.1 ssh-keyscan.1 ssh.1 sshd.8 sftp-server.8 sftp.1 ssh-rand-helper.8 ssh-keysign.8 ssh-pkcs11-helper.8 sshd_config.5 ssh_config.5
@@ -2101,15 +2256,15 @@ diff -up openssh-5.5p1/Makefile.in.ldap openssh-5.5p1/Makefile.in
  MANTYPE		= @MANTYPE@
  
  CONFIGFILES=sshd_config.out ssh_config.out moduli.out
-@@ -165,6 +167,9 @@ ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT)
- ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
- 	$(LD) -o $@ ssh-keyscan.o roaming_dummy.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lfipscheck $(LIBS)
+@@ -162,6 +164,9 @@ ssh-keysign$(EXEEXT): $(LIBCOMPAT) libss
+ ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-pkcs11-helper.o ssh-pkcs11.o
+ 	$(LD) -o $@ ssh-pkcs11-helper.o ssh-pkcs11.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
  
 +ssh-ldap-helper$(EXEEXT): $(LIBCOMPAT) libssh.a ldapconf.o ldapbody.o ldapmisc.o ldap-helper.o
 +	$(LD) -o $@ ldapconf.o ldapbody.o ldapmisc.o ldap-helper.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
 +
- sftp-server$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-common.o sftp-server.o sftp-server-main.o
- 	$(LD) -o $@ sftp-server.o sftp-common.o sftp-server-main.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
+ ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
+ 	$(LD) -o $@ ssh-keyscan.o roaming_dummy.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
  
 @@ -266,6 +271,9 @@ install-files:
  	fi
@@ -2139,9 +2294,9 @@ diff -up openssh-5.5p1/Makefile.in.ldap openssh-5.5p1/Makefile.in
  	-rm -f $(DESTDIR)$(mandir)/$(mansubdir)1/slogin.1
  
  tests interop-tests:	$(TARGETS)
-diff -up openssh-5.5p1/openssh-lpk-openldap.schema.ldap openssh-5.5p1/openssh-lpk-openldap.schema
---- openssh-5.5p1/openssh-lpk-openldap.schema.ldap	2010-04-28 11:34:15.000000000 +0200
-+++ openssh-5.5p1/openssh-lpk-openldap.schema	2010-04-28 11:34:15.000000000 +0200
+diff -up openssh-5.5p1/openssh-lpk-openldap.schema.pka openssh-5.5p1/openssh-lpk-openldap.schema
+--- openssh-5.5p1/openssh-lpk-openldap.schema.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/openssh-lpk-openldap.schema	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,21 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2164,9 +2319,9 @@ diff -up openssh-5.5p1/openssh-lpk-openldap.schema.ldap openssh-5.5p1/openssh-lp
 +	DESC 'MANDATORY: OpenSSH LPK objectclass'
 +	MUST ( sshPublicKey $ uid ) 
 +	)
-diff -up openssh-5.5p1/openssh-lpk-sun.schema.ldap openssh-5.5p1/openssh-lpk-sun.schema
---- openssh-5.5p1/openssh-lpk-sun.schema.ldap	2010-04-28 11:34:15.000000000 +0200
-+++ openssh-5.5p1/openssh-lpk-sun.schema	2010-04-28 11:34:15.000000000 +0200
+diff -up openssh-5.5p1/openssh-lpk-sun.schema.pka openssh-5.5p1/openssh-lpk-sun.schema
+--- openssh-5.5p1/openssh-lpk-sun.schema.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/openssh-lpk-sun.schema	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,23 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2191,9 +2346,9 @@ diff -up openssh-5.5p1/openssh-lpk-sun.schema.ldap openssh-5.5p1/openssh-lpk-sun
 +	DESC 'MANDATORY: OpenSSH LPK objectclass'
 +	MUST ( sshPublicKey $ uid ) 
 +	)
-diff -up openssh-5.5p1/README.lpk.ldap openssh-5.5p1/README.lpk
---- openssh-5.5p1/README.lpk.ldap	2010-04-28 11:34:15.000000000 +0200
-+++ openssh-5.5p1/README.lpk	2010-04-28 12:33:34.000000000 +0200
+diff -up openssh-5.5p1/README.lpk.pka openssh-5.5p1/README.lpk
+--- openssh-5.5p1/README.lpk.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/README.lpk	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,268 @@
 +OpenSSH LDAP PUBLIC KEY PATCH 
 +Copyright (c) 2003 Eric AUGE (eau@phear.org)
@@ -2463,9 +2618,167 @@ diff -up openssh-5.5p1/README.lpk.ldap openssh-5.5p1/README.lpk
 +- CONTACT :
 +    Jan F. Chadima <jchadima@redhat.com>
 +
-diff -up openssh-5.5p1/ssh-ldap-helper.8.ldap openssh-5.5p1/ssh-ldap-helper.8
---- openssh-5.5p1/ssh-ldap-helper.8.ldap	2010-04-28 11:34:15.000000000 +0200
-+++ openssh-5.5p1/ssh-ldap-helper.8	2010-04-28 11:34:15.000000000 +0200
+diff -up openssh-5.5p1/servconf.c.pka openssh-5.5p1/servconf.c
+--- openssh-5.5p1/servconf.c.pka	2010-03-26 00:40:04.000000000 +0100
++++ openssh-5.5p1/servconf.c	2010-04-29 11:08:25.000000000 +0200
+@@ -128,6 +128,8 @@ initialize_server_options(ServerOptions 
+ 	options->num_permitted_opens = -1;
+ 	options->adm_forced_command = NULL;
+ 	options->chroot_directory = NULL;
++	options->pubkey_agent = NULL;
++	options->pubkey_agent_runas = NULL;
+ 	options->zero_knowledge_password_authentication = -1;
+ 	options->revoked_keys_file = NULL;
+ 	options->trusted_user_ca_keys = NULL;
+@@ -311,6 +313,7 @@ typedef enum {
+ 	sUsePrivilegeSeparation, sAllowAgentForwarding,
+ 	sZeroKnowledgePasswordAuthentication, sHostCertificate,
+ 	sRevokedKeys, sTrustedUserCAKeys,
++	sPubkeyAgent, sPubkeyAgentRunAs,
+ 	sDeprecated, sUnsupported
+ } ServerOpCodes;
+ 
+@@ -432,6 +435,13 @@ static struct {
+ 	{ "hostcertificate", sHostCertificate, SSHCFG_GLOBAL },
+ 	{ "revokedkeys", sRevokedKeys, SSHCFG_ALL },
+ 	{ "trustedusercakeys", sTrustedUserCAKeys, SSHCFG_ALL },
++#ifdef WITH_PUBKEY_AGENT
++	{ "pubkeyagent", sPubkeyAgent, SSHCFG_ALL },
++	{ "pubkeyagentrunas", sPubkeyAgentRunAs, SSHCFG_ALL },
++#else
++	{ "pubkeyagent", sUnsupported, SSHCFG_ALL },
++	{ "pubkeyagentrunas", sUnsupported, SSHCFG_ALL },
++#endif
+ 	{ NULL, sBadOption, 0 }
+ };
+ 
+@@ -1345,6 +1355,20 @@ process_server_config_line(ServerOptions
+ 		charptr = &options->revoked_keys_file;
+ 		goto parse_filename;
+ 
++	case sPubkeyAgent:
++		len = strspn(cp, WHITESPACE);
++		if (*activep && options->pubkey_agent == NULL)
++			options->pubkey_agent = xstrdup(cp + len);
++		return 0;
++
++	case sPubkeyAgentRunAs:
++		charptr = &options->pubkey_agent_runas;
++
++		arg = strdelim(&cp);
++		if (*activep && *charptr == NULL)
++			*charptr = xstrdup(arg);
++		break;
++
+ 	case sDeprecated:
+ 		logit("%s line %d: Deprecated option %s",
+ 		    filename, linenum, arg);
+@@ -1438,6 +1462,8 @@ copy_set_server_options(ServerOptions *d
+ 	M_CP_INTOPT(gss_authentication);
+ 	M_CP_INTOPT(rsa_authentication);
+ 	M_CP_INTOPT(pubkey_authentication);
++	M_CP_STROPT(pubkey_agent);
++	M_CP_STROPT(pubkey_agent_runas);
+ 	M_CP_INTOPT(kerberos_authentication);
+ 	M_CP_INTOPT(hostbased_authentication);
+ 	M_CP_INTOPT(kbd_interactive_authentication);
+@@ -1682,6 +1708,8 @@ dump_config(ServerOptions *o)
+ 	dump_cfg_string(sChrootDirectory, o->chroot_directory);
+ 	dump_cfg_string(sTrustedUserCAKeys, o->trusted_user_ca_keys);
+ 	dump_cfg_string(sRevokedKeys, o->revoked_keys_file);
++	dump_cfg_string(sPubkeyAgent, o->pubkey_agent);
++	dump_cfg_string(sPubkeyAgentRunAs, o->pubkey_agent_runas);
+ 
+ 	/* string arguments requiring a lookup */
+ 	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
+diff -up openssh-5.5p1/servconf.h.pka openssh-5.5p1/servconf.h
+--- openssh-5.5p1/servconf.h.pka	2010-03-04 11:53:35.000000000 +0100
++++ openssh-5.5p1/servconf.h	2010-04-29 11:08:25.000000000 +0200
+@@ -156,6 +156,8 @@ typedef struct {
+ 	char   *chroot_directory;
+ 	char   *revoked_keys_file;
+ 	char   *trusted_user_ca_keys;
++	char   *pubkey_agent;
++	char   *pubkey_agent_runas;
+ }       ServerOptions;
+ 
+ void	 initialize_server_options(ServerOptions *);
+diff -up openssh-5.5p1/sshd_config.0.pka openssh-5.5p1/sshd_config.0
+--- openssh-5.5p1/sshd_config.0.pka	2010-04-16 02:17:12.000000000 +0200
++++ openssh-5.5p1/sshd_config.0	2010-04-29 11:08:25.000000000 +0200
+@@ -352,7 +352,8 @@ DESCRIPTION
+              KbdInteractiveAuthentication, KerberosAuthentication,
+              MaxAuthTries, MaxSessions, PasswordAuthentication,
+              PermitEmptyPasswords, PermitOpen, PermitRootLogin,
+-             PubkeyAuthentication, RhostsRSAAuthentication, RSAAuthentication,
++             PubkeyAuthentication, PubkeyAgent, PubkeyAgentRunAs,
++             RhostsRSAAuthentication, RSAAuthentication,
+              X11DisplayOffset, X11Forwarding and X11UseLocalHost.
+ 
+      MaxAuthTries
+@@ -467,6 +468,17 @@ DESCRIPTION
+              this file is not readable, then public key authentication will be
+              refused for all users.
+ 
++     PubkeyAgent
++             Specifies which agent is used for lookup of the user's public
++             keys. Empty string means to use the authorized_keys file.  By
++             default there is no PubkeyAgent set.  Note that this option has
++             an effect only with PubkeyAuthentication switched on.
++
++     PubkeyAgentRunAs
++             Specifies the user under whose account the PubkeyAgent is run.
++             Empty string (the default value) means the user being authorized
++             is used.
++
+      RhostsRSAAuthentication
+              Specifies whether rhosts or /etc/hosts.equiv authentication to-
+              gether with successful RSA host authentication is allowed.  The
+diff -up openssh-5.5p1/sshd_config.5.pka openssh-5.5p1/sshd_config.5
+--- openssh-5.5p1/sshd_config.5.pka	2010-03-05 00:41:45.000000000 +0100
++++ openssh-5.5p1/sshd_config.5	2010-04-29 11:08:25.000000000 +0200
+@@ -618,6 +618,9 @@ Available keywords are
+ .Cm KerberosAuthentication ,
+ .Cm MaxAuthTries ,
+ .Cm MaxSessions ,
++.Cm PubkeyAuthentication ,
++.Cm PubkeyAgent ,
++.Cm PubkeyAgentRunAs ,
+ .Cm PasswordAuthentication ,
+ .Cm PermitEmptyPasswords ,
+ .Cm PermitOpen ,
+@@ -819,6 +822,16 @@ Specifies a list of revoked public keys.
+ Keys listed in this file will be refused for public key authentication.
+ Note that if this file is not readable, then public key authentication will
+ be refused for all users.
+++.It Cm PubkeyAgent
+++Specifies which agent is used for lookup of the user's public
+++keys. Empty string means to use the authorized_keys file.
+++By default there is no PubkeyAgent set.
+++Note that this option has an effect only with PubkeyAuthentication
+++switched on.
+++.It Cm PubkeyAgentRunAs
+++Specifies the user under whose account the PubkeyAgent is run. Empty
+++string (the default value) means the user being authorized is used.
+++.Dq 
+ .It Cm RhostsRSAAuthentication
+ Specifies whether rhosts or /etc/hosts.equiv authentication together
+ with successful RSA host authentication is allowed.
+diff -up openssh-5.5p1/sshd_config.pka openssh-5.5p1/sshd_config
+--- openssh-5.5p1/sshd_config.pka	2009-10-11 12:51:09.000000000 +0200
++++ openssh-5.5p1/sshd_config	2010-04-29 11:08:25.000000000 +0200
+@@ -44,6 +44,8 @@
+ #RSAAuthentication yes
+ #PubkeyAuthentication yes
+ #AuthorizedKeysFile	.ssh/authorized_keys
++#PubkeyAgent none
++#PubkeyAgentRunAs nobody
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #RhostsRSAAuthentication no
+diff -up openssh-5.5p1/ssh-ldap-helper.8.pka openssh-5.5p1/ssh-ldap-helper.8
+--- openssh-5.5p1/ssh-ldap-helper.8.pka	2010-04-29 11:08:26.000000000 +0200
++++ openssh-5.5p1/ssh-ldap-helper.8	2010-04-29 11:08:26.000000000 +0200
 @@ -0,0 +1,78 @@
 +.\" $OpenBSD: ssh-ldap-helper.8,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"

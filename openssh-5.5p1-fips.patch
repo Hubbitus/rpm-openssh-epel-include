@@ -222,7 +222,7 @@ diff -up openssh-5.5p1/mac.c.fips openssh-5.5p1/mac.c
 diff -up openssh-5.5p1/Makefile.in.fips openssh-5.5p1/Makefile.in
 --- openssh-5.5p1/Makefile.in.fips	2010-03-13 22:41:34.000000000 +0100
 +++ openssh-5.5p1/Makefile.in	2010-04-16 09:48:16.000000000 +0200
-@@ -139,31 +139,31 @@ libssh.a: $(LIBSSH_OBJS)
+@@ -141,25 +141,25 @@
  	$(RANLIB) $@
  
  ssh$(EXEEXT): $(LIBCOMPAT) libssh.a $(SSHOBJS)
@@ -254,6 +254,8 @@ diff -up openssh-5.5p1/Makefile.in.fips openssh-5.5p1/Makefile.in
  
  ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-pkcs11-helper.o ssh-pkcs11.o
  	$(LD) -o $@ ssh-pkcs11-helper.o ssh-pkcs11.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
+@@ -168,7 +168,7 @@
+ 	$(LD) -o $@ ldapconf.o ldapbody.o ldapmisc.o ldap-helper.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
  
  ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
 -	$(LD) -o $@ ssh-keyscan.o roaming_dummy.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
