@@ -120,6 +120,7 @@ Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.5p1-fips.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1614
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
 Patch73: openssh-5.5p1-gsskex.patch
