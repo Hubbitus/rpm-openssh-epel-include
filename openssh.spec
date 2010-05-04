@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 5
+%define openssh_rel 6
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -92,29 +92,42 @@ Source2: sshd.pam
 Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
+
 Patch0: openssh-5.4p1-redhat.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1638
 Patch2: openssh-5.3p1-skip-initial.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1641
 Patch12: openssh-5.4p1-selinux.patch
 Patch13: openssh-5.5p1-mls.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1663
+Patch20: openssh-5.5p1-pka-ldap.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1668
+Patch23: openssh-5.5p1-keygen.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1636
 Patch27: openssh-5.1p1-log-in-chroot.patch
 Patch30: openssh-4.0p1-exit-deadlock.patch
 Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
 Patch65: openssh-5.5p1-fips.patch
 Patch69: openssh-5.3p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
-Patch72: openssh-5.5p1-pka-ldap.patch
 Patch73: openssh-5.5p1-gsskex.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1701
 Patch74: openssh-5.3p1-randclean.patch
-Patch76: openssh-5.4p1-staterr.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1740
+Patch76: openssh-5.5p1-staterr.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1750
 Patch77: openssh-5.5p1-stderr.patch
 
 License: BSD
@@ -270,7 +283,8 @@ popd
 %patch18 -p1 -b .pam_selinux
 %endif
 
-%patch72 -p1 -b .pka
+%patch20 -p1 -b .pka
+%patch23 -p1 -b .keygen
 %patch24 -p1 -b .fromto-remote
 %patch27 -p1 -b .log-chroot
 %patch30 -p1 -b .exit-deadlock
@@ -562,6 +576,10 @@ fi
 %endif
 
 %changelog
+* Tue May  4 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-6 + 0.9.2-26
+- Comment spec.file
+- Sync patches from upstream
+
 * Mon May  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-5 + 0.9.2-26
 - Create separate ldap package
 - Tweak the ldap patch
