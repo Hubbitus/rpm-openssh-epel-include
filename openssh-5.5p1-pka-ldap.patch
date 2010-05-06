@@ -1,6 +1,6 @@
 diff -up openssh-5.5p1/auth2-pubkey.c.pka openssh-5.5p1/auth2-pubkey.c
---- openssh-5.5p1/auth2-pubkey.c.pka	2010-05-06 10:50:47.000000000 +0200
-+++ openssh-5.5p1/auth2-pubkey.c	2010-05-06 10:50:49.000000000 +0200
+--- openssh-5.5p1/auth2-pubkey.c.pka	2010-05-06 15:49:14.000000000 +0200
++++ openssh-5.5p1/auth2-pubkey.c	2010-05-06 15:49:15.000000000 +0200
 @@ -186,27 +186,15 @@ done:
  
  /* return 1 if user allows given key */
@@ -196,7 +196,7 @@ diff -up openssh-5.5p1/auth2-pubkey.c.pka openssh-5.5p1/auth2-pubkey.c
  	if (key_is_cert(key) && auth_key_is_revoked(key->cert->signature_key))
 diff -up openssh-5.5p1/config.h.in.pka openssh-5.5p1/config.h.in
 --- openssh-5.5p1/config.h.in.pka	2010-04-16 02:17:09.000000000 +0200
-+++ openssh-5.5p1/config.h.in	2010-05-06 10:51:21.000000000 +0200
++++ openssh-5.5p1/config.h.in	2010-05-06 15:49:15.000000000 +0200
 @@ -1,5 +1,8 @@
  /* config.h.in.  Generated from configure.ac by autoheader.  */
  
@@ -362,8 +362,8 @@ diff -up openssh-5.5p1/config.h.in.pka openssh-5.5p1/config.h.in
  /* Define if xauth is found in your path */
  #undef XAUTH_PATH
 diff -up openssh-5.5p1/configure.ac.pka openssh-5.5p1/configure.ac
---- openssh-5.5p1/configure.ac.pka	2010-05-06 10:50:49.000000000 +0200
-+++ openssh-5.5p1/configure.ac	2010-05-06 10:50:49.000000000 +0200
+--- openssh-5.5p1/configure.ac.pka	2010-05-06 15:49:14.000000000 +0200
++++ openssh-5.5p1/configure.ac	2010-05-06 15:49:15.000000000 +0200
 @@ -1346,6 +1346,118 @@ AC_ARG_WITH(audit,
  	esac ]
  )
@@ -493,8 +493,8 @@ diff -up openssh-5.5p1/configure.ac.pka openssh-5.5p1/configure.ac
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
 diff -up openssh-5.5p1/ldapbody.c.pka openssh-5.5p1/ldapbody.c
---- openssh-5.5p1/ldapbody.c.pka	2010-05-06 10:50:49.000000000 +0200
-+++ openssh-5.5p1/ldapbody.c	2010-05-06 10:50:49.000000000 +0200
+--- openssh-5.5p1/ldapbody.c.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapbody.c	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,494 @@
 +/* $OpenBSD: ldapbody.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -991,8 +991,8 @@ diff -up openssh-5.5p1/ldapbody.c.pka openssh-5.5p1/ldapbody.c
 +}
 +
 diff -up openssh-5.5p1/ldapbody.h.pka openssh-5.5p1/ldapbody.h
---- openssh-5.5p1/ldapbody.h.pka	2010-05-06 10:50:49.000000000 +0200
-+++ openssh-5.5p1/ldapbody.h	2010-05-06 10:50:49.000000000 +0200
+--- openssh-5.5p1/ldapbody.h.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapbody.h	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,37 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1032,9 +1032,9 @@ diff -up openssh-5.5p1/ldapbody.h.pka openssh-5.5p1/ldapbody.h
 +#endif /* LDAPBODY_H */
 +
 diff -up openssh-5.5p1/ldapconf.c.pka openssh-5.5p1/ldapconf.c
---- openssh-5.5p1/ldapconf.c.pka	2010-05-06 10:50:49.000000000 +0200
-+++ openssh-5.5p1/ldapconf.c	2010-05-06 10:48:32.000000000 +0200
-@@ -0,0 +1,665 @@
+--- openssh-5.5p1/ldapconf.c.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapconf.c	2010-05-06 15:47:43.000000000 +0200
+@@ -0,0 +1,673 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
 + * Copyright (c) 2009 Jan F. Chadima.  All rights reserved.
@@ -1106,13 +1106,21 @@ diff -up openssh-5.5p1/ldapconf.c.pka openssh-5.5p1/ldapconf.c
 +	{ "Referrals", lReferrals },
 +	{ "Restart", lRestart },
 +	{ "TLS_CheckPeer", lTLS_CheckPeer },
++	{ "TLS_ReqCert", lTLS_CheckPeer },
 +	{ "TLS_Certificate", lTLS_Certificate },
 +	{ "TLS_CaCertFile", lTLS_CaCertFile },
++	{ "TLS_CaCert", lTLS_CaCertFile },
 +	{ "TLS_CaCertDir", lTLS_CaCertDir },
 +	{ "TLS_Ciphers", lTLS_Ciphers },
++	{ "TLS_Cipher_Suite", lTLS_Ciphers },
 +	{ "TLS_Cert", lTLS_Cert },
 +	{ "TLS_Key", lTLS_Key },
 +	{ "TLS_RandFile", lTLS_RandFile },
++/*
++ * Todo
++ * TLS_CRLCHECK
++ * TLS_CRLFILE
++ */
 +	{ "Logdir", lLogdir },
 +	{ "Debug", lDebug },
 +	{ "SSH_Filter", lSSH_Filter },
@@ -1701,8 +1709,8 @@ diff -up openssh-5.5p1/ldapconf.c.pka openssh-5.5p1/ldapconf.c
 +}
 +
 diff -up openssh-5.5p1/ldapconf.h.pka openssh-5.5p1/ldapconf.h
---- openssh-5.5p1/ldapconf.h.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldapconf.h	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldapconf.h.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapconf.h	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,71 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1776,8 +1784,8 @@ diff -up openssh-5.5p1/ldapconf.h.pka openssh-5.5p1/ldapconf.h
 +
 +#endif /* LDAPCONF_H */
 diff -up openssh-5.5p1/ldap-helper.c.pka openssh-5.5p1/ldap-helper.c
---- openssh-5.5p1/ldap-helper.c.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldap-helper.c	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldap-helper.c.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldap-helper.c	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,154 @@
 +/* $OpenBSD: ssh-pka-ldap.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1934,8 +1942,8 @@ diff -up openssh-5.5p1/ldap-helper.c.pka openssh-5.5p1/ldap-helper.c
 +void    buffer_put_string(Buffer *b, const void *f, u_int l) {}
 +
 diff -up openssh-5.5p1/ldap-helper.h.pka openssh-5.5p1/ldap-helper.h
---- openssh-5.5p1/ldap-helper.h.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldap-helper.h	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldap-helper.h.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldap-helper.h	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,32 @@
 +/* $OpenBSD: ldap-helper.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1970,8 +1978,8 @@ diff -up openssh-5.5p1/ldap-helper.h.pka openssh-5.5p1/ldap-helper.h
 +
 +#endif /* LDAP_HELPER_H */
 diff -up openssh-5.5p1/ldapincludes.h.pka openssh-5.5p1/ldapincludes.h
---- openssh-5.5p1/ldapincludes.h.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldapincludes.h	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldapincludes.h.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapincludes.h	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,41 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -2015,8 +2023,8 @@ diff -up openssh-5.5p1/ldapincludes.h.pka openssh-5.5p1/ldapincludes.h
 +
 +#endif /* LDAPINCLUDES_H */
 diff -up openssh-5.5p1/ldapmisc.c.pka openssh-5.5p1/ldapmisc.c
---- openssh-5.5p1/ldapmisc.c.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldapmisc.c	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldapmisc.c.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapmisc.c	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,79 @@
 +
 +#include "ldapincludes.h"
@@ -2098,8 +2106,8 @@ diff -up openssh-5.5p1/ldapmisc.c.pka openssh-5.5p1/ldapmisc.c
 +#endif
 +
 diff -up openssh-5.5p1/ldapmisc.h.pka openssh-5.5p1/ldapmisc.h
---- openssh-5.5p1/ldapmisc.h.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ldapmisc.h	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ldapmisc.h.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ldapmisc.h	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,35 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -2137,8 +2145,8 @@ diff -up openssh-5.5p1/ldapmisc.h.pka openssh-5.5p1/ldapmisc.h
 +#endif /* LDAPMISC_H */
 +
 diff -up openssh-5.5p1/lpk-user-example.txt.pka openssh-5.5p1/lpk-user-example.txt
---- openssh-5.5p1/lpk-user-example.txt.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/lpk-user-example.txt	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/lpk-user-example.txt.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/lpk-user-example.txt	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,117 @@
 +
 +Post to ML -> User Made Quick Install Doc.
@@ -2259,7 +2267,7 @@ diff -up openssh-5.5p1/lpk-user-example.txt.pka openssh-5.5p1/lpk-user-example.t
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 diff -up openssh-5.5p1/Makefile.in.pka openssh-5.5p1/Makefile.in
 --- openssh-5.5p1/Makefile.in.pka	2010-03-13 22:41:34.000000000 +0100
-+++ openssh-5.5p1/Makefile.in	2010-05-06 10:50:50.000000000 +0200
++++ openssh-5.5p1/Makefile.in	2010-05-06 15:49:15.000000000 +0200
 @@ -26,6 +26,7 @@ ASKPASS_PROGRAM=$(libexecdir)/ssh-askpas
  SFTP_SERVER=$(libexecdir)/sftp-server
  SSH_KEYSIGN=$(libexecdir)/ssh-keysign
@@ -2329,8 +2337,8 @@ diff -up openssh-5.5p1/Makefile.in.pka openssh-5.5p1/Makefile.in
  
  tests interop-tests:	$(TARGETS)
 diff -up openssh-5.5p1/openssh-lpk-openldap.schema.pka openssh-5.5p1/openssh-lpk-openldap.schema
---- openssh-5.5p1/openssh-lpk-openldap.schema.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/openssh-lpk-openldap.schema	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/openssh-lpk-openldap.schema.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/openssh-lpk-openldap.schema	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,21 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2354,8 +2362,8 @@ diff -up openssh-5.5p1/openssh-lpk-openldap.schema.pka openssh-5.5p1/openssh-lpk
 +	MUST ( sshPublicKey $ uid ) 
 +	)
 diff -up openssh-5.5p1/openssh-lpk-sun.schema.pka openssh-5.5p1/openssh-lpk-sun.schema
---- openssh-5.5p1/openssh-lpk-sun.schema.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/openssh-lpk-sun.schema	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/openssh-lpk-sun.schema.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/openssh-lpk-sun.schema	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,23 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2381,8 +2389,8 @@ diff -up openssh-5.5p1/openssh-lpk-sun.schema.pka openssh-5.5p1/openssh-lpk-sun.
 +	MUST ( sshPublicKey $ uid ) 
 +	)
 diff -up openssh-5.5p1/README.lpk.pka openssh-5.5p1/README.lpk
---- openssh-5.5p1/README.lpk.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/README.lpk	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/README.lpk.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/README.lpk	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,268 @@
 +OpenSSH LDAP PUBLIC KEY PATCH 
 +Copyright (c) 2003 Eric AUGE (eau@phear.org)
@@ -2653,8 +2661,8 @@ diff -up openssh-5.5p1/README.lpk.pka openssh-5.5p1/README.lpk
 +    Jan F. Chadima <jchadima@redhat.com>
 +
 diff -up openssh-5.5p1/servconf.c.pka openssh-5.5p1/servconf.c
---- openssh-5.5p1/servconf.c.pka	2010-05-06 10:50:47.000000000 +0200
-+++ openssh-5.5p1/servconf.c	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/servconf.c.pka	2010-05-06 15:49:13.000000000 +0200
++++ openssh-5.5p1/servconf.c	2010-05-06 15:49:15.000000000 +0200
 @@ -129,6 +129,8 @@ initialize_server_options(ServerOptions 
  	options->num_permitted_opens = -1;
  	options->adm_forced_command = NULL;
@@ -2726,8 +2734,8 @@ diff -up openssh-5.5p1/servconf.c.pka openssh-5.5p1/servconf.c
  	/* string arguments requiring a lookup */
  	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
 diff -up openssh-5.5p1/servconf.h.pka openssh-5.5p1/servconf.h
---- openssh-5.5p1/servconf.h.pka	2010-05-06 10:50:47.000000000 +0200
-+++ openssh-5.5p1/servconf.h	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/servconf.h.pka	2010-05-06 15:49:13.000000000 +0200
++++ openssh-5.5p1/servconf.h	2010-05-06 15:49:15.000000000 +0200
 @@ -157,6 +157,8 @@ typedef struct {
  	char   *chroot_directory;
  	char   *revoked_keys_file;
@@ -2738,8 +2746,8 @@ diff -up openssh-5.5p1/servconf.h.pka openssh-5.5p1/servconf.h
  
  void	 initialize_server_options(ServerOptions *);
 diff -up openssh-5.5p1/sshd_config.0.pka openssh-5.5p1/sshd_config.0
---- openssh-5.5p1/sshd_config.0.pka	2010-05-06 10:50:47.000000000 +0200
-+++ openssh-5.5p1/sshd_config.0	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/sshd_config.0.pka	2010-05-06 15:49:13.000000000 +0200
++++ openssh-5.5p1/sshd_config.0	2010-05-06 15:49:15.000000000 +0200
 @@ -352,7 +352,8 @@ DESCRIPTION
               KbdInteractiveAuthentication, KerberosAuthentication,
               MaxAuthTries, MaxSessions, PasswordAuthentication,
@@ -2769,8 +2777,8 @@ diff -up openssh-5.5p1/sshd_config.0.pka openssh-5.5p1/sshd_config.0
               Specifies whether rhosts or /etc/hosts.equiv authentication to-
               gether with successful RSA host authentication is allowed.  The
 diff -up openssh-5.5p1/sshd_config.5.pka openssh-5.5p1/sshd_config.5
---- openssh-5.5p1/sshd_config.5.pka	2010-05-06 10:50:46.000000000 +0200
-+++ openssh-5.5p1/sshd_config.5	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/sshd_config.5.pka	2010-05-06 15:49:13.000000000 +0200
++++ openssh-5.5p1/sshd_config.5	2010-05-06 15:49:15.000000000 +0200
 @@ -618,6 +618,9 @@ Available keywords are
  .Cm KerberosAuthentication ,
  .Cm MaxAuthTries ,
@@ -2799,8 +2807,8 @@ diff -up openssh-5.5p1/sshd_config.5.pka openssh-5.5p1/sshd_config.5
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful RSA host authentication is allowed.
 diff -up openssh-5.5p1/sshd_config.pka openssh-5.5p1/sshd_config
---- openssh-5.5p1/sshd_config.pka	2010-05-06 10:50:47.000000000 +0200
-+++ openssh-5.5p1/sshd_config	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/sshd_config.pka	2010-05-06 15:49:13.000000000 +0200
++++ openssh-5.5p1/sshd_config	2010-05-06 15:49:15.000000000 +0200
 @@ -45,6 +45,8 @@ SyslogFacility AUTHPRIV
  #RSAAuthentication yes
  #PubkeyAuthentication yes
@@ -2811,8 +2819,8 @@ diff -up openssh-5.5p1/sshd_config.pka openssh-5.5p1/sshd_config
  # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
  #RhostsRSAAuthentication no
 diff -up openssh-5.5p1/ssh-ldap-helper.8.pka openssh-5.5p1/ssh-ldap-helper.8
---- openssh-5.5p1/ssh-ldap-helper.8.pka	2010-05-06 10:50:50.000000000 +0200
-+++ openssh-5.5p1/ssh-ldap-helper.8	2010-05-06 10:50:50.000000000 +0200
+--- openssh-5.5p1/ssh-ldap-helper.8.pka	2010-05-06 15:49:15.000000000 +0200
++++ openssh-5.5p1/ssh-ldap-helper.8	2010-05-06 15:49:15.000000000 +0200
 @@ -0,0 +1,78 @@
 +.\" $OpenBSD: ssh-ldap-helper.8,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"
