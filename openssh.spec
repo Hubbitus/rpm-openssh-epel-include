@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 8
+%define openssh_rel 9
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -285,22 +285,22 @@ popd
 %endif
 
 %patch20 -p1 -b .pka
-%patch23 -p1 -b .keygen
-%patch24 -p1 -b .fromto-remote
-%patch27 -p1 -b .log-chroot
-%patch30 -p1 -b .exit-deadlock
-%patch35 -p1 -b .progress
-%patch38 -p1 -b .grab-info
-%patch44 -p1 -b .ip-opts
-%patch49 -p1 -b .canohost
-%patch62 -p1 -b .manpage
-%patch65 -p1 -b .fips
-%patch69 -p1 -b .selabel
-%patch71 -p1 -b .edns
-%patch73 -p1 -b .gsskex
-%patch74 -p1 -b .randclean
-%patch76 -p1 -b .staterr
-%patch77 -p1 -b .stderr
+#%patch23 -p1 -b .keygen
+#%patch24 -p1 -b .fromto-remote
+#%patch27 -p1 -b .log-chroot
+#%patch30 -p1 -b .exit-deadlock
+#%patch35 -p1 -b .progress
+#%patch38 -p1 -b .grab-info
+#%patch44 -p1 -b .ip-opts
+#%patch49 -p1 -b .canohost
+#%patch62 -p1 -b .manpage
+#%patch65 -p1 -b .fips
+#%patch69 -p1 -b .selabel
+#%patch71 -p1 -b .edns
+#%patch73 -p1 -b .gsskex
+#%patch74 -p1 -b .randclean
+#%patch76 -p1 -b .staterr
+#%patch77 -p1 -b .stderr
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -558,6 +558,7 @@ fi
 %doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
 %attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
+%attr(0644,root,root) %{_mandir}/man5/ssh-ldap.conf.5*
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -577,6 +578,10 @@ fi
 %endif
 
 %changelog
+* Thu May 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-9 + 0.9.2-26
+- Make the Ldap configuration widely compatible
+- create the aditional docs for LDAP support.
+
 * Thu May  6 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-8 + 0.9.2-26
 - Make LDAP config elements TLS_CACERT and TLS_REQCERT compatiple with pam_ldap (#589360)
 
