@@ -285,22 +285,22 @@ popd
 %endif
 
 %patch20 -p1 -b .pka
-#%patch23 -p1 -b .keygen
-#%patch24 -p1 -b .fromto-remote
-#%patch27 -p1 -b .log-chroot
-#%patch30 -p1 -b .exit-deadlock
-#%patch35 -p1 -b .progress
-#%patch38 -p1 -b .grab-info
-#%patch44 -p1 -b .ip-opts
-#%patch49 -p1 -b .canohost
-#%patch62 -p1 -b .manpage
-#%patch65 -p1 -b .fips
-#%patch69 -p1 -b .selabel
-#%patch71 -p1 -b .edns
-#%patch73 -p1 -b .gsskex
-#%patch74 -p1 -b .randclean
-#%patch76 -p1 -b .staterr
-#%patch77 -p1 -b .stderr
+%patch23 -p1 -b .keygen
+%patch24 -p1 -b .fromto-remote
+%patch27 -p1 -b .log-chroot
+%patch30 -p1 -b .exit-deadlock
+%patch35 -p1 -b .progress
+%patch38 -p1 -b .grab-info
+%patch44 -p1 -b .ip-opts
+%patch49 -p1 -b .canohost
+%patch62 -p1 -b .manpage
+%patch65 -p1 -b .fips
+%patch69 -p1 -b .selabel
+%patch71 -p1 -b .edns
+%patch73 -p1 -b .gsskex
+%patch74 -p1 -b .randclean
+%patch76 -p1 -b .staterr
+%patch77 -p1 -b .stderr
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
