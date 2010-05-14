@@ -2942,7 +2942,7 @@ diff -up openssh-5.5p1/sshd_config.pka openssh-5.5p1/sshd_config
 diff -up openssh-5.5p1/ssh-ldap.conf.5.pka openssh-5.5p1/ssh-ldap.conf.5
 --- openssh-5.5p1/ssh-ldap.conf.5.pka	2010-05-14 08:19:02.000000000 +0200
 +++ openssh-5.5p1/ssh-ldap.conf.5	2010-05-14 08:19:02.000000000 +0200
-@@ -0,0 +1,369 @@
+@@ -0,0 +1,371 @@
 +.\" $OpenBSD: ssh-ldap.conf.5,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"
 +.\" Copyright (c) 2010 Jan F. Chadima.  All rights reserved.
@@ -2986,7 +2986,6 @@ diff -up openssh-5.5p1/ssh-ldap.conf.5.pka openssh-5.5p1/ssh-ldap.conf.5
 +may be incorrect, as the quotes would become part of the value.
 +The possible keywords and their meanings are as follows (note that
 +keywords are case-insensitive and arguments, on a case by case basis, may be case-sensitive).
-+.Bl -tag -width Ds
 +.It Cm URI
 +The argument(s) are in the form
 +.Pa ldap[si]://[name[:port]]
@@ -3298,6 +3297,9 @@ diff -up openssh-5.5p1/ssh-ldap.conf.5.pka openssh-5.5p1/ssh-ldap.conf.5
 +.It Cm Debug
 +Specifies the debug level used for logging by the LDAP client library.
 +There is no default.
++.It Cm SSH_Filter
++Specifies the user filter applied on the LDAP serch.
++The default is no filter.
 +.Sh FILES
 +.Bl -tag -width Ds
 +.It Pa  /etc/ssh/ldap.conf

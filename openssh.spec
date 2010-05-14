@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 9
+%define openssh_rel 10
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -428,6 +428,7 @@ mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
 mkdir -p -m755 $RPM_BUILD_ROOT%{_libexecdir}/openssh
 mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd
 make install DESTDIR=$RPM_BUILD_ROOT
+rm -f $RPM_BUILD_ROOT%{_sysconfdir}/ssh/ldap.conf
 
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
@@ -495,7 +496,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README* TODO WARNING*
+%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO WARNING*
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -555,7 +556,7 @@ fi
 %if %{ldap}
 %files ldap
 %defattr(-,root,root)
-%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema
+%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
 %attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
 %attr(0644,root,root) %{_mandir}/man5/ssh-ldap.conf.5*
@@ -578,6 +579,11 @@ fi
 %endif
 
 %changelog
+* Fri May 14 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-10 + 0.9.2-26
+- Repair the reference in man ssh-ldap-helper(8)
+- Repair the PubkeyAgent section in sshd_config(5)
+- Provide example ldap.conf
+
 * Thu May 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-9 + 0.9.2-26
 - Make the Ldap configuration widely compatible
 - create the aditional docs for LDAP support.
