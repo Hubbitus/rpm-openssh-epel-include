@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 10
+%define openssh_rel 11
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -579,6 +579,9 @@ fi
 %endif
 
 %changelog
+* Thu May 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-11 + 0.9.2-26
+- Typo in ssh-ldap.conf(5) and ssh-ladap-helper(8)
+
 * Fri May 14 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-10 + 0.9.2-26
 - Repair the reference in man ssh-ldap-helper(8)
 - Repair the PubkeyAgent section in sshd_config(5)
