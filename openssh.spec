@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 11
+%define openssh_rel 12
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -473,12 +473,15 @@ popd
 rm -rf $RPM_BUILD_ROOT
 
 %pre server
+getent group sshd >/dev/null || groupadd -g %{sshd_uid} -r sshd || :
 %if %{nologin}
-/usr/sbin/useradd -c "Privilege-separated SSH" -u %{sshd_uid} \
-	-s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
+getent passwd sshd >/dev/null || \
+  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd  -s /sbin/nologin \
+  -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
 %else
-/usr/sbin/useradd -c "Privilege-separated SSH" -u %{sshd_uid} \
-	-s /dev/null -r -d /var/empty/sshd sshd 2> /dev/null || :
+getent passwd sshd >/dev/null || \
+  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd  -s /sbin/nologin \
+  -s /dev/null -r -d /var/empty/sshd sshd 2> /dev/null || :
 %endif
 
 %post server
@@ -579,6 +582,9 @@ fi
 %endif
 
 %changelog
+* Fri May 21 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-12 + 0.9.2-26
+- synchronize uid and gid for the user sshd
+
 * Thu May 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-11 + 0.9.2-26
 - Typo in ssh-ldap.conf(5) and ssh-ladap-helper(8)
 
