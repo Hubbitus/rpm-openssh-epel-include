@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 12
+%define openssh_rel 13
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -130,6 +130,7 @@ Patch74: openssh-5.3p1-randclean.patch
 Patch76: openssh-5.5p1-staterr.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1750
 Patch77: openssh-5.5p1-stderr.patch
+Patch78: openssh-5.5p1-kuserok.patch
 
 License: BSD
 Group: Applications/Internet
@@ -301,6 +302,7 @@ popd
 %patch74 -p1 -b .randclean
 %patch76 -p1 -b .staterr
 %patch77 -p1 -b .stderr
+%patch78 -p1 -b .kuserok
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -582,6 +584,9 @@ fi
 %endif
 
 %changelog
+* Tue Jun  8 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-13 + 0.9.2-26
+- add option to switch out krb5_kuserok
+
 * Fri May 21 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-12 + 0.9.2-26
 - synchronize uid and gid for the user sshd
 
