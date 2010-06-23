@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 13
+%define openssh_rel 14
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -584,6 +584,9 @@ fi
 %endif
 
 %changelog
+* Wed Jun 23 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-14 + 0.9.2-26
+- sftp works in deviceless chroot again (broken from 5.5p1-3)
+
 * Tue Jun  8 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-13 + 0.9.2-26
 - add option to switch out krb5_kuserok
 
