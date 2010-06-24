@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 14
+%define openssh_rel 15
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -94,6 +94,7 @@ Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/p
 Source5: pam_ssh_agent-rmheaders
 
 Patch0: openssh-5.4p1-redhat.patch
+Patch1: openssh-5.5p1-x11.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1638
 Patch2: openssh-5.3p1-skip-initial.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
@@ -266,6 +267,7 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 %patch0 -p1 -b .redhat
+%patch1 -p1 -b .x11
 %patch2 -p1 -b .skip-initial
 %patch4 -p1 -b .vendor
 
@@ -584,6 +586,9 @@ fi
 %endif
 
 %changelog
+* Thu Jun 24 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-15 + 0.9.2-26
+- changed _PATH_UNIX_X to unexistent file name (#598671)
+
 * Wed Jun 23 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-14 + 0.9.2-26
 - sftp works in deviceless chroot again (broken from 5.5p1-3)
 

@@ -1,0 +1,12 @@
+diff -up openssh-5.5p1/pathnames.h.x11 openssh-5.5p1/pathnames.h
+--- openssh-5.5p1/pathnames.h.x11	2010-06-23 18:07:59.000000000 +0200
++++ openssh-5.5p1/pathnames.h	2010-06-23 18:10:20.000000000 +0200
+@@ -137,7 +137,7 @@
+ 
+ /* UNIX domain socket for X11 server; displaynum will replace %u */
+ #ifndef _PATH_UNIX_X
+-#define _PATH_UNIX_X "/tmp/.X11-unix/X%u"
++#define _PATH_UNIX_X "/var/spool/sockets/X11/%u"
+ #endif
+ 
+ /* for scp */
