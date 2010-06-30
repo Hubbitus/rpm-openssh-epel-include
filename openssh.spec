@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 16
+%define openssh_rel 17
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -586,6 +586,9 @@ fi
 %endif
 
 %changelog
+* Wed Jun 30 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-17 + 0.9.2-26
+- improved the x11 patch according to upstream (#598671)
+
 * Thu Jun 25 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-16 + 0.9.2-26
 - improved the x11 patch (#598671)
 
