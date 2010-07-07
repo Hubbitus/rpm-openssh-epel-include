@@ -1,6 +1,6 @@
 diff -up openssh-5.5p1/auth-krb5.c.kuserok openssh-5.5p1/auth-krb5.c
---- openssh-5.5p1/auth-krb5.c.kuserok	2010-06-08 11:40:10.000000000 +0200
-+++ openssh-5.5p1/auth-krb5.c	2010-06-08 11:40:11.000000000 +0200
+--- openssh-5.5p1/auth-krb5.c.kuserok	2010-07-07 13:12:01.000000000 +0200
++++ openssh-5.5p1/auth-krb5.c	2010-07-07 13:12:03.000000000 +0200
 @@ -146,9 +146,11 @@ auth_krb5_password(Authctxt *authctxt, c
  	if (problem)
  		goto out;
@@ -17,8 +17,8 @@ diff -up openssh-5.5p1/auth-krb5.c.kuserok openssh-5.5p1/auth-krb5.c
  
  	problem = ssh_krb5_cc_gen(authctxt->krb5_ctx, &authctxt->krb5_fwd_ccache);
 diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
---- openssh-5.5p1/servconf.c.kuserok	2010-06-08 11:40:10.000000000 +0200
-+++ openssh-5.5p1/servconf.c	2010-06-08 11:46:20.000000000 +0200
+--- openssh-5.5p1/servconf.c.kuserok	2010-07-07 13:12:02.000000000 +0200
++++ openssh-5.5p1/servconf.c	2010-07-07 13:12:04.000000000 +0200
 @@ -137,6 +137,7 @@ initialize_server_options(ServerOptions 
  	options->zero_knowledge_password_authentication = -1;
  	options->revoked_keys_file = NULL;
@@ -87,8 +87,8 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  	/* string arguments */
  	dump_cfg_string(sPidFile, o->pid_file);
 diff -up openssh-5.5p1/servconf.h.kuserok openssh-5.5p1/servconf.h
---- openssh-5.5p1/servconf.h.kuserok	2010-06-08 11:40:10.000000000 +0200
-+++ openssh-5.5p1/servconf.h	2010-06-08 11:40:11.000000000 +0200
+--- openssh-5.5p1/servconf.h.kuserok	2010-07-07 13:12:02.000000000 +0200
++++ openssh-5.5p1/servconf.h	2010-07-07 13:12:04.000000000 +0200
 @@ -157,6 +157,7 @@ typedef struct {
  
  	int	num_permitted_opens;
@@ -98,8 +98,8 @@ diff -up openssh-5.5p1/servconf.h.kuserok openssh-5.5p1/servconf.h
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
 diff -up openssh-5.5p1/sshd_config.5.kuserok openssh-5.5p1/sshd_config.5
---- openssh-5.5p1/sshd_config.5.kuserok	2010-06-08 11:40:10.000000000 +0200
-+++ openssh-5.5p1/sshd_config.5	2010-06-08 11:40:11.000000000 +0200
+--- openssh-5.5p1/sshd_config.5.kuserok	2010-07-07 13:12:03.000000000 +0200
++++ openssh-5.5p1/sshd_config.5	2010-07-07 13:21:02.000000000 +0200
 @@ -519,6 +519,10 @@ Specifies whether to automatically destr
  file on logout.
  The default is
@@ -118,10 +118,10 @@ diff -up openssh-5.5p1/sshd_config.5.kuserok openssh-5.5p1/sshd_config.5
 +.Cm KerberosUseKuserok ,
  .Cm MaxAuthTries ,
  .Cm MaxSessions ,
- .Cm PasswordAuthentication ,
+ .Cm PubkeyAuthentication ,
 diff -up openssh-5.5p1/sshd_config.kuserok openssh-5.5p1/sshd_config
---- openssh-5.5p1/sshd_config.kuserok	2010-06-08 11:40:10.000000000 +0200
-+++ openssh-5.5p1/sshd_config	2010-06-08 11:40:11.000000000 +0200
+--- openssh-5.5p1/sshd_config.kuserok	2010-07-07 13:12:03.000000000 +0200
++++ openssh-5.5p1/sshd_config	2010-07-07 13:12:04.000000000 +0200
 @@ -72,6 +72,7 @@ ChallengeResponseAuthentication no
  #KerberosOrLocalPasswd yes
  #KerberosTicketCleanup yes

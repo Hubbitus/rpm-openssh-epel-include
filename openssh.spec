@@ -70,7 +70,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_rel 17
+%define openssh_rel 18
 %define openssh_ver 5.5p1
 %define pam_ssh_agent_rel 26
 %define pam_ssh_agent_ver 0.9.2
@@ -106,7 +106,8 @@ Patch13: openssh-5.5p1-mls.patch
 Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch20: openssh-5.5p1-pka-ldap.patch
+Patch20: openssh-5.5p1-authorized-keys-command.patch
+Patch21: openssh-5.5p1-ldap.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
 Patch23: openssh-5.5p1-keygen.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
@@ -286,7 +287,8 @@ popd
 %patch18 -p1 -b .pam_selinux
 %endif
 
-%patch20 -p1 -b .pka
+%patch20 -p1 -b .akc
+%patch21 -p1 -b .ldap
 %patch23 -p1 -b .keygen
 %patch24 -p1 -b .fromto-remote
 %patch27 -p1 -b .log-chroot
@@ -586,6 +588,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul  7 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-18 + 0.9.2-26
+- merged with newer bugzilla's version of authorized keys command patch
+
 * Wed Jun 30 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-17 + 0.9.2-26
 - improved the x11 patch according to upstream (#598671)
 
