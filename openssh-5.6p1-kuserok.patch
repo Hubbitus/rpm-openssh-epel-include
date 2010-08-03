@@ -1,6 +1,6 @@
-diff -up openssh-5.5p1/auth-krb5.c.kuserok openssh-5.5p1/auth-krb5.c
---- openssh-5.5p1/auth-krb5.c.kuserok	2010-07-07 13:12:01.000000000 +0200
-+++ openssh-5.5p1/auth-krb5.c	2010-07-07 13:12:03.000000000 +0200
+diff -up openssh-5.6p1/auth-krb5.c.kuserok openssh-5.6p1/auth-krb5.c
+--- openssh-5.6p1/auth-krb5.c.kuserok	2010-08-23 13:01:19.000000000 +0200
++++ openssh-5.6p1/auth-krb5.c	2010-08-23 13:01:21.000000000 +0200
 @@ -146,9 +146,11 @@ auth_krb5_password(Authctxt *authctxt, c
  	if (problem)
  		goto out;
@@ -16,18 +16,18 @@ diff -up openssh-5.5p1/auth-krb5.c.kuserok openssh-5.5p1/auth-krb5.c
  	}
  
  	problem = ssh_krb5_cc_gen(authctxt->krb5_ctx, &authctxt->krb5_fwd_ccache);
-diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
---- openssh-5.5p1/servconf.c.kuserok	2010-07-07 13:12:02.000000000 +0200
-+++ openssh-5.5p1/servconf.c	2010-07-07 13:12:04.000000000 +0200
-@@ -137,6 +137,7 @@ initialize_server_options(ServerOptions 
- 	options->zero_knowledge_password_authentication = -1;
+diff -up openssh-5.6p1/servconf.c.kuserok openssh-5.6p1/servconf.c
+--- openssh-5.6p1/servconf.c.kuserok	2010-08-23 13:01:20.000000000 +0200
++++ openssh-5.6p1/servconf.c	2010-08-23 13:02:14.000000000 +0200
+@@ -138,6 +138,7 @@ initialize_server_options(ServerOptions 
  	options->revoked_keys_file = NULL;
  	options->trusted_user_ca_keys = NULL;
+ 	options->authorized_principals_file = NULL;
 +	options->use_kuserok = -1;
  }
  
  void
-@@ -285,6 +286,8 @@ fill_default_server_options(ServerOption
+@@ -286,6 +287,8 @@ fill_default_server_options(ServerOption
  	if (use_privsep == -1)
  		use_privsep = 1;
  
@@ -36,7 +36,7 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  #ifndef HAVE_MMAP
  	if (use_privsep && options->compression == 1) {
  		error("This platform does not support both privilege "
-@@ -306,7 +309,7 @@ typedef enum {
+@@ -307,7 +310,7 @@ typedef enum {
  	sPermitRootLogin, sLogFacility, sLogLevel,
  	sRhostsRSAAuthentication, sRSAAuthentication,
  	sKerberosAuthentication, sKerberosOrLocalPasswd, sKerberosTicketCleanup,
@@ -45,7 +45,7 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  	sKerberosTgtPassing, sChallengeResponseAuthentication,
  	sPasswordAuthentication, sKbdInteractiveAuthentication,
  	sListenAddress, sAddressFamily,
-@@ -376,11 +379,13 @@ static struct {
+@@ -377,11 +380,13 @@ static struct {
  #else
  	{ "kerberosgetafstoken", sUnsupported, SSHCFG_GLOBAL },
  #endif
@@ -59,7 +59,7 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  #endif
  	{ "kerberostgtpassing", sUnsupported, SSHCFG_GLOBAL },
  	{ "afstokenpassing", sUnsupported, SSHCFG_GLOBAL },
-@@ -1335,6 +1340,10 @@ process_server_config_line(ServerOptions
+@@ -1341,6 +1346,10 @@ process_server_config_line(ServerOptions
  		*activep = value;
  		break;
  
@@ -70,7 +70,7 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  	case sPermitOpen:
  		arg = strdelim(&cp);
  		if (!arg || *arg == '\0')
-@@ -1517,6 +1526,7 @@ copy_set_server_options(ServerOptions *d
+@@ -1525,6 +1534,7 @@ copy_set_server_options(ServerOptions *d
  	M_CP_INTOPT(x11_use_localhost);
  	M_CP_INTOPT(max_sessions);
  	M_CP_INTOPT(max_authtries);
@@ -78,7 +78,7 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  
  	M_CP_STROPT(banner);
  	if (preauth)
-@@ -1734,6 +1744,7 @@ dump_config(ServerOptions *o)
+@@ -1745,6 +1755,7 @@ dump_config(ServerOptions *o)
  	dump_cfg_fmtint(sUseDNS, o->use_dns);
  	dump_cfg_fmtint(sAllowTcpForwarding, o->allow_tcp_forwarding);
  	dump_cfg_fmtint(sUsePrivilegeSeparation, use_privsep);
@@ -86,9 +86,9 @@ diff -up openssh-5.5p1/servconf.c.kuserok openssh-5.5p1/servconf.c
  
  	/* string arguments */
  	dump_cfg_string(sPidFile, o->pid_file);
-diff -up openssh-5.5p1/servconf.h.kuserok openssh-5.5p1/servconf.h
---- openssh-5.5p1/servconf.h.kuserok	2010-07-07 13:12:02.000000000 +0200
-+++ openssh-5.5p1/servconf.h	2010-07-07 13:12:04.000000000 +0200
+diff -up openssh-5.6p1/servconf.h.kuserok openssh-5.6p1/servconf.h
+--- openssh-5.6p1/servconf.h.kuserok	2010-08-23 13:01:20.000000000 +0200
++++ openssh-5.6p1/servconf.h	2010-08-23 13:01:21.000000000 +0200
 @@ -157,6 +157,7 @@ typedef struct {
  
  	int	num_permitted_opens;
@@ -97,10 +97,10 @@ diff -up openssh-5.5p1/servconf.h.kuserok openssh-5.5p1/servconf.h
  	char   *chroot_directory;
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
-diff -up openssh-5.5p1/sshd_config.5.kuserok openssh-5.5p1/sshd_config.5
---- openssh-5.5p1/sshd_config.5.kuserok	2010-07-07 13:12:03.000000000 +0200
-+++ openssh-5.5p1/sshd_config.5	2010-07-07 13:21:02.000000000 +0200
-@@ -519,6 +519,10 @@ Specifies whether to automatically destr
+diff -up openssh-5.6p1/sshd_config.5.kuserok openssh-5.6p1/sshd_config.5
+--- openssh-5.6p1/sshd_config.5.kuserok	2010-08-23 13:01:21.000000000 +0200
++++ openssh-5.6p1/sshd_config.5	2010-08-23 13:03:15.000000000 +0200
+@@ -564,6 +564,10 @@ Specifies whether to automatically destr
  file on logout.
  The default is
  .Dq yes .
@@ -111,17 +111,17 @@ diff -up openssh-5.5p1/sshd_config.5.kuserok openssh-5.5p1/sshd_config.5
  .It Cm KeyRegenerationInterval
  In protocol version 1, the ephemeral server key is automatically regenerated
  after this many seconds (if it has been used).
-@@ -644,6 +648,7 @@ Available keywords are
- .Cm HostbasedAuthentication ,
+@@ -694,6 +698,7 @@ Available keywords are
+ .Cm HostbasedUsesNameFromPacketOnly ,
  .Cm KbdInteractiveAuthentication ,
  .Cm KerberosAuthentication ,
 +.Cm KerberosUseKuserok ,
  .Cm MaxAuthTries ,
  .Cm MaxSessions ,
  .Cm PubkeyAuthentication ,
-diff -up openssh-5.5p1/sshd_config.kuserok openssh-5.5p1/sshd_config
---- openssh-5.5p1/sshd_config.kuserok	2010-07-07 13:12:03.000000000 +0200
-+++ openssh-5.5p1/sshd_config	2010-07-07 13:12:04.000000000 +0200
+diff -up openssh-5.6p1/sshd_config.kuserok openssh-5.6p1/sshd_config
+--- openssh-5.6p1/sshd_config.kuserok	2010-08-23 13:01:21.000000000 +0200
++++ openssh-5.6p1/sshd_config	2010-08-23 13:01:21.000000000 +0200
 @@ -72,6 +72,7 @@ ChallengeResponseAuthentication no
  #KerberosOrLocalPasswd yes
  #KerberosTicketCleanup yes

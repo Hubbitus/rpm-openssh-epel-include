@@ -73,7 +73,7 @@
 %define openssh_ver 5.6p1
 %define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 26
+%define pam_ssh_agent_rel 27
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -94,44 +94,38 @@ Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/p
 Source5: pam_ssh_agent-rmheaders
 
 Patch0: openssh-5.4p1-redhat.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1638
-Patch2: openssh-5.3p1-skip-initial.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641
 Patch12: openssh-5.4p1-selinux.patch
-Patch13: openssh-5.5p1-mls.patch
+Patch13: openssh-5.6p1-mls.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch20: openssh-5.5p1-authorized-keys-command.patch
-Patch21: openssh-5.5p1-ldap.patch
+Patch20: openssh-5.6p1-authorized-keys-command.patch
+Patch21: openssh-5.6p1-ldap.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
-Patch23: openssh-5.5p1-keygen.patch
+Patch23: openssh-5.6p1-keygen.patch
 Patch24: openssh-4.3p1-fromto-remote.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1636
 Patch27: openssh-5.1p1-log-in-chroot.patch
-Patch30: openssh-4.0p1-exit-deadlock.patch
+Patch30: openssh-5.6p1-exit-deadlock.patch
 Patch35: openssh-5.1p1-askpass-progress.patch
 Patch38: openssh-4.3p2-askpass-grab-info.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch44: openssh-5.2p1-allow-ip-opts.patch
 Patch49: openssh-4.3p2-gssapi-canohost.patch
 Patch62: openssh-5.1p1-scp-manpage.patch
-Patch65: openssh-5.5p1-fips.patch
+Patch65: openssh-5.6p1-fips.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1614
-Patch69: openssh-5.3p1-selabel.patch
+Patch69: openssh-5.6p1-selabel.patch
 Patch71: openssh-5.2p1-edns.patch
-Patch73: openssh-5.5p1-gsskex.patch
+Patch73: openssh-5.6p1-gsskex.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
 Patch74: openssh-5.3p1-randclean.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1740
-Patch76: openssh-5.5p1-staterr.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1750
-Patch77: openssh-5.5p1-stderr.patch
-Patch78: openssh-5.5p1-kuserok.patch
+Patch78: openssh-5.6p1-kuserok.patch
 Patch79: openssh-5.5p1-x11.patch
 
 License: BSD
@@ -268,7 +262,6 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 %patch0 -p1 -b .redhat
-%patch2 -p1 -b .skip-initial
 %patch4 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
@@ -303,8 +296,6 @@ popd
 %patch71 -p1 -b .edns
 %patch73 -p1 -b .gsskex
 %patch74 -p1 -b .randclean
-%patch76 -p1 -b .staterr
-%patch77 -p1 -b .stderr
 %patch78 -p1 -b .kuserok
 %patch79 -p1 -b .x11
 

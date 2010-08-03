@@ -1,6 +1,6 @@
-diff -up openssh-5.5p1/ssh-keygen.0.keygen openssh-5.5p1/ssh-keygen.0
---- openssh-5.5p1/ssh-keygen.0.keygen	2010-04-16 02:17:11.000000000 +0200
-+++ openssh-5.5p1/ssh-keygen.0	2010-05-04 08:19:22.000000000 +0200
+diff -up openssh-5.6p1/ssh-keygen.0.keygen openssh-5.6p1/ssh-keygen.0
+--- openssh-5.6p1/ssh-keygen.0.keygen	2010-08-22 16:30:03.000000000 +0200
++++ openssh-5.6p1/ssh-keygen.0	2010-08-23 12:37:19.000000000 +0200
 @@ -4,7 +4,7 @@ NAME
       ssh-keygen - authentication key generation, management and conversion
  
@@ -9,8 +9,8 @@ diff -up openssh-5.5p1/ssh-keygen.0.keygen openssh-5.5p1/ssh-keygen.0
 +     ssh-keygen [-q] [-o] [-b bits] -t type [-N new_passphrase] [-C comment]
                  [-f output_keyfile]
       ssh-keygen -p [-P old_passphrase] [-N new_passphrase] [-f keyfile]
-      ssh-keygen -i [-f input_keyfile]
-@@ -222,6 +222,8 @@ DESCRIPTION
+      ssh-keygen -i [-m key_format] [-f input_keyfile]
+@@ -232,6 +232,8 @@ DESCRIPTION
  
       -q      Silence ssh-keygen.  Used by /etc/rc when creating a new key.
  
@@ -19,18 +19,18 @@ diff -up openssh-5.5p1/ssh-keygen.0.keygen openssh-5.5p1/ssh-keygen.0
       -R hostname
               Removes all keys belonging to hostname from a known_hosts file.
               This option is useful to delete hashed hosts (see the -H option
-diff -up openssh-5.5p1/ssh-keygen.1.keygen openssh-5.5p1/ssh-keygen.1
---- openssh-5.5p1/ssh-keygen.1.keygen	2010-03-21 19:57:49.000000000 +0100
-+++ openssh-5.5p1/ssh-keygen.1	2010-05-04 08:19:22.000000000 +0200
+diff -up openssh-5.6p1/ssh-keygen.1.keygen openssh-5.6p1/ssh-keygen.1
+--- openssh-5.6p1/ssh-keygen.1.keygen	2010-08-05 05:05:32.000000000 +0200
++++ openssh-5.6p1/ssh-keygen.1	2010-08-23 12:36:25.000000000 +0200
 @@ -47,6 +47,7 @@
- .Nm ssh-keygen
  .Bk -words
+ .Nm ssh-keygen
  .Op Fl q
 +.Op Fl o
  .Op Fl b Ar bits
  .Fl t Ar type
  .Op Fl N Ar new_passphrase
-@@ -370,6 +371,8 @@ Silence
+@@ -397,6 +398,8 @@ Silence
  Used by
  .Pa /etc/rc
  when creating a new key.
@@ -39,9 +39,9 @@ diff -up openssh-5.5p1/ssh-keygen.1.keygen openssh-5.5p1/ssh-keygen.1
  .It Fl R Ar hostname
  Removes all keys belonging to
  .Ar hostname
-diff -up openssh-5.5p1/ssh-keygen.c.keygen openssh-5.5p1/ssh-keygen.c
---- openssh-5.5p1/ssh-keygen.c.keygen	2010-03-21 19:58:24.000000000 +0100
-+++ openssh-5.5p1/ssh-keygen.c	2010-05-04 08:22:22.000000000 +0200
+diff -up openssh-5.6p1/ssh-keygen.c.keygen openssh-5.6p1/ssh-keygen.c
+--- openssh-5.6p1/ssh-keygen.c.keygen	2010-08-05 05:05:32.000000000 +0200
++++ openssh-5.6p1/ssh-keygen.c	2010-08-23 12:34:40.000000000 +0200
 @@ -72,6 +72,7 @@ int change_passphrase = 0;
  int change_comment = 0;
  
@@ -50,16 +50,16 @@ diff -up openssh-5.5p1/ssh-keygen.c.keygen openssh-5.5p1/ssh-keygen.c
  
  int log_level = SYSLOG_LEVEL_INFO;
  
-@@ -1540,7 +1541,7 @@ main(int argc, char **argv)
+@@ -1798,7 +1799,7 @@ main(int argc, char **argv)
  		exit(1);
  	}
  
--	while ((opt = getopt(argc, argv, "degiqpclBHLhvxXyF:b:f:t:D:I:P:N:n:"
-+	while ((opt = getopt(argc, argv, "degiqopclBHLhvxXyF:b:f:t:D:I:P:N:n:"
- 	    "O:C:r:g:R:T:G:M:S:s:a:V:W:")) != -1) {
+-	while ((opt = getopt(argc, argv, "degiqpclBHLhvxXyF:b:f:t:D:I:P:m:N:n:"
++	while ((opt = getopt(argc, argv, "degiqopclBHLhvxXyF:b:f:t:D:I:P:m:N:n:"
+ 	    "O:C:r:g:R:T:G:M:S:s:a:V:W:z:")) != -1) {
  		switch (opt) {
  		case 'b':
-@@ -1605,6 +1606,9 @@ main(int argc, char **argv)
+@@ -1878,6 +1879,9 @@ main(int argc, char **argv)
  		case 'q':
  			quiet = 1;
  			break;
@@ -69,8 +69,8 @@ diff -up openssh-5.5p1/ssh-keygen.c.keygen openssh-5.5p1/ssh-keygen.c
  		case 'e':
  		case 'x':
  			/* export key */
-@@ -1835,7 +1839,7 @@ main(int argc, char **argv)
- 			printf("Created directory '%s'.\n", dotsshdir);
+@@ -2124,7 +2128,7 @@ main(int argc, char **argv)
+ 		}
  	}
  	/* If the file already exists, ask the user to confirm. */
 -	if (stat(identity_file, &st) >= 0) {
