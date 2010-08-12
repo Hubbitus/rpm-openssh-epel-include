@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -93,7 +93,7 @@ Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
 
-Patch0: openssh-5.4p1-redhat.patch
+Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
@@ -317,7 +317,7 @@ CFLAGS="$CFLAGS -fpic"
 %endif
 export CFLAGS
 SAVE_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -pie"; export LDFLAGS
+LDFLAGS="$LDFLAGS -pie -z relro -z now"; export LDFLAGS
 %endif
 %if %{kerberos5}
 if test -r /etc/profile.d/krb5-devel.sh ; then
@@ -579,6 +579,10 @@ fi
 %endif
 
 %changelog
+* Fri Sep  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-1 + 0.9.2-27
+- Rebased to openssh5.6p1
+- Added -z relro -z now to LDFLAGS
+
 * Wed Jul  7 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-18 + 0.9.2-26
 - merged with newer bugzilla's version of authorized keys command patch
 

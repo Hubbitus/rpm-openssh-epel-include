@@ -1,6 +1,6 @@
-diff -up openssh-5.4p1/ssh_config.redhat openssh-5.4p1/ssh_config
---- openssh-5.4p1/ssh_config.redhat	2010-01-12 09:40:27.000000000 +0100
-+++ openssh-5.4p1/ssh_config	2010-03-01 15:15:51.000000000 +0100
+diff -up openssh-5.6p1/ssh_config.redhat openssh-5.6p1/ssh_config
+--- openssh-5.6p1/ssh_config.redhat	2010-01-12 09:40:27.000000000 +0100
++++ openssh-5.6p1/ssh_config	2010-09-03 15:21:17.000000000 +0200
 @@ -45,3 +45,14 @@
  #   PermitLocalCommand no
  #   VisualHostKey no
@@ -16,26 +16,26 @@ diff -up openssh-5.4p1/ssh_config.redhat openssh-5.4p1/ssh_config
 +	SendEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT 
 +	SendEnv LC_IDENTIFICATION LC_ALL LANGUAGE
 +	SendEnv XMODIFIERS
-diff -up openssh-5.4p1/sshd_config.0.redhat openssh-5.4p1/sshd_config.0
---- openssh-5.4p1/sshd_config.0.redhat	2010-03-01 14:30:04.000000000 +0100
-+++ openssh-5.4p1/sshd_config.0	2010-03-01 15:14:13.000000000 +0100
-@@ -501,9 +501,9 @@ DESCRIPTION
+diff -up openssh-5.6p1/sshd_config.0.redhat openssh-5.6p1/sshd_config.0
+--- openssh-5.6p1/sshd_config.0.redhat	2010-08-23 05:24:16.000000000 +0200
++++ openssh-5.6p1/sshd_config.0	2010-09-03 15:23:20.000000000 +0200
+@@ -537,9 +537,9 @@ DESCRIPTION
  
       SyslogFacility
               Gives the facility code that is used when logging messages from
 -             sshd(8).  The possible values are: DAEMON, USER, AUTH, LOCAL0,
--             LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.  The de-
--             fault is AUTH.
+-             LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.  The
+-             default is AUTH.
 +             sshd(8).  The possible values are: DAEMON, USER, AUTH, AUTHPRIV,
 +             LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
 +             The default is AUTH.
  
       TCPKeepAlive
               Specifies whether the system should send TCP keepalive messages
-diff -up openssh-5.4p1/sshd_config.5.redhat openssh-5.4p1/sshd_config.5
---- openssh-5.4p1/sshd_config.5.redhat	2010-02-26 21:55:06.000000000 +0100
-+++ openssh-5.4p1/sshd_config.5	2010-03-01 15:14:14.000000000 +0100
-@@ -865,7 +865,7 @@ Note that this option applies to protoco
+diff -up openssh-5.6p1/sshd_config.5.redhat openssh-5.6p1/sshd_config.5
+--- openssh-5.6p1/sshd_config.5.redhat	2010-07-02 05:37:17.000000000 +0200
++++ openssh-5.6p1/sshd_config.5	2010-09-03 15:21:17.000000000 +0200
+@@ -919,7 +919,7 @@ Note that this option applies to protoco
  .It Cm SyslogFacility
  Gives the facility code that is used when logging messages from
  .Xr sshd 8 .
@@ -44,9 +44,9 @@ diff -up openssh-5.4p1/sshd_config.5.redhat openssh-5.4p1/sshd_config.5
  LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7.
  The default is AUTH.
  .It Cm TCPKeepAlive
-diff -up openssh-5.4p1/sshd_config.redhat openssh-5.4p1/sshd_config
---- openssh-5.4p1/sshd_config.redhat	2009-10-11 12:51:09.000000000 +0200
-+++ openssh-5.4p1/sshd_config	2010-03-01 15:14:14.000000000 +0100
+diff -up openssh-5.6p1/sshd_config.redhat openssh-5.6p1/sshd_config
+--- openssh-5.6p1/sshd_config.redhat	2009-10-11 12:51:09.000000000 +0200
++++ openssh-5.6p1/sshd_config	2010-09-03 15:21:17.000000000 +0200
 @@ -31,6 +31,7 @@
  # Logging
  # obsoletes QuietMode and FascistLogging
