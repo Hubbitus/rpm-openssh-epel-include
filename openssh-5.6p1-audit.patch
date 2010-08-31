@@ -1,6 +1,6 @@
 diff -up openssh-5.6p1/audit-bsm.c.audit openssh-5.6p1/audit-bsm.c
 --- openssh-5.6p1/audit-bsm.c.audit	2008-02-25 11:05:04.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/audit-bsm.c	2010-10-01 08:48:17.000000000 +0200
 @@ -305,13 +305,13 @@ audit_run_command(const char *command)
  }
  
@@ -19,7 +19,7 @@ diff -up openssh-5.6p1/audit-bsm.c.audit openssh-5.6p1/audit-bsm.c
  }
 diff -up openssh-5.6p1/audit.c.audit openssh-5.6p1/audit.c
 --- openssh-5.6p1/audit.c.audit	2006-09-01 07:38:36.000000000 +0200
-+++ openssh-5.6p1/audit.c	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/audit.c	2010-10-01 08:48:17.000000000 +0200
 @@ -147,9 +147,9 @@ audit_event(ssh_audit_event_t event)
   * within a single connection.
   */
@@ -46,7 +46,7 @@ diff -up openssh-5.6p1/audit.c.audit openssh-5.6p1/audit.c
  	    audit_username(), t);
 diff -up openssh-5.6p1/audit.h.audit openssh-5.6p1/audit.h
 --- openssh-5.6p1/audit.h.audit	2006-08-05 16:05:10.000000000 +0200
-+++ openssh-5.6p1/audit.h	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/audit.h	2010-10-01 08:48:17.000000000 +0200
 @@ -26,6 +26,9 @@
  
  #ifndef _SSH_AUDIT_H
@@ -69,9 +69,9 @@ diff -up openssh-5.6p1/audit.h.audit openssh-5.6p1/audit.h
  ssh_audit_event_t audit_classify_auth(const char *);
  
 diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit	2010-09-25 16:07:42.000000000 +0200
-+++ openssh-5.6p1/audit-linux.c	2010-09-25 16:08:37.000000000 +0200
-@@ -0,0 +1,128 @@
+--- openssh-5.6p1/audit-linux.c.audit	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/audit-linux.c	2010-10-01 08:53:11.000000000 +0200
+@@ -0,0 +1,122 @@
 +/* $Id: audit-linux.c,v 1.1 jfch Exp $ */
 +
 +/*
@@ -110,6 +110,9 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +
 +#include "log.h"
 +#include "audit.h"
++#include "canohost.h"
++
++const char* audit_username(void);
 +
 +int
 +linux_audit_record_event(int uid, const char *username,
@@ -152,7 +155,6 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +void
 +audit_session_open(struct logininfo *li)
 +{
-+	debug("audit session open euid %d", geteuid());
 +	if (linux_audit_record_event(li->uid, NULL, li->hostname,
 +		NULL, li->line, 1) == 0)
 +	fatal("linux_audit_write_entry failed: %s", strerror(errno));
@@ -168,20 +170,12 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +audit_event(ssh_audit_event_t event)
 +{
 +	switch(event) {
-+//	case SSH_AUTH_SUCCESS:
-+//		break;
-+//
-+//	case SSH_CONNECTION_CLOSE:
-+//		break;
-+//
-+//	case SSH_NOLOGIN:
-+//		break;
-+//
-+//	case SSH_LOGIN_EXCEED_MAXTRIES:
-+//		break;
-+//
-+//	case SSH_LOGIN_ROOT_DENIED:
-+//		break;
++	case SSH_AUTH_SUCCESS:
++	case SSH_CONNECTION_CLOSE:
++	case SSH_NOLOGIN:
++	case SSH_LOGIN_EXCEED_MAXTRIES:
++	case SSH_LOGIN_ROOT_DENIED:
++		break;
 +
 +	case SSH_AUTH_FAIL_NONE:
 +	case SSH_AUTH_FAIL_PASSWD:
@@ -202,7 +196,7 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +#endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.6p1/configure.ac.audit openssh-5.6p1/configure.ac
 --- openssh-5.6p1/configure.ac.audit	2010-08-16 05:15:23.000000000 +0200
-+++ openssh-5.6p1/configure.ac	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/configure.ac	2010-10-01 08:48:17.000000000 +0200
 @@ -1308,7 +1308,7 @@ int main(void)
  
  AUDIT_MODULE=none
@@ -234,7 +228,7 @@ diff -up openssh-5.6p1/configure.ac.audit openssh-5.6p1/configure.ac
  		AC_MSG_RESULT(no)
 diff -up openssh-5.6p1/defines.h.audit openssh-5.6p1/defines.h
 --- openssh-5.6p1/defines.h.audit	2010-04-09 10:13:27.000000000 +0200
-+++ openssh-5.6p1/defines.h	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/defines.h	2010-10-01 08:48:17.000000000 +0200
 @@ -566,6 +566,11 @@ struct winsize {
  # define CUSTOM_SSH_AUDIT_EVENTS
  #endif
@@ -249,7 +243,7 @@ diff -up openssh-5.6p1/defines.h.audit openssh-5.6p1/defines.h
  #elif !defined(HAVE___func__)
 diff -up openssh-5.6p1/loginrec.c.audit openssh-5.6p1/loginrec.c
 --- openssh-5.6p1/loginrec.c.audit	2010-04-09 10:13:27.000000000 +0200
-+++ openssh-5.6p1/loginrec.c	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/loginrec.c	2010-10-01 08:48:17.000000000 +0200
 @@ -468,9 +468,9 @@ login_write(struct logininfo *li)
  #endif
  #ifdef SSH_AUDIT_EVENTS
@@ -264,7 +258,7 @@ diff -up openssh-5.6p1/loginrec.c.audit openssh-5.6p1/loginrec.c
  }
 diff -up openssh-5.6p1/Makefile.in.audit openssh-5.6p1/Makefile.in
 --- openssh-5.6p1/Makefile.in.audit	2010-05-12 08:51:39.000000000 +0200
-+++ openssh-5.6p1/Makefile.in	2010-09-25 16:07:42.000000000 +0200
++++ openssh-5.6p1/Makefile.in	2010-10-01 08:48:17.000000000 +0200
 @@ -90,7 +90,7 @@ SSHDOBJS=sshd.o auth-rhosts.o auth-passw
  	auth-krb5.o \
  	auth2-gss.o gss-serv.o gss-serv-krb5.o \

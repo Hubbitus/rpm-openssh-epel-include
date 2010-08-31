@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -102,8 +102,6 @@ Patch10: pam_ssh_agent_auth-0.9-build.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641
 Patch12: openssh-5.4p1-selinux.patch
 Patch13: openssh-5.6p1-mls.patch
-####https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-###Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch20: openssh-5.6p1-authorized-keys-command.patch
@@ -587,6 +585,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct  1 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-10 + 0.9.2-27
+- add missing headers to linux audit
+
 * Wed Sep 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-9 + 0.9.2-27
 - audit module now uses openssh audit framevork
 
