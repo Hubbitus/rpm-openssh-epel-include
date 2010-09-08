@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -157,7 +157,7 @@ BuildRequires: audit-libs-devel
 BuildRequires: util-linux, groff
 BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
-BuildRequires: fipscheck-devel
+BuildRequires: fipscheck-devel >= 1.3.0
 BuildRequires: openssl-devel >= 0.9.8j
 
 %if %{kerberos5}
@@ -183,8 +183,9 @@ BuildRequires: xauth
 
 %package clients
 Summary: An open source SSH client applications
-Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
+Requires: openssh = %{version}-%{release}
+Requires: fipscheck-lib%{_isa} >= 1.3.0
 
 %package server
 Summary: An open source SSH server daemon
@@ -193,6 +194,7 @@ Requires: openssh = %{version}-%{release}
 Requires(post): chkconfig >= 0.9, /sbin/service
 Requires(pre): /usr/sbin/useradd
 Requires: pam >= 1.0.1-3
+Requires: fipscheck-lib%{_isa} >= 1.3.0
 
 %if %{ldap}
 %package ldap
@@ -415,8 +417,7 @@ popd
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    fipshmac $RPM_BUILD_ROOT%{_bindir}/ssh \
-    fipshmac $RPM_BUILD_ROOT%{_sbindir}/sshd \
+    fipshmac -d $RPM_BUILD_ROOT%{_libdir}/fipscheck $RPM_BUILD_ROOT%{_bindir}/ssh $RPM_BUILD_ROOT%{_sbindir}/sshd \
 %{nil}
 
 %install
@@ -430,6 +431,7 @@ rm -f $RPM_BUILD_ROOT%{_sysconfdir}/ssh/ldap.conf
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
+install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
@@ -514,7 +516,7 @@ fi
 %files clients
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
-%attr(0644,root,root) %{_bindir}/.ssh.hmac
+%attr(0644,root,root) %{_libdir}/fipscheck/ssh.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
@@ -542,7 +544,7 @@ fi
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
-%attr(0644,root,root) %{_sbindir}/.sshd.hmac
+%attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man5/moduli.5*
@@ -579,6 +581,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep  8 2010 Tomas Mraz <tmraz@redhat.com> - 5.6p1-3 + 0.9.2-27
+- Make fipscheck hmacs compliant with FHS - requires new fipscheck
+
 * Fri Sep  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-2 + 0.9.2-27
 - Added -z relro -z now to LDFLAGS
 
