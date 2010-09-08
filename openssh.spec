@@ -579,9 +579,11 @@ fi
 %endif
 
 %changelog
+* Fri Sep  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-2 + 0.9.2-27
+- Added -z relro -z now to LDFLAGS
+
 * Fri Sep  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-1 + 0.9.2-27
 - Rebased to openssh5.6p1
-- Added -z relro -z now to LDFLAGS
 
 * Wed Jul  7 2010 Jan F. Chadima <jchadima@redhat.com> - 5.5p1-18 + 0.9.2-26
 - merged with newer bugzilla's version of authorized keys command patch
