@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -581,6 +581,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-4 + 0.9.2-27
+- Tweaking selabel batch to work properly without selinux rules loaded. (#632914)
+
 * Wed Sep  8 2010 Tomas Mraz <tmraz@redhat.com> - 5.6p1-3 + 0.9.2-27
 - Make fipscheck hmacs compliant with FHS - requires new fipscheck
 
