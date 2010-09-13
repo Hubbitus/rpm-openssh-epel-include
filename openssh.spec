@@ -352,7 +352,7 @@ fi
 	--disable-strip \
 	--without-zlib-version-check \
 	--with-ssl-engine \
-	--with-pka \
+	--with-authorized-keys-command \
 %if %{nss}
 	--with-nss \
 %endif
