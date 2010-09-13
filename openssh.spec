@@ -127,6 +127,7 @@ Patch73: openssh-5.6p1-gsskex.patch
 Patch74: openssh-5.3p1-randclean.patch
 Patch78: openssh-5.6p1-kuserok.patch
 Patch79: openssh-5.5p1-x11.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1817
 Patch80: openssh-5.6p1-biguid.patch
 
 License: BSD
