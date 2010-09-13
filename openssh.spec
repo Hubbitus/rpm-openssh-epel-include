@@ -581,8 +581,11 @@ fi
 %endif
 
 %changelog
+* Mon Sep 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-5 + 0.9.2-27
+- Merging selabel patch with the upstream version. (#632914)
+
 * Mon Sep 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-4 + 0.9.2-27
-- Tweaking selabel batch to work properly without selinux rules loaded. (#632914)
+- Tweaking selabel patch to work properly without selinux rules loaded. (#632914)
 
 * Wed Sep  8 2010 Tomas Mraz <tmraz@redhat.com> - 5.6p1-3 + 0.9.2-27
 - Make fipscheck hmacs compliant with FHS - requires new fipscheck
