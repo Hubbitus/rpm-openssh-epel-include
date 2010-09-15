@@ -125,6 +125,7 @@ Patch71: openssh-5.2p1-edns.patch
 Patch73: openssh-5.6p1-gsskex.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
 Patch74: openssh-5.3p1-randclean.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch78: openssh-5.6p1-kuserok.patch
 Patch79: openssh-5.5p1-x11.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1817
