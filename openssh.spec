@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -584,6 +584,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-7 + 0.9.2-27
+- Repaired the kuserok patch
+
 * Mon Sep 13 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-6 + 0.9.2-27
 - Repaired the problem with puting entries with very big uid into lastlog
 
