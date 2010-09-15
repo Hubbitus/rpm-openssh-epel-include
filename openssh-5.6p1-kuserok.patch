@@ -1,6 +1,6 @@
 diff -up openssh-5.6p1/auth-krb5.c.kuserok openssh-5.6p1/auth-krb5.c
---- openssh-5.6p1/auth-krb5.c.kuserok	2010-09-15 09:23:18.000000000 +0200
-+++ openssh-5.6p1/auth-krb5.c	2010-09-15 09:31:56.000000000 +0200
+--- openssh-5.6p1/auth-krb5.c.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/auth-krb5.c	2010-09-15 15:39:48.000000000 +0200
 @@ -146,9 +146,21 @@ auth_krb5_password(Authctxt *authctxt, c
  	if (problem)
  		goto out;
@@ -26,9 +26,45 @@ diff -up openssh-5.6p1/auth-krb5.c.kuserok openssh-5.6p1/auth-krb5.c
  	}
  
  	problem = ssh_krb5_cc_gen(authctxt->krb5_ctx, &authctxt->krb5_fwd_ccache);
+diff -up openssh-5.6p1/gss-serv-krb5.c.kuserok openssh-5.6p1/gss-serv-krb5.c
+--- openssh-5.6p1/gss-serv-krb5.c.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/gss-serv-krb5.c	2010-09-15 15:49:43.000000000 +0200
+@@ -97,13 +97,25 @@ ssh_gssapi_krb5_userok(ssh_gssapi_client
+ 		    krb5_get_err_text(krb_context, retval));
+ 		return 0;
+ 	}
+-	if (krb5_kuserok(krb_context, princ, name)) {
+-		retval = 1;
+-		logit("Authorized to %s, krb5 principal %s (krb5_kuserok)",
+-		    name, (char *)client->displayname.value);
+-	} else
+-		retval = 0;
+-
++	if (options.use_kuserok) {
++		if (krb5_kuserok(krb_context, princ, name)) {
++			retval = 1;
++			logit("Authorized to %s, krb5 principal %s (krb5_kuserok)",
++			    name, (char *)client->displayname.value);
++		} else
++			retval = 0;
++	} else {
++		char kuser[65];
++		if (krb5_aname_to_localname(krb_context, princ, sizeof(kuser), kuser))
++			retval = 0;
++		else if (strcmp(kuser, client))
++			retval = 0;
++		else {
++			retval = 1;
++			logit("Authorized to %s, krb5 principal %s (krb5)",
++			    name, (char *)client->displayname.value);
++		}
++	}
+ 	krb5_free_principal(krb_context, princ);
+ 	return retval;
+ }
 diff -up openssh-5.6p1/servconf.c.kuserok openssh-5.6p1/servconf.c
---- openssh-5.6p1/servconf.c.kuserok	2010-09-15 09:23:19.000000000 +0200
-+++ openssh-5.6p1/servconf.c	2010-09-15 09:23:19.000000000 +0200
+--- openssh-5.6p1/servconf.c.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/servconf.c	2010-09-15 15:39:48.000000000 +0200
 @@ -138,6 +138,7 @@ initialize_server_options(ServerOptions 
  	options->revoked_keys_file = NULL;
  	options->trusted_user_ca_keys = NULL;
@@ -97,8 +133,8 @@ diff -up openssh-5.6p1/servconf.c.kuserok openssh-5.6p1/servconf.c
  	/* string arguments */
  	dump_cfg_string(sPidFile, o->pid_file);
 diff -up openssh-5.6p1/servconf.h.kuserok openssh-5.6p1/servconf.h
---- openssh-5.6p1/servconf.h.kuserok	2010-09-15 09:23:19.000000000 +0200
-+++ openssh-5.6p1/servconf.h	2010-09-15 09:23:19.000000000 +0200
+--- openssh-5.6p1/servconf.h.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/servconf.h	2010-09-15 15:39:48.000000000 +0200
 @@ -157,6 +157,7 @@ typedef struct {
  
  	int	num_permitted_opens;
@@ -108,8 +144,8 @@ diff -up openssh-5.6p1/servconf.h.kuserok openssh-5.6p1/servconf.h
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
 diff -up openssh-5.6p1/sshd_config.5.kuserok openssh-5.6p1/sshd_config.5
---- openssh-5.6p1/sshd_config.5.kuserok	2010-09-15 09:23:19.000000000 +0200
-+++ openssh-5.6p1/sshd_config.5	2010-09-15 09:23:19.000000000 +0200
+--- openssh-5.6p1/sshd_config.5.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/sshd_config.5	2010-09-15 15:39:48.000000000 +0200
 @@ -564,6 +564,10 @@ Specifies whether to automatically destr
  file on logout.
  The default is
@@ -130,8 +166,8 @@ diff -up openssh-5.6p1/sshd_config.5.kuserok openssh-5.6p1/sshd_config.5
  .Cm MaxSessions ,
  .Cm PubkeyAuthentication ,
 diff -up openssh-5.6p1/sshd_config.kuserok openssh-5.6p1/sshd_config
---- openssh-5.6p1/sshd_config.kuserok	2010-09-15 09:23:19.000000000 +0200
-+++ openssh-5.6p1/sshd_config	2010-09-15 09:23:19.000000000 +0200
+--- openssh-5.6p1/sshd_config.kuserok	2010-09-15 15:39:48.000000000 +0200
++++ openssh-5.6p1/sshd_config	2010-09-15 15:39:48.000000000 +0200
 @@ -72,6 +72,7 @@ ChallengeResponseAuthentication no
  #KerberosOrLocalPasswd yes
  #KerberosTicketCleanup yes
