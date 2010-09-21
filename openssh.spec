@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 14
+%define openssh_rel 15
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -97,6 +97,7 @@ Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch1: openssh-5.6p1-audit.patch
 Patch2: openssh-5.6p1-audit2.patch
+Patch3: openssh-5.6p1-audit3.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
@@ -157,7 +158,7 @@ BuildRequires: sharutils
 BuildRequires: openldap-devel
 %endif
 BuildRequires: autoconf, automake, perl, zlib-devel
-BuildRequires: audit-libs-devel
+BuildRequires: audit-libs-devel >= 2.0.5
 BuildRequires: util-linux, groff
 BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
@@ -270,6 +271,7 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .audit
 %patch2 -p1 -b .audit2
+%patch3 -p1 -b .audit3
 %patch4 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
@@ -587,6 +589,9 @@ fi
 %endif
 
 %changelog
+* Wed Nov  3 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-15 + 0.9.2-27
+- add auditing the kex result
+
 * Fri Nov  2 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-14 + 0.9.2-27
 - add auditing the key ussage
 
