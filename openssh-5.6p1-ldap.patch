@@ -1,7 +1,7 @@
 diff -up openssh-5.6p1/configure.ac.ldap openssh-5.6p1/configure.ac
---- openssh-5.6p1/configure.ac.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/configure.ac	2010-08-23 12:28:11.000000000 +0200
-@@ -1358,6 +1358,106 @@ AC_ARG_WITH(authorized-keys-command,
+--- openssh-5.6p1/configure.ac.ldap	2010-09-25 12:07:39.000000000 +0200
++++ openssh-5.6p1/configure.ac	2010-09-25 12:07:39.000000000 +0200
+@@ -1366,6 +1366,106 @@ AC_ARG_WITH(authorized-keys-command,
  	]
  )
  
@@ -109,8 +109,8 @@ diff -up openssh-5.6p1/configure.ac.ldap openssh-5.6p1/configure.ac
  AC_CHECK_FUNCS( \
  	arc4random \
 diff -up openssh-5.6p1/ldapbody.c.ldap openssh-5.6p1/ldapbody.c
---- openssh-5.6p1/ldapbody.c.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapbody.c	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapbody.c.ldap	2010-09-25 12:07:39.000000000 +0200
++++ openssh-5.6p1/ldapbody.c	2010-09-25 12:07:39.000000000 +0200
 @@ -0,0 +1,494 @@
 +/* $OpenBSD: ldapbody.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -607,8 +607,8 @@ diff -up openssh-5.6p1/ldapbody.c.ldap openssh-5.6p1/ldapbody.c
 +}
 +
 diff -up openssh-5.6p1/ldapbody.h.ldap openssh-5.6p1/ldapbody.h
---- openssh-5.6p1/ldapbody.h.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapbody.h	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapbody.h.ldap	2010-09-25 12:07:39.000000000 +0200
++++ openssh-5.6p1/ldapbody.h	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,37 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -648,8 +648,8 @@ diff -up openssh-5.6p1/ldapbody.h.ldap openssh-5.6p1/ldapbody.h
 +#endif /* LDAPBODY_H */
 +
 diff -up openssh-5.6p1/ldapconf.c.ldap openssh-5.6p1/ldapconf.c
---- openssh-5.6p1/ldapconf.c.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapconf.c	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapconf.c.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldapconf.c	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,682 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1334,8 +1334,8 @@ diff -up openssh-5.6p1/ldapconf.c.ldap openssh-5.6p1/ldapconf.c
 +}
 +
 diff -up openssh-5.6p1/ldapconf.h.ldap openssh-5.6p1/ldapconf.h
---- openssh-5.6p1/ldapconf.h.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapconf.h	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapconf.h.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldapconf.h	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,71 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1409,8 +1409,8 @@ diff -up openssh-5.6p1/ldapconf.h.ldap openssh-5.6p1/ldapconf.h
 +
 +#endif /* LDAPCONF_H */
 diff -up openssh-5.6p1/ldap.conf.ldap openssh-5.6p1/ldap.conf
---- openssh-5.6p1/ldap.conf.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldap.conf	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldap.conf.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldap.conf	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,88 @@
 +# $Id: openssh-5.5p1-ldap.patch,v 1.3 2010/07/07 13:48:36 jfch2222 Exp $
 +#
@@ -1501,8 +1501,8 @@ diff -up openssh-5.6p1/ldap.conf.ldap openssh-5.6p1/ldap.conf
 +#tls_key
 +
 diff -up openssh-5.6p1/ldap-helper.c.ldap openssh-5.6p1/ldap-helper.c
---- openssh-5.6p1/ldap-helper.c.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldap-helper.c	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldap-helper.c.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldap-helper.c	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,154 @@
 +/* $OpenBSD: ssh-pka-ldap.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1659,8 +1659,8 @@ diff -up openssh-5.6p1/ldap-helper.c.ldap openssh-5.6p1/ldap-helper.c
 +void    buffer_put_string(Buffer *b, const void *f, u_int l) {}
 +
 diff -up openssh-5.6p1/ldap-helper.h.ldap openssh-5.6p1/ldap-helper.h
---- openssh-5.6p1/ldap-helper.h.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldap-helper.h	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldap-helper.h.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldap-helper.h	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,32 @@
 +/* $OpenBSD: ldap-helper.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1695,8 +1695,8 @@ diff -up openssh-5.6p1/ldap-helper.h.ldap openssh-5.6p1/ldap-helper.h
 +
 +#endif /* LDAP_HELPER_H */
 diff -up openssh-5.6p1/ldapincludes.h.ldap openssh-5.6p1/ldapincludes.h
---- openssh-5.6p1/ldapincludes.h.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapincludes.h	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapincludes.h.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldapincludes.h	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,41 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1740,8 +1740,8 @@ diff -up openssh-5.6p1/ldapincludes.h.ldap openssh-5.6p1/ldapincludes.h
 +
 +#endif /* LDAPINCLUDES_H */
 diff -up openssh-5.6p1/ldapmisc.c.ldap openssh-5.6p1/ldapmisc.c
---- openssh-5.6p1/ldapmisc.c.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapmisc.c	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapmisc.c.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldapmisc.c	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,79 @@
 +
 +#include "ldapincludes.h"
@@ -1823,8 +1823,8 @@ diff -up openssh-5.6p1/ldapmisc.c.ldap openssh-5.6p1/ldapmisc.c
 +#endif
 +
 diff -up openssh-5.6p1/ldapmisc.h.ldap openssh-5.6p1/ldapmisc.h
---- openssh-5.6p1/ldapmisc.h.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ldapmisc.h	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ldapmisc.h.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ldapmisc.h	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,35 @@
 +/* $OpenBSD: ldapbody.h,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
@@ -1862,8 +1862,8 @@ diff -up openssh-5.6p1/ldapmisc.h.ldap openssh-5.6p1/ldapmisc.h
 +#endif /* LDAPMISC_H */
 +
 diff -up openssh-5.6p1/lpk-user-example.txt.ldap openssh-5.6p1/lpk-user-example.txt
---- openssh-5.6p1/lpk-user-example.txt.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/lpk-user-example.txt	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/lpk-user-example.txt.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/lpk-user-example.txt	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,117 @@
 +
 +Post to ML -> User Made Quick Install Doc.
@@ -1983,8 +1983,8 @@ diff -up openssh-5.6p1/lpk-user-example.txt.ldap openssh-5.6p1/lpk-user-example.
 +
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 diff -up openssh-5.6p1/Makefile.in.ldap openssh-5.6p1/Makefile.in
---- openssh-5.6p1/Makefile.in.ldap	2010-05-12 08:51:39.000000000 +0200
-+++ openssh-5.6p1/Makefile.in	2010-08-23 12:29:24.000000000 +0200
+--- openssh-5.6p1/Makefile.in.ldap	2010-09-25 12:07:39.000000000 +0200
++++ openssh-5.6p1/Makefile.in	2010-09-25 12:09:46.000000000 +0200
 @@ -26,6 +26,7 @@ ASKPASS_PROGRAM=$(libexecdir)/ssh-askpas
  SFTP_SERVER=$(libexecdir)/sftp-server
  SSH_KEYSIGN=$(libexecdir)/ssh-keysign
@@ -2005,7 +2005,7 @@ diff -up openssh-5.6p1/Makefile.in.ldap openssh-5.6p1/Makefile.in
  LIBSSH_OBJS=acss.o authfd.o authfile.o bufaux.o bufbn.o buffer.o \
  	canohost.o channels.o cipher.o cipher-acss.o cipher-aes.o \
 @@ -93,8 +95,8 @@ SSHDOBJS=sshd.o auth-rhosts.o auth-passw
- 	audit.o audit-bsm.o platform.o sftp-server.o sftp-common.o \
+ 	audit.o audit-bsm.o audit-linux.o platform.o sftp-server.o sftp-common.o \
  	roaming_common.o roaming_serv.o
  
 -MANPAGES	= moduli.5.out scp.1.out ssh-add.1.out ssh-agent.1.out ssh-keygen.1.out ssh-keyscan.1.out ssh.1.out sshd.8.out sftp-server.8.out sftp.1.out ssh-rand-helper.8.out ssh-keysign.8.out ssh-pkcs11-helper.8.out sshd_config.5.out ssh_config.5.out
@@ -2069,8 +2069,8 @@ diff -up openssh-5.6p1/Makefile.in.ldap openssh-5.6p1/Makefile.in
  
  tests interop-tests:	$(TARGETS)
 diff -up openssh-5.6p1/openssh-lpk-openldap.schema.ldap openssh-5.6p1/openssh-lpk-openldap.schema
---- openssh-5.6p1/openssh-lpk-openldap.schema.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/openssh-lpk-openldap.schema	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/openssh-lpk-openldap.schema.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/openssh-lpk-openldap.schema	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,21 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2094,8 +2094,8 @@ diff -up openssh-5.6p1/openssh-lpk-openldap.schema.ldap openssh-5.6p1/openssh-lp
 +	MUST ( sshPublicKey $ uid ) 
 +	)
 diff -up openssh-5.6p1/openssh-lpk-sun.schema.ldap openssh-5.6p1/openssh-lpk-sun.schema
---- openssh-5.6p1/openssh-lpk-sun.schema.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/openssh-lpk-sun.schema	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/openssh-lpk-sun.schema.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/openssh-lpk-sun.schema	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,23 @@
 +#
 +# LDAP Public Key Patch schema for use with openssh-ldappubkey
@@ -2121,8 +2121,8 @@ diff -up openssh-5.6p1/openssh-lpk-sun.schema.ldap openssh-5.6p1/openssh-lpk-sun
 +	MUST ( sshPublicKey $ uid ) 
 +	)
 diff -up openssh-5.6p1/README.lpk.ldap openssh-5.6p1/README.lpk
---- openssh-5.6p1/README.lpk.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/README.lpk	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/README.lpk.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/README.lpk	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,274 @@
 +OpenSSH LDAP PUBLIC KEY PATCH 
 +Copyright (c) 2003 Eric AUGE (eau@phear.org)
@@ -2399,8 +2399,8 @@ diff -up openssh-5.6p1/README.lpk.ldap openssh-5.6p1/README.lpk
 +    Jan F. Chadima <jchadima@redhat.com>
 +
 diff -up openssh-5.6p1/ssh-ldap.conf.5.ldap openssh-5.6p1/ssh-ldap.conf.5
---- openssh-5.6p1/ssh-ldap.conf.5.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ssh-ldap.conf.5	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ssh-ldap.conf.5.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ssh-ldap.conf.5	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,373 @@
 +.\" $OpenBSD: ssh-ldap.conf.5,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"
@@ -2776,8 +2776,8 @@ diff -up openssh-5.6p1/ssh-ldap.conf.5.ldap openssh-5.6p1/ssh-ldap.conf.5
 +.Sh AUTHORS
 +.An Jan F. Chadima Aq jchadima@redhat.com
 diff -up openssh-5.6p1/ssh-ldap-helper.8.ldap openssh-5.6p1/ssh-ldap-helper.8
---- openssh-5.6p1/ssh-ldap-helper.8.ldap	2010-08-23 12:28:11.000000000 +0200
-+++ openssh-5.6p1/ssh-ldap-helper.8	2010-08-23 12:28:11.000000000 +0200
+--- openssh-5.6p1/ssh-ldap-helper.8.ldap	2010-09-25 12:07:40.000000000 +0200
++++ openssh-5.6p1/ssh-ldap-helper.8	2010-09-25 12:07:40.000000000 +0200
 @@ -0,0 +1,78 @@
 +.\" $OpenBSD: ssh-ldap-helper.8,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"

@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -94,14 +94,16 @@ Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/p
 Source5: pam_ssh_agent-rmheaders
 
 Patch0: openssh-5.6p1-redhat.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1402
+Patch1: openssh-5.6p1-audit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch4: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641
 Patch12: openssh-5.4p1-selinux.patch
 Patch13: openssh-5.6p1-mls.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch16: openssh-5.3p1-audit.patch
+####https://bugzilla.mindrot.org/show_bug.cgi?id=1402
+###Patch16: openssh-5.3p1-audit.patch
 Patch18: openssh-5.4p1-pam_selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch20: openssh-5.6p1-authorized-keys-command.patch
@@ -267,6 +269,7 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 %patch0 -p1 -b .redhat
+%patch1 -p1 -b .audit
 %patch4 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
@@ -281,7 +284,6 @@ popd
 #SELinux
 %patch12 -p1 -b .selinux
 %patch13 -p1 -b .mls
-%patch16 -p1 -b .audit
 %patch18 -p1 -b .pam_selinux
 %endif
 
@@ -369,7 +371,7 @@ fi
 	--with-pam \
 %endif
 %if %{WITH_SELINUX}
-	--with-selinux --with-linux-audit \
+	--with-selinux --with-audit=linux \
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
@@ -585,6 +587,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 29 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-9 + 0.9.2-27
+- audit module now uses openssh audit framevork
+
 * Wed Sep 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-8 + 0.9.2-27
 - Add the GSSAPI kuserok switch to the kuserok patch
 
