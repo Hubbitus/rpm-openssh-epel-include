@@ -71,9 +71,9 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 18
+%define openssh_rel 19
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 27
+%define pam_ssh_agent_rel 28
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -101,6 +101,7 @@ Patch3: openssh-5.6p1-audit3.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch5: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
+Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641
 Patch12: openssh-5.4p1-selinux.patch
 Patch13: openssh-5.6p1-mls.patch
@@ -277,6 +278,7 @@ The module is most useful for su and sudo service stacks.
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch10 -p1 -b .psaa-build
+%patch11 -p1 -b .psaa-seteuid
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
@@ -513,7 +515,7 @@ fi
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
-%attr(4755,root,root) %{_libexecdir}/openssh/ssh-keysign
+%attr(4111,root,root) %{_libexecdir}/openssh/ssh-keysign
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -533,7 +535,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
-%attr(2755,root,nobody) %{_bindir}/ssh-agent
+%attr(2111,root,nobody) %{_bindir}/ssh-agent
 %attr(0755,root,root) %{_bindir}/ssh-add
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
 %attr(0755,root,root) %{_bindir}/sftp
@@ -589,6 +591,10 @@ fi
 %endif
 
 %changelog
+* Mon Nov 22 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-19 + 0.9.2-28
+- striped read permissions from suid and sgid binaries
+- properly restore euid in case connect to the ssh-agent socket fails
+
 * Mon Nov 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-18 + 0.9.2-27
 - used upstream version of the biguid patch
 
