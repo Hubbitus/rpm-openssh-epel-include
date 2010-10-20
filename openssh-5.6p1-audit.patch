@@ -1,6 +1,6 @@
 diff -up openssh-5.6p1/audit-bsm.c.audit openssh-5.6p1/audit-bsm.c
 --- openssh-5.6p1/audit-bsm.c.audit	2008-02-25 11:05:04.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/audit-bsm.c	2010-10-20 09:15:47.000000000 +0200
 @@ -305,13 +305,13 @@ audit_run_command(const char *command)
  }
  
@@ -19,7 +19,7 @@ diff -up openssh-5.6p1/audit-bsm.c.audit openssh-5.6p1/audit-bsm.c
  }
 diff -up openssh-5.6p1/audit.c.audit openssh-5.6p1/audit.c
 --- openssh-5.6p1/audit.c.audit	2006-09-01 07:38:36.000000000 +0200
-+++ openssh-5.6p1/audit.c	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/audit.c	2010-10-20 09:15:47.000000000 +0200
 @@ -147,9 +147,9 @@ audit_event(ssh_audit_event_t event)
   * within a single connection.
   */
@@ -46,7 +46,7 @@ diff -up openssh-5.6p1/audit.c.audit openssh-5.6p1/audit.c
  	    audit_username(), t);
 diff -up openssh-5.6p1/audit.h.audit openssh-5.6p1/audit.h
 --- openssh-5.6p1/audit.h.audit	2006-08-05 16:05:10.000000000 +0200
-+++ openssh-5.6p1/audit.h	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/audit.h	2010-10-20 09:15:47.000000000 +0200
 @@ -26,6 +26,9 @@
  
  #ifndef _SSH_AUDIT_H
@@ -69,9 +69,9 @@ diff -up openssh-5.6p1/audit.h.audit openssh-5.6p1/audit.h
  ssh_audit_event_t audit_classify_auth(const char *);
  
 diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit	2010-10-01 08:48:17.000000000 +0200
-+++ openssh-5.6p1/audit-linux.c	2010-10-01 08:53:11.000000000 +0200
-@@ -0,0 +1,122 @@
+--- openssh-5.6p1/audit-linux.c.audit	2010-10-20 09:15:47.000000000 +0200
++++ openssh-5.6p1/audit-linux.c	2010-10-20 09:15:47.000000000 +0200
+@@ -0,0 +1,120 @@
 +/* $Id: audit-linux.c,v 1.1 jfch Exp $ */
 +
 +/*
@@ -100,7 +100,6 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 + *
 + * Red Hat author: Jan F. Chadima <jchadima@redhat.com>
 + */
-+/* #pragma ident	"@(#)audit-linux.c	1.1	01/09/17 SMI" */
 +
 +#include "includes.h"
 +#if defined(USE_LINUX_AUDIT)
@@ -116,26 +115,25 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +
 +int
 +linux_audit_record_event(int uid, const char *username,
-+	const char *hostname, const char *ip, const char *ttyn, int success)
++    const char *hostname, const char *ip, const char *ttyn, int success)
 +{
-+	int audit_fd, rc;
++	int audit_fd, rc, saved_errno;
 +
 +	audit_fd = audit_open();
 +	if (audit_fd < 0) {
 +		if (errno == EINVAL || errno == EPROTONOSUPPORT ||
-+				errno == EAFNOSUPPORT)
++		    errno == EAFNOSUPPORT)
 +			return 1; /* No audit support in kernel */
 +		else
-+                        return 0; /* Must prevent login */
++			return 0; /* Must prevent login */
 +	}
 +	rc = audit_log_acct_message(audit_fd, AUDIT_USER_LOGIN,
-+		NULL, "login", username ? username : "(unknown)",
-+		username == NULL ? uid : -1, hostname, ip, ttyn, success);
++	    NULL, "login", username ? username : "(unknown)",
++	    username == NULL ? uid : -1, hostname, ip, ttyn, success);
++	saved_errno = errno;
 +	close(audit_fd);
-+	if (rc >= 0)
-+		return 1;
-+	else
-+		return 0;
++	errno = saved_errno;
++	return (rc >= 0);
 +}
 +
 +/* Below is the sshd audit API code */
@@ -156,8 +154,8 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +audit_session_open(struct logininfo *li)
 +{
 +	if (linux_audit_record_event(li->uid, NULL, li->hostname,
-+		NULL, li->line, 1) == 0)
-+	fatal("linux_audit_write_entry failed: %s", strerror(errno));
++	    NULL, li->line, 1) == 0)
++		fatal("linux_audit_write_entry failed: %s", strerror(errno));
 +}
 +
 +void
@@ -196,13 +194,13 @@ diff -up openssh-5.6p1/audit-linux.c.audit openssh-5.6p1/audit-linux.c
 +#endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.6p1/configure.ac.audit openssh-5.6p1/configure.ac
 --- openssh-5.6p1/configure.ac.audit	2010-08-16 05:15:23.000000000 +0200
-+++ openssh-5.6p1/configure.ac	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/configure.ac	2010-10-20 09:15:47.000000000 +0200
 @@ -1308,7 +1308,7 @@ int main(void)
  
  AUDIT_MODULE=none
  AC_ARG_WITH(audit,
 -	[  --with-audit=module     Enable EXPERIMENTAL audit support (modules=debug,bsm)],
-+	[  --with-audit=module     Enable EXPERIMENTAL audit support (modules=debug,bsm,linux)],
++	[  --with-audit=module     Enable audit support (modules=debug,bsm,linux)],
  	[
  	  AC_MSG_CHECKING(for supported audit module)
  	  case "$withval" in
@@ -228,7 +226,7 @@ diff -up openssh-5.6p1/configure.ac.audit openssh-5.6p1/configure.ac
  		AC_MSG_RESULT(no)
 diff -up openssh-5.6p1/defines.h.audit openssh-5.6p1/defines.h
 --- openssh-5.6p1/defines.h.audit	2010-04-09 10:13:27.000000000 +0200
-+++ openssh-5.6p1/defines.h	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/defines.h	2010-10-20 09:15:47.000000000 +0200
 @@ -566,6 +566,11 @@ struct winsize {
  # define CUSTOM_SSH_AUDIT_EVENTS
  #endif
@@ -243,7 +241,7 @@ diff -up openssh-5.6p1/defines.h.audit openssh-5.6p1/defines.h
  #elif !defined(HAVE___func__)
 diff -up openssh-5.6p1/loginrec.c.audit openssh-5.6p1/loginrec.c
 --- openssh-5.6p1/loginrec.c.audit	2010-04-09 10:13:27.000000000 +0200
-+++ openssh-5.6p1/loginrec.c	2010-10-01 08:48:17.000000000 +0200
++++ openssh-5.6p1/loginrec.c	2010-10-20 09:15:47.000000000 +0200
 @@ -468,9 +468,9 @@ login_write(struct logininfo *li)
  #endif
  #ifdef SSH_AUDIT_EVENTS
@@ -258,13 +256,21 @@ diff -up openssh-5.6p1/loginrec.c.audit openssh-5.6p1/loginrec.c
  }
 diff -up openssh-5.6p1/Makefile.in.audit openssh-5.6p1/Makefile.in
 --- openssh-5.6p1/Makefile.in.audit	2010-05-12 08:51:39.000000000 +0200
-+++ openssh-5.6p1/Makefile.in	2010-10-01 08:48:17.000000000 +0200
-@@ -90,7 +90,7 @@ SSHDOBJS=sshd.o auth-rhosts.o auth-passw
++++ openssh-5.6p1/Makefile.in	2010-10-20 09:15:47.000000000 +0200
+@@ -81,6 +81,7 @@ SSHOBJS= ssh.o readconf.o clientloop.o s
+ 	roaming_common.o roaming_client.o
+ 
+ SSHDOBJS=sshd.o auth-rhosts.o auth-passwd.o auth-rsa.o auth-rh-rsa.o \
++	audit.o audit-bsm.o audit-linux.o platform.o \
+ 	sshpty.o sshlogin.o servconf.o serverloop.o \
+ 	auth.o auth1.o auth2.o auth-options.o session.o \
+ 	auth-chall.o auth2-chall.o groupaccess.o \
+@@ -90,7 +91,7 @@ SSHDOBJS=sshd.o auth-rhosts.o auth-passw
  	auth-krb5.o \
  	auth2-gss.o gss-serv.o gss-serv-krb5.o \
  	loginrec.o auth-pam.o auth-shadow.o auth-sia.o md5crypt.o \
 -	audit.o audit-bsm.o platform.o sftp-server.o sftp-common.o \
-+	audit.o audit-bsm.o audit-linux.o platform.o sftp-server.o sftp-common.o \
++	sftp-server.o sftp-common.o \
  	roaming_common.o roaming_serv.o
  
  MANPAGES	= moduli.5.out scp.1.out ssh-add.1.out ssh-agent.1.out ssh-keygen.1.out ssh-keyscan.1.out ssh.1.out sshd.8.out sftp-server.8.out sftp.1.out ssh-rand-helper.8.out ssh-keysign.8.out ssh-pkcs11-helper.8.out sshd_config.5.out ssh_config.5.out

@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 10
+%define openssh_rel 11
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -585,6 +585,9 @@ fi
 %endif
 
 %changelog
+* Wed Oct 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-11 + 0.9.2-27
+- rebase linux audit according to upstream
+
 * Fri Oct  1 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-10 + 0.9.2-27
 - add missing headers to linux audit
 
