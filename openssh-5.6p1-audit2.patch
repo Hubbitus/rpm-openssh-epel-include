@@ -1,6 +1,6 @@
 diff -up openssh-5.6p1/audit-bsm.c.audit2 openssh-5.6p1/audit-bsm.c
---- openssh-5.6p1/audit-bsm.c.audit2	2010-11-05 15:41:17.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2010-11-05 15:45:28.000000000 +0100
+--- openssh-5.6p1/audit-bsm.c.audit2	2010-12-10 21:55:40.000000000 +0100
++++ openssh-5.6p1/audit-bsm.c	2010-12-10 21:55:41.000000000 +0100
 @@ -316,6 +316,12 @@ audit_session_close(struct logininfo *li
  	/* not implemented */
  }
@@ -15,8 +15,8 @@ diff -up openssh-5.6p1/audit-bsm.c.audit2 openssh-5.6p1/audit-bsm.c
  audit_event(ssh_audit_event_t event)
  {
 diff -up openssh-5.6p1/audit.c.audit2 openssh-5.6p1/audit.c
---- openssh-5.6p1/audit.c.audit2	2010-11-05 15:41:17.000000000 +0100
-+++ openssh-5.6p1/audit.c	2010-11-05 15:51:37.000000000 +0100
+--- openssh-5.6p1/audit.c.audit2	2010-12-10 21:55:40.000000000 +0100
++++ openssh-5.6p1/audit.c	2010-12-10 21:55:41.000000000 +0100
 @@ -111,6 +111,33 @@ audit_event_lookup(ssh_audit_event_t ev)
  	return(event_lookup[i].name);
  }
@@ -70,8 +70,8 @@ diff -up openssh-5.6p1/audit.c.audit2 openssh-5.6p1/audit.c
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/audit.h.audit2 openssh-5.6p1/audit.h
---- openssh-5.6p1/audit.h.audit2	2010-11-05 15:41:17.000000000 +0100
-+++ openssh-5.6p1/audit.h	2010-11-05 15:41:18.000000000 +0100
+--- openssh-5.6p1/audit.h.audit2	2010-12-10 21:55:40.000000000 +0100
++++ openssh-5.6p1/audit.h	2010-12-10 21:55:41.000000000 +0100
 @@ -28,6 +28,7 @@
  # define _SSH_AUDIT_H
  
@@ -89,8 +89,8 @@ diff -up openssh-5.6p1/audit.h.audit2 openssh-5.6p1/audit.h
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit2	2010-11-05 15:41:17.000000000 +0100
-+++ openssh-5.6p1/audit-linux.c	2010-11-05 15:41:18.000000000 +0100
+--- openssh-5.6p1/audit-linux.c.audit2	2010-12-10 21:55:41.000000000 +0100
++++ openssh-5.6p1/audit-linux.c	2010-12-10 22:16:42.000000000 +0100
 @@ -37,6 +37,8 @@
  #include "audit.h"
  #include "canohost.h"
@@ -100,8 +100,8 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
  const char* audit_username(void);
  
  int
-@@ -62,6 +64,36 @@ linux_audit_record_event(int uid, const 
- 	return (rc >= 0);
+@@ -63,6 +65,37 @@ linux_audit_record_event(int uid, const 
+ 	return (rc >= 0) || ((rc == -EPERM) && (getuid() != 0));
  }
  
 +int
@@ -121,7 +121,7 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
 +	snprintf(buf, sizeof(buf), "%s_auth rport=%d", host_user ? "hostbased" : "pubkey", get_remote_port());
 +	rc = audit_log_acct_message(audit_fd, AUDIT_USER_AUTH, NULL,
 +		buf, audit_username(), -1, NULL, get_remote_ipaddr(), NULL, rv);
-+	if (rc < 0)
++	if ((rc < 0) && ((rc != -1) || (getuid() == 0)))
 +		goto out;
 +	snprintf(buf, sizeof(buf), "key algo=%s size=%d fp=%s rport=%d",
 +			type, 8 * len, fp, get_remote_port());
@@ -131,7 +131,8 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
 +	saved_errno = errno;
 +	audit_close(audit_fd);
 +	errno = saved_errno;
-+	return (rc >= 0);
++	/* do not report error if the error is EPERM and sshd is run as non root user */
++	return (rc >= 0) || ((rc == -EPERM) && (getuid() != 0));
 +}
 +
  /* Below is the sshd audit API code */
@@ -139,7 +140,7 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
  void
 diff -up openssh-5.6p1/auth2-hostbased.c.audit2 openssh-5.6p1/auth2-hostbased.c
 --- openssh-5.6p1/auth2-hostbased.c.audit2	2010-08-05 05:04:50.000000000 +0200
-+++ openssh-5.6p1/auth2-hostbased.c	2010-11-05 15:41:18.000000000 +0100
++++ openssh-5.6p1/auth2-hostbased.c	2010-12-10 21:55:41.000000000 +0100
 @@ -136,6 +136,18 @@ done:
  	return authenticated;
  }
@@ -161,7 +162,7 @@ diff -up openssh-5.6p1/auth2-hostbased.c.audit2 openssh-5.6p1/auth2-hostbased.c
  hostbased_key_allowed(struct passwd *pw, const char *cuser, char *chost,
 diff -up openssh-5.6p1/auth2-pubkey.c.audit2 openssh-5.6p1/auth2-pubkey.c
 --- openssh-5.6p1/auth2-pubkey.c.audit2	2010-07-02 05:35:19.000000000 +0200
-+++ openssh-5.6p1/auth2-pubkey.c	2010-11-05 15:41:18.000000000 +0100
++++ openssh-5.6p1/auth2-pubkey.c	2010-12-10 21:55:41.000000000 +0100
 @@ -177,6 +177,18 @@ done:
  	return authenticated;
  }
@@ -183,7 +184,7 @@ diff -up openssh-5.6p1/auth2-pubkey.c.audit2 openssh-5.6p1/auth2-pubkey.c
  {
 diff -up openssh-5.6p1/auth.h.audit2 openssh-5.6p1/auth.h
 --- openssh-5.6p1/auth.h.audit2	2010-05-10 03:58:03.000000000 +0200
-+++ openssh-5.6p1/auth.h	2010-11-05 15:41:18.000000000 +0100
++++ openssh-5.6p1/auth.h	2010-12-10 21:55:41.000000000 +0100
 @@ -170,6 +170,7 @@ void	abandon_challenge_response(Authctxt
  char	*authorized_keys_file(struct passwd *);
  char	*authorized_keys_file2(struct passwd *);
@@ -202,7 +203,7 @@ diff -up openssh-5.6p1/auth.h.audit2 openssh-5.6p1/auth.h
  void	 auth_debug_add(const char *fmt,...) __attribute__((format(printf, 1, 2)));
 diff -up openssh-5.6p1/auth-rsa.c.audit2 openssh-5.6p1/auth-rsa.c
 --- openssh-5.6p1/auth-rsa.c.audit2	2010-07-16 05:58:37.000000000 +0200
-+++ openssh-5.6p1/auth-rsa.c	2010-11-05 15:41:18.000000000 +0100
++++ openssh-5.6p1/auth-rsa.c	2010-12-10 21:55:41.000000000 +0100
 @@ -92,7 +92,10 @@ auth_rsa_verify_response(Key *key, BIGNU
  {
  	u_char buf[32], mdbuf[16];
@@ -241,8 +242,8 @@ diff -up openssh-5.6p1/auth-rsa.c.audit2 openssh-5.6p1/auth-rsa.c
  /*
 diff -up openssh-5.6p1/monitor.c.audit2 openssh-5.6p1/monitor.c
 --- openssh-5.6p1/monitor.c.audit2	2010-08-03 07:50:16.000000000 +0200
-+++ openssh-5.6p1/monitor.c	2010-11-05 15:41:18.000000000 +0100
-@@ -1235,7 +1235,19 @@ mm_answer_keyverify(int sock, Buffer *m)
++++ openssh-5.6p1/monitor.c	2010-12-10 21:55:41.000000000 +0100
+@@ -1235,7 +1235,17 @@ mm_answer_keyverify(int sock, Buffer *m)
  	if (!valid_data)
  		fatal("%s: bad signature data blob", __func__);
  
@@ -253,8 +254,6 @@ diff -up openssh-5.6p1/monitor.c.audit2 openssh-5.6p1/monitor.c
 +		break;
 +	case MM_HOSTKEY:
 +		verified = hostkey_key_verify(key, signature, signaturelen, data, datalen);
-+		valid_data = monitor_valid_hostbasedblob(data, datalen,
-+		    hostbased_cuser, hostbased_chost);
 +		break;
 +	default:
 +		verified = 0;

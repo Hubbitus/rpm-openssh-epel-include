@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 20
+%define openssh_rel 21
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 29
 
@@ -96,8 +96,9 @@ Source5: pam_ssh_agent-rmheaders
 Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch1: openssh-5.6p1-audit.patch
-Patch2: openssh-5.6p1-audit2.patch
-Patch3: openssh-5.6p1-audit3.patch
+Patch2: openssh-5.6p1-audit1a.patch
+Patch3: openssh-5.6p1-audit2.patch
+Patch4: openssh-5.6p1-audit3.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch5: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
@@ -273,8 +274,9 @@ The module is most useful for su and sudo service stacks.
 %setup -q -a 4
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .audit
-%patch2 -p1 -b .audit2
-%patch3 -p1 -b .audit3
+%patch2 -p1 -b .audit1a
+%patch3 -p1 -b .audit2
+%patch4 -p1 -b .audit3
 %patch5 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
@@ -594,6 +596,10 @@ fi
 %endif
 
 %changelog
+* Fri Dec 10 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-21 + 0.9.2-29
+- reenable run sshd as non root user
+- renable rekeying
+
 * Wed Nov 24 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-20 + 0.9.2-29
 - reapair clientloop crash (#627332)
 - properly restore euid in case connect to the ssh-agent socket fails
