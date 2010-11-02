@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 13
+%define openssh_rel 14
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -587,7 +587,7 @@ fi
 %endif
 
 %changelog
-* Fri Nov  2 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-13 + 0.9.2-27
+* Fri Nov  2 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-14 + 0.9.2-27
 - add auditing the key ussage
 
 * Fri Oct 20 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-12 + 0.9.2-27
