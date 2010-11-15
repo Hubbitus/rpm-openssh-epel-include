@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 16
+%define openssh_rel 17
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -589,6 +589,9 @@ fi
 %endif
 
 %changelog
+* Mon Nov 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-17 + 0.9.2-27
+- improoved kuserok patch
+
 * Fri Nov  5 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-16 + 0.9.2-27
 - add auditing the host based key ussage
 - repait X11 abstract layer socket (#648896)
