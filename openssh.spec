@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 17
+%define openssh_rel 18
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 27
 
@@ -589,6 +589,9 @@ fi
 %endif
 
 %changelog
+* Mon Nov 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-18 + 0.9.2-27
+- used upstream version of the biguid patch
+
 * Mon Nov 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-17 + 0.9.2-27
 - improoved kuserok patch
 
