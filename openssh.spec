@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 19
+%define openssh_rel 20
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 29
 
@@ -133,6 +133,8 @@ Patch78: openssh-5.6p1-kuserok.patch
 Patch79: openssh-5.5p1-x11.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1817
 Patch80: openssh-5.6p1-biguid.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1842
+Patch81: openssh-5.6p1-clientloop.patch
 
 License: BSD
 Group: Applications/Internet
@@ -310,6 +312,7 @@ popd
 %patch78 -p1 -b .kuserok
 %patch79 -p1 -b .x11
 %patch80 -p1 -b .biguid
+%patch81 -p1 -b .clientloop
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -591,7 +594,8 @@ fi
 %endif
 
 %changelog
-* Wed Nov 24 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-19 + 0.9.2-29
+* Wed Nov 24 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-20 + 0.9.2-29
+- reapair clientloop crash (#627332)
 - properly restore euid in case connect to the ssh-agent socket fails
 
 * Mon Nov 22 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-19 + 0.9.2-28
