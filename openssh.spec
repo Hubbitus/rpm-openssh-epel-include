@@ -73,7 +73,7 @@
 %define openssh_ver 5.6p1
 %define openssh_rel 19
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 28
+%define pam_ssh_agent_rel 29
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -591,9 +591,11 @@ fi
 %endif
 
 %changelog
+* Wed Nov 24 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-19 + 0.9.2-29
+- properly restore euid in case connect to the ssh-agent socket fails
+
 * Mon Nov 22 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-19 + 0.9.2-28
 - striped read permissions from suid and sgid binaries
-- properly restore euid in case connect to the ssh-agent socket fails
 
 * Mon Nov 15 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-18 + 0.9.2-27
 - used upstream version of the biguid patch
