@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 21
+%define openssh_rel 22
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 29
 
@@ -93,12 +93,16 @@ Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
 
+Patch100: openssh-5.6p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch1: openssh-5.6p1-audit.patch
 Patch2: openssh-5.6p1-audit1a.patch
 Patch3: openssh-5.6p1-audit2.patch
 Patch4: openssh-5.6p1-audit3.patch
+Patch104: openssh-5.6p1-audit4.patch
+#not yet
+###Patch105: openssh-5.6p1-audit5.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch5: openssh-5.2p1-vendor.patch
 Patch10: pam_ssh_agent_auth-0.9-build.patch
@@ -272,11 +276,14 @@ The module is most useful for su and sudo service stacks.
 
 %prep
 %setup -q -a 4
+#Do not enable by default
+###%patch100 -p1 -b .wIm
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .audit
 %patch2 -p1 -b .audit1a
 %patch3 -p1 -b .audit2
 %patch4 -p1 -b .audit3
+%patch104 -p1 -b .audit4
 %patch5 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
@@ -596,6 +603,9 @@ fi
 %endif
 
 %changelog
+* Wed Jan 12 2011 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-22 + 0.9.2-29
+- add audit of destruction the session keys
+
 * Fri Dec 10 2010 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-21 + 0.9.2-29
 - reenable run sshd as non root user
 - renable rekeying
