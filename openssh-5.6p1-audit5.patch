@@ -1,6 +1,38 @@
+diff -up openssh-5.6p1/audit-bsm.c.audit5 openssh-5.6p1/audit-bsm.c
+--- openssh-5.6p1/audit-bsm.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/audit-bsm.c	2011-01-14 10:04:56.000000000 +0100
+@@ -401,4 +401,10 @@ audit_session_key_free_body(int ctos)
+ {
+ 	/* not implemented */
+ }
++
++void
++audit_destroy_sensitive_data(void)
++{
++	/* not implemented */
++}
+ #endif /* BSM */
+diff -up openssh-5.6p1/audit.c.audit5 openssh-5.6p1/audit.c
+--- openssh-5.6p1/audit.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/audit.c	2011-01-14 10:07:57.000000000 +0100
+@@ -268,5 +268,14 @@ audit_session_key_free_body(int ctos)
+ {
+ 	debug("audit session key discard euid %d direction %d", geteuid(), ctos);
+ }
++
++/*
++ * This will be called on destroy private part of the server key
++ */
++void
++audit_destroy_sensitive_data(void)
++{
++	debug("audit destroy sensitive data euid %d", geteuid());
++}
+ # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
+ #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/audit.h.audit5 openssh-5.6p1/audit.h
---- openssh-5.6p1/audit.h.audit5	2011-01-14 09:21:01.000000000 +0100
-+++ openssh-5.6p1/audit.h	2011-01-14 09:21:04.000000000 +0100
+--- openssh-5.6p1/audit.h.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/audit.h	2011-01-14 10:14:08.000000000 +0100
 @@ -62,5 +62,6 @@ void	audit_unsupported_body(int);
  void	audit_kex_body(int, char *, char *, char *);
  void	audit_session_key_free(int ctos);
@@ -9,8 +41,8 @@ diff -up openssh-5.6p1/audit.h.audit5 openssh-5.6p1/audit.h
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.6p1/audit-linux.c.audit5 openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit5	2011-01-14 09:21:01.000000000 +0100
-+++ openssh-5.6p1/audit-linux.c	2011-01-14 09:21:04.000000000 +0100
+--- openssh-5.6p1/audit-linux.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/audit-linux.c	2011-01-14 10:14:08.000000000 +0100
 @@ -226,4 +226,26 @@ audit_session_key_free_body(int ctos)
  		error("cannot write into audit");
  }
@@ -39,9 +71,9 @@ diff -up openssh-5.6p1/audit-linux.c.audit5 openssh-5.6p1/audit-linux.c
 +
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
---- openssh-5.6p1/monitor.c.audit5	2011-01-14 09:21:04.000000000 +0100
-+++ openssh-5.6p1/monitor.c	2011-01-14 09:21:05.000000000 +0100
-@@ -186,6 +186,7 @@ int mm_answer_audit_command(int, Buffer 
+--- openssh-5.6p1/monitor.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/monitor.c	2011-01-14 10:14:08.000000000 +0100
+@@ -181,6 +181,7 @@ int mm_answer_audit_command(int, Buffer 
  int mm_answer_audit_unsupported_body(int, Buffer *);
  int mm_answer_audit_kex_body(int, Buffer *);
  int mm_answer_audit_session_key_free_body(int, Buffer *);
@@ -49,7 +81,7 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
  #endif
  
  static Authctxt *authctxt;
-@@ -240,6 +241,7 @@ struct mon_table mon_dispatch_proto20[] 
+@@ -232,6 +233,7 @@ struct mon_table mon_dispatch_proto20[] 
      {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
      {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
      {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
@@ -57,7 +89,7 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
  #endif
  #ifdef BSD_AUTH
      {MONITOR_REQ_BSDAUTHQUERY, MON_ISAUTH, mm_answer_bsdauthquery},
-@@ -286,6 +288,7 @@ struct mon_table mon_dispatch_postauth20
+@@ -271,6 +273,7 @@ struct mon_table mon_dispatch_postauth20
      {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
      {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
      {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
@@ -65,7 +97,7 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -320,6 +323,7 @@ struct mon_table mon_dispatch_proto15[] 
+@@ -305,6 +308,7 @@ struct mon_table mon_dispatch_proto15[] 
      {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
      {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
      {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
@@ -73,7 +105,7 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -334,6 +338,7 @@ struct mon_table mon_dispatch_postauth15
+@@ -319,6 +323,7 @@ struct mon_table mon_dispatch_postauth15
      {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
      {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
      {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
@@ -81,7 +113,7 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -2409,4 +2414,15 @@ mm_answer_audit_session_key_free_body(in
+@@ -2271,4 +2276,15 @@ mm_answer_audit_session_key_free_body(in
  	mm_request_send(sock, MONITOR_ANS_AUDIT_SESSION_KEY_FREE, m);
  	return 0;
  }
@@ -98,9 +130,9 @@ diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/monitor.h.audit5 openssh-5.6p1/monitor.h
---- openssh-5.6p1/monitor.h.audit5	2011-01-14 09:21:04.000000000 +0100
-+++ openssh-5.6p1/monitor.h	2011-01-14 09:21:05.000000000 +0100
-@@ -74,6 +74,7 @@ enum monitor_reqtype {
+--- openssh-5.6p1/monitor.h.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/monitor.h	2011-01-14 10:14:08.000000000 +0100
+@@ -69,6 +69,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
  	MONITOR_REQ_AUDIT_KEX, MONITOR_ANS_AUDIT_KEX,
  	MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MONITOR_ANS_AUDIT_SESSION_KEY_FREE,
@@ -109,9 +141,9 @@ diff -up openssh-5.6p1/monitor.h.audit5 openssh-5.6p1/monitor.h
  
  struct mm_master;
 diff -up openssh-5.6p1/monitor_wrap.c.audit5 openssh-5.6p1/monitor_wrap.c
---- openssh-5.6p1/monitor_wrap.c.audit5	2011-01-14 09:21:04.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.c	2011-01-14 09:21:05.000000000 +0100
-@@ -1522,4 +1522,16 @@ mm_audit_session_key_free_body(int ctos)
+--- openssh-5.6p1/monitor_wrap.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.c	2011-01-14 10:14:08.000000000 +0100
+@@ -1458,4 +1458,16 @@ mm_audit_session_key_free_body(int ctos)
  				  &m);
  	buffer_free(&m);
  }
@@ -129,9 +161,9 @@ diff -up openssh-5.6p1/monitor_wrap.c.audit5 openssh-5.6p1/monitor_wrap.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/monitor_wrap.h.audit5 openssh-5.6p1/monitor_wrap.h
---- openssh-5.6p1/monitor_wrap.h.audit5	2011-01-14 09:21:04.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.h	2011-01-14 09:21:05.000000000 +0100
-@@ -82,6 +82,7 @@ void mm_audit_run_command(const char *);
+--- openssh-5.6p1/monitor_wrap.h.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.h	2011-01-14 10:14:08.000000000 +0100
+@@ -77,6 +77,7 @@ void mm_audit_run_command(const char *);
  void mm_audit_unsupported_body(int);
  void mm_audit_kex_body(int, char *, char *, char *);
  void mm_audit_session_key_free_body(int);
@@ -140,9 +172,9 @@ diff -up openssh-5.6p1/monitor_wrap.h.audit5 openssh-5.6p1/monitor_wrap.h
  
  struct Session;
 diff -up openssh-5.6p1/session.c.audit5 openssh-5.6p1/session.c
---- openssh-5.6p1/session.c.audit5	2011-01-14 09:21:02.000000000 +0100
-+++ openssh-5.6p1/session.c	2011-01-14 09:22:29.000000000 +0100
-@@ -1679,6 +1679,7 @@ do_child(Session *s, const char *command
+--- openssh-5.6p1/session.c.audit5	2010-06-26 02:00:15.000000000 +0200
++++ openssh-5.6p1/session.c	2011-01-14 10:14:08.000000000 +0100
+@@ -1677,6 +1677,7 @@ do_child(Session *s, const char *command
  
  	/* remove hostkey from the child's memory */
  	destroy_sensitive_data();
@@ -151,9 +183,9 @@ diff -up openssh-5.6p1/session.c.audit5 openssh-5.6p1/session.c
  	/* Force a password change */
  	if (s->authctxt->force_pwchange) {
 diff -up openssh-5.6p1/sshd.c.audit5 openssh-5.6p1/sshd.c
---- openssh-5.6p1/sshd.c.audit5	2011-01-14 09:21:04.000000000 +0100
-+++ openssh-5.6p1/sshd.c	2011-01-14 09:23:25.000000000 +0100
-@@ -588,6 +588,7 @@ demote_sensitive_data(void)
+--- openssh-5.6p1/sshd.c.audit5	2011-01-14 10:14:08.000000000 +0100
++++ openssh-5.6p1/sshd.c	2011-01-14 10:14:08.000000000 +0100
+@@ -579,6 +579,7 @@ demote_sensitive_data(void)
  		}
  		/* Certs do not need demotion */
  	}
@@ -161,7 +193,7 @@ diff -up openssh-5.6p1/sshd.c.audit5 openssh-5.6p1/sshd.c
  
  	/* We do not clear ssh1_host key and cookie.  XXX - Okay Niels? */
  }
-@@ -2101,8 +2102,10 @@ main(int ac, char **av)
+@@ -2011,8 +2012,10 @@ main(int ac, char **av)
  	if (use_privsep) {
  		privsep_postauth(authctxt);
  		/* the monitor process [priv] will not return */
@@ -173,7 +205,7 @@ diff -up openssh-5.6p1/sshd.c.audit5 openssh-5.6p1/sshd.c
  	}
  
  	packet_set_timeout(options.client_alive_interval,
-@@ -2339,6 +2342,7 @@ do_ssh1_kex(void)
+@@ -2249,6 +2252,7 @@ do_ssh1_kex(void)
  	}
  	/* Destroy the private and public keys. No longer. */
  	destroy_sensitive_data();

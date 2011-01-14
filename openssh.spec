@@ -284,7 +284,7 @@ The module is most useful for su and sudo service stacks.
 %patch4 -p1 -b .audit3
 %patch104 -p1 -b .audit4
 %patch105 -p1 -b .audit5
-%patch5 -p1 -b .vendor
+###%patch5 -p1 -b .vendor
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -297,31 +297,31 @@ popd
 
 %if %{WITH_SELINUX}
 #SELinux
-%patch12 -p1 -b .selinux
-%patch13 -p1 -b .mls
-%patch18 -p1 -b .pam_selinux
+###%patch12 -p1 -b .selinux
+###%patch13 -p1 -b .mls
+###%patch18 -p1 -b .pam_selinux
 %endif
 
-%patch20 -p1 -b .akc
-%patch21 -p1 -b .ldap
-%patch23 -p1 -b .keygen
-%patch24 -p1 -b .fromto-remote
-%patch27 -p1 -b .log-chroot
-%patch30 -p1 -b .exit-deadlock
-%patch35 -p1 -b .progress
-%patch38 -p1 -b .grab-info
-%patch44 -p1 -b .ip-opts
-%patch49 -p1 -b .canohost
-%patch62 -p1 -b .manpage
-%patch65 -p1 -b .fips
-%patch69 -p1 -b .selabel
-%patch71 -p1 -b .edns
-%patch73 -p1 -b .gsskex
-%patch74 -p1 -b .randclean
-%patch78 -p1 -b .kuserok
-%patch79 -p1 -b .x11
-%patch80 -p1 -b .biguid
-%patch81 -p1 -b .clientloop
+###%patch20 -p1 -b .akc
+###%patch21 -p1 -b .ldap
+###%patch23 -p1 -b .keygen
+###%patch24 -p1 -b .fromto-remote
+###%patch27 -p1 -b .log-chroot
+###%patch30 -p1 -b .exit-deadlock
+###%patch35 -p1 -b .progress
+###%patch38 -p1 -b .grab-info
+###%patch44 -p1 -b .ip-opts
+###%patch49 -p1 -b .canohost
+###%patch62 -p1 -b .manpage
+###%patch65 -p1 -b .fips
+###%patch69 -p1 -b .selabel
+###%patch71 -p1 -b .edns
+###%patch73 -p1 -b .gsskex
+###%patch74 -p1 -b .randclean
+###%patch78 -p1 -b .kuserok
+###%patch79 -p1 -b .x11
+###%patch80 -p1 -b .biguid
+###%patch81 -p1 -b .clientloop
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
