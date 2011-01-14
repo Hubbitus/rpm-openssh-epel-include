@@ -1,0 +1,183 @@
+diff -up openssh-5.6p1/audit.h.audit5 openssh-5.6p1/audit.h
+--- openssh-5.6p1/audit.h.audit5	2011-01-14 09:21:01.000000000 +0100
++++ openssh-5.6p1/audit.h	2011-01-14 09:21:04.000000000 +0100
+@@ -62,5 +62,6 @@ void	audit_unsupported_body(int);
+ void	audit_kex_body(int, char *, char *, char *);
+ void	audit_session_key_free(int ctos);
+ void	audit_session_key_free_body(int ctos);
++void	audit_destroy_sensitive_data(void);
+ 
+ #endif /* _SSH_AUDIT_H */
+diff -up openssh-5.6p1/audit-linux.c.audit5 openssh-5.6p1/audit-linux.c
+--- openssh-5.6p1/audit-linux.c.audit5	2011-01-14 09:21:01.000000000 +0100
++++ openssh-5.6p1/audit-linux.c	2011-01-14 09:21:04.000000000 +0100
+@@ -226,4 +226,26 @@ audit_session_key_free_body(int ctos)
+ 		error("cannot write into audit");
+ }
+ 
++void
++audit_destroy_sensitive_data(void)
++{
++	char buf[AUDIT_LOG_SIZE];
++	int audit_fd, audit_ok;
++
++	snprintf(buf, sizeof(buf), "destroy kind=server direction=?");
++	audit_fd = audit_open();
++	if (audit_fd < 0) {
++		if (errno != EINVAL && errno != EPROTONOSUPPORT &&
++					 errno != EAFNOSUPPORT)
++			error("cannot open audit");
++		return;
++	}
++	audit_ok = audit_log_acct_message(audit_fd, AUDIT_CRYPTO_KEY_USER, NULL,
++			buf, NULL, -1, NULL, get_remote_ipaddr(), NULL, 1);
++	audit_close(audit_fd);
++	/* do not abort if the error is EPERM and sshd is run as non root user */
++	if ((audit_ok < 0) && ((audit_ok != -1) || (getuid() == 0)))
++		error("cannot write into audit");
++}
++
+ #endif /* USE_LINUX_AUDIT */
+diff -up openssh-5.6p1/monitor.c.audit5 openssh-5.6p1/monitor.c
+--- openssh-5.6p1/monitor.c.audit5	2011-01-14 09:21:04.000000000 +0100
++++ openssh-5.6p1/monitor.c	2011-01-14 09:21:05.000000000 +0100
+@@ -186,6 +186,7 @@ int mm_answer_audit_command(int, Buffer 
+ int mm_answer_audit_unsupported_body(int, Buffer *);
+ int mm_answer_audit_kex_body(int, Buffer *);
+ int mm_answer_audit_session_key_free_body(int, Buffer *);
++int mm_answer_audit_server_key_free(int, Buffer *);
+ #endif
+ 
+ static Authctxt *authctxt;
+@@ -240,6 +241,7 @@ struct mon_table mon_dispatch_proto20[] 
+     {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
+     {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
+     {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
++    {MONITOR_REQ_AUDIT_SERVER_KEY_FREE, MON_PERMIT, mm_answer_audit_server_key_free},
+ #endif
+ #ifdef BSD_AUTH
+     {MONITOR_REQ_BSDAUTHQUERY, MON_ISAUTH, mm_answer_bsdauthquery},
+@@ -286,6 +288,7 @@ struct mon_table mon_dispatch_postauth20
+     {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
+     {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
+     {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
++    {MONITOR_REQ_AUDIT_SERVER_KEY_FREE, MON_PERMIT, mm_answer_audit_server_key_free},
+ #endif
+     {0, 0, NULL}
+ };
+@@ -320,6 +323,7 @@ struct mon_table mon_dispatch_proto15[] 
+     {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
+     {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
+     {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
++    {MONITOR_REQ_AUDIT_SERVER_KEY_FREE, MON_PERMIT, mm_answer_audit_server_key_free},
+ #endif
+     {0, 0, NULL}
+ };
+@@ -334,6 +338,7 @@ struct mon_table mon_dispatch_postauth15
+     {MONITOR_REQ_AUDIT_UNSUPPORTED, MON_PERMIT, mm_answer_audit_unsupported_body},
+     {MONITOR_REQ_AUDIT_KEX, MON_PERMIT, mm_answer_audit_kex_body},
+     {MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MON_PERMIT, mm_answer_audit_session_key_free_body},
++    {MONITOR_REQ_AUDIT_SERVER_KEY_FREE, MON_PERMIT, mm_answer_audit_server_key_free},
+ #endif
+     {0, 0, NULL}
+ };
+@@ -2409,4 +2414,15 @@ mm_answer_audit_session_key_free_body(in
+ 	mm_request_send(sock, MONITOR_ANS_AUDIT_SESSION_KEY_FREE, m);
+ 	return 0;
+ }
++
++int
++mm_answer_audit_server_key_free(int sock, Buffer *m)
++{
++	audit_destroy_sensitive_data();
++
++	buffer_clear(m);
++
++	mm_request_send(sock, MONITOR_ANS_AUDIT_SERVER_KEY_FREE, m);
++	return 0;
++}
+ #endif /* SSH_AUDIT_EVENTS */
+diff -up openssh-5.6p1/monitor.h.audit5 openssh-5.6p1/monitor.h
+--- openssh-5.6p1/monitor.h.audit5	2011-01-14 09:21:04.000000000 +0100
++++ openssh-5.6p1/monitor.h	2011-01-14 09:21:05.000000000 +0100
+@@ -74,6 +74,7 @@ enum monitor_reqtype {
+ 	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
+ 	MONITOR_REQ_AUDIT_KEX, MONITOR_ANS_AUDIT_KEX,
+ 	MONITOR_REQ_AUDIT_SESSION_KEY_FREE, MONITOR_ANS_AUDIT_SESSION_KEY_FREE,
++	MONITOR_REQ_AUDIT_SERVER_KEY_FREE, MONITOR_ANS_AUDIT_SERVER_KEY_FREE,
+ };
+ 
+ struct mm_master;
+diff -up openssh-5.6p1/monitor_wrap.c.audit5 openssh-5.6p1/monitor_wrap.c
+--- openssh-5.6p1/monitor_wrap.c.audit5	2011-01-14 09:21:04.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.c	2011-01-14 09:21:05.000000000 +0100
+@@ -1522,4 +1522,16 @@ mm_audit_session_key_free_body(int ctos)
+ 				  &m);
+ 	buffer_free(&m);
+ }
++
++void
++mm_audit_destroy_sensitive_data(void)
++{
++	Buffer m;
++
++	buffer_init(&m);
++	mm_request_send(pmonitor->m_recvfd, MONITOR_REQ_AUDIT_SERVER_KEY_FREE, &m);
++	mm_request_receive_expect(pmonitor->m_recvfd, MONITOR_ANS_AUDIT_SERVER_KEY_FREE,
++				  &m);
++	buffer_free(&m);
++}
+ #endif /* SSH_AUDIT_EVENTS */
+diff -up openssh-5.6p1/monitor_wrap.h.audit5 openssh-5.6p1/monitor_wrap.h
+--- openssh-5.6p1/monitor_wrap.h.audit5	2011-01-14 09:21:04.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.h	2011-01-14 09:21:05.000000000 +0100
+@@ -82,6 +82,7 @@ void mm_audit_run_command(const char *);
+ void mm_audit_unsupported_body(int);
+ void mm_audit_kex_body(int, char *, char *, char *);
+ void mm_audit_session_key_free_body(int);
++void mm_audit_server_key_free_body(void);
+ #endif
+ 
+ struct Session;
+diff -up openssh-5.6p1/session.c.audit5 openssh-5.6p1/session.c
+--- openssh-5.6p1/session.c.audit5	2011-01-14 09:21:02.000000000 +0100
++++ openssh-5.6p1/session.c	2011-01-14 09:22:29.000000000 +0100
+@@ -1679,6 +1679,7 @@ do_child(Session *s, const char *command
+ 
+ 	/* remove hostkey from the child's memory */
+ 	destroy_sensitive_data();
++	PRIVSEP(audit_destroy_sensitive_data());
+ 
+ 	/* Force a password change */
+ 	if (s->authctxt->force_pwchange) {
+diff -up openssh-5.6p1/sshd.c.audit5 openssh-5.6p1/sshd.c
+--- openssh-5.6p1/sshd.c.audit5	2011-01-14 09:21:04.000000000 +0100
++++ openssh-5.6p1/sshd.c	2011-01-14 09:23:25.000000000 +0100
+@@ -588,6 +588,7 @@ demote_sensitive_data(void)
+ 		}
+ 		/* Certs do not need demotion */
+ 	}
++	audit_destroy_sensitive_data();
+ 
+ 	/* We do not clear ssh1_host key and cookie.  XXX - Okay Niels? */
+ }
+@@ -2101,8 +2102,10 @@ main(int ac, char **av)
+ 	if (use_privsep) {
+ 		privsep_postauth(authctxt);
+ 		/* the monitor process [priv] will not return */
+-		if (!compat20)
++		if (!compat20) {
+ 			destroy_sensitive_data();
++			audit_destroy_sensitive_data();
++		}
+ 	}
+ 
+ 	packet_set_timeout(options.client_alive_interval,
+@@ -2339,6 +2342,7 @@ do_ssh1_kex(void)
+ 	}
+ 	/* Destroy the private and public keys. No longer. */
+ 	destroy_sensitive_data();
++	audit_destroy_sensitive_data();
+ 
+ 	if (use_privsep)
+ 		mm_ssh1_session_id(session_id);

@@ -1,6 +1,6 @@
 diff -up openssh-5.6p1/audit-bsm.c.audit4 openssh-5.6p1/audit-bsm.c
---- openssh-5.6p1/audit-bsm.c.audit4	2011-01-12 10:48:20.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2011-01-12 10:48:54.000000000 +0100
+--- openssh-5.6p1/audit-bsm.c.audit4	2011-01-12 14:01:50.000000000 +0100
++++ openssh-5.6p1/audit-bsm.c	2011-01-12 14:01:51.000000000 +0100
 @@ -395,4 +395,10 @@ audit_kex_body(int ctos, char *enc, char
  {
  	/* not implemented */
@@ -13,8 +13,8 @@ diff -up openssh-5.6p1/audit-bsm.c.audit4 openssh-5.6p1/audit-bsm.c
 +}
  #endif /* BSM */
 diff -up openssh-5.6p1/audit.c.audit4 openssh-5.6p1/audit.c
---- openssh-5.6p1/audit.c.audit4	2011-01-12 10:45:58.000000000 +0100
-+++ openssh-5.6p1/audit.c	2011-01-12 10:51:16.000000000 +0100
+--- openssh-5.6p1/audit.c.audit4	2011-01-12 14:01:50.000000000 +0100
++++ openssh-5.6p1/audit.c	2011-01-12 14:01:51.000000000 +0100
 @@ -152,6 +152,12 @@ audit_kex(int ctos, char *enc, char *mac
  	PRIVSEP(audit_kex_body(ctos, enc, mac, comp));
  }
@@ -43,8 +43,8 @@ diff -up openssh-5.6p1/audit.c.audit4 openssh-5.6p1/audit.c
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/audit.h.audit4 openssh-5.6p1/audit.h
---- openssh-5.6p1/audit.h.audit4	2011-01-12 10:45:58.000000000 +0100
-+++ openssh-5.6p1/audit.h	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/audit.h.audit4	2011-01-12 14:01:50.000000000 +0100
++++ openssh-5.6p1/audit.h	2011-01-12 14:01:51.000000000 +0100
 @@ -60,5 +60,7 @@ void	audit_unsupported(int);
  void	audit_kex(int, char *, char *, char *);
  void	audit_unsupported_body(int);
@@ -54,8 +54,8 @@ diff -up openssh-5.6p1/audit.h.audit4 openssh-5.6p1/audit.h
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.6p1/audit-linux.c.audit4 openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit4	2011-01-12 10:45:58.000000000 +0100
-+++ openssh-5.6p1/audit-linux.c	2011-01-12 10:48:00.000000000 +0100
+--- openssh-5.6p1/audit-linux.c.audit4	2011-01-12 14:01:50.000000000 +0100
++++ openssh-5.6p1/audit-linux.c	2011-01-12 14:04:15.000000000 +0100
 @@ -174,13 +174,14 @@ audit_unsupported_body(int what)
  #endif
  }
@@ -72,7 +72,7 @@ diff -up openssh-5.6p1/audit-linux.c.audit4 openssh-5.6p1/audit-linux.c
  	Cipher *cipher = cipher_by_name(enc);
  
  	snprintf(buf, sizeof(buf), "start direction=%s cipher=%s, ksize=%d rport=%d laddr=%s lport=%d",
-@@ -203,4 +204,22 @@ audit_kex_body(int ctos, char *enc, char
+@@ -203,4 +204,26 @@ audit_kex_body(int ctos, char *enc, char
  #endif
  }
  
@@ -84,8 +84,12 @@ diff -up openssh-5.6p1/audit-linux.c.audit4 openssh-5.6p1/audit-linux.c
 +
 +	snprintf(buf, sizeof(buf), "destroy kind=session direction=%s", direction[ctos]);
 +	audit_fd = audit_open();
-+	if (audit_fd < 0) 
++	if (audit_fd < 0) {
++		if (errno != EINVAL && errno != EPROTONOSUPPORT &&
++					 errno != EAFNOSUPPORT)
++			error("cannot open audit");
 +		return;
++	}
 +	audit_ok = audit_log_acct_message(audit_fd, AUDIT_CRYPTO_KEY_USER, NULL,
 +			buf, NULL, -1, NULL, get_remote_ipaddr(), NULL, 1);
 +	audit_close(audit_fd);
@@ -96,8 +100,8 @@ diff -up openssh-5.6p1/audit-linux.c.audit4 openssh-5.6p1/audit-linux.c
 +
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.6p1/auditstub.c.audit4 openssh-5.6p1/auditstub.c
---- openssh-5.6p1/auditstub.c.audit4	2011-01-12 10:45:58.000000000 +0100
-+++ openssh-5.6p1/auditstub.c	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/auditstub.c.audit4	2011-01-12 14:01:50.000000000 +0100
++++ openssh-5.6p1/auditstub.c	2011-01-12 14:01:51.000000000 +0100
 @@ -37,3 +37,7 @@ audit_kex(int ctos, char *enc, char *mac
  {
  }
@@ -107,8 +111,8 @@ diff -up openssh-5.6p1/auditstub.c.audit4 openssh-5.6p1/auditstub.c
 +{
 +}
 diff -up openssh-5.6p1/monitor.c.audit4 openssh-5.6p1/monitor.c
---- openssh-5.6p1/monitor.c.audit4	2011-01-12 10:45:59.000000000 +0100
-+++ openssh-5.6p1/monitor.c	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/monitor.c.audit4	2011-01-12 14:01:51.000000000 +0100
++++ openssh-5.6p1/monitor.c	2011-01-12 14:01:51.000000000 +0100
 @@ -180,6 +180,7 @@ int mm_answer_audit_event(int, Buffer *)
  int mm_answer_audit_command(int, Buffer *);
  int mm_answer_audit_unsupported_body(int, Buffer *);
@@ -169,8 +173,8 @@ diff -up openssh-5.6p1/monitor.c.audit4 openssh-5.6p1/monitor.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/monitor.h.audit4 openssh-5.6p1/monitor.h
---- openssh-5.6p1/monitor.h.audit4	2011-01-12 10:45:59.000000000 +0100
-+++ openssh-5.6p1/monitor.h	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/monitor.h.audit4	2011-01-12 14:01:51.000000000 +0100
++++ openssh-5.6p1/monitor.h	2011-01-12 14:01:51.000000000 +0100
 @@ -68,6 +68,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_JPAKE_CHECK_CONFIRM, MONITOR_ANS_JPAKE_CHECK_CONFIRM,
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
@@ -180,8 +184,8 @@ diff -up openssh-5.6p1/monitor.h.audit4 openssh-5.6p1/monitor.h
  
  struct mm_master;
 diff -up openssh-5.6p1/monitor_wrap.c.audit4 openssh-5.6p1/monitor_wrap.c
---- openssh-5.6p1/monitor_wrap.c.audit4	2011-01-12 10:45:59.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.c	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/monitor_wrap.c.audit4	2011-01-12 14:01:51.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.c	2011-01-12 14:01:51.000000000 +0100
 @@ -1445,4 +1445,17 @@ mm_audit_kex_body(int ctos, char *cipher
  
  	buffer_free(&m);
@@ -201,8 +205,8 @@ diff -up openssh-5.6p1/monitor_wrap.c.audit4 openssh-5.6p1/monitor_wrap.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.6p1/monitor_wrap.h.audit4 openssh-5.6p1/monitor_wrap.h
---- openssh-5.6p1/monitor_wrap.h.audit4	2011-01-12 10:45:59.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.h	2011-01-12 10:45:59.000000000 +0100
+--- openssh-5.6p1/monitor_wrap.h.audit4	2011-01-12 14:01:51.000000000 +0100
++++ openssh-5.6p1/monitor_wrap.h	2011-01-12 14:01:51.000000000 +0100
 @@ -76,6 +76,7 @@ void mm_audit_event(ssh_audit_event_t);
  void mm_audit_run_command(const char *);
  void mm_audit_unsupported_body(int);
@@ -213,7 +217,7 @@ diff -up openssh-5.6p1/monitor_wrap.h.audit4 openssh-5.6p1/monitor_wrap.h
  struct Session;
 diff -up openssh-5.6p1/packet.c.audit4 openssh-5.6p1/packet.c
 --- openssh-5.6p1/packet.c.audit4	2010-07-16 05:58:37.000000000 +0200
-+++ openssh-5.6p1/packet.c	2011-01-12 10:45:59.000000000 +0100
++++ openssh-5.6p1/packet.c	2011-01-12 14:01:51.000000000 +0100
 @@ -495,6 +495,7 @@ packet_close(void)
  		buffer_free(&active_state->compression_buffer);
  		buffer_compress_uninit();
