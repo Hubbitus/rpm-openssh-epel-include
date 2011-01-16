@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 23
+%define openssh_rel 24
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 29
 
@@ -603,6 +603,9 @@ fi
 %endif
 
 %changelog
+* Mon Jan 17 2011 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-24 + 0.9.2-29
+- make audit compatible with the fips mode
+
 * Fri Jan 14 2011 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-23 + 0.9.2-29
 - add audit of destruction the server keys
 
