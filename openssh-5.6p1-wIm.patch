@@ -68,7 +68,7 @@ diff -up openssh-5.6p1/whereIam.c.wIm openssh-5.6p1/whereIam.c
 +
 +void debug_wIm(const char *txt)
 +{
-+	debug("%s wIm = %d, euid=%d", txt, whereIam, geteuid());
++	debug("%s: %s wIm = %d, euid=%d", txt, __func__, whereIam, geteuid());
 +}
 +
 +
