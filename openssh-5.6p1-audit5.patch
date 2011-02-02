@@ -286,10 +286,10 @@ diff -up openssh-5.6p1/packet.c.audit5 openssh-5.6p1/packet.c
 +	if (state == NULL)
 +		return;
 +
-+	if (state->connection_in >= 0)
-+		close(state->connection_in);
-+	if ((state->connection_in != state->connection_out) && (state->connection_out >= 0))
-+		close(state->connection_out);
++//	if (state->connection_in >= 0)
++//		close(state->connection_in);
++//	if ((state->connection_in != state->connection_out) && (state->connection_out >= 0))
++//		close(state->connection_out);
 +
 +	cipher_cleanup(&state->receive_context);
 +	cipher_cleanup(&state->send_context);
@@ -303,7 +303,7 @@ diff -up openssh-5.6p1/packet.c.audit5 openssh-5.6p1/packet.c
 +	newkeys_destroy(state->newkeys[MODE_OUT]);
 +	mac_destroy(state->packet_discard_mac);
 +//	TAILQ_HEAD(, packet) outgoing;
-+	memset(state, 0, sizeof(state));
++//	memset(state, 0, sizeof(state));
 +}
 +
 +void
