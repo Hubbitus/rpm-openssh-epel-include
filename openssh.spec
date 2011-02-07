@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.6p1
-%define openssh_rel 28
+%define openssh_rel 29
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 29
 
@@ -603,6 +603,9 @@ fi
 %endif
 
 %changelog
+* Tue Feb  2 2011 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-29 + 0.9.2-29
+- clean the data structures when roaming
+
 * Tue Feb  2 2011 Jan F. Chadima <jchadima@redhat.com> - 5.6p1-28 + 0.9.2-29
 - clean the data structures in the privileged process
 
