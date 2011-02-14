@@ -1,18 +1,7 @@
-diff -up openssh-5.6p1/configure.ac.mls openssh-5.6p1/configure.ac
---- openssh-5.6p1/configure.ac.mls	2010-08-23 12:11:36.000000000 +0200
-+++ openssh-5.6p1/configure.ac	2010-08-23 12:11:36.000000000 +0200
-@@ -3390,6 +3390,7 @@ AC_ARG_WITH(selinux,
- 		SSHDLIBS="$SSHDLIBS $LIBSELINUX"
- 		LIBS="$LIBS $LIBSELINUX"
- 		AC_CHECK_FUNCS(getseuserbyname get_default_context_with_level)
-+		AC_CHECK_FUNCS(setkeycreatecon)
- 		LIBS="$save_LIBS"
- 	fi ]
- )
-diff -up openssh-5.6p1/misc.c.mls openssh-5.6p1/misc.c
---- openssh-5.6p1/misc.c.mls	2010-08-03 08:05:05.000000000 +0200
-+++ openssh-5.6p1/misc.c	2010-08-23 12:14:16.000000000 +0200
-@@ -424,6 +424,7 @@ char *
+diff -up openssh-5.8p1/misc.c.mls openssh-5.8p1/misc.c
+--- openssh-5.8p1/misc.c.mls	2011-01-13 02:21:36.000000000 +0100
++++ openssh-5.8p1/misc.c	2011-02-12 15:05:06.000000000 +0100
+@@ -427,6 +427,7 @@ char *
  colon(char *cp)
  {
  	int flag = 0;
@@ -20,7 +9,7 @@ diff -up openssh-5.6p1/misc.c.mls openssh-5.6p1/misc.c
  
  	if (*cp == ':')		/* Leading colon is part of file name. */
  		return NULL;
-@@ -439,6 +440,13 @@ colon(char *cp)
+@@ -442,6 +443,13 @@ colon(char *cp)
  			return (cp);
  		if (*cp == '/')
  			return NULL;
@@ -34,15 +23,10 @@ diff -up openssh-5.6p1/misc.c.mls openssh-5.6p1/misc.c
  	}
  	return NULL;
  }
-diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-compat/port-linux.c
---- openssh-5.6p1/openbsd-compat/port-linux.c.mls	2010-08-23 12:11:36.000000000 +0200
-+++ openssh-5.6p1/openbsd-compat/port-linux.c	2010-08-23 12:11:37.000000000 +0200
-@@ -35,13 +35,24 @@
- #include "key.h"
- #include "hostfile.h"
- #include "auth.h"
-+#include "xmalloc.h"
- 
+diff -up openssh-5.8p1/openbsd-compat/port-linux.c.mls openssh-5.8p1/openbsd-compat/port-linux.c
+--- openssh-5.8p1/openbsd-compat/port-linux.c.mls	2011-02-12 15:05:06.000000000 +0100
++++ openssh-5.8p1/openbsd-compat/port-linux.c	2011-02-12 15:09:23.000000000 +0100
+@@ -40,13 +40,164 @@
  #ifdef WITH_SELINUX
  #include <selinux/selinux.h>
  #include <selinux/flask.h>
@@ -56,15 +40,10 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
 +#include <unistd.h>
 +#endif
  
+ extern ServerOptions options;
  extern Authctxt *the_authctxt;
-+extern int inetd_flag;
-+extern int rexeced_flag;
- 
- /* Wrapper around is_selinux_enabled() to log its return value once only */
- int
-@@ -57,17 +68,173 @@ ssh_selinux_enabled(void)
- 	return (enabled);
- }
+ extern int inetd_flag;
+ extern int rexeced_flag;
  
 +/* Send audit message */
 +static int
@@ -80,8 +59,8 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
 +	rc = -1;
 +	if (audit_fd < 0) {
 +		if (errno == EINVAL || errno == EPROTONOSUPPORT ||
-+                                        errno == EAFNOSUPPORT)
-+                        return 0; /* No audit support in kernel */
++					errno == EAFNOSUPPORT)
++				return 0; /* No audit support in kernel */
 +		error("Error connecting to audit system.");
 +		return rc;
 +	}
@@ -204,11 +183,17 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
 +#endif
 +	return 0;
 +      out:
-+        freecon(*sc);
-+        *sc = NULL;
-+        return -1;
++	freecon(*sc);
++	*sc = NULL;
++	return -1;
 +}
 +
+ static void
+ ssh_selinux_get_role_level(char **role, const char **level)
+ {
+@@ -65,14 +216,16 @@ ssh_selinux_get_role_level(char **role, 
+ }
+ 
  /* Return the default security context for the given username */
 -static security_context_t
 -ssh_selinux_getctxbyname(char *pwname)
@@ -216,33 +201,16 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
 +ssh_selinux_getctxbyname(char *pwname,
 +	security_context_t *default_sc, security_context_t *user_sc)
  {
--	security_context_t sc = NULL;
+ 	security_context_t sc = NULL;
  	char *sename, *lvl;
-+	const char *reqlvl = NULL;
- 	char *role = NULL;
--	int r = 0;
-+	int r = -1;
-+	context_t con = NULL;
-+
-+	*default_sc = NULL;
-+	*user_sc = NULL;
-+	if (the_authctxt) {
-+		if (the_authctxt->role != NULL) {
-+			char *slash;
-+			role = xstrdup(the_authctxt->role);
-+			if ((slash = strchr(role, '/')) != NULL) {
-+				*slash = '\0';
-+				reqlvl = slash + 1;
-+			}
-+		}
-+	}
+ 	char *role;
+ 	const char *reqlvl;
+ 	int r = 0;
++	context_t con;
  
--	if (the_authctxt) 
--		role=the_authctxt->role;
+ 	ssh_selinux_get_role_level(&role, &reqlvl);
  #ifdef HAVE_GETSEUSERBYNAME
- 	if ((r=getseuserbyname(pwname, &sename, &lvl)) != 0) {
- 		sename = NULL;
-@@ -75,38 +242,63 @@ ssh_selinux_getctxbyname(char *pwname)
+@@ -82,38 +235,63 @@ ssh_selinux_getctxbyname(char *pwname)
  	}
  #else
  	sename = pwname;
@@ -328,29 +296,31 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
  
  #ifdef HAVE_GETSEUSERBYNAME
  	if (sename != NULL)
-@@ -114,14 +306,20 @@ ssh_selinux_getctxbyname(char *pwname)
+@@ -121,8 +299,12 @@ ssh_selinux_getctxbyname(char *pwname)
  	if (lvl != NULL)
  		xfree(lvl);
  #endif
+-
+-	return (sc);
 +	if (role != NULL)
 +		xfree(role);
 +	if (con)
 +		context_free(con);
- 
--	return (sc);
++ 
 +	return (r);
  }
  
- /* Set the execution context to the default for the specified user */
- void
+ /* Setup environment variables for pam_selinux */
+@@ -160,6 +342,8 @@ void
  ssh_selinux_setup_exec_context(char *pwname)
  {
+ 	security_context_t user_ctx = NULL;
 +	int r = 0;
 +	security_context_t default_ctx = NULL;
- 	security_context_t user_ctx = NULL;
  
  	if (!ssh_selinux_enabled())
-@@ -129,22 +327,45 @@ ssh_selinux_setup_exec_context(char *pwn
+ 		return;
+@@ -184,22 +368,45 @@ ssh_selinux_setup_exec_context(char *pwn
  
  	debug3("%s: setting execution context", __func__);
  
@@ -403,7 +373,7 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
  
  	debug3("%s: done", __func__);
  }
-@@ -162,7 +383,10 @@ ssh_selinux_setup_pty(char *pwname, cons
+@@ -217,7 +424,10 @@ ssh_selinux_setup_pty(char *pwname, cons
  
  	debug3("%s: setting TTY context on %s", __func__, tty);
  
@@ -415,10 +385,10 @@ diff -up openssh-5.6p1/openbsd-compat/port-linux.c.mls openssh-5.6p1/openbsd-com
  
  	/* XXX: should these calls fatal() upon failure in enforcing mode? */
  
-diff -up openssh-5.6p1/sshd.c.mls openssh-5.6p1/sshd.c
---- openssh-5.6p1/sshd.c.mls	2010-08-23 12:11:36.000000000 +0200
-+++ openssh-5.6p1/sshd.c	2010-08-23 12:11:37.000000000 +0200
-@@ -1997,6 +1997,9 @@ main(int ac, char **av)
+diff -up openssh-5.8p1/sshd.c.mls openssh-5.8p1/sshd.c
+--- openssh-5.8p1/sshd.c.mls	2011-02-12 15:05:05.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-12 15:05:06.000000000 +0100
+@@ -2011,6 +2011,9 @@ main(int ac, char **av)
  		restore_uid();
  	}
  #endif

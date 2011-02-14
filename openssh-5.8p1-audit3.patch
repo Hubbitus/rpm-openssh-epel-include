@@ -1,6 +1,6 @@
-diff -up openssh-5.6p1/audit-bsm.c.audit3 openssh-5.6p1/audit-bsm.c
---- openssh-5.6p1/audit-bsm.c.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2010-12-10 22:17:31.000000000 +0100
+diff -up openssh-5.8p1/audit-bsm.c.audit3 openssh-5.8p1/audit-bsm.c
+--- openssh-5.8p1/audit-bsm.c.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-09 21:51:19.000000000 +0100
 @@ -383,4 +383,16 @@ audit_event(ssh_audit_event_t event)
  		debug("%s: unhandled event %d", __func__, event);
  	}
@@ -18,9 +18,9 @@ diff -up openssh-5.6p1/audit-bsm.c.audit3 openssh-5.6p1/audit-bsm.c
 +	/* not implemented */
 +}
  #endif /* BSM */
-diff -up openssh-5.6p1/audit.c.audit3 openssh-5.6p1/audit.c
---- openssh-5.6p1/audit.c.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/audit.c	2010-12-10 22:17:31.000000000 +0100
+diff -up openssh-5.8p1/audit.c.audit3 openssh-5.8p1/audit.c
+--- openssh-5.8p1/audit.c.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-09 21:51:19.000000000 +0100
 @@ -36,6 +36,8 @@
  #include "key.h"
  #include "hostfile.h"
@@ -74,9 +74,9 @@ diff -up openssh-5.6p1/audit.c.audit3 openssh-5.6p1/audit.c
 +}
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.6p1/audit.h.audit3 openssh-5.6p1/audit.h
---- openssh-5.6p1/audit.h.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/audit.h	2010-12-10 22:17:31.000000000 +0100
+diff -up openssh-5.8p1/audit.h.audit3 openssh-5.8p1/audit.h
+--- openssh-5.8p1/audit.h.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-09 21:51:19.000000000 +0100
 @@ -56,5 +56,9 @@ void	audit_run_command(const char *);
  ssh_audit_event_t audit_classify_auth(const char *);
  int	audit_keyusage(int, const char *, unsigned, char *, int);
@@ -87,9 +87,9 @@ diff -up openssh-5.6p1/audit.h.audit3 openssh-5.6p1/audit.h
 +void	audit_kex_body(int, char *, char *, char *);
  
  #endif /* _SSH_AUDIT_H */
-diff -up openssh-5.6p1/audit-linux.c.audit3 openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/audit-linux.c	2010-12-10 22:20:00.000000000 +0100
+diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-09 21:51:19.000000000 +0100
 @@ -36,6 +36,8 @@
  #include "log.h"
  #include "audit.h"
@@ -99,7 +99,7 @@ diff -up openssh-5.6p1/audit-linux.c.audit3 openssh-5.6p1/audit-linux.c
  
  #define AUDIT_LOG_SIZE 128
  
-@@ -151,4 +153,54 @@ audit_event(ssh_audit_event_t event)
+@@ -156,4 +158,54 @@ audit_event(ssh_audit_event_t event)
  	}
  }
  
@@ -154,9 +154,9 @@ diff -up openssh-5.6p1/audit-linux.c.audit3 openssh-5.6p1/audit-linux.c
 +}
 +
  #endif /* USE_LINUX_AUDIT */
-diff -up openssh-5.6p1/auditstub.c.audit3 openssh-5.6p1/auditstub.c
---- openssh-5.6p1/auditstub.c.audit3	2010-12-10 22:17:32.000000000 +0100
-+++ openssh-5.6p1/auditstub.c	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/auditstub.c.audit3 openssh-5.8p1/auditstub.c
+--- openssh-5.8p1/auditstub.c.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/auditstub.c	2011-02-09 21:51:19.000000000 +0100
 @@ -0,0 +1,39 @@
 +/* $Id: auditstub.c,v 1.1 jfch Exp $ */
 +
@@ -197,9 +197,9 @@ diff -up openssh-5.6p1/auditstub.c.audit3 openssh-5.6p1/auditstub.c
 +{
 +}
 +
-diff -up openssh-5.6p1/cipher.c.audit3 openssh-5.6p1/cipher.c
---- openssh-5.6p1/cipher.c.audit3	2010-09-03 14:54:23.000000000 +0200
-+++ openssh-5.6p1/cipher.c	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/cipher.c.audit3 openssh-5.8p1/cipher.c
+--- openssh-5.8p1/cipher.c.audit3	2011-02-09 15:24:23.000000000 +0100
++++ openssh-5.8p1/cipher.c	2011-02-09 21:51:19.000000000 +0100
 @@ -59,15 +59,7 @@ extern void ssh1_3des_iv(EVP_CIPHER_CTX 
  extern const EVP_CIPHER *evp_aes_128_ctr(void);
  extern void ssh_aes_ctr_iv(EVP_CIPHER_CTX *, int, u_char *, u_int);
@@ -217,9 +217,9 @@ diff -up openssh-5.6p1/cipher.c.audit3 openssh-5.6p1/cipher.c
  	{ "none",		SSH_CIPHER_NONE, 8, 0, 0, 0, EVP_enc_null },
  	{ "des",		SSH_CIPHER_DES, 8, 8, 0, 1, EVP_des_cbc },
  	{ "3des",		SSH_CIPHER_3DES, 8, 16, 0, 1, evp_ssh1_3des },
-diff -up openssh-5.6p1/cipher.h.audit3 openssh-5.6p1/cipher.h
---- openssh-5.6p1/cipher.h.audit3	2009-01-28 06:38:41.000000000 +0100
-+++ openssh-5.6p1/cipher.h	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/cipher.h.audit3 openssh-5.8p1/cipher.h
+--- openssh-5.8p1/cipher.h.audit3	2009-01-28 06:38:41.000000000 +0100
++++ openssh-5.8p1/cipher.h	2011-02-09 21:51:19.000000000 +0100
 @@ -61,7 +61,16 @@
  typedef struct Cipher Cipher;
  typedef struct CipherContext CipherContext;
@@ -238,9 +238,9 @@ diff -up openssh-5.6p1/cipher.h.audit3 openssh-5.6p1/cipher.h
  struct CipherContext {
  	int	plaintext;
  	EVP_CIPHER_CTX evp;
-diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
---- openssh-5.6p1/kex.c.audit3	2010-01-08 06:50:41.000000000 +0100
-+++ openssh-5.6p1/kex.c	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/kex.c.audit3 openssh-5.8p1/kex.c
+--- openssh-5.8p1/kex.c.audit3	2010-09-24 14:11:14.000000000 +0200
++++ openssh-5.8p1/kex.c	2011-02-09 21:51:19.000000000 +0100
 @@ -49,6 +49,7 @@
  #include "dispatch.h"
  #include "monitor.h"
@@ -249,7 +249,7 @@ diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
  
  #if OPENSSL_VERSION_NUMBER >= 0x00907000L
  # if defined(HAVE_EVP_SHA256)
-@@ -258,9 +259,13 @@ static void
+@@ -286,9 +287,13 @@ static void
  choose_enc(Enc *enc, char *client, char *server)
  {
  	char *name = match_list(client, server, NULL);
@@ -264,7 +264,7 @@ diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
  	if ((enc->cipher = cipher_by_name(name)) == NULL)
  		fatal("matching cipher is not supported: %s", name);
  	enc->name = name;
-@@ -275,9 +280,13 @@ static void
+@@ -303,9 +308,13 @@ static void
  choose_mac(Mac *mac, char *client, char *server)
  {
  	char *name = match_list(client, server, NULL);
@@ -279,7 +279,7 @@ diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
  	if (mac_setup(mac, name) < 0)
  		fatal("unsupported mac %s", name);
  	/* truncate the key */
-@@ -292,8 +301,12 @@ static void
+@@ -320,8 +329,12 @@ static void
  choose_comp(Comp *comp, char *client, char *server)
  {
  	char *name = match_list(client, server, NULL);
@@ -293,7 +293,7 @@ diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
  	if (strcmp(name, "zlib@openssh.com") == 0) {
  		comp->type = COMP_DELAYED;
  	} else if (strcmp(name, "zlib") == 0) {
-@@ -414,6 +427,9 @@ kex_choose_conf(Kex *kex)
+@@ -446,6 +459,9 @@ kex_choose_conf(Kex *kex)
  		    newkeys->enc.name,
  		    newkeys->mac.name,
  		    newkeys->comp.name);
@@ -303,21 +303,21 @@ diff -up openssh-5.6p1/kex.c.audit3 openssh-5.6p1/kex.c
  	}
  	choose_kex(kex, cprop[PROPOSAL_KEX_ALGS], sprop[PROPOSAL_KEX_ALGS]);
  	choose_hostkeyalg(kex, cprop[PROPOSAL_SERVER_HOST_KEY_ALGS],
-diff -up openssh-5.6p1/Makefile.in.audit3 openssh-5.6p1/Makefile.in
---- openssh-5.6p1/Makefile.in.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/Makefile.in	2010-12-10 22:17:32.000000000 +0100
-@@ -74,7 +74,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
- 	monitor_fdpass.o rijndael.o ssh-dss.o ssh-rsa.o dh.o kexdh.o \
- 	kexgex.o kexdhc.o kexgexc.o msg.o progressmeter.o dns.o \
- 	entropy.o gss-genr.o umac.o jpake.o schnorr.o \
--	ssh-pkcs11.o
-+	ssh-pkcs11.o auditstub.o
+diff -up openssh-5.8p1/Makefile.in.audit3 openssh-5.8p1/Makefile.in
+--- openssh-5.8p1/Makefile.in.audit3	2011-02-04 01:42:13.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-02-09 21:53:15.000000000 +0100
+@@ -76,7 +76,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
+ 	monitor_fdpass.o rijndael.o ssh-dss.o ssh-ecdsa.o ssh-rsa.o dh.o \
+ 	kexdh.o kexgex.o kexdhc.o kexgexc.o bufec.o kexecdh.o kexecdhc.o \
+ 	msg.o progressmeter.o dns.o entropy.o gss-genr.o umac.o jpake.o \
+-	schnorr.o ssh-pkcs11.o
++	schnorr.o ssh-pkcs11.o auditstub.o
  
  SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
  	sshconnect.o sshconnect1.o sshconnect2.o mux.o \
-diff -up openssh-5.6p1/monitor.c.audit3 openssh-5.6p1/monitor.c
---- openssh-5.6p1/monitor.c.audit3	2010-12-10 22:17:31.000000000 +0100
-+++ openssh-5.6p1/monitor.c	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/monitor.c.audit3 openssh-5.8p1/monitor.c
+--- openssh-5.8p1/monitor.c.audit3	2011-02-09 21:51:19.000000000 +0100
++++ openssh-5.8p1/monitor.c	2011-02-09 21:51:19.000000000 +0100
 @@ -89,6 +89,7 @@
  #include "ssh2.h"
  #include "jpake.h"
@@ -371,7 +371,7 @@ diff -up openssh-5.6p1/monitor.c.audit3 openssh-5.6p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -2205,3 +2216,40 @@ mm_answer_jpake_check_confirm(int sock, 
+@@ -2206,3 +2217,40 @@ mm_answer_jpake_check_confirm(int sock, 
  }
  
  #endif /* JPAKE */
@@ -412,9 +412,9 @@ diff -up openssh-5.6p1/monitor.c.audit3 openssh-5.6p1/monitor.c
 +}
 +
 +#endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.6p1/monitor.h.audit3 openssh-5.6p1/monitor.h
---- openssh-5.6p1/monitor.h.audit3	2008-11-05 06:20:46.000000000 +0100
-+++ openssh-5.6p1/monitor.h	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/monitor.h.audit3 openssh-5.8p1/monitor.h
+--- openssh-5.8p1/monitor.h.audit3	2008-11-05 06:20:46.000000000 +0100
++++ openssh-5.8p1/monitor.h	2011-02-09 21:51:19.000000000 +0100
 @@ -66,6 +66,8 @@ enum monitor_reqtype {
  	MONITOR_REQ_JPAKE_STEP2, MONITOR_ANS_JPAKE_STEP2,
  	MONITOR_REQ_JPAKE_KEY_CONFIRM, MONITOR_ANS_JPAKE_KEY_CONFIRM,
@@ -424,10 +424,10 @@ diff -up openssh-5.6p1/monitor.h.audit3 openssh-5.6p1/monitor.h
  };
  
  struct mm_master;
-diff -up openssh-5.6p1/monitor_wrap.c.audit3 openssh-5.6p1/monitor_wrap.c
---- openssh-5.6p1/monitor_wrap.c.audit3	2010-03-07 13:05:17.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.c	2010-12-10 22:17:32.000000000 +0100
-@@ -1411,3 +1411,38 @@ mm_jpake_check_confirm(const BIGNUM *k,
+diff -up openssh-5.8p1/monitor_wrap.c.audit3 openssh-5.8p1/monitor_wrap.c
+--- openssh-5.8p1/monitor_wrap.c.audit3	2010-08-31 14:41:14.000000000 +0200
++++ openssh-5.8p1/monitor_wrap.c	2011-02-09 21:51:19.000000000 +0100
+@@ -1412,3 +1412,38 @@ mm_jpake_check_confirm(const BIGNUM *k,
  	return success;
  }
  #endif /* JPAKE */
@@ -466,9 +466,9 @@ diff -up openssh-5.6p1/monitor_wrap.c.audit3 openssh-5.6p1/monitor_wrap.c
 +	buffer_free(&m);
 +}
 +#endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.6p1/monitor_wrap.h.audit3 openssh-5.6p1/monitor_wrap.h
---- openssh-5.6p1/monitor_wrap.h.audit3	2009-03-05 14:58:22.000000000 +0100
-+++ openssh-5.6p1/monitor_wrap.h	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/monitor_wrap.h.audit3 openssh-5.8p1/monitor_wrap.h
+--- openssh-5.8p1/monitor_wrap.h.audit3	2009-03-05 14:58:22.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.h	2011-02-09 21:51:19.000000000 +0100
 @@ -74,6 +74,8 @@ void mm_sshpam_free_ctx(void *);
  #include "audit.h"
  void mm_audit_event(ssh_audit_event_t);
@@ -478,9 +478,9 @@ diff -up openssh-5.6p1/monitor_wrap.h.audit3 openssh-5.6p1/monitor_wrap.h
  #endif
  
  struct Session;
-diff -up openssh-5.6p1/sshd.c.audit3 openssh-5.6p1/sshd.c
---- openssh-5.6p1/sshd.c.audit3	2010-04-16 07:56:22.000000000 +0200
-+++ openssh-5.6p1/sshd.c	2010-12-10 22:17:32.000000000 +0100
+diff -up openssh-5.8p1/sshd.c.audit3 openssh-5.8p1/sshd.c
+--- openssh-5.8p1/sshd.c.audit3	2011-01-11 07:20:31.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-09 21:51:19.000000000 +0100
 @@ -118,6 +118,7 @@
  #endif
  #include "monitor_wrap.h"
@@ -489,7 +489,7 @@ diff -up openssh-5.6p1/sshd.c.audit3 openssh-5.6p1/sshd.c
  #include "version.h"
  
  #ifdef LIBWRAP
-@@ -2177,6 +2178,10 @@ do_ssh1_kex(void)
+@@ -2182,6 +2183,10 @@ do_ssh1_kex(void)
  		if (cookie[i] != packet_get_char())
  			packet_disconnect("IP Spoofing check bytes do not match.");
  

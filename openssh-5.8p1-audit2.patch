@@ -1,6 +1,6 @@
-diff -up openssh-5.6p1/audit-bsm.c.audit2 openssh-5.6p1/audit-bsm.c
---- openssh-5.6p1/audit-bsm.c.audit2	2010-12-10 21:55:40.000000000 +0100
-+++ openssh-5.6p1/audit-bsm.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/audit-bsm.c.audit2 openssh-5.8p1/audit-bsm.c
+--- openssh-5.8p1/audit-bsm.c.audit2	2011-01-17 11:15:29.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-09 15:50:28.000000000 +0100
 @@ -316,6 +316,12 @@ audit_session_close(struct logininfo *li
  	/* not implemented */
  }
@@ -14,9 +14,9 @@ diff -up openssh-5.6p1/audit-bsm.c.audit2 openssh-5.6p1/audit-bsm.c
  void
  audit_event(ssh_audit_event_t event)
  {
-diff -up openssh-5.6p1/audit.c.audit2 openssh-5.6p1/audit.c
---- openssh-5.6p1/audit.c.audit2	2010-12-10 21:55:40.000000000 +0100
-+++ openssh-5.6p1/audit.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/audit.c.audit2 openssh-5.8p1/audit.c
+--- openssh-5.8p1/audit.c.audit2	2011-01-17 11:15:30.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-09 15:50:28.000000000 +0100
 @@ -111,6 +111,33 @@ audit_event_lookup(ssh_audit_event_t ev)
  	return(event_lookup[i].name);
  }
@@ -69,9 +69,9 @@ diff -up openssh-5.6p1/audit.c.audit2 openssh-5.6p1/audit.c
 +}
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.6p1/audit.h.audit2 openssh-5.6p1/audit.h
---- openssh-5.6p1/audit.h.audit2	2010-12-10 21:55:40.000000000 +0100
-+++ openssh-5.6p1/audit.h	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/audit.h.audit2 openssh-5.8p1/audit.h
+--- openssh-5.8p1/audit.h.audit2	2011-01-17 11:15:30.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-09 15:50:28.000000000 +0100
 @@ -28,6 +28,7 @@
  # define _SSH_AUDIT_H
  
@@ -88,9 +88,9 @@ diff -up openssh-5.6p1/audit.h.audit2 openssh-5.6p1/audit.h
 +int	audit_key(int, int *, const Key *);
  
  #endif /* _SSH_AUDIT_H */
-diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
---- openssh-5.6p1/audit-linux.c.audit2	2010-12-10 21:55:41.000000000 +0100
-+++ openssh-5.6p1/audit-linux.c	2010-12-10 22:16:42.000000000 +0100
+diff -up openssh-5.8p1/audit-linux.c.audit2 openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit2	2011-01-17 11:15:30.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-09 15:51:45.000000000 +0100
 @@ -37,6 +37,8 @@
  #include "audit.h"
  #include "canohost.h"
@@ -100,8 +100,8 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
  const char* audit_username(void);
  
  int
-@@ -63,6 +65,37 @@ linux_audit_record_event(int uid, const 
- 	return (rc >= 0) || ((rc == -EPERM) && (getuid() != 0));
+@@ -68,6 +70,37 @@ linux_audit_record_event(int uid, const 
+ 	return (rc >= 0);
  }
  
 +int
@@ -138,9 +138,9 @@ diff -up openssh-5.6p1/audit-linux.c.audit2 openssh-5.6p1/audit-linux.c
  /* Below is the sshd audit API code */
  
  void
-diff -up openssh-5.6p1/auth2-hostbased.c.audit2 openssh-5.6p1/auth2-hostbased.c
---- openssh-5.6p1/auth2-hostbased.c.audit2	2010-08-05 05:04:50.000000000 +0200
-+++ openssh-5.6p1/auth2-hostbased.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/auth2-hostbased.c.audit2 openssh-5.8p1/auth2-hostbased.c
+--- openssh-5.8p1/auth2-hostbased.c.audit2	2010-08-05 05:04:50.000000000 +0200
++++ openssh-5.8p1/auth2-hostbased.c	2011-02-09 15:50:28.000000000 +0100
 @@ -136,6 +136,18 @@ done:
  	return authenticated;
  }
@@ -160,9 +160,9 @@ diff -up openssh-5.6p1/auth2-hostbased.c.audit2 openssh-5.6p1/auth2-hostbased.c
  /* return 1 if given hostkey is allowed */
  int
  hostbased_key_allowed(struct passwd *pw, const char *cuser, char *chost,
-diff -up openssh-5.6p1/auth2-pubkey.c.audit2 openssh-5.6p1/auth2-pubkey.c
---- openssh-5.6p1/auth2-pubkey.c.audit2	2010-07-02 05:35:19.000000000 +0200
-+++ openssh-5.6p1/auth2-pubkey.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/auth2-pubkey.c.audit2 openssh-5.8p1/auth2-pubkey.c
+--- openssh-5.8p1/auth2-pubkey.c.audit2	2010-12-01 01:50:14.000000000 +0100
++++ openssh-5.8p1/auth2-pubkey.c	2011-02-09 15:50:28.000000000 +0100
 @@ -177,6 +177,18 @@ done:
  	return authenticated;
  }
@@ -182,9 +182,9 @@ diff -up openssh-5.6p1/auth2-pubkey.c.audit2 openssh-5.6p1/auth2-pubkey.c
  static int
  match_principals_option(const char *principal_list, struct KeyCert *cert)
  {
-diff -up openssh-5.6p1/auth.h.audit2 openssh-5.6p1/auth.h
---- openssh-5.6p1/auth.h.audit2	2010-05-10 03:58:03.000000000 +0200
-+++ openssh-5.6p1/auth.h	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/auth.h.audit2 openssh-5.8p1/auth.h
+--- openssh-5.8p1/auth.h.audit2	2010-05-10 03:58:03.000000000 +0200
++++ openssh-5.8p1/auth.h	2011-02-09 15:50:28.000000000 +0100
 @@ -170,6 +170,7 @@ void	abandon_challenge_response(Authctxt
  char	*authorized_keys_file(struct passwd *);
  char	*authorized_keys_file2(struct passwd *);
@@ -201,9 +201,9 @@ diff -up openssh-5.6p1/auth.h.audit2 openssh-5.6p1/auth.h
  
  /* debug messages during authentication */
  void	 auth_debug_add(const char *fmt,...) __attribute__((format(printf, 1, 2)));
-diff -up openssh-5.6p1/auth-rsa.c.audit2 openssh-5.6p1/auth-rsa.c
---- openssh-5.6p1/auth-rsa.c.audit2	2010-07-16 05:58:37.000000000 +0200
-+++ openssh-5.6p1/auth-rsa.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/auth-rsa.c.audit2 openssh-5.8p1/auth-rsa.c
+--- openssh-5.8p1/auth-rsa.c.audit2	2010-12-04 23:01:47.000000000 +0100
++++ openssh-5.8p1/auth-rsa.c	2011-02-09 15:53:00.000000000 +0100
 @@ -92,7 +92,10 @@ auth_rsa_verify_response(Key *key, BIGNU
  {
  	u_char buf[32], mdbuf[16];
@@ -214,9 +214,9 @@ diff -up openssh-5.6p1/auth-rsa.c.audit2 openssh-5.6p1/auth-rsa.c
 +	char *fp;
 +#endif
  
- 	if (auth_key_is_revoked(key))
- 		return 0;
-@@ -116,12 +119,18 @@ auth_rsa_verify_response(Key *key, BIGNU
+ 	/* don't allow short keys */
+ 	if (BN_num_bits(key->rsa->n) < SSH_RSA_MINIMUM_MODULUS_SIZE) {
+@@ -113,12 +116,18 @@ auth_rsa_verify_response(Key *key, BIGNU
  	MD5_Final(mdbuf, &md);
  
  	/* Verify that the response is the original challenge. */
@@ -240,9 +240,9 @@ diff -up openssh-5.6p1/auth-rsa.c.audit2 openssh-5.6p1/auth-rsa.c
  }
  
  /*
-diff -up openssh-5.6p1/monitor.c.audit2 openssh-5.6p1/monitor.c
---- openssh-5.6p1/monitor.c.audit2	2010-08-03 07:50:16.000000000 +0200
-+++ openssh-5.6p1/monitor.c	2010-12-10 21:55:41.000000000 +0100
+diff -up openssh-5.8p1/monitor.c.audit2 openssh-5.8p1/monitor.c
+--- openssh-5.8p1/monitor.c.audit2	2010-09-10 03:23:34.000000000 +0200
++++ openssh-5.8p1/monitor.c	2011-02-09 15:50:28.000000000 +0100
 @@ -1235,7 +1235,17 @@ mm_answer_keyverify(int sock, Buffer *m)
  	if (!valid_data)
  		fatal("%s: bad signature data blob", __func__);

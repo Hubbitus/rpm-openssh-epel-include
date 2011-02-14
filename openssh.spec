@@ -70,10 +70,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 5.6p1
-%define openssh_rel 30
+%define openssh_ver 5.8p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 29
+%define pam_ssh_agent_rel 30
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -96,49 +96,54 @@ Source5: pam_ssh_agent-rmheaders
 Patch100: openssh-5.6p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch1: openssh-5.6p1-audit.patch
-Patch2: openssh-5.6p1-audit1a.patch
-Patch3: openssh-5.6p1-audit2.patch
-Patch4: openssh-5.6p1-audit3.patch
-Patch104: openssh-5.6p1-audit4.patch
-Patch105: openssh-5.6p1-audit5.patch
+Patch2: openssh-5.8p1-audit2.patch
+Patch3: openssh-5.8p1-audit3.patch
+Patch4: openssh-5.8p1-audit4.patch
+Patch5: openssh-5.8p1-audit5.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
-Patch5: openssh-5.2p1-vendor.patch
+Patch9: openssh-5.8p1-vendor.patch
+# --- pam_ssh-agent ---
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1641
-Patch12: openssh-5.4p1-selinux.patch
-Patch13: openssh-5.6p1-mls.patch
-Patch18: openssh-5.4p1-pam_selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch20: openssh-5.6p1-authorized-keys-command.patch
+Patch20: openssh-5.8p1-authorized-keys-command.patch
 Patch21: openssh-5.6p1-ldap.patch
+#?mail-conf
+Patch22: openssh-5.8p1-selinux.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1641
+Patch23: openssh-5.8p1-selinux-role.patch
+#?
+Patch24: openssh-5.8p1-mls.patch
+# #https://bugzilla.mindrot.org/show_bug.cgi?id=1614
+# Patch25: openssh-5.6p1-selabel.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
-Patch23: openssh-5.6p1-keygen.patch
-Patch24: openssh-4.3p1-fromto-remote.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1636
-Patch27: openssh-5.1p1-log-in-chroot.patch
-Patch30: openssh-5.6p1-exit-deadlock.patch
-Patch35: openssh-5.1p1-askpass-progress.patch
-Patch38: openssh-4.3p2-askpass-grab-info.patch
+Patch30: openssh-5.6p1-keygen.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1644
-Patch44: openssh-5.2p1-allow-ip-opts.patch
-Patch49: openssh-4.3p2-gssapi-canohost.patch
-Patch62: openssh-5.1p1-scp-manpage.patch
-Patch65: openssh-5.6p1-fips.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1614
-Patch69: openssh-5.6p1-selabel.patch
-Patch71: openssh-5.2p1-edns.patch
-Patch73: openssh-5.6p1-gsskex.patch
+Patch31: openssh-5.2p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
-Patch74: openssh-5.3p1-randclean.patch
+Patch32: openssh-5.8p1-randclean.patch
+# #https://bugzilla.mindrot.org/show_bug.cgi?id=1636
+# Patch33: openssh-5.1p1-log-in-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch78: openssh-5.6p1-kuserok.patch
-Patch79: openssh-5.5p1-x11.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1817
-Patch80: openssh-5.6p1-biguid.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1842
-Patch81: openssh-5.6p1-clientloop.patch
+Patch34: openssh-5.8p1-kuserok.patch
+#?
+Patch50: openssh-5.8p1-fips.patch
+#?
+Patch51: openssh-5.5p1-x11.patch
+#?
+Patch52: openssh-5.6p1-exit-deadlock.patch
+#?
+Patch53: openssh-5.1p1-askpass-progress.patch
+#?
+Patch54: openssh-4.3p2-askpass-grab-info.patch
+#?
+Patch56: openssh-5.2p1-edns.patch
+#?
+Patch57: openssh-5.1p1-scp-manpage.patch
+#http://www.sxw.org.uk/computing/patches/openssh.html
+Patch60: openssh-5.8p1-gsskex.patch
+#?
+Patch61: openssh-5.8p1-gssapi-canohost.patch
 
 License: BSD
 Group: Applications/Internet
@@ -278,14 +283,11 @@ The module is most useful for su and sudo service stacks.
 #Do not enable by default
 ###%patch100 -p1 -b .wIm
 %patch0 -p1 -b .redhat
-%patch1 -p1 -b .audit
-%patch2 -p1 -b .audit1a
-%patch3 -p1 -b .audit2
-%patch4 -p1 -b .audit3
-%patch104 -p1 -b .audit4
-%patch105 -p1 -b .audit5
-%patch5 -p1 -b .vendor
-
+%patch2 -p1 -b .audit2
+%patch3 -p1 -b .audit3
+%patch4 -p1 -b .audit4
+%patch5 -p1 -b .audit5
+%patch9 -p1 -b .vendor
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch10 -p1 -b .psaa-build
@@ -294,34 +296,27 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 rm -f $(cat %{SOURCE5})
 popd
 %endif
-
-%if %{WITH_SELINUX}
-#SELinux
-%patch12 -p1 -b .selinux
-%patch13 -p1 -b .mls
-%patch18 -p1 -b .pam_selinux
-%endif
-
 %patch20 -p1 -b .akc
 %patch21 -p1 -b .ldap
-%patch23 -p1 -b .keygen
-%patch24 -p1 -b .fromto-remote
-%patch27 -p1 -b .log-chroot
-%patch30 -p1 -b .exit-deadlock
-%patch35 -p1 -b .progress
-%patch38 -p1 -b .grab-info
-%patch44 -p1 -b .ip-opts
-%patch49 -p1 -b .canohost
-%patch62 -p1 -b .manpage
-%patch65 -p1 -b .fips
-%patch69 -p1 -b .selabel
-%patch71 -p1 -b .edns
-%patch73 -p1 -b .gsskex
-%patch74 -p1 -b .randclean
-%patch78 -p1 -b .kuserok
-%patch79 -p1 -b .x11
-%patch80 -p1 -b .biguid
-%patch81 -p1 -b .clientloop
+%if %{WITH_SELINUX}
+#SELinux
+%patch22 -p1 -b .selinux
+%patch23 -p1 -b .role
+%patch24 -p1 -b .mls
+%endif
+%patch30 -p1 -b .keygen
+%patch31 -p1 -b .ip-opts
+%patch32 -p1 -b .randclean
+%patch34 -p1 -b .kuserok
+%patch50 -p1 -b .fips
+%patch51 -p1 -b .x11
+%patch52 -p1 -b .exit-deadlock
+%patch53 -p1 -b .progress
+%patch54 -p1 -b .grab-info
+%patch56 -p1 -b .edns
+%patch57 -p1 -b .manpage
+%patch60 -p1 -b .gsskex
+%patch61 -p1 -b .canohost
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -339,9 +334,13 @@ CFLAGS="$CFLAGS -fPIC"
 %else
 CFLAGS="$CFLAGS -fpic"
 %endif
-export CFLAGS
 SAVE_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -pie -z relro -z now"; export LDFLAGS
+LDFLAGS="$LDFLAGS -pie -z relro -z now"
+
+export CFLAGS
+export LDFLAGS
+
+
 %endif
 %if %{kerberos5}
 if test -r /etc/profile.d/krb5-devel.sh ; then
@@ -603,6 +602,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 14 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-1 + 0.9.2-30
+- bump openssh version to 5.8p1
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6p1-30.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 

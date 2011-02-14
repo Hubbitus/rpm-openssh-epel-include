@@ -1,6 +1,6 @@
-diff -up openssh-5.6p1/auth2-pubkey.c.akc openssh-5.6p1/auth2-pubkey.c
---- openssh-5.6p1/auth2-pubkey.c.akc	2010-09-03 15:24:51.000000000 +0200
-+++ openssh-5.6p1/auth2-pubkey.c	2010-09-03 15:24:51.000000000 +0200
+diff -up openssh-5.8p1/auth2-pubkey.c.akc openssh-5.8p1/auth2-pubkey.c
+--- openssh-5.8p1/auth2-pubkey.c.akc	2011-02-10 13:21:27.000000000 +0100
++++ openssh-5.8p1/auth2-pubkey.c	2011-02-10 13:21:28.000000000 +0100
 @@ -27,6 +27,7 @@
  
  #include <sys/types.h>
@@ -9,7 +9,7 @@ diff -up openssh-5.6p1/auth2-pubkey.c.akc openssh-5.6p1/auth2-pubkey.c
  
  #include <fcntl.h>
  #include <pwd.h>
-@@ -264,27 +265,15 @@ match_principals_file(char *file, struct
+@@ -268,27 +269,15 @@ match_principals_file(char *file, struct
  
  /* return 1 if user allows given key */
  static int
@@ -38,7 +38,7 @@ diff -up openssh-5.6p1/auth2-pubkey.c.akc openssh-5.6p1/auth2-pubkey.c
  	found_key = 0;
  	found = key_new(key_is_cert(key) ? KEY_UNSPEC : key->type);
  
-@@ -377,8 +366,6 @@ user_key_allowed2(struct passwd *pw, Key
+@@ -381,8 +370,6 @@ user_key_allowed2(struct passwd *pw, Key
  			break;
  		}
  	}
@@ -47,7 +47,7 @@ diff -up openssh-5.6p1/auth2-pubkey.c.akc openssh-5.6p1/auth2-pubkey.c
  	key_free(found);
  	if (!found_key)
  		debug2("key not found");
-@@ -440,13 +427,191 @@ user_cert_trusted_ca(struct passwd *pw, 
+@@ -444,13 +431,191 @@ user_cert_trusted_ca(struct passwd *pw, 
  	return ret;
  }
  
@@ -240,10 +240,10 @@ diff -up openssh-5.6p1/auth2-pubkey.c.akc openssh-5.6p1/auth2-pubkey.c
  	if (auth_key_is_revoked(key))
  		return 0;
  	if (key_is_cert(key) && auth_key_is_revoked(key->cert->signature_key))
-diff -up openssh-5.6p1/configure.ac.akc openssh-5.6p1/configure.ac
---- openssh-5.6p1/configure.ac.akc	2010-09-03 15:24:51.000000000 +0200
-+++ openssh-5.6p1/configure.ac	2010-09-03 15:24:51.000000000 +0200
-@@ -1346,6 +1346,18 @@ AC_ARG_WITH(audit,
+diff -up openssh-5.8p1/configure.ac.akc openssh-5.8p1/configure.ac
+--- openssh-5.8p1/configure.ac.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/configure.ac	2011-02-10 13:21:28.000000000 +0100
+@@ -1422,6 +1422,18 @@ AC_ARG_WITH(audit,
  	esac ]
  )
  
@@ -262,7 +262,7 @@ diff -up openssh-5.6p1/configure.ac.akc openssh-5.6p1/configure.ac
  dnl    Checks for library functions. Please keep in alphabetical order
  AC_CHECK_FUNCS( \
  	arc4random \
-@@ -4209,6 +4221,7 @@ echo "               Linux audit support
+@@ -4325,6 +4337,7 @@ echo "                   SELinux support
  echo "                 Smartcard support: $SCARD_MSG"
  echo "                     S/KEY support: $SKEY_MSG"
  echo "              TCP Wrappers support: $TCPW_MSG"
@@ -270,10 +270,10 @@ diff -up openssh-5.6p1/configure.ac.akc openssh-5.6p1/configure.ac
  echo "              MD5 password support: $MD5_MSG"
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
-diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
---- openssh-5.6p1/servconf.c.akc	2010-09-03 15:24:50.000000000 +0200
-+++ openssh-5.6p1/servconf.c	2010-09-03 15:24:51.000000000 +0200
-@@ -129,6 +129,8 @@ initialize_server_options(ServerOptions 
+diff -up openssh-5.8p1/servconf.c.akc openssh-5.8p1/servconf.c
+--- openssh-5.8p1/servconf.c.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/servconf.c	2011-02-10 13:28:21.000000000 +0100
+@@ -134,6 +134,8 @@ initialize_server_options(ServerOptions 
  	options->num_permitted_opens = -1;
  	options->adm_forced_command = NULL;
  	options->chroot_directory = NULL;
@@ -282,18 +282,18 @@ diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
  	options->zero_knowledge_password_authentication = -1;
  	options->revoked_keys_file = NULL;
  	options->trusted_user_ca_keys = NULL;
-@@ -316,6 +318,7 @@ typedef enum {
- 	sUsePrivilegeSeparation, sAllowAgentForwarding,
+@@ -331,6 +333,7 @@ typedef enum {
  	sZeroKnowledgePasswordAuthentication, sHostCertificate,
  	sRevokedKeys, sTrustedUserCAKeys, sAuthorizedPrincipalsFile,
+ 	sKexAlgorithms, sIPQoS,
 +	sAuthorizedKeysCommand, sAuthorizedKeysCommandRunAs,
  	sDeprecated, sUnsupported
  } ServerOpCodes;
  
-@@ -439,6 +442,13 @@ static struct {
- 	{ "revokedkeys", sRevokedKeys, SSHCFG_ALL },
- 	{ "trustedusercakeys", sTrustedUserCAKeys, SSHCFG_ALL },
+@@ -456,6 +459,13 @@ static struct {
  	{ "authorizedprincipalsfile", sAuthorizedPrincipalsFile, SSHCFG_ALL },
+ 	{ "kexalgorithms", sKexAlgorithms, SSHCFG_GLOBAL },
+ 	{ "ipqos", sIPQoS, SSHCFG_ALL },
 +#ifdef WITH_AUTHORIZED_KEYS_COMMAND
 +	{ "authorizedkeyscommand", sAuthorizedKeysCommand, SSHCFG_ALL },
 +	{ "authorizedkeyscommandrunas", sAuthorizedKeysCommandRunAs, SSHCFG_ALL },
@@ -304,9 +304,9 @@ diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
  	{ NULL, sBadOption, 0 }
  };
  
-@@ -1360,6 +1370,20 @@ process_server_config_line(ServerOptions
- 		charptr = &options->revoked_keys_file;
- 		goto parse_filename;
+@@ -1406,6 +1416,20 @@ process_server_config_line(ServerOptions
+ 		}
+ 		break;
  
 +	case sAuthorizedKeysCommand:
 +		len = strspn(cp, WHITESPACE);
@@ -325,7 +325,7 @@ diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
  	case sDeprecated:
  		logit("%s line %d: Deprecated option %s",
  		    filename, linenum, arg);
-@@ -1453,6 +1477,8 @@ copy_set_server_options(ServerOptions *d
+@@ -1499,6 +1523,8 @@ copy_set_server_options(ServerOptions *d
  	M_CP_INTOPT(gss_authentication);
  	M_CP_INTOPT(rsa_authentication);
  	M_CP_INTOPT(pubkey_authentication);
@@ -334,7 +334,7 @@ diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
  	M_CP_INTOPT(kerberos_authentication);
  	M_CP_INTOPT(hostbased_authentication);
  	M_CP_INTOPT(hostbased_uses_name_from_packet_only);
-@@ -1705,6 +1731,8 @@ dump_config(ServerOptions *o)
+@@ -1753,6 +1779,8 @@ dump_config(ServerOptions *o)
  	dump_cfg_string(sRevokedKeys, o->revoked_keys_file);
  	dump_cfg_string(sAuthorizedPrincipalsFile,
  	    o->authorized_principals_file);
@@ -343,10 +343,10 @@ diff -up openssh-5.6p1/servconf.c.akc openssh-5.6p1/servconf.c
  
  	/* string arguments requiring a lookup */
  	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
-diff -up openssh-5.6p1/servconf.h.akc openssh-5.6p1/servconf.h
---- openssh-5.6p1/servconf.h.akc	2010-09-03 15:24:50.000000000 +0200
-+++ openssh-5.6p1/servconf.h	2010-09-03 15:24:51.000000000 +0200
-@@ -158,6 +158,8 @@ typedef struct {
+diff -up openssh-5.8p1/servconf.h.akc openssh-5.8p1/servconf.h
+--- openssh-5.8p1/servconf.h.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/servconf.h	2011-02-10 13:21:28.000000000 +0100
+@@ -161,6 +161,8 @@ typedef struct {
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
  	char   *authorized_principals_file;
@@ -355,9 +355,9 @@ diff -up openssh-5.6p1/servconf.h.akc openssh-5.6p1/servconf.h
  }       ServerOptions;
  
  void	 initialize_server_options(ServerOptions *);
-diff -up openssh-5.6p1/sshd_config.0.akc openssh-5.6p1/sshd_config.0
---- openssh-5.6p1/sshd_config.0.akc	2010-09-03 15:24:50.000000000 +0200
-+++ openssh-5.6p1/sshd_config.0	2010-09-03 15:27:26.000000000 +0200
+diff -up openssh-5.8p1/sshd_config.0.akc openssh-5.8p1/sshd_config.0
+--- openssh-5.8p1/sshd_config.0.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/sshd_config.0	2011-02-10 13:21:28.000000000 +0100
 @@ -71,6 +71,23 @@ DESCRIPTION
  
               See PATTERNS in ssh_config(5) for more information on patterns.
@@ -382,7 +382,7 @@ diff -up openssh-5.6p1/sshd_config.0.akc openssh-5.6p1/sshd_config.0
       AuthorizedKeysFile
               Specifies the file that contains the public keys that can be used
               for user authentication.  The format is described in the
-@@ -375,7 +392,8 @@ DESCRIPTION
+@@ -398,7 +415,8 @@ DESCRIPTION
  
               Only a subset of keywords may be used on the lines following a
               Match keyword.  Available keywords are AllowAgentForwarding,
@@ -392,10 +392,10 @@ diff -up openssh-5.6p1/sshd_config.0.akc openssh-5.6p1/sshd_config.0
               Banner, ChrootDirectory, ForceCommand, GatewayPorts,
               GSSAPIAuthentication, HostbasedAuthentication,
               HostbasedUsesNameFromPacketOnly, KbdInteractiveAuthentication,
-diff -up openssh-5.6p1/sshd_config.5.akc openssh-5.6p1/sshd_config.5
---- openssh-5.6p1/sshd_config.5.akc	2010-09-03 15:24:50.000000000 +0200
-+++ openssh-5.6p1/sshd_config.5	2010-09-03 15:24:51.000000000 +0200
-@@ -654,6 +654,8 @@ Available keywords are
+diff -up openssh-5.8p1/sshd_config.5.akc openssh-5.8p1/sshd_config.5
+--- openssh-5.8p1/sshd_config.5.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/sshd_config.5	2011-02-10 13:21:28.000000000 +0100
+@@ -703,6 +703,8 @@ Available keywords are
  .Cm AllowAgentForwarding ,
  .Cm AllowTcpForwarding ,
  .Cm AuthorizedKeysFile ,
@@ -404,7 +404,7 @@ diff -up openssh-5.6p1/sshd_config.5.akc openssh-5.6p1/sshd_config.5
  .Cm AuthorizedPrincipalsFile ,
  .Cm Banner ,
  .Cm ChrootDirectory ,
-@@ -666,6 +668,7 @@ Available keywords are
+@@ -715,6 +717,7 @@ Available keywords are
  .Cm KerberosAuthentication ,
  .Cm MaxAuthTries ,
  .Cm MaxSessions ,
@@ -412,7 +412,7 @@ diff -up openssh-5.6p1/sshd_config.5.akc openssh-5.6p1/sshd_config.5
  .Cm PasswordAuthentication ,
  .Cm PermitEmptyPasswords ,
  .Cm PermitOpen ,
-@@ -868,6 +871,20 @@ Specifies a list of revoked public keys.
+@@ -917,6 +920,20 @@ Specifies a list of revoked public keys.
  Keys listed in this file will be refused for public key authentication.
  Note that if this file is not readable, then public key authentication will
  be refused for all users.
@@ -433,10 +433,10 @@ diff -up openssh-5.6p1/sshd_config.5.akc openssh-5.6p1/sshd_config.5
  .It Cm RhostsRSAAuthentication
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful RSA host authentication is allowed.
-diff -up openssh-5.6p1/sshd_config.akc openssh-5.6p1/sshd_config
---- openssh-5.6p1/sshd_config.akc	2010-09-03 15:24:50.000000000 +0200
-+++ openssh-5.6p1/sshd_config	2010-09-03 15:24:51.000000000 +0200
-@@ -45,6 +45,8 @@ SyslogFacility AUTHPRIV
+diff -up openssh-5.8p1/sshd_config.akc openssh-5.8p1/sshd_config
+--- openssh-5.8p1/sshd_config.akc	2011-02-10 13:21:28.000000000 +0100
++++ openssh-5.8p1/sshd_config	2011-02-10 13:21:28.000000000 +0100
+@@ -46,6 +46,8 @@ SyslogFacility AUTHPRIV
  #RSAAuthentication yes
  #PubkeyAuthentication yes
  #AuthorizedKeysFile	.ssh/authorized_keys
