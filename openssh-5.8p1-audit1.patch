@@ -1,0 +1,120 @@
+diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit1	2011-02-16 15:49:11.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-16 16:48:45.000000000 +0100
+@@ -39,8 +39,8 @@
+ 
+ const char* audit_username(void);
+ 
+-int
+-linux_audit_record_event(int uid, const char *username,
++static int
++linux_audit_user_login(int uid, const char *username,
+     const char *hostname, const char *ip, const char *ttyn, int success)
+ {
+ 	int audit_fd, rc, saved_errno;
+@@ -68,13 +68,62 @@ linux_audit_record_event(int uid, const 
+ 	return (rc >= 0);
+ }
+ 
++static int
++linux_audit_user_auth(int uid, const char *username,
++    const char *hostname, const char *ip, const char *ttyn, int success, int event)
++{
++	int audit_fd, rc, saved_errno;
++	static const char *event_name[] = {
++		"exceed maxtries",
++		"root denied",
++		"success",
++		"none",
++		"paasword",
++		"chalenge-response",
++		"pubkey",
++		"hostbased",
++		"gssapi",
++		"invalid user",
++		"nologin",
++		"connection close",
++		"connection abandon",
++		"unknown"
++	};
++
++	audit_fd = audit_open();
++	if (audit_fd < 0) {
++		if (errno == EINVAL || errno == EPROTONOSUPPORT ||
++		    errno == EAFNOSUPPORT)
++			return 1; /* No audit support in kernel */
++		else
++			return 0; /* Must prevent login */
++	}
++	
++	if ((event < 0) || (event > SSH_AUDIT_UNKNOWN))
++		event = SSH_AUDIT_UNKNOWN;
++
++	rc = audit_log_acct_message(audit_fd, AUDIT_USER_AUTH,
++	    NULL, event_name[event], username ? username : "(unknown)",
++	    username == NULL ? uid : -1, hostname, ip, ttyn, success);
++	saved_errno = errno;
++	close(audit_fd);
++	/*
++	 * Do not report error if the error is EPERM and sshd is run as non
++	 * root user.
++	 */
++	if ((rc == -EPERM) && (geteuid() != 0))
++		rc = 0;
++	errno = saved_errno;
++	return (rc >= 0);
++}
++
+ /* Below is the sshd audit API code */
+ 
+ void
+ audit_connection_from(const char *host, int port)
+ {
+-}
+ 	/* not implemented */
++}
+ 
+ void
+ audit_run_command(const char *command)
+@@ -85,7 +134,7 @@ audit_run_command(const char *command)
+ void
+ audit_session_open(struct logininfo *li)
+ {
+-	if (linux_audit_record_event(li->uid, NULL, li->hostname,
++	if (linux_audit_user_login(li->uid, NULL, li->hostname,
+ 	    NULL, li->line, 1) == 0)
+ 		fatal("linux_audit_write_entry failed: %s", strerror(errno));
+ }
+@@ -101,10 +150,15 @@ audit_event(ssh_audit_event_t event)
+ {
+ 	switch(event) {
+ 	case SSH_AUTH_SUCCESS:
+-	case SSH_CONNECTION_CLOSE:
++		break;
++
+ 	case SSH_NOLOGIN:
+ 	case SSH_LOGIN_EXCEED_MAXTRIES:
+ 	case SSH_LOGIN_ROOT_DENIED:
++		linux_audit_user_auth(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 0, event);
++		linux_audit_user_login(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 0);
+ 		break;
+ 
+ 	case SSH_AUTH_FAIL_NONE:
+@@ -113,8 +167,14 @@ audit_event(ssh_audit_event_t event)
+ 	case SSH_AUTH_FAIL_PUBKEY:
+ 	case SSH_AUTH_FAIL_HOSTBASED:
+ 	case SSH_AUTH_FAIL_GSSAPI:
++		linux_audit_user_auth(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 0, event);
++		break;
++
++	case SSH_CONNECTION_CLOSE:
++	case SSH_CONNECTION_ABANDON:
+ 	case SSH_INVALID_USER:
+-		linux_audit_record_event(-1, audit_username(), NULL,
++		linux_audit_user_login(-1, audit_username(), NULL,
+ 			get_remote_ipaddr(), "sshd", 0);
+ 		break;
+ 
