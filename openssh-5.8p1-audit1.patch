@@ -1,22 +1,41 @@
 diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
---- openssh-5.8p1/audit-linux.c.audit1	2011-02-16 15:49:11.000000000 +0100
-+++ openssh-5.8p1/audit-linux.c	2011-02-16 16:48:45.000000000 +0100
+--- openssh-5.8p1/audit-linux.c.audit1	2011-01-17 11:15:30.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-16 23:26:59.000000000 +0100
 @@ -39,8 +39,8 @@
  
  const char* audit_username(void);
  
 -int
 -linux_audit_record_event(int uid, const char *username,
-+static int
++static void
 +linux_audit_user_login(int uid, const char *username,
      const char *hostname, const char *ip, const char *ttyn, int success)
  {
  	int audit_fd, rc, saved_errno;
-@@ -68,13 +68,62 @@ linux_audit_record_event(int uid, const 
- 	return (rc >= 0);
- }
- 
-+static int
+@@ -49,9 +49,9 @@ linux_audit_record_event(int uid, const 
+ 	if (audit_fd < 0) {
+ 		if (errno == EINVAL || errno == EPROTONOSUPPORT ||
+ 		    errno == EAFNOSUPPORT)
+-			return 1; /* No audit support in kernel */
++			return; /* No audit support in kernel */
+ 		else
+-			return 0; /* Must prevent login */
++			goto fatal_report; /* Must prevent login */
+ 	}
+ 	rc = audit_log_acct_message(audit_fd, AUDIT_USER_LOGIN,
+ 	    NULL, "login", username ? username : "(unknown)",
+@@ -65,7 +65,62 @@ linux_audit_record_event(int uid, const 
+ 	if ((rc == -EPERM) && (geteuid() != 0))
+ 		rc = 0;
+ 	errno = saved_errno;
+-	return (rc >= 0);
++	if (rc < 0) {
++fatal_report:
++		fatal("linux_audit_write_entry failed: %s", strerror(errno));
++	}
++}
++
++static void
 +linux_audit_user_auth(int uid, const char *username,
 +    const char *hostname, const char *ip, const char *ttyn, int success, int event)
 +{
@@ -42,9 +61,9 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 +	if (audit_fd < 0) {
 +		if (errno == EINVAL || errno == EPROTONOSUPPORT ||
 +		    errno == EAFNOSUPPORT)
-+			return 1; /* No audit support in kernel */
++			return; /* No audit support in kernel */
 +		else
-+			return 0; /* Must prevent login */
++			goto fatal_report; /* Must prevent login */
 +	}
 +	
 +	if ((event < 0) || (event > SSH_AUDIT_UNKNOWN))
@@ -62,11 +81,14 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 +	if ((rc == -EPERM) && (geteuid() != 0))
 +		rc = 0;
 +	errno = saved_errno;
-+	return (rc >= 0);
-+}
-+
- /* Below is the sshd audit API code */
++	if (rc < 0) {
++fatal_report:
++		fatal("linux_audit_write_entry failed: %s", strerror(errno));
++	}
+ }
  
+ /* Below is the sshd audit API code */
+@@ -73,8 +128,8 @@ linux_audit_record_event(int uid, const 
  void
  audit_connection_from(const char *host, int port)
  {
@@ -76,24 +98,29 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
  
  void
  audit_run_command(const char *command)
-@@ -85,7 +134,7 @@ audit_run_command(const char *command)
+@@ -85,9 +140,8 @@ audit_run_command(const char *command)
  void
  audit_session_open(struct logininfo *li)
  {
 -	if (linux_audit_record_event(li->uid, NULL, li->hostname,
-+	if (linux_audit_user_login(li->uid, NULL, li->hostname,
- 	    NULL, li->line, 1) == 0)
- 		fatal("linux_audit_write_entry failed: %s", strerror(errno));
+-	    NULL, li->line, 1) == 0)
+-		fatal("linux_audit_write_entry failed: %s", strerror(errno));
++	linux_audit_user_login(li->uid, NULL, li->hostname,
++	    NULL, li->line, 1);
  }
-@@ -101,10 +150,15 @@ audit_event(ssh_audit_event_t event)
+ 
+ void
+@@ -101,20 +155,33 @@ audit_event(ssh_audit_event_t event)
  {
  	switch(event) {
  	case SSH_AUTH_SUCCESS:
 -	case SSH_CONNECTION_CLOSE:
++		linux_audit_user_auth(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 1, event);
 +		break;
 +
  	case SSH_NOLOGIN:
- 	case SSH_LOGIN_EXCEED_MAXTRIES:
+-	case SSH_LOGIN_EXCEED_MAXTRIES:
  	case SSH_LOGIN_ROOT_DENIED:
 +		linux_audit_user_auth(-1, audit_username(), NULL,
 +			get_remote_ipaddr(), "sshd", 0, event);
@@ -101,8 +128,10 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 +			get_remote_ipaddr(), "sshd", 0);
  		break;
  
++	case SSH_LOGIN_EXCEED_MAXTRIES:
  	case SSH_AUTH_FAIL_NONE:
-@@ -113,8 +167,14 @@ audit_event(ssh_audit_event_t event)
+ 	case SSH_AUTH_FAIL_PASSWD:
+ 	case SSH_AUTH_FAIL_KBDINT:
  	case SSH_AUTH_FAIL_PUBKEY:
  	case SSH_AUTH_FAIL_HOSTBASED:
  	case SSH_AUTH_FAIL_GSSAPI:
