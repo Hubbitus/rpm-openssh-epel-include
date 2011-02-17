@@ -1,20 +1,20 @@
 diff -up openssh-5.8p1/audit-bsm.c.audit5 openssh-5.8p1/audit-bsm.c
---- openssh-5.8p1/audit-bsm.c.audit5	2011-02-09 22:33:51.000000000 +0100
-+++ openssh-5.8p1/audit-bsm.c	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/audit-bsm.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-17 10:36:14.000000000 +0100
 @@ -401,4 +401,10 @@ audit_session_key_free_body(int ctos)
  {
  	/* not implemented */
  }
 +
 +void
-+audit_destroy_sensitive_data(void)
++audit_destroy_sensitive_data(const char *fp)
 +{
 +	/* not implemented */
 +}
  #endif /* BSM */
 diff -up openssh-5.8p1/audit.c.audit5 openssh-5.8p1/audit.c
---- openssh-5.8p1/audit.c.audit5	2011-02-09 22:33:51.000000000 +0100
-+++ openssh-5.8p1/audit.c	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/audit.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-17 10:36:14.000000000 +0100
 @@ -268,5 +268,14 @@ audit_session_key_free_body(int ctos)
  {
  	debug("audit session key discard euid %d direction %d", geteuid(), ctos);
@@ -24,36 +24,36 @@ diff -up openssh-5.8p1/audit.c.audit5 openssh-5.8p1/audit.c
 + * This will be called on destroy private part of the server key
 + */
 +void
-+audit_destroy_sensitive_data(void)
++audit_destroy_sensitive_data(const char *fp)
 +{
-+	debug("audit destroy sensitive data euid %d", geteuid());
++	debug("audit destroy sensitive data euid %d fingerprint %s", geteuid(), fp);
 +}
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/audit.h.audit5 openssh-5.8p1/audit.h
---- openssh-5.8p1/audit.h.audit5	2011-02-09 22:33:51.000000000 +0100
-+++ openssh-5.8p1/audit.h	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/audit.h.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-17 10:36:14.000000000 +0100
 @@ -62,5 +62,6 @@ void	audit_unsupported_body(int);
  void	audit_kex_body(int, char *, char *, char *);
  void	audit_session_key_free(int ctos);
  void	audit_session_key_free_body(int ctos);
-+void	audit_destroy_sensitive_data(void);
++void	audit_destroy_sensitive_data(const char *);
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.8p1/audit-linux.c.audit5 openssh-5.8p1/audit-linux.c
---- openssh-5.8p1/audit-linux.c.audit5	2011-02-09 22:33:51.000000000 +0100
-+++ openssh-5.8p1/audit-linux.c	2011-02-09 22:33:52.000000000 +0100
-@@ -231,4 +231,26 @@ audit_session_key_free_body(int ctos)
+--- openssh-5.8p1/audit-linux.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-17 10:36:14.000000000 +0100
+@@ -301,4 +301,26 @@ audit_session_key_free_body(int ctos)
  		error("cannot write into audit");
  }
  
 +void
-+audit_destroy_sensitive_data(void)
++audit_destroy_sensitive_data(const char *fp)
 +{
 +	char buf[AUDIT_LOG_SIZE];
 +	int audit_fd, audit_ok;
 +
-+	snprintf(buf, sizeof(buf), "destroy kind=server direction=?");
++	snprintf(buf, sizeof(buf), "op=destroy kind=server fp=%s direction=?", fp);
 +	audit_fd = audit_open();
 +	if (audit_fd < 0) {
 +		if (errno != EINVAL && errno != EPROTONOSUPPORT &&
@@ -61,8 +61,8 @@ diff -up openssh-5.8p1/audit-linux.c.audit5 openssh-5.8p1/audit-linux.c
 +			error("cannot open audit");
 +		return;
 +	}
-+	audit_ok = audit_log_acct_message(audit_fd, AUDIT_CRYPTO_KEY_USER, NULL,
-+			buf, NULL, -1, NULL, get_remote_ipaddr(), NULL, 1);
++	audit_ok = audit_log_user_message(audit_fd, AUDIT_CRYPTO_KEY_USER,
++			buf, NULL, get_remote_ipaddr(), NULL, 1);
 +	audit_close(audit_fd);
 +	/* do not abort if the error is EPERM and sshd is run as non root user */
 +	if ((audit_ok < 0) && ((audit_ok != -1) || (getuid() == 0)))
@@ -71,8 +71,8 @@ diff -up openssh-5.8p1/audit-linux.c.audit5 openssh-5.8p1/audit-linux.c
 +
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.8p1/monitor.c.audit5 openssh-5.8p1/monitor.c
---- openssh-5.8p1/monitor.c.audit5	2011-02-09 22:33:52.000000000 +0100
-+++ openssh-5.8p1/monitor.c	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/monitor.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/monitor.c	2011-02-17 10:36:14.000000000 +0100
 @@ -181,6 +181,7 @@ int mm_answer_audit_command(int, Buffer 
  int mm_answer_audit_unsupported_body(int, Buffer *);
  int mm_answer_audit_kex_body(int, Buffer *);
@@ -113,7 +113,7 @@ diff -up openssh-5.8p1/monitor.c.audit5 openssh-5.8p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -2272,4 +2277,15 @@ mm_answer_audit_session_key_free_body(in
+@@ -2272,4 +2277,20 @@ mm_answer_audit_session_key_free_body(in
  	mm_request_send(sock, MONITOR_ANS_AUDIT_SESSION_KEY_FREE, m);
  	return 0;
  }
@@ -121,7 +121,12 @@ diff -up openssh-5.8p1/monitor.c.audit5 openssh-5.8p1/monitor.c
 +int
 +mm_answer_audit_server_key_free(int sock, Buffer *m)
 +{
-+	audit_destroy_sensitive_data();
++	int len;
++	char *fp;
++
++	fp = buffer_get_string(m, &len);
++
++	audit_destroy_sensitive_data(fp);
 +
 +	buffer_clear(m);
 +
@@ -130,8 +135,8 @@ diff -up openssh-5.8p1/monitor.c.audit5 openssh-5.8p1/monitor.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor.h.audit5 openssh-5.8p1/monitor.h
---- openssh-5.8p1/monitor.h.audit5	2011-02-09 22:33:52.000000000 +0100
-+++ openssh-5.8p1/monitor.h	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/monitor.h.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/monitor.h	2011-02-17 10:36:14.000000000 +0100
 @@ -69,6 +69,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
  	MONITOR_REQ_AUDIT_KEX, MONITOR_ANS_AUDIT_KEX,
@@ -141,19 +146,21 @@ diff -up openssh-5.8p1/monitor.h.audit5 openssh-5.8p1/monitor.h
  
  struct mm_master;
 diff -up openssh-5.8p1/monitor_wrap.c.audit5 openssh-5.8p1/monitor_wrap.c
---- openssh-5.8p1/monitor_wrap.c.audit5	2011-02-09 22:33:52.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.c	2011-02-09 22:33:52.000000000 +0100
-@@ -1459,4 +1459,16 @@ mm_audit_session_key_free_body(int ctos)
+--- openssh-5.8p1/monitor_wrap.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.c	2011-02-17 10:36:14.000000000 +0100
+@@ -1459,4 +1459,18 @@ mm_audit_session_key_free_body(int ctos)
  				  &m);
  	buffer_free(&m);
  }
 +
 +void
-+mm_audit_destroy_sensitive_data(void)
++mm_audit_destroy_sensitive_data(const char *fp)
 +{
 +	Buffer m;
 +
 +	buffer_init(&m);
++	buffer_put_cstring(&m, fp);
++
 +	mm_request_send(pmonitor->m_recvfd, MONITOR_REQ_AUDIT_SERVER_KEY_FREE, &m);
 +	mm_request_receive_expect(pmonitor->m_recvfd, MONITOR_ANS_AUDIT_SERVER_KEY_FREE,
 +				  &m);
@@ -161,55 +168,108 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit5 openssh-5.8p1/monitor_wrap.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor_wrap.h.audit5 openssh-5.8p1/monitor_wrap.h
---- openssh-5.8p1/monitor_wrap.h.audit5	2011-02-09 22:33:52.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.h	2011-02-09 22:33:52.000000000 +0100
+--- openssh-5.8p1/monitor_wrap.h.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.h	2011-02-17 10:36:14.000000000 +0100
 @@ -77,6 +77,7 @@ void mm_audit_run_command(const char *);
  void mm_audit_unsupported_body(int);
  void mm_audit_kex_body(int, char *, char *, char *);
  void mm_audit_session_key_free_body(int);
-+void mm_audit_server_key_free_body(void);
++void mm_audit_destroy_sensitive_data(const char *);
  #endif
  
  struct Session;
 diff -up openssh-5.8p1/session.c.audit5 openssh-5.8p1/session.c
 --- openssh-5.8p1/session.c.audit5	2010-12-01 02:02:59.000000000 +0100
-+++ openssh-5.8p1/session.c	2011-02-09 22:33:52.000000000 +0100
-@@ -1615,6 +1615,7 @@ do_child(Session *s, const char *command
++++ openssh-5.8p1/session.c	2011-02-17 10:36:14.000000000 +0100
+@@ -132,7 +132,7 @@ extern int log_stderr;
+ extern int debug_flag;
+ extern u_int utmp_len;
+ extern int startup_pipe;
+-extern void destroy_sensitive_data(void);
++extern void destroy_sensitive_data(int);
+ extern Buffer loginmsg;
+ 
+ /* original command from peer. */
+@@ -1614,7 +1614,7 @@ do_child(Session *s, const char *command
+ 	int r = 0;
  
  	/* remove hostkey from the child's memory */
- 	destroy_sensitive_data();
-+	PRIVSEP(audit_destroy_sensitive_data());
+-	destroy_sensitive_data();
++	destroy_sensitive_data(1);
  
  	/* Force a password change */
  	if (s->authctxt->force_pwchange) {
 diff -up openssh-5.8p1/sshd.c.audit5 openssh-5.8p1/sshd.c
---- openssh-5.8p1/sshd.c.audit5	2011-02-09 22:33:52.000000000 +0100
-+++ openssh-5.8p1/sshd.c	2011-02-09 22:33:52.000000000 +0100
-@@ -579,6 +579,7 @@ demote_sensitive_data(void)
+--- openssh-5.8p1/sshd.c.audit5	2011-02-17 10:36:14.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-17 10:36:14.000000000 +0100
+@@ -253,7 +253,7 @@ Buffer loginmsg;
+ struct passwd *privsep_pw = NULL;
+ 
+ /* Prototypes for various functions defined later in this file. */
+-void destroy_sensitive_data(void);
++void destroy_sensitive_data(int);
+ void demote_sensitive_data(void);
+ 
+ static void do_ssh1_kex(void);
+@@ -534,7 +534,7 @@ sshd_exchange_identification(int sock_in
+ 
+ /* Destroy the host and server keys.  They will no longer be needed. */
+ void
+-destroy_sensitive_data(void)
++destroy_sensitive_data(int privsep)
+ {
+ 	int i;
+ 
+@@ -544,8 +544,16 @@ destroy_sensitive_data(void)
+ 	}
+ 	for (i = 0; i < options.num_host_key_files; i++) {
+ 		if (sensitive_data.host_keys[i]) {
++			char *fp;
++
++			fp = key_fingerprint(sensitive_data.host_keys[i],
++					     FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5, SSH_FP_HEX);
+ 			key_free(sensitive_data.host_keys[i]);
+ 			sensitive_data.host_keys[i] = NULL;
++			if (privsep)
++				PRIVSEP(audit_destroy_sensitive_data(fp));
++			else
++				audit_destroy_sensitive_data(fp);
+ 		}
+ 		if (sensitive_data.host_certificates[i]) {
+ 			key_free(sensitive_data.host_certificates[i]);
+@@ -571,11 +579,17 @@ demote_sensitive_data(void)
+ 
+ 	for (i = 0; i < options.num_host_key_files; i++) {
+ 		if (sensitive_data.host_keys[i]) {
++			char *fp;
++
++			fp = key_fingerprint(sensitive_data.host_keys[i],
++					     FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5, SSH_FP_HEX);
+ 			tmp = key_demote(sensitive_data.host_keys[i]);
+ 			key_free(sensitive_data.host_keys[i]);
+ 			sensitive_data.host_keys[i] = tmp;
+ 			if (tmp->type == KEY_RSA1)
+ 				sensitive_data.ssh1_host_key = tmp;
++			audit_destroy_sensitive_data(fp);
++			xfree(fp);
  		}
  		/* Certs do not need demotion */
  	}
-+	audit_destroy_sensitive_data();
- 
- 	/* We do not clear ssh1_host key and cookie.  XXX - Okay Niels? */
- }
-@@ -2023,8 +2024,10 @@ main(int ac, char **av)
- 	if (use_privsep) {
+@@ -2024,7 +2038,7 @@ main(int ac, char **av)
  		privsep_postauth(authctxt);
  		/* the monitor process [priv] will not return */
--		if (!compat20)
-+		if (!compat20) {
- 			destroy_sensitive_data();
-+			audit_destroy_sensitive_data();
-+		}
+ 		if (!compat20)
+-			destroy_sensitive_data();
++			destroy_sensitive_data(0);
  	}
  
  	packet_set_timeout(options.client_alive_interval,
-@@ -2265,6 +2268,7 @@ do_ssh1_kex(void)
+@@ -2264,7 +2278,7 @@ do_ssh1_kex(void)
+ 			session_id[i] = session_key[i] ^ session_key[i + 16];
  	}
  	/* Destroy the private and public keys. No longer. */
- 	destroy_sensitive_data();
-+	audit_destroy_sensitive_data();
+-	destroy_sensitive_data();
++	destroy_sensitive_data(0);
  
  	if (use_privsep)
  		mm_ssh1_session_id(session_id);

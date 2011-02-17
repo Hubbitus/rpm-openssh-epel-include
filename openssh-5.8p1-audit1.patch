@@ -45,7 +45,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 +		"root denied",
 +		"success",
 +		"none",
-+		"paasword",
++		"pasword",
 +		"chalenge-response",
 +		"pubkey",
 +		"hostbased",
