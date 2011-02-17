@@ -1,0 +1,11 @@
+diff -up openssh-5.8p1/audit.c.audit2a openssh-5.8p1/audit.c
+--- openssh-5.8p1/audit.c.audit2a	2011-02-17 15:05:55.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-17 15:06:13.000000000 +0100
+@@ -36,6 +36,7 @@
+ #include "key.h"
+ #include "hostfile.h"
+ #include "auth.h"
++#include "xmalloc.h"
+ 
+ /*
+  * Care must be taken when using this since it WILL NOT be initialized when
