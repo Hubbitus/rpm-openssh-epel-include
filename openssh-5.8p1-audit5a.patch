@@ -1,0 +1,91 @@
+diff -up openssh-5.8p1/audit-bsm.c.audit5a openssh-5.8p1/audit-bsm.c
+--- openssh-5.8p1/audit-bsm.c.audit5a	2011-02-17 14:23:22.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-17 14:24:05.000000000 +0100
+@@ -407,4 +407,10 @@ audit_destroy_sensitive_data(const char 
+ {
+ 	/* not implemented */
+ }
++
++void
++audit_generate_ephemeral_server_key(const char *fp)
++{
++	/* not implemented */
++}
+ #endif /* BSM */
+diff -up openssh-5.8p1/audit.c.audit5a openssh-5.8p1/audit.c
+--- openssh-5.8p1/audit.c.audit5a	2011-02-17 13:27:01.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-17 14:18:58.000000000 +0100
+@@ -277,5 +277,14 @@ audit_destroy_sensitive_data(const char 
+ {
+ 	debug("audit destroy sensitive data euid %d fingerprint %s", geteuid(), fp);
+ }
++
++/*
++ * This will be called on generation of the ephemeral server key
++ */
++void
++audit_generate_ephemeral_server_key(const char *)
++{
++	debug("audit create ephemeral server key euid %d fingerprint %s", geteuid(), fp);
++}
+ # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
+ #endif /* SSH_AUDIT_EVENTS */
+diff -up openssh-5.8p1/audit.h.audit5a openssh-5.8p1/audit.h
+--- openssh-5.8p1/audit.h.audit5a	2011-02-17 13:23:57.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-17 14:11:53.000000000 +0100
+@@ -63,5 +63,6 @@ void	audit_kex_body(int, char *, char *,
+ void	audit_session_key_free(int ctos);
+ void	audit_session_key_free_body(int ctos);
+ void	audit_destroy_sensitive_data(const char *);
++void	audit_generate_ephemeral_server_key(const char *);
+ 
+ #endif /* _SSH_AUDIT_H */
+diff -up openssh-5.8p1/audit-linux.c.audit5a openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit5a	2011-02-17 14:24:31.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-17 14:26:12.000000000 +0100
+@@ -323,4 +323,25 @@ audit_destroy_sensitive_data(const char 
+ 		error("cannot write into audit");
+ }
+ 
++void
++audit_generate_ephemeral_server_key(const char *fp)
++{
++	char buf[AUDIT_LOG_SIZE];
++	int audit_fd, audit_ok;
++
++	snprintf(buf, sizeof(buf), "op=create kind=server fp=%s direction=?", fp);
++	audit_fd = audit_open();
++	if (audit_fd < 0) {
++		if (errno != EINVAL && errno != EPROTONOSUPPORT &&
++					 errno != EAFNOSUPPORT)
++			error("cannot open audit");
++		return;
++	}
++	audit_ok = audit_log_user_message(audit_fd, AUDIT_CRYPTO_KEY_USER,
++			buf, NULL, 0, NULL, 1);
++	audit_close(audit_fd);
++	/* do not abort if the error is EPERM and sshd is run as non root user */
++	if ((audit_ok < 0) && ((audit_ok != -1) || (getuid() == 0)))
++		error("cannot write into audit");
++}
+ #endif /* USE_LINUX_AUDIT */
+diff -up openssh-5.8p1/sshd.c.audit5a openssh-5.8p1/sshd.c
+--- openssh-5.8p1/sshd.c.audit5a	2011-02-17 13:23:27.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-17 14:11:33.000000000 +0100
+@@ -379,6 +379,16 @@ generate_ephemeral_server_key(void)
+ 	sensitive_data.server_key = key_generate(KEY_RSA1,
+ 	    options.server_key_bits);
+ 	verbose("RSA key generation complete.");
++#ifdef SSH_AUDIT_EVENTS
++	{
++		char *fp;
++
++		fp = key_fingerprint(sensitive_data.server_key,
++				     FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5, SSH_FP_HEX);
++		audit_generate_ephemeral_server_key(fp);
++		xfree(fp);
++	}
++#endif
+ 
+ 	arc4random_buf(sensitive_data.ssh1_cookie, SSH_SESSION_KEY_LENGTH);
+ 	arc4random_stir();
