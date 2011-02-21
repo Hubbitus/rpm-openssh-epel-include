@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/audit-bsm.c.audit3 openssh-5.8p1/audit-bsm.c
---- openssh-5.8p1/audit-bsm.c.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/audit-bsm.c	2011-02-21 18:28:25.000000000 +0100
+--- openssh-5.8p1/audit-bsm.c.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-21 20:09:33.000000000 +0100
 @@ -383,4 +383,16 @@ audit_event(ssh_audit_event_t event)
  		debug("%s: unhandled event %d", __func__, event);
  	}
@@ -13,15 +13,23 @@ diff -up openssh-5.8p1/audit-bsm.c.audit3 openssh-5.8p1/audit-bsm.c
 +}
 +
 +void
-+audit_kex_body(int ctos, char *enc, char *mac, char *compress)
++audit_kex_body(int ctos, char *enc, char *mac, char *compress, pid_t pid, uid_t uid)
 +{
 +	/* not implemented */
 +}
  #endif /* BSM */
 diff -up openssh-5.8p1/audit.c.audit3 openssh-5.8p1/audit.c
---- openssh-5.8p1/audit.c.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/audit.c	2011-02-21 18:28:25.000000000 +0100
-@@ -36,6 +36,8 @@
+--- openssh-5.8p1/audit.c.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-21 20:09:33.000000000 +0100
+@@ -28,6 +28,7 @@
+ 
+ #include <stdarg.h>
+ #include <string.h>
++#include <unistd.h>
+ 
+ #ifdef SSH_AUDIT_EVENTS
+ 
+@@ -36,6 +37,8 @@
  #include "key.h"
  #include "hostfile.h"
  #include "auth.h"
@@ -30,7 +38,7 @@ diff -up openssh-5.8p1/audit.c.audit3 openssh-5.8p1/audit.c
  #include "xmalloc.h"
  
  /*
-@@ -128,6 +130,18 @@ audit_key(int host_user, int *rv, const 
+@@ -128,6 +131,18 @@ audit_key(int host_user, int *rv, const 
  	xfree(fp);
  }
  
@@ -43,13 +51,13 @@ diff -up openssh-5.8p1/audit.c.audit3 openssh-5.8p1/audit.c
 +void
 +audit_kex(int ctos, char *enc, char *mac, char *comp)
 +{
-+	PRIVSEP(audit_kex_body(ctos, enc, mac, comp));
++	PRIVSEP(audit_kex_body(ctos, enc, mac, comp, getpid(), getuid()));
 +}
 +
  # ifndef CUSTOM_SSH_AUDIT_EVENTS
  /*
   * Null implementations of audit functions.
-@@ -211,5 +225,24 @@ audit_keyusage(int host_user, const char
+@@ -211,5 +226,26 @@ audit_keyusage(int host_user, const char
  	debug("audit %s key usage euid %d user %s key type %s key length %d fingerprint %s, result %d", 
  		host_user ? "hostbased" : "pubkey", geteuid(), audit_username(), type, bits, fp, rv);
  }
@@ -67,16 +75,18 @@ diff -up openssh-5.8p1/audit.c.audit3 openssh-5.8p1/audit.c
 + * This will be called on succesfull protocol negotiation.
 + */
 +void
-+audit_kex_body(int ctos, char *enc, char *mac, char *compress)
++audit_kex_body(int ctos, char *enc, char *mac, char *compress, pid_t pid,
++	       uid_t uid)
 +{
-+	debug("audit procol negotiation euid %d direction %d cipher %s mac %s compresion %s",
-+		geteuid(), ctos, enc, mac, compress);
++	debug("audit protocol negotiation euid %d direction %d cipher %s mac %s compresion %s from pid %ld uid %u",
++		(unsigned)geteuid(), ctos, enc, mac, compress, (long)pid,
++	        (unsigned)uid);
 +}
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/audit.h.audit3 openssh-5.8p1/audit.h
---- openssh-5.8p1/audit.h.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/audit.h	2011-02-21 18:28:25.000000000 +0100
+--- openssh-5.8p1/audit.h.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-21 20:09:33.000000000 +0100
 @@ -56,5 +56,9 @@ void	audit_run_command(const char *);
  ssh_audit_event_t audit_classify_auth(const char *);
  int	audit_keyusage(int, const char *, unsigned, char *, int);
@@ -84,12 +94,12 @@ diff -up openssh-5.8p1/audit.h.audit3 openssh-5.8p1/audit.h
 +void	audit_unsupported(int);
 +void	audit_kex(int, char *, char *, char *);
 +void	audit_unsupported_body(int);
-+void	audit_kex_body(int, char *, char *, char *);
++void	audit_kex_body(int, char *, char *, char *, pid_t, uid_t);
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
---- openssh-5.8p1/audit-linux.c.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/audit-linux.c	2011-02-21 18:28:59.000000000 +0100
+--- openssh-5.8p1/audit-linux.c.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-21 20:09:33.000000000 +0100
 @@ -40,6 +40,8 @@
  #include "auth.h"
  #include "servconf.h"
@@ -99,7 +109,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
  
  #define AUDIT_LOG_SIZE 128
  
-@@ -243,4 +245,54 @@ audit_event(ssh_audit_event_t event)
+@@ -243,4 +245,56 @@ audit_event(ssh_audit_event_t event)
  	}
  }
  
@@ -125,7 +135,8 @@ diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
 +}
 +
 +void
-+audit_kex_body(int ctos, char *enc, char *mac, char *compress)
++audit_kex_body(int ctos, char *enc, char *mac, char *compress, pid_t pid,
++	       uid_t uid)
 +{
 +#ifdef AUDIT_CRYPTO_SESSION
 +	char buf[AUDIT_LOG_SIZE];
@@ -133,8 +144,9 @@ diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
 +	const static char *direction[] = { "from-server", "from-client", "both" };
 +	Cipher *cipher = cipher_by_name(enc);
 +
-+	snprintf(buf, sizeof(buf), "op=start direction=%s cipher=%s ksize=%d rport=%d laddr=%s lport=%d",
++	snprintf(buf, sizeof(buf), "op=start direction=%s cipher=%s ksize=%d spid=%jd suid=%jd rport=%d laddr=%s lport=%d",
 +		direction[ctos], enc, cipher ? 8 * cipher->key_len : 0,
++		(intmax_t)pid, (intmax_t)uid,
 +		get_remote_port(), get_local_ipaddr(packet_get_connection_in()), get_local_port());
 +	audit_fd = audit_open();
 +	if (audit_fd < 0) {
@@ -155,8 +167,8 @@ diff -up openssh-5.8p1/audit-linux.c.audit3 openssh-5.8p1/audit-linux.c
 +
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.8p1/auditstub.c.audit3 openssh-5.8p1/auditstub.c
---- openssh-5.8p1/auditstub.c.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/auditstub.c	2011-02-21 18:28:25.000000000 +0100
+--- openssh-5.8p1/auditstub.c.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/auditstub.c	2011-02-21 20:09:33.000000000 +0100
 @@ -0,0 +1,39 @@
 +/* $Id: auditstub.c,v 1.1 jfch Exp $ */
 +
@@ -199,7 +211,7 @@ diff -up openssh-5.8p1/auditstub.c.audit3 openssh-5.8p1/auditstub.c
 +
 diff -up openssh-5.8p1/cipher.c.audit3 openssh-5.8p1/cipher.c
 --- openssh-5.8p1/cipher.c.audit3	2011-02-09 15:24:23.000000000 +0100
-+++ openssh-5.8p1/cipher.c	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/cipher.c	2011-02-21 20:09:33.000000000 +0100
 @@ -59,15 +59,7 @@ extern void ssh1_3des_iv(EVP_CIPHER_CTX 
  extern const EVP_CIPHER *evp_aes_128_ctr(void);
  extern void ssh_aes_ctr_iv(EVP_CIPHER_CTX *, int, u_char *, u_int);
@@ -219,7 +231,7 @@ diff -up openssh-5.8p1/cipher.c.audit3 openssh-5.8p1/cipher.c
  	{ "3des",		SSH_CIPHER_3DES, 8, 16, 0, 1, evp_ssh1_3des },
 diff -up openssh-5.8p1/cipher.h.audit3 openssh-5.8p1/cipher.h
 --- openssh-5.8p1/cipher.h.audit3	2009-01-28 06:38:41.000000000 +0100
-+++ openssh-5.8p1/cipher.h	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/cipher.h	2011-02-21 20:09:33.000000000 +0100
 @@ -61,7 +61,16 @@
  typedef struct Cipher Cipher;
  typedef struct CipherContext CipherContext;
@@ -240,7 +252,7 @@ diff -up openssh-5.8p1/cipher.h.audit3 openssh-5.8p1/cipher.h
  	EVP_CIPHER_CTX evp;
 diff -up openssh-5.8p1/kex.c.audit3 openssh-5.8p1/kex.c
 --- openssh-5.8p1/kex.c.audit3	2010-09-24 14:11:14.000000000 +0200
-+++ openssh-5.8p1/kex.c	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/kex.c	2011-02-21 20:09:33.000000000 +0100
 @@ -49,6 +49,7 @@
  #include "dispatch.h"
  #include "monitor.h"
@@ -305,7 +317,7 @@ diff -up openssh-5.8p1/kex.c.audit3 openssh-5.8p1/kex.c
  	choose_hostkeyalg(kex, cprop[PROPOSAL_SERVER_HOST_KEY_ALGS],
 diff -up openssh-5.8p1/Makefile.in.audit3 openssh-5.8p1/Makefile.in
 --- openssh-5.8p1/Makefile.in.audit3	2011-02-04 01:42:13.000000000 +0100
-+++ openssh-5.8p1/Makefile.in	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-02-21 20:09:33.000000000 +0100
 @@ -76,7 +76,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
  	monitor_fdpass.o rijndael.o ssh-dss.o ssh-ecdsa.o ssh-rsa.o dh.o \
  	kexdh.o kexgex.o kexdhc.o kexgexc.o bufec.o kexecdh.o kexecdhc.o \
@@ -316,8 +328,8 @@ diff -up openssh-5.8p1/Makefile.in.audit3 openssh-5.8p1/Makefile.in
  SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
  	sshconnect.o sshconnect1.o sshconnect2.o mux.o \
 diff -up openssh-5.8p1/monitor.c.audit3 openssh-5.8p1/monitor.c
---- openssh-5.8p1/monitor.c.audit3	2011-02-21 18:28:25.000000000 +0100
-+++ openssh-5.8p1/monitor.c	2011-02-21 18:28:25.000000000 +0100
+--- openssh-5.8p1/monitor.c.audit3	2011-02-21 20:09:33.000000000 +0100
++++ openssh-5.8p1/monitor.c	2011-02-21 20:09:33.000000000 +0100
 @@ -89,6 +89,7 @@
  #include "ssh2.h"
  #include "jpake.h"
@@ -371,7 +383,7 @@ diff -up openssh-5.8p1/monitor.c.audit3 openssh-5.8p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -2206,3 +2217,40 @@ mm_answer_jpake_check_confirm(int sock, 
+@@ -2206,3 +2217,44 @@ mm_answer_jpake_check_confirm(int sock, 
  }
  
  #endif /* JPAKE */
@@ -397,13 +409,17 @@ diff -up openssh-5.8p1/monitor.c.audit3 openssh-5.8p1/monitor.c
 +{
 +	int ctos, len;
 +	char *cipher, *mac, *compress;
++	pid_t pid;
++	uid_t uid;
 +
 +	ctos = buffer_get_int(m);
 +	cipher = buffer_get_string(m, &len);
 +	mac = buffer_get_string(m, &len);
 +	compress = buffer_get_string(m, &len);
++	pid = buffer_get_int64(m);
++	uid = buffer_get_int64(m);
 +
-+	audit_kex_body(ctos, cipher, mac, compress);
++	audit_kex_body(ctos, cipher, mac, compress, pid, uid);
 +
 +	buffer_clear(m);
 +
@@ -414,7 +430,7 @@ diff -up openssh-5.8p1/monitor.c.audit3 openssh-5.8p1/monitor.c
 +#endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor.h.audit3 openssh-5.8p1/monitor.h
 --- openssh-5.8p1/monitor.h.audit3	2008-11-05 06:20:46.000000000 +0100
-+++ openssh-5.8p1/monitor.h	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/monitor.h	2011-02-21 20:09:33.000000000 +0100
 @@ -66,6 +66,8 @@ enum monitor_reqtype {
  	MONITOR_REQ_JPAKE_STEP2, MONITOR_ANS_JPAKE_STEP2,
  	MONITOR_REQ_JPAKE_KEY_CONFIRM, MONITOR_ANS_JPAKE_KEY_CONFIRM,
@@ -426,8 +442,8 @@ diff -up openssh-5.8p1/monitor.h.audit3 openssh-5.8p1/monitor.h
  struct mm_master;
 diff -up openssh-5.8p1/monitor_wrap.c.audit3 openssh-5.8p1/monitor_wrap.c
 --- openssh-5.8p1/monitor_wrap.c.audit3	2010-08-31 14:41:14.000000000 +0200
-+++ openssh-5.8p1/monitor_wrap.c	2011-02-21 18:28:25.000000000 +0100
-@@ -1412,3 +1412,38 @@ mm_jpake_check_confirm(const BIGNUM *k,
++++ openssh-5.8p1/monitor_wrap.c	2011-02-21 20:09:33.000000000 +0100
+@@ -1412,3 +1412,41 @@ mm_jpake_check_confirm(const BIGNUM *k,
  	return success;
  }
  #endif /* JPAKE */
@@ -449,7 +465,8 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit3 openssh-5.8p1/monitor_wrap.c
 +}
 +
 +void
-+mm_audit_kex_body(int ctos, char *cipher, char *mac, char *compress)
++mm_audit_kex_body(int ctos, char *cipher, char *mac, char *compress, pid_t pid,
++		  uid_t uid)
 +{
 +	Buffer m;
 +
@@ -458,6 +475,8 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit3 openssh-5.8p1/monitor_wrap.c
 +	buffer_put_cstring(&m, cipher);
 +	buffer_put_cstring(&m, mac);
 +	buffer_put_cstring(&m, compress);
++	buffer_put_int64(&m, pid);
++	buffer_put_int64(&m, uid);
 +
 +	mm_request_send(pmonitor->m_recvfd, MONITOR_REQ_AUDIT_KEX, &m);
 +	mm_request_receive_expect(pmonitor->m_recvfd, MONITOR_ANS_AUDIT_KEX,
@@ -468,19 +487,19 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit3 openssh-5.8p1/monitor_wrap.c
 +#endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor_wrap.h.audit3 openssh-5.8p1/monitor_wrap.h
 --- openssh-5.8p1/monitor_wrap.h.audit3	2009-03-05 14:58:22.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.h	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.h	2011-02-21 20:09:33.000000000 +0100
 @@ -74,6 +74,8 @@ void mm_sshpam_free_ctx(void *);
  #include "audit.h"
  void mm_audit_event(ssh_audit_event_t);
  void mm_audit_run_command(const char *);
 +void mm_audit_unsupported_body(int);
-+void mm_audit_kex_body(int, char *, char *, char *);
++void mm_audit_kex_body(int, char *, char *, char *, pid_t, uid_t);
  #endif
  
  struct Session;
 diff -up openssh-5.8p1/sshd.c.audit3 openssh-5.8p1/sshd.c
 --- openssh-5.8p1/sshd.c.audit3	2011-01-11 07:20:31.000000000 +0100
-+++ openssh-5.8p1/sshd.c	2011-02-21 18:28:25.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-21 20:09:33.000000000 +0100
 @@ -118,6 +118,7 @@
  #endif
  #include "monitor_wrap.h"
