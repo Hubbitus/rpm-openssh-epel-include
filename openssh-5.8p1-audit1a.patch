@@ -1,0 +1,127 @@
+diff -up openssh-5.8p1/audit-linux.c.audit1a openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit1a	2011-02-21 18:14:37.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-21 18:17:33.000000000 +0100
+@@ -35,13 +35,20 @@
+ 
+ #include "log.h"
+ #include "audit.h"
++#include "key.h"
++#include "hostfile.h"
++#include "auth.h"
++#include "servconf.h"
+ #include "canohost.h"
+ 
++extern ServerOptions options;
++extern Authctxt *the_authctxt;
++extern u_int utmp_len;
+ const char* audit_username(void);
+ 
+ static void
+-linux_audit_user_login(int uid, const char *username,
+-    const char *hostname, const char *ip, const char *ttyn, int success)
++linux_audit_user_logxxx(int uid, const char *username,
++    const char *hostname, const char *ip, const char *ttyn, int success, int event)
+ {
+ 	int audit_fd, rc, saved_errno;
+ 
+@@ -53,7 +60,7 @@ linux_audit_user_login(int uid, const ch
+ 		else
+ 			goto fatal_report; /* Must prevent login */
+ 	}
+-	rc = audit_log_acct_message(audit_fd, AUDIT_USER_LOGIN,
++	rc = audit_log_acct_message(audit_fd, event,
+ 	    NULL, "login", username ? username : "(unknown)",
+ 	    username == NULL ? uid : -1, hostname, ip, ttyn, success);
+ 	saved_errno = errno;
+@@ -77,19 +84,19 @@ linux_audit_user_auth(int uid, const cha
+ {
+ 	int audit_fd, rc, saved_errno;
+ 	static const char *event_name[] = {
+-		"exceed maxtries",
++		"maxtries exceeded",
+ 		"root denied",
+ 		"success",
+ 		"none",
+-		"pasword",
+-		"chalenge-response",
++		"password",
++		"challenge-response",
+ 		"pubkey",
+ 		"hostbased",
+ 		"gssapi",
+ 		"invalid user",
+ 		"nologin",
+-		"connection close",
+-		"connection abandon",
++		"connection closed",
++		"connection abandoned",
+ 		"unknown"
+ 	};
+ 
+@@ -123,6 +130,8 @@ fatal_report:
+ 	}
+ }
+ 
++static int user_login_count = 0;
++
+ /* Below is the sshd audit API code */
+ 
+ void
+@@ -134,20 +143,31 @@ audit_connection_from(const char *host, 
+ void
+ audit_run_command(const char *command)
+ {
+-	/* not implemented */
++	linux_audit_user_logxxx(the_authctxt->pw->pw_uid, NULL, get_remote_name_or_ip(utmp_len, options.use_dns),
++	    NULL, "ssh", 1, AUDIT_USER_START);
++	if (!user_login_count++) 
++		linux_audit_user_logxxx(the_authctxt->pw->pw_uid, NULL, get_remote_name_or_ip(utmp_len, options.use_dns),
++		    NULL, "ssh", 1, AUDIT_USER_LOGIN);
+ }
+ 
+ void
+ audit_session_open(struct logininfo *li)
+ {
+-	linux_audit_user_login(li->uid, NULL, li->hostname,
+-	    NULL, li->line, 1);
++	linux_audit_user_logxxx(li->uid, NULL, li->hostname,
++	    NULL, li->line, 1, AUDIT_USER_START);
++	if (!user_login_count++) 
++		linux_audit_user_logxxx(li->uid, NULL, li->hostname,
++		    NULL, li->line, 1, AUDIT_USER_LOGIN);
+ }
+ 
+ void
+ audit_session_close(struct logininfo *li)
+ {
+-	/* not implemented */
++	linux_audit_user_logxxx(li->uid, NULL, li->hostname,
++	    NULL, li->line, 1, AUDIT_USER_END);
++	if (!--user_login_count) 
++		linux_audit_user_logxxx(li->uid, NULL, li->hostname,
++		    NULL, li->line, 1, AUDIT_USER_LOGOUT);
+ }
+ 
+ void
+@@ -163,8 +183,8 @@ audit_event(ssh_audit_event_t event)
+ 	case SSH_LOGIN_ROOT_DENIED:
+ 		linux_audit_user_auth(-1, audit_username(), NULL,
+ 			get_remote_ipaddr(), "sshd", 0, event);
+-		linux_audit_user_login(-1, audit_username(), NULL,
+-			get_remote_ipaddr(), "sshd", 0);
++		linux_audit_user_logxxx(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 0, AUDIT_USER_LOGIN);
+ 		break;
+ 
+ 	case SSH_LOGIN_EXCEED_MAXTRIES:
+@@ -181,8 +201,8 @@ audit_event(ssh_audit_event_t event)
+ 	case SSH_CONNECTION_CLOSE:
+ 	case SSH_CONNECTION_ABANDON:
+ 	case SSH_INVALID_USER:
+-		linux_audit_user_login(-1, audit_username(), NULL,
+-			get_remote_ipaddr(), "sshd", 0);
++		linux_audit_user_logxxx(-1, audit_username(), NULL,
++			get_remote_ipaddr(), "sshd", 0, AUDIT_USER_LOGIN);
+ 		break;
+ 
+ 	default:
