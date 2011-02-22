@@ -1,17 +1,18 @@
 diff -up openssh-5.8p1/log.h.wIm openssh-5.8p1/log.h
 --- openssh-5.8p1/log.h.wIm	2008-06-13 02:22:54.000000000 +0200
-+++ openssh-5.8p1/log.h	2011-02-17 11:41:51.000000000 +0100
-@@ -63,6 +63,7 @@ void     verbose(const char *, ...) __at
++++ openssh-5.8p1/log.h	2011-02-22 09:21:58.000000000 +0100
+@@ -63,6 +63,8 @@ void     verbose(const char *, ...) __at
  void     debug(const char *, ...) __attribute__((format(printf, 1, 2)));
  void     debug2(const char *, ...) __attribute__((format(printf, 1, 2)));
  void     debug3(const char *, ...) __attribute__((format(printf, 1, 2)));
-+void	 debug_wIm(const char *);
++void	 _debug_wIm_body(const char *, const char *);
++#define	debug_wIm(a) _debug_wIm_body(a,__func__)
  
  void	 do_log(LogLevel, const char *, va_list);
  void	 cleanup_exit(int) __attribute__((noreturn));
 diff -up openssh-5.8p1/Makefile.in.wIm openssh-5.8p1/Makefile.in
 --- openssh-5.8p1/Makefile.in.wIm	2011-02-04 01:42:13.000000000 +0100
-+++ openssh-5.8p1/Makefile.in	2011-02-17 11:44:05.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-02-22 09:20:18.000000000 +0100
 @@ -71,7 +71,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
  	cipher-bf1.o cipher-ctr.o cipher-3des1.o cleanup.o \
  	compat.o compress.o crc32.o deattack.o fatal.o hostfile.o \
@@ -23,7 +24,7 @@ diff -up openssh-5.8p1/Makefile.in.wIm openssh-5.8p1/Makefile.in
  	kexdh.o kexgex.o kexdhc.o kexgexc.o bufec.o kexecdh.o kexecdhc.o \
 diff -up openssh-5.8p1/sshd.c.wIm openssh-5.8p1/sshd.c
 --- openssh-5.8p1/sshd.c.wIm	2011-01-11 07:20:31.000000000 +0100
-+++ openssh-5.8p1/sshd.c	2011-02-17 11:41:51.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-22 09:20:18.000000000 +0100
 @@ -139,6 +139,9 @@ int deny_severity;
  
  extern char *__progname;
@@ -60,15 +61,15 @@ diff -up openssh-5.8p1/sshd.c.wIm openssh-5.8p1/sshd.c
  	(void)set_auth_parameters(ac, av);
  #endif
 diff -up openssh-5.8p1/whereIam.c.wIm openssh-5.8p1/whereIam.c
---- openssh-5.8p1/whereIam.c.wIm	2011-02-17 11:41:51.000000000 +0100
-+++ openssh-5.8p1/whereIam.c	2011-02-17 11:41:51.000000000 +0100
+--- openssh-5.8p1/whereIam.c.wIm	2011-02-22 09:20:18.000000000 +0100
++++ openssh-5.8p1/whereIam.c	2011-02-22 09:24:01.000000000 +0100
 @@ -0,0 +1,9 @@
 +
 +int whereIam = -1;
 +
-+void debug_wIm(const char *txt)
++void _debug_wIm_body(const char *txt, const char *func)
 +{
-+	debug("%s: %s wIm = %d, euid=%d", txt, __func__, whereIam, geteuid());
++	debug("%s: %s wIm = %d, uid=%d, euid=%d", txt, func, whereIam, getuid(), geteuid());
 +}
 +
 +

@@ -1,0 +1,15 @@
+diff -up openssh-5.8p1/audit-linux.c.audit1a openssh-5.8p1/audit-linux.c
+--- openssh-5.8p1/audit-linux.c.audit1a	2011-02-22 14:42:30.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-22 14:47:03.000000000 +0100
+@@ -199,6 +199,11 @@ audit_event(ssh_audit_event_t event)
+ 		break;
+ 
+ 	case SSH_CONNECTION_CLOSE:
++		if (user_login_count)
++			linux_audit_user_logxxx(the_authctxt->pw->pw_uid, NULL, get_remote_name_or_ip(utmp_len, options.use_dns),
++			    NULL, "ssh", 1, AUDIT_USER_LOGOUT);
++		break;
++
+ 	case SSH_CONNECTION_ABANDON:
+ 	case SSH_INVALID_USER:
+ 		linux_audit_user_logxxx(-1, audit_username(), NULL,
