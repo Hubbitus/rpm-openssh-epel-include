@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -93,8 +93,10 @@ Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
 
-Patch100: openssh-5.8p1-wIm.patch
+Patch99: openssh-5.8p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
+#?
+Patch100: openssh-5.8p1-fingerprit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch1: openssh-5.8p1-audit1.patch
 Patch101: openssh-5.8p1-audit1a.patch
@@ -287,8 +289,9 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 #Do not enable by default
-###%patch100 -p1 -b .wIm
+###%patch99 -p1 -b .wIm
 %patch0 -p1 -b .redhat
+%patch100 -p1 -b .fingerprint
 %patch1 -p1 -b .audit1
 %patch101 -p1 -b .audit1a
 %patch2 -p1 -b .audit2
@@ -616,7 +619,7 @@ fi
 %endif
 
 %changelog
-* Wed Feb 23 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-7 + 0.9.2-30
+* Thu Feb 24 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-8 + 0.9.2-30
 - another audit improovements
 
 * Thu Feb 17 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-4 + 0.9.2-30

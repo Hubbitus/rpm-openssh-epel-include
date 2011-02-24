@@ -1,0 +1,13 @@
+diff -ur openssh/sshd.c openssh-5.8p1/sshd.c
+--- openssh/sshd.c	2011-02-23 16:23:05.720096223 +0100
++++ openssh-5.8p1/sshd.c	2011-02-23 17:04:24.206612620 +0100
+@@ -748,7 +748,8 @@
+ 		buffer_clear(&loginmsg);
+  		newkeys_destroy(current_keys[MODE_OUT]);
+ 		newkeys_destroy(current_keys[MODE_IN]);
+-		packet_destroy_all(1, 0);
++		audit_session_key_free_body(2, getpid(), getuid());
++		packet_destroy_all(0, 0);
+ 		monitor_child_postauth(pmonitor);
+ 
+ 		/* NEVERREACHED */
