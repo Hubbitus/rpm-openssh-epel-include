@@ -1,0 +1,57 @@
+diff -up openssh-5.8p1/HOWTO.ldap-keys.ldap2 openssh-5.8p1/HOWTO.ldap-keys
+--- openssh-5.8p1/HOWTO.ldap-keys.ldap2	2011-02-25 11:48:59.000000000 +0100
++++ openssh-5.8p1/HOWTO.ldap-keys	2011-02-25 11:48:59.000000000 +0100
+@@ -0,0 +1,14 @@
++
++1) configure LDAP server
++2) add appropriate schema
++3) insert users into LDAP
++4) on the ssh side set in sshd_config
++AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-wrapper
++AuthorizedKeysCommandRunAs <appropriate user to run LDAP>
++5) do not forget to set
++PubkeyAuthentication yes
++
++
++To debug the ssh-ldap-helper is possible to set
++the necessary flags in the ssh-ldap-wrapper.
++
+diff -up openssh-5.8p1/ldap-helper.c.ldap2 openssh-5.8p1/ldap-helper.c
+--- openssh-5.8p1/ldap-helper.c.ldap2	2011-02-25 11:48:59.000000000 +0100
++++ openssh-5.8p1/ldap-helper.c	2011-02-25 11:48:59.000000000 +0100
+@@ -51,7 +51,7 @@ usage(void)
+ 	fprintf(stderr, "  -f file     Use alternate config file (default is /etc/ssh/ldap.conf).\n");
+ 	fprintf(stderr, "  -s user     Do not demonize, send the user's key to stdout.\n");
+ 	fprintf(stderr, "  -v          Increase verbosity of the debug output (implies -d).\n");
+-	fprintf(stderr, "  -w          Warn on unknown commands int the config file.\n");
++	fprintf(stderr, "  -w          Warn on unknown commands in the config file.\n");
+ 	exit(1);
+ }
+ 
+diff -up openssh-5.8p1/Makefile.in.ldap2 openssh-5.8p1/Makefile.in
+--- openssh-5.8p1/Makefile.in.ldap2	2011-02-25 11:48:59.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-02-25 11:55:59.000000000 +0100
+@@ -27,6 +27,7 @@ SFTP_SERVER=$(libexecdir)/sftp-server
+ SSH_KEYSIGN=$(libexecdir)/ssh-keysign
+ SSH_PKCS11_HELPER=$(libexecdir)/ssh-pkcs11-helper
+ SSH_LDAP_HELPER=$(libexecdir)/ssh-ldap-helper
++SSH_LDAP_WRAPPER=$(libexecdir)/ssh-ldap-wrapper
+ RAND_HELPER=$(libexecdir)/ssh-rand-helper
+ PRIVSEP_PATH=@PRIVSEP_PATH@
+ SSH_PRIVSEP_USER=@SSH_PRIVSEP_USER@
+@@ -277,6 +278,7 @@ install-files:
+ 	$(INSTALL) -m 0755 $(STRIP_OPT) ssh-pkcs11-helper$(EXEEXT) $(DESTDIR)$(SSH_PKCS11_HELPER)$(EXEEXT)
+ 	if test ! -z "$(INSTALL_SSH_LDAP_HELPER)" ; then \
+ 		$(INSTALL) -m 0700 $(STRIP_OPT) ssh-ldap-helper $(DESTDIR)$(SSH_LDAP_HELPER) ; \
++		$(INSTALL) -m 0700 ssh-ldap-wrapper $(DESTDIR)$(SSH_LDAP_WRAPPER) ; \
+ 	fi
+ 	$(INSTALL) -m 0755 $(STRIP_OPT) sftp$(EXEEXT) $(DESTDIR)$(bindir)/sftp$(EXEEXT)
+ 	$(INSTALL) -m 0755 $(STRIP_OPT) sftp-server$(EXEEXT) $(DESTDIR)$(SFTP_SERVER)$(EXEEXT)
+diff -up openssh-5.8p1/ssh-ldap-wrapper.ldap2 openssh-5.8p1/ssh-ldap-wrapper
+--- openssh-5.8p1/ssh-ldap-wrapper.ldap2	2011-02-25 11:48:59.000000000 +0100
++++ openssh-5.8p1/ssh-ldap-wrapper	2011-02-25 11:48:59.000000000 +0100
+@@ -0,0 +1,4 @@
++#!/bin/sh
++
++exec /usr/libexec/openssh/ssh-ldap-helper -s "$1"
++

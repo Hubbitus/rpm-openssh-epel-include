@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -115,7 +115,8 @@ Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch20: openssh-5.8p1-authorized-keys-command.patch
-Patch21: openssh-5.6p1-ldap.patch
+Patch21: openssh-5.8p1-ldap.patch
+Patch121: openssh-5.8p1-ldap2.patch
 #?mail-conf
 Patch22: openssh-5.8p1-selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641
@@ -314,6 +315,7 @@ popd
 %patch20 -p1 -b .akc
 %if %{ldap}
 %patch21 -p1 -b .ldap
+%patch121 -p1 -b .ldap2
 %endif
 %if %{WITH_SELINUX}
 #SELinux
@@ -596,8 +598,9 @@ fi
 %if %{ldap}
 %files ldap
 %defattr(-,root,root)
-%doc README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
+%doc HOWTO.ldap-keys README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-wrapper
 %attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
 %attr(0644,root,root) %{_mandir}/man5/ssh-ldap.conf.5*
 %endif
@@ -619,6 +622,9 @@ fi
 %endif
 
 %changelog
+* Fri Feb 25 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-10 + 0.9.2-30
+- reenable auth-keys ldap backend
+
 * Fri Feb 25 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-9 + 0.9.2-30
 - another audit improovements
 
