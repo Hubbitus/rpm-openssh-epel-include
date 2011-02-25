@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -619,11 +619,15 @@ fi
 %endif
 
 %changelog
-* Thu Feb 24 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-8 + 0.9.2-30
+* Fri Feb 25 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-9 + 0.9.2-30
 - another audit improovements
 
+* Thu Feb 24 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-8 + 0.9.2-30
+- another audit improovements
+- switchable fingerprint mode
+
 * Thu Feb 17 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-4 + 0.9.2-30
-- improve audit of server ket management
+- improve audit of server key management
 
 * Wed Feb 16 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-3 + 0.9.2-30
 - improve audit of logins and auths

@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/auth2-hostbased.c.fingerprint openssh-5.8p1/auth2-hostbased.c
 --- openssh-5.8p1/auth2-hostbased.c.fingerprint	2010-08-05 05:04:50.000000000 +0200
-+++ openssh-5.8p1/auth2-hostbased.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/auth2-hostbased.c	2011-02-25 09:17:18.000000000 +0100
 @@ -196,16 +196,18 @@ hostbased_key_allowed(struct passwd *pw,
  
  	if (host_status == HOST_OK) {
@@ -29,7 +29,7 @@ diff -up openssh-5.8p1/auth2-hostbased.c.fingerprint openssh-5.8p1/auth2-hostbas
  	}
 diff -up openssh-5.8p1/auth2-pubkey.c.fingerprint openssh-5.8p1/auth2-pubkey.c
 --- openssh-5.8p1/auth2-pubkey.c.fingerprint	2010-12-01 01:50:14.000000000 +0100
-+++ openssh-5.8p1/auth2-pubkey.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/auth2-pubkey.c	2011-02-25 09:17:18.000000000 +0100
 @@ -319,10 +319,10 @@ user_key_allowed2(struct passwd *pw, Key
  				continue;
  			if (!key_is_cert_authority)
@@ -78,7 +78,7 @@ diff -up openssh-5.8p1/auth2-pubkey.c.fingerprint openssh-5.8p1/auth2-pubkey.c
  	}
 diff -up openssh-5.8p1/auth.c.fingerprint openssh-5.8p1/auth.c
 --- openssh-5.8p1/auth.c.fingerprint	2010-12-01 02:21:51.000000000 +0100
-+++ openssh-5.8p1/auth.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/auth.c	2011-02-25 09:17:18.000000000 +0100
 @@ -639,9 +639,10 @@ auth_key_is_revoked(Key *key)
  		return 1;
  	case 1:
@@ -94,7 +94,7 @@ diff -up openssh-5.8p1/auth.c.fingerprint openssh-5.8p1/auth.c
  	}
 diff -up openssh-5.8p1/auth-rsa.c.fingerprint openssh-5.8p1/auth-rsa.c
 --- openssh-5.8p1/auth-rsa.c.fingerprint	2010-12-04 23:01:47.000000000 +0100
-+++ openssh-5.8p1/auth-rsa.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/auth-rsa.c	2011-02-25 09:17:18.000000000 +0100
 @@ -318,9 +318,9 @@ auth_rsa(Authctxt *authctxt, BIGNUM *cli
  	 * options; this will be reset if the options cause the
  	 * authentication to be rejected.
@@ -110,20 +110,23 @@ diff -up openssh-5.8p1/auth-rsa.c.fingerprint openssh-5.8p1/auth-rsa.c
  
 diff -up openssh-5.8p1/key.c.fingerprint openssh-5.8p1/key.c
 --- openssh-5.8p1/key.c.fingerprint	2011-02-04 01:48:34.000000000 +0100
-+++ openssh-5.8p1/key.c	2011-02-24 10:33:05.000000000 +0100
-@@ -594,6 +594,32 @@ key_fingerprint(Key *k, enum fp_type dgs
++++ openssh-5.8p1/key.c	2011-02-25 09:18:16.000000000 +0100
+@@ -594,6 +594,34 @@ key_fingerprint(Key *k, enum fp_type dgs
  	return retval;
  }
  
-+int
++enum fp_type
 +key_fingerprint_selection(void)
 +{
++	static enum fp_type rv;
++	static char rv_defined = 0;
 +	char *env;
-+	static int rv = -1;
 +
-+	if (rv == -1) {
++	if (!rv_defined) {
 +		env = getenv("SSH_FINGERPRINT_TYPE");
-+		rv = env && !strcmp (env, "sha");
++		rv = (env && !strcmp (env, "sha")) ?
++			SSH_FP_SHA1 : SSH_FP_MD5;
++		rv_defined = 1;
 +	}
 +	return rv;
 +}
@@ -131,14 +134,13 @@ diff -up openssh-5.8p1/key.c.fingerprint openssh-5.8p1/key.c
 +char *
 +key_selected_fingerprint(Key *k, enum fp_rep dgst_rep)
 +{
-+	return key_fingerprint(k, key_fingerprint_selection() ?
-+	    SSH_FP_SHA1 : SSH_FP_MD5, dgst_rep);
++	return key_fingerprint(k, key_fingerprint_selection(), dgst_rep);
 +}
 +
 +char *
 +key_fingerprint_prefix(void)
 +{
-+	return key_fingerprint_selection() ? "sha1:" : "";
++	return key_fingerprint_selection() == SSH_FP_SHA1 ? "sha1:" : "";
 +}
 +
  /*
@@ -146,12 +148,12 @@ diff -up openssh-5.8p1/key.c.fingerprint openssh-5.8p1/key.c
   * the pointer.  The integer must already be initialized.  This function is
 diff -up openssh-5.8p1/key.h.fingerprint openssh-5.8p1/key.h
 --- openssh-5.8p1/key.h.fingerprint	2010-11-05 00:19:49.000000000 +0100
-+++ openssh-5.8p1/key.h	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/key.h	2011-02-25 09:17:18.000000000 +0100
 @@ -96,6 +96,9 @@ int		 key_equal_public(const Key *, cons
  int		 key_equal(const Key *, const Key *);
  char		*key_fingerprint(Key *, enum fp_type, enum fp_rep);
  u_char		*key_fingerprint_raw(Key *, enum fp_type, u_int *);
-+int		 key_fingerprint_selection(void);
++enum fp_type	 key_fingerprint_selection(void);
 +char		*key_selected_fingerprint(Key *, enum fp_rep);
 +char		*key_fingerprint_prefix(void);
  const char	*key_type(const Key *);
@@ -159,7 +161,7 @@ diff -up openssh-5.8p1/key.h.fingerprint openssh-5.8p1/key.h
  int		 key_write(const Key *, FILE *);
 diff -up openssh-5.8p1/ssh-add.c.fingerprint openssh-5.8p1/ssh-add.c
 --- openssh-5.8p1/ssh-add.c.fingerprint	2010-11-11 04:17:02.000000000 +0100
-+++ openssh-5.8p1/ssh-add.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/ssh-add.c	2011-02-25 09:17:18.000000000 +0100
 @@ -280,10 +280,10 @@ list_identities(AuthenticationConnection
  		    key = ssh_get_next_identity(ac, &comment, version)) {
  			had_identities = 1;
@@ -177,7 +179,7 @@ diff -up openssh-5.8p1/ssh-add.c.fingerprint openssh-5.8p1/ssh-add.c
  				if (!key_write(key, stdout))
 diff -up openssh-5.8p1/ssh-agent.c.fingerprint openssh-5.8p1/ssh-agent.c
 --- openssh-5.8p1/ssh-agent.c.fingerprint	2010-12-01 01:50:35.000000000 +0100
-+++ openssh-5.8p1/ssh-agent.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/ssh-agent.c	2011-02-25 09:17:18.000000000 +0100
 @@ -199,9 +199,9 @@ confirm_key(Identity *id)
  	char *p;
  	int ret = -1;
@@ -193,7 +195,7 @@ diff -up openssh-5.8p1/ssh-agent.c.fingerprint openssh-5.8p1/ssh-agent.c
  
 diff -up openssh-5.8p1/sshconnect2.c.fingerprint openssh-5.8p1/sshconnect2.c
 --- openssh-5.8p1/sshconnect2.c.fingerprint	2010-12-01 02:21:51.000000000 +0100
-+++ openssh-5.8p1/sshconnect2.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/sshconnect2.c	2011-02-25 09:17:18.000000000 +0100
 @@ -590,8 +590,9 @@ input_userauth_pk_ok(int type, u_int32_t
  		    key->type, pktype);
  		goto done;
@@ -220,7 +222,7 @@ diff -up openssh-5.8p1/sshconnect2.c.fingerprint openssh-5.8p1/sshconnect2.c
  	if (key_to_blob(id->key, &blob, &bloblen) == 0) {
 diff -up openssh-5.8p1/sshconnect.c.fingerprint openssh-5.8p1/sshconnect.c
 --- openssh-5.8p1/sshconnect.c.fingerprint	2011-01-16 13:17:59.000000000 +0100
-+++ openssh-5.8p1/sshconnect.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/sshconnect.c	2011-02-25 09:17:18.000000000 +0100
 @@ -798,10 +798,10 @@ check_host_key(char *hostname, struct so
  				    "key for IP address '%.128s' to the list "
  				    "of known hosts.", type, ip);
@@ -316,7 +318,7 @@ diff -up openssh-5.8p1/sshconnect.c.fingerprint openssh-5.8p1/sshconnect.c
  	xfree(fp);
 diff -up openssh-5.8p1/ssh-keygen.c.fingerprint openssh-5.8p1/ssh-keygen.c
 --- openssh-5.8p1/ssh-keygen.c.fingerprint	2011-01-11 07:20:31.000000000 +0100
-+++ openssh-5.8p1/ssh-keygen.c	2011-02-24 10:30:47.000000000 +0100
++++ openssh-5.8p1/ssh-keygen.c	2011-02-25 09:17:18.000000000 +0100
 @@ -714,13 +714,14 @@ do_fingerprint(struct passwd *pw)
  {
  	FILE *f;
