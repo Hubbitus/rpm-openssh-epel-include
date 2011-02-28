@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 10
+%define openssh_rel 11
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -92,6 +92,7 @@ Source2: sshd.pam
 Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
+Source6: ssh-keycat.pam
 
 Patch99: openssh-5.8p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
@@ -149,6 +150,8 @@ Patch54: openssh-4.3p2-askpass-grab-info.patch
 Patch56: openssh-5.2p1-edns.patch
 #?
 Patch57: openssh-5.1p1-scp-manpage.patch
+#?
+Patch58: openssh-5.8p1-keycat.patch
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch60: openssh-5.8p1-gsskex.patch
 #?
@@ -229,6 +232,11 @@ Requires: openssh = %{version}-%{release}
 Group: System Environment/Daemons
 %endif
 
+%package keycat
+Summary: A mls keycat backend for openssh
+Requires: openssh = %{version}-%{release}
+Group: System Environment/Daemons
+
 %package askpass
 Summary: A passphrase dialog for OpenSSH and X
 Group: Applications/Internet
@@ -273,6 +281,10 @@ securely connect to your SSH server.
 OpenSSH LDAP backend is a way how to distribute the authorized tokens
 among the servers in the network.
 %endif
+
+%description keycat
+OpenSSH mls keycat is backend for using the authorized keys in the
+openssh in the mls mode.
 
 %description askpass
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -334,6 +346,7 @@ popd
 %patch54 -p1 -b .grab-info
 %patch56 -p1 -b .edns
 %patch57 -p1 -b .manpage
+%patch58 -p1 -b .keycat
 %patch60 -p1 -b .gsskex
 %patch61 -p1 -b .canohost
 
@@ -473,6 +486,7 @@ install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
 install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
+install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
@@ -605,6 +619,11 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/ssh-ldap.conf.5*
 %endif
 
+%files keycat
+%defattr(-,root,root)
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-keycat
+%attr(0644,root,root) %config(noreplace) /etc/pam.d/ssh-keycat
+
 %if ! %{no_gnome_askpass}
 %files askpass
 %defattr(-,root,root)
@@ -622,6 +641,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-11 + 0.9.2-30
+- add ssk-keycat
+
 * Fri Feb 25 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-10 + 0.9.2-30
 - reenable auth-keys ldap backend
 
