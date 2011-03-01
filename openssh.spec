@@ -96,7 +96,7 @@ Source6: ssh-keycat.pam
 
 Patch99: openssh-5.8p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch100: openssh-5.8p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch1: openssh-5.8p1-audit1.patch
