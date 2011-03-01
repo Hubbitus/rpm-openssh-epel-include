@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/audit-bsm.c.audit4 openssh-5.8p1/audit-bsm.c
---- openssh-5.8p1/audit-bsm.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/audit-bsm.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/audit-bsm.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-28 23:07:12.000000000 +0100
 @@ -401,4 +401,10 @@ audit_kex_body(int ctos, char *enc, char
  {
  	/* not implemented */
@@ -13,8 +13,8 @@ diff -up openssh-5.8p1/audit-bsm.c.audit4 openssh-5.8p1/audit-bsm.c
 +}
  #endif /* BSM */
 diff -up openssh-5.8p1/audit.c.audit4 openssh-5.8p1/audit.c
---- openssh-5.8p1/audit.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/audit.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/audit.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-28 23:07:12.000000000 +0100
 @@ -143,6 +143,12 @@ audit_kex(int ctos, char *enc, char *mac
  	PRIVSEP(audit_kex_body(ctos, enc, mac, comp, getpid(), getuid()));
  }
@@ -45,8 +45,8 @@ diff -up openssh-5.8p1/audit.c.audit4 openssh-5.8p1/audit.c
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/audit.h.audit4 openssh-5.8p1/audit.h
---- openssh-5.8p1/audit.h.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/audit.h	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/audit.h.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-28 23:07:12.000000000 +0100
 @@ -61,5 +61,7 @@ void	audit_unsupported(int);
  void	audit_kex(int, char *, char *, char *);
  void	audit_unsupported_body(int);
@@ -56,8 +56,8 @@ diff -up openssh-5.8p1/audit.h.audit4 openssh-5.8p1/audit.h
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.8p1/audit-linux.c.audit4 openssh-5.8p1/audit-linux.c
---- openssh-5.8p1/audit-linux.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/audit-linux.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/audit-linux.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-28 23:07:12.000000000 +0100
 @@ -285,6 +285,8 @@ audit_unsupported_body(int what)
  #endif
  }
@@ -107,8 +107,8 @@ diff -up openssh-5.8p1/audit-linux.c.audit4 openssh-5.8p1/audit-linux.c
 +
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.8p1/auditstub.c.audit4 openssh-5.8p1/auditstub.c
---- openssh-5.8p1/auditstub.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/auditstub.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/auditstub.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/auditstub.c	2011-02-28 23:07:12.000000000 +0100
 @@ -27,6 +27,8 @@
   * Red Hat author: Jan F. Chadima <jchadima@redhat.com>
   */
@@ -132,8 +132,8 @@ diff -up openssh-5.8p1/auditstub.c.audit4 openssh-5.8p1/auditstub.c
 +{
 +}
 diff -up openssh-5.8p1/kex.c.audit4 openssh-5.8p1/kex.c
---- openssh-5.8p1/kex.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/kex.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/kex.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/kex.c	2011-02-28 23:07:12.000000000 +0100
 @@ -624,3 +624,34 @@ dump_digest(char *msg, u_char *digest, i
  	fprintf(stderr, "\n");
  }
@@ -171,7 +171,7 @@ diff -up openssh-5.8p1/kex.c.audit4 openssh-5.8p1/kex.c
 +
 diff -up openssh-5.8p1/kex.h.audit4 openssh-5.8p1/kex.h
 --- openssh-5.8p1/kex.h.audit4	2010-09-24 14:11:14.000000000 +0200
-+++ openssh-5.8p1/kex.h	2011-02-24 13:54:02.000000000 +0100
++++ openssh-5.8p1/kex.h	2011-02-28 23:07:12.000000000 +0100
 @@ -156,6 +156,8 @@ void	 kexgex_server(Kex *);
  void	 kexecdh_client(Kex *);
  void	 kexecdh_server(Kex *);
@@ -183,7 +183,7 @@ diff -up openssh-5.8p1/kex.h.audit4 openssh-5.8p1/kex.h
      BIGNUM *, BIGNUM *, BIGNUM *, u_char **, u_int *);
 diff -up openssh-5.8p1/mac.c.audit4 openssh-5.8p1/mac.c
 --- openssh-5.8p1/mac.c.audit4	2008-06-13 02:58:50.000000000 +0200
-+++ openssh-5.8p1/mac.c	2011-02-24 13:54:02.000000000 +0100
++++ openssh-5.8p1/mac.c	2011-02-28 23:07:12.000000000 +0100
 @@ -162,6 +162,20 @@ mac_clear(Mac *mac)
  	mac->umac_ctx = NULL;
  }
@@ -207,15 +207,15 @@ diff -up openssh-5.8p1/mac.c.audit4 openssh-5.8p1/mac.c
  int
 diff -up openssh-5.8p1/mac.h.audit4 openssh-5.8p1/mac.h
 --- openssh-5.8p1/mac.h.audit4	2007-06-11 06:01:42.000000000 +0200
-+++ openssh-5.8p1/mac.h	2011-02-24 13:54:02.000000000 +0100
++++ openssh-5.8p1/mac.h	2011-02-28 23:07:13.000000000 +0100
 @@ -28,3 +28,4 @@ int	 mac_setup(Mac *, char *);
  int	 mac_init(Mac *);
  u_char	*mac_compute(Mac *, u_int32_t, u_char *, int);
  void	 mac_clear(Mac *);
 +void	 mac_destroy(Mac *);
 diff -up openssh-5.8p1/monitor.c.audit4 openssh-5.8p1/monitor.c
---- openssh-5.8p1/monitor.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/monitor.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/monitor.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/monitor.c	2011-02-28 23:07:13.000000000 +0100
 @@ -181,6 +181,7 @@ int mm_answer_audit_command(int, Buffer 
  int mm_answer_audit_end_command(int, Buffer *);
  int mm_answer_audit_unsupported_body(int, Buffer *);
@@ -311,8 +311,8 @@ diff -up openssh-5.8p1/monitor.c.audit4 openssh-5.8p1/monitor.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor.h.audit4 openssh-5.8p1/monitor.h
---- openssh-5.8p1/monitor.h.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/monitor.h	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/monitor.h.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/monitor.h	2011-02-28 23:07:13.000000000 +0100
 @@ -69,6 +69,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_JPAKE_CHECK_CONFIRM, MONITOR_ANS_JPAKE_CHECK_CONFIRM,
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
@@ -322,8 +322,8 @@ diff -up openssh-5.8p1/monitor.h.audit4 openssh-5.8p1/monitor.h
  
  struct mm_master;
 diff -up openssh-5.8p1/monitor_wrap.c.audit4 openssh-5.8p1/monitor_wrap.c
---- openssh-5.8p1/monitor_wrap.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/monitor_wrap.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.c	2011-02-28 23:07:13.000000000 +0100
 @@ -601,12 +601,14 @@ mm_send_keystate(struct monitor *monitor
  		fatal("%s: conversion of newkeys failed", __func__);
  
@@ -360,8 +360,8 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit4 openssh-5.8p1/monitor_wrap.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/monitor_wrap.h.audit4 openssh-5.8p1/monitor_wrap.h
---- openssh-5.8p1/monitor_wrap.h.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.h	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/monitor_wrap.h.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.h	2011-02-28 23:07:13.000000000 +0100
 @@ -77,6 +77,7 @@ void mm_audit_run_command(const char *);
  void mm_audit_end_command(const char *);
  void mm_audit_unsupported_body(int);
@@ -372,7 +372,7 @@ diff -up openssh-5.8p1/monitor_wrap.h.audit4 openssh-5.8p1/monitor_wrap.h
  struct Session;
 diff -up openssh-5.8p1/packet.c.audit4 openssh-5.8p1/packet.c
 --- openssh-5.8p1/packet.c.audit4	2010-11-24 00:46:37.000000000 +0100
-+++ openssh-5.8p1/packet.c	2011-02-24 13:54:02.000000000 +0100
++++ openssh-5.8p1/packet.c	2011-02-28 23:07:13.000000000 +0100
 @@ -60,6 +60,7 @@
  #include <signal.h>
  
@@ -532,7 +532,7 @@ diff -up openssh-5.8p1/packet.c.audit4 openssh-5.8p1/packet.c
 +
 diff -up openssh-5.8p1/packet.h.audit4 openssh-5.8p1/packet.h
 --- openssh-5.8p1/packet.h.audit4	2010-11-20 05:19:38.000000000 +0100
-+++ openssh-5.8p1/packet.h	2011-02-24 13:54:02.000000000 +0100
++++ openssh-5.8p1/packet.h	2011-02-28 23:07:13.000000000 +0100
 @@ -125,4 +125,5 @@ void	 packet_restore_state(void);
  void	*packet_get_input(void);
  void	*packet_get_output(void);
@@ -540,8 +540,8 @@ diff -up openssh-5.8p1/packet.h.audit4 openssh-5.8p1/packet.h
 +void	 packet_destroy_all(int, int);
  #endif				/* PACKET_H */
 diff -up openssh-5.8p1/session.c.audit4 openssh-5.8p1/session.c
---- openssh-5.8p1/session.c.audit4	2011-02-24 13:54:01.000000000 +0100
-+++ openssh-5.8p1/session.c	2011-02-24 13:54:02.000000000 +0100
+--- openssh-5.8p1/session.c.audit4	2011-02-28 23:07:11.000000000 +0100
++++ openssh-5.8p1/session.c	2011-02-28 23:07:13.000000000 +0100
 @@ -1617,6 +1617,9 @@ do_child(Session *s, const char *command
  
  	/* remove hostkey from the child's memory */
@@ -553,8 +553,8 @@ diff -up openssh-5.8p1/session.c.audit4 openssh-5.8p1/session.c
  	/* Force a password change */
  	if (s->authctxt->force_pwchange) {
 diff -up openssh-5.8p1/sshd.c.audit4 openssh-5.8p1/sshd.c
---- openssh-5.8p1/sshd.c.audit4	2011-02-24 13:54:02.000000000 +0100
-+++ openssh-5.8p1/sshd.c	2011-02-24 13:55:09.000000000 +0100
+--- openssh-5.8p1/sshd.c.audit4	2011-02-28 23:07:12.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-28 23:07:13.000000000 +0100
 @@ -663,6 +663,8 @@ privsep_preauth(Authctxt *authctxt)
  	return (0);
  }
@@ -564,17 +564,18 @@ diff -up openssh-5.8p1/sshd.c.audit4 openssh-5.8p1/sshd.c
  static void
  privsep_postauth(Authctxt *authctxt)
  {
-@@ -688,6 +690,9 @@ privsep_postauth(Authctxt *authctxt)
+@@ -688,6 +690,10 @@ privsep_postauth(Authctxt *authctxt)
  		verbose("User child is on pid %ld", (long)pmonitor->m_pid);
  		close(pmonitor->m_recvfd);
  		buffer_clear(&loginmsg);
 + 		newkeys_destroy(current_keys[MODE_OUT]);
 +		newkeys_destroy(current_keys[MODE_IN]);
-+		packet_destroy_all(1, 0);
++		audit_session_key_free_body(2, getpid(), getuid());
++		packet_destroy_all(0, 0);
  		monitor_child_postauth(pmonitor);
  
  		/* NEVERREACHED */
-@@ -1974,6 +1979,7 @@ main(int ac, char **av)
+@@ -1974,6 +1980,7 @@ main(int ac, char **av)
  	 */
  	if (use_privsep) {
  		mm_send_keystate(pmonitor);
@@ -582,7 +583,7 @@ diff -up openssh-5.8p1/sshd.c.audit4 openssh-5.8p1/sshd.c
  		exit(0);
  	}
  
-@@ -2026,6 +2032,8 @@ main(int ac, char **av)
+@@ -2026,6 +2033,8 @@ main(int ac, char **av)
  	do_authenticated(authctxt);
  
  	/* The connection has been terminated. */
@@ -591,7 +592,7 @@ diff -up openssh-5.8p1/sshd.c.audit4 openssh-5.8p1/sshd.c
  	packet_get_state(MODE_IN, NULL, NULL, NULL, &ibytes);
  	packet_get_state(MODE_OUT, NULL, NULL, NULL, &obytes);
  	verbose("Transferred: sent %llu, received %llu bytes",
-@@ -2345,6 +2353,7 @@ cleanup_exit(int i)
+@@ -2345,6 +2354,7 @@ cleanup_exit(int i)
  {
  	if (the_authctxt)
  		do_cleanup(the_authctxt);

@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/audit-bsm.c.audit1 openssh-5.8p1/audit-bsm.c
 --- openssh-5.8p1/audit-bsm.c.audit1	2011-01-17 11:15:29.000000000 +0100
-+++ openssh-5.8p1/audit-bsm.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/audit-bsm.c	2011-02-28 22:39:02.000000000 +0100
 @@ -305,6 +305,12 @@ audit_run_command(const char *command)
  }
  
@@ -16,7 +16,7 @@ diff -up openssh-5.8p1/audit-bsm.c.audit1 openssh-5.8p1/audit-bsm.c
  	/* not implemented */
 diff -up openssh-5.8p1/audit.c.audit1 openssh-5.8p1/audit.c
 --- openssh-5.8p1/audit.c.audit1	2011-01-17 11:15:30.000000000 +0100
-+++ openssh-5.8p1/audit.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/audit.c	2011-02-28 22:39:02.000000000 +0100
 @@ -182,5 +182,18 @@ audit_run_command(const char *command)
  	debug("audit run command euid %d user %s command '%.200s'", geteuid(),
  	    audit_username(), command);
@@ -38,7 +38,7 @@ diff -up openssh-5.8p1/audit.c.audit1 openssh-5.8p1/audit.c
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.8p1/audit.h.audit1 openssh-5.8p1/audit.h
 --- openssh-5.8p1/audit.h.audit1	2011-01-17 11:15:30.000000000 +0100
-+++ openssh-5.8p1/audit.h	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/audit.h	2011-02-28 22:39:02.000000000 +0100
 @@ -52,6 +52,7 @@ void	audit_event(ssh_audit_event_t);
  void	audit_session_open(struct logininfo *);
  void	audit_session_close(struct logininfo *);
@@ -49,7 +49,7 @@ diff -up openssh-5.8p1/audit.h.audit1 openssh-5.8p1/audit.h
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 --- openssh-5.8p1/audit-linux.c.audit1	2011-01-17 11:15:30.000000000 +0100
-+++ openssh-5.8p1/audit-linux.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/audit-linux.c	2011-02-28 22:39:02.000000000 +0100
 @@ -35,13 +35,20 @@
  
  #include "log.h"
@@ -179,7 +179,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 +{
 +	linux_audit_user_logxxx(the_authctxt->pw->pw_uid, NULL, get_remote_name_or_ip(utmp_len, options.use_dns),
 +	    NULL, "ssh", 1, AUDIT_USER_END);
-+	if (!--user_login_count) 
++	if (user_login_count && !--user_login_count) 
 +		linux_audit_user_logxxx(the_authctxt->pw->pw_uid, NULL, get_remote_name_or_ip(utmp_len, options.use_dns),
 +		    NULL, "ssh", 1, AUDIT_USER_LOGOUT);
  }
@@ -203,7 +203,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 -	/* not implemented */
 +	linux_audit_user_logxxx(li->uid, NULL, li->hostname,
 +	    NULL, li->line, 1, AUDIT_USER_END);
-+	if (!--user_login_count) 
++	if (user_login_count && !--user_login_count) 
 +		linux_audit_user_logxxx(li->uid, NULL, li->hostname,
 +		    NULL, li->line, 1, AUDIT_USER_LOGOUT);
  }
@@ -259,7 +259,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
  	default:
 diff -up openssh-5.8p1/monitor.c.audit1 openssh-5.8p1/monitor.c
 --- openssh-5.8p1/monitor.c.audit1	2010-09-10 03:23:34.000000000 +0200
-+++ openssh-5.8p1/monitor.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/monitor.c	2011-02-28 22:39:02.000000000 +0100
 @@ -177,6 +177,7 @@ int mm_answer_gss_checkmic(int, Buffer *
  #ifdef SSH_AUDIT_EVENTS
  int mm_answer_audit_event(int, Buffer *);
@@ -307,7 +307,7 @@ diff -up openssh-5.8p1/monitor.c.audit1 openssh-5.8p1/monitor.c
  void
 diff -up openssh-5.8p1/monitor.h.audit1 openssh-5.8p1/monitor.h
 --- openssh-5.8p1/monitor.h.audit1	2008-11-05 06:20:46.000000000 +0100
-+++ openssh-5.8p1/monitor.h	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/monitor.h	2011-02-28 22:39:02.000000000 +0100
 @@ -60,6 +60,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_PAM_RESPOND, MONITOR_ANS_PAM_RESPOND,
  	MONITOR_REQ_PAM_FREE_CTX, MONITOR_ANS_PAM_FREE_CTX,
@@ -318,7 +318,7 @@ diff -up openssh-5.8p1/monitor.h.audit1 openssh-5.8p1/monitor.h
  	MONITOR_REQ_JPAKE_GET_PWDATA, MONITOR_ANS_JPAKE_GET_PWDATA,
 diff -up openssh-5.8p1/monitor_wrap.c.audit1 openssh-5.8p1/monitor_wrap.c
 --- openssh-5.8p1/monitor_wrap.c.audit1	2010-08-31 14:41:14.000000000 +0200
-+++ openssh-5.8p1/monitor_wrap.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.c	2011-02-28 22:39:02.000000000 +0100
 @@ -1163,6 +1163,20 @@ mm_audit_run_command(const char *command
  	mm_request_send(pmonitor->m_recvfd, MONITOR_REQ_AUDIT_COMMAND, &m);
  	buffer_free(&m);
@@ -342,7 +342,7 @@ diff -up openssh-5.8p1/monitor_wrap.c.audit1 openssh-5.8p1/monitor_wrap.c
  #ifdef GSSAPI
 diff -up openssh-5.8p1/monitor_wrap.h.audit1 openssh-5.8p1/monitor_wrap.h
 --- openssh-5.8p1/monitor_wrap.h.audit1	2009-03-05 14:58:22.000000000 +0100
-+++ openssh-5.8p1/monitor_wrap.h	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/monitor_wrap.h	2011-02-28 22:39:02.000000000 +0100
 @@ -74,6 +74,7 @@ void mm_sshpam_free_ctx(void *);
  #include "audit.h"
  void mm_audit_event(ssh_audit_event_t);
@@ -353,7 +353,7 @@ diff -up openssh-5.8p1/monitor_wrap.h.audit1 openssh-5.8p1/monitor_wrap.h
  struct Session;
 diff -up openssh-5.8p1/session.c.audit1 openssh-5.8p1/session.c
 --- openssh-5.8p1/session.c.audit1	2010-12-01 02:02:59.000000000 +0100
-+++ openssh-5.8p1/session.c	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/session.c	2011-02-28 22:39:02.000000000 +0100
 @@ -809,14 +809,16 @@ do_exec(Session *s, const char *command)
  	}
  
@@ -388,7 +388,7 @@ diff -up openssh-5.8p1/session.c.audit1 openssh-5.8p1/session.c
  	if (s->display)
 diff -up openssh-5.8p1/session.h.audit1 openssh-5.8p1/session.h
 --- openssh-5.8p1/session.h.audit1	2008-05-19 07:34:50.000000000 +0200
-+++ openssh-5.8p1/session.h	2011-02-24 13:49:49.000000000 +0100
++++ openssh-5.8p1/session.h	2011-02-28 22:39:02.000000000 +0100
 @@ -60,6 +60,11 @@ struct Session {
  		char	*name;
  		char	*val;
@@ -402,8 +402,8 @@ diff -up openssh-5.8p1/session.h.audit1 openssh-5.8p1/session.h
  
  void	 do_authenticated(Authctxt *);
 diff -up openssh-5.8p1/sshd.c.audit1 openssh-5.8p1/sshd.c
---- openssh-5.8p1/sshd.c.audit1	2011-02-24 13:50:29.000000000 +0100
-+++ openssh-5.8p1/sshd.c	2011-02-24 13:50:47.000000000 +0100
+--- openssh-5.8p1/sshd.c.audit1	2011-01-11 07:20:31.000000000 +0100
++++ openssh-5.8p1/sshd.c	2011-02-28 22:39:02.000000000 +0100
 @@ -2342,7 +2342,8 @@ cleanup_exit(int i)
  		do_cleanup(the_authctxt);
  #ifdef SSH_AUDIT_EVENTS

@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 11
+%define openssh_rel 12
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -152,6 +152,7 @@ Patch56: openssh-5.2p1-edns.patch
 Patch57: openssh-5.1p1-scp-manpage.patch
 #?
 Patch58: openssh-5.8p1-keycat.patch
+Patch158: openssh-5.8p1-keycat2.patch
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch60: openssh-5.8p1-gsskex.patch
 #?
@@ -347,6 +348,7 @@ popd
 %patch56 -p1 -b .edns
 %patch57 -p1 -b .manpage
 %patch58 -p1 -b .keycat
+%patch158 -p1 -b .keycat2
 %patch60 -p1 -b .gsskex
 %patch61 -p1 -b .canohost
 
@@ -641,6 +643,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar  1 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-12 + 0.9.2-30
+- improove ssk-keycat
+
 * Mon Feb 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-11 + 0.9.2-30
 - add ssk-keycat
 
