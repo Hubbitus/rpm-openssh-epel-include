@@ -138,7 +138,7 @@ Patch32: openssh-5.8p1-randclean.patch
 Patch34: openssh-5.8p1-kuserok.patch
 #?
 Patch50: openssh-5.8p1-fips.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1789
 Patch51: openssh-5.5p1-x11.patch
 #?
 Patch52: openssh-5.6p1-exit-deadlock.patch
@@ -157,6 +157,8 @@ Patch158: openssh-5.8p1-keycat2.patch
 Patch60: openssh-5.8p1-gsskex.patch
 #?
 Patch61: openssh-5.8p1-gssapi-canohost.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1873
+#=>https://bugzilla.redhat.com/show_bug.cgi?id=668993
 
 License: BSD
 Group: Applications/Internet
