@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 12
+%define openssh_rel 13
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -99,6 +99,8 @@ Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch100: openssh-5.8p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
+Patch8: openssh-5.8p1-audit0.patch
+Patch108: openssh-5.8p1-audit0a.patch
 Patch1: openssh-5.8p1-audit1.patch
 Patch101: openssh-5.8p1-audit1a.patch
 Patch2: openssh-5.8p1-audit2.patch
@@ -308,6 +310,8 @@ The module is most useful for su and sudo service stacks.
 ###%patch99 -p1 -b .wIm
 %patch0 -p1 -b .redhat
 %patch100 -p1 -b .fingerprint
+%patch8 -p1 -b .audit0
+%patch108 -p1 -b .audit0a
 %patch1 -p1 -b .audit1
 %patch101 -p1 -b .audit1a
 %patch2 -p1 -b .audit2
@@ -375,7 +379,6 @@ LDFLAGS="$LDFLAGS -pie -z relro -z now"
 
 export CFLAGS
 export LDFLAGS
-
 
 %endif
 %if %{kerberos5}
@@ -645,6 +648,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar  3 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-13 + 0.9.2-30
+- improve audit of logins and auths
+
 * Tue Mar  1 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-12 + 0.9.2-30
 - improove ssk-keycat
 
