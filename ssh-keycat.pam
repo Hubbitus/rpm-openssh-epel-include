@@ -6,4 +6,3 @@ session    required     pam_loginuid.so
 user context
 session    required     pam_selinux.so open env_params
 session    required     pam_namespace.so
-
