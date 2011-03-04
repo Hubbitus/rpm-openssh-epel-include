@@ -1,6 +1,41 @@
+diff -up openssh-5.8p1/auth2-pubkey.c.keycat openssh-5.8p1/auth2-pubkey.c
+--- openssh-5.8p1/auth2-pubkey.c.keycat	2011-03-04 14:40:23.000000000 +0100
++++ openssh-5.8p1/auth2-pubkey.c	2011-03-04 14:40:23.000000000 +0100
+@@ -579,6 +579,14 @@ user_key_via_command_allowed2(struct pas
+ 			close(i);
+ 		}
+ 
++#ifdef WITH_SELINUX
++		if (ssh_selinux_setup_env_variables() < 0) {
++			error ("failed to copy environment:  %s",
++			    strerror(errno));
++			_exit(127);
++		}
++#endif
++
+ 		execl(options.authorized_keys_command, options.authorized_keys_command, pw->pw_name, NULL);
+ 
+ 		/* if we got here, it didn't work */
+diff -up openssh-5.8p1/HOWTO.ssh-keycat.keycat openssh-5.8p1/HOWTO.ssh-keycat
+--- openssh-5.8p1/HOWTO.ssh-keycat.keycat	2011-03-04 14:53:14.000000000 +0100
++++ openssh-5.8p1/HOWTO.ssh-keycat	2011-03-04 14:56:39.000000000 +0100
+@@ -0,0 +1,13 @@
++
++The ssh-keycat returns the content of the ~/.ssh/authorized_keys
++in the stdandard out of any user in any environment, including
++polyinstatination and mls.
++
++To use it set:
++	AuthorizedKeysCommand /usr/libexec/openssh/ssh-keycat
++	AuthorizedKeysCommandRunAs root
++
++Do not forget to set
++	PubkeyAuthentication yes
++
++
 diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
---- openssh-5.8p1/Makefile.in.keycat	2011-02-28 12:06:55.000000000 +0100
-+++ openssh-5.8p1/Makefile.in	2011-02-28 12:11:18.000000000 +0100
+--- openssh-5.8p1/Makefile.in.keycat	2011-03-04 14:40:23.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-03-04 14:40:23.000000000 +0100
 @@ -28,6 +28,7 @@ SSH_KEYSIGN=$(libexecdir)/ssh-keysign
  SSH_PKCS11_HELPER=$(libexecdir)/ssh-pkcs11-helper
  SSH_LDAP_HELPER=$(libexecdir)/ssh-ldap-helper
@@ -18,7 +53,7 @@ diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
  
  LIBSSH_OBJS=acss.o authfd.o authfile.o bufaux.o bufbn.o buffer.o \
  	canohost.o channels.o cipher.o cipher-acss.o cipher-aes.o \
-@@ -173,6 +174,9 @@ ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT)
+@@ -172,6 +173,9 @@ ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT)
  ssh-ldap-helper$(EXEEXT): $(LIBCOMPAT) libssh.a ldapconf.o ldapbody.o ldapmisc.o ldap-helper.o
  	$(LD) -o $@ ldapconf.o ldapbody.o ldapmisc.o ldap-helper.o $(LDFLAGS) -lssh -lopenbsd-compat -lfipscheck $(LIBS)
  
@@ -28,7 +63,7 @@ diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
  ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
  	$(LD) -o $@ ssh-keyscan.o roaming_dummy.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lfipscheck $(LIBS)
  
-@@ -281,6 +285,7 @@ install-files:
+@@ -280,6 +284,7 @@ install-files:
  		$(INSTALL) -m 0700 $(STRIP_OPT) ssh-ldap-helper $(DESTDIR)$(SSH_LDAP_HELPER) ; \
  		$(INSTALL) -m 0700 ssh-ldap-wrapper $(DESTDIR)$(SSH_LDAP_WRAPPER) ; \
  	fi
@@ -36,10 +71,67 @@ diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
  	$(INSTALL) -m 0755 $(STRIP_OPT) sftp$(EXEEXT) $(DESTDIR)$(bindir)/sftp$(EXEEXT)
  	$(INSTALL) -m 0755 $(STRIP_OPT) sftp-server$(EXEEXT) $(DESTDIR)$(SFTP_SERVER)$(EXEEXT)
  	$(INSTALL) -m 644 ssh.1.out $(DESTDIR)$(mandir)/$(mansubdir)1/ssh.1
+diff -up openssh-5.8p1/openbsd-compat/port-linux.c.keycat openssh-5.8p1/openbsd-compat/port-linux.c
+--- openssh-5.8p1/openbsd-compat/port-linux.c.keycat	2011-03-04 14:40:23.000000000 +0100
++++ openssh-5.8p1/openbsd-compat/port-linux.c	2011-03-04 14:40:23.000000000 +0100
+@@ -309,7 +309,7 @@ ssh_selinux_getctxbyname(char *pwname,
+ 
+ /* Setup environment variables for pam_selinux */
+ static int
+-ssh_selinux_setup_pam_variables(void)
++ssh_selinux_setup_variables(int(*set_it)(const char *, const char *))
+ {
+ 	const char *reqlvl;
+ 	char *role;
+@@ -320,16 +320,16 @@ ssh_selinux_setup_pam_variables(void)
+ 
+ 	ssh_selinux_get_role_level(&role, &reqlvl);
+ 
+-	rv = do_pam_putenv("SELINUX_ROLE_REQUESTED", role ? role : "");
++	rv = set_it("SELINUX_ROLE_REQUESTED", role ? role : "");
+ 	
+ 	if (inetd_flag && !rexeced_flag) {
+ 		use_current = "1";
+ 	} else {
+ 		use_current = "";
+-		rv = rv || do_pam_putenv("SELINUX_LEVEL_REQUESTED", reqlvl ? reqlvl: "");
++		rv = rv || set_it("SELINUX_LEVEL_REQUESTED", reqlvl ? reqlvl: "");
+ 	}
+ 
+-	rv = rv || do_pam_putenv("SELINUX_USE_CURRENT_RANGE", use_current);
++	rv = rv || set_it("SELINUX_USE_CURRENT_RANGE", use_current);
+ 
+ 	if (role != NULL)
+ 		xfree(role);
+@@ -337,6 +337,24 @@ ssh_selinux_setup_pam_variables(void)
+ 	return rv;
+ }
+ 
++static int
++ssh_selinux_setup_pam_variables(void)
++{
++	return ssh_selinux_setup_variables(do_pam_putenv);
++}
++
++static int
++do_setenv(char *name, char *value)
++{
++	return setenv(name, value, 1);
++}
++
++int
++ssh_selinux_setup_env_variables(void)
++{
++	return ssh_selinux_setup_variables(do_setenv);
++}
++
+ /* Set the execution context to the default for the specified user */
+ void
+ ssh_selinux_setup_exec_context(char *pwname)
 diff -up openssh-5.8p1/ssh-keycat.c.keycat openssh-5.8p1/ssh-keycat.c
---- openssh-5.8p1/ssh-keycat.c.keycat	2011-02-28 12:06:28.000000000 +0100
-+++ openssh-5.8p1/ssh-keycat.c	2011-02-25 18:46:31.000000000 +0100
-@@ -0,0 +1,205 @@
+--- openssh-5.8p1/ssh-keycat.c.keycat	2011-03-04 14:40:23.000000000 +0100
++++ openssh-5.8p1/ssh-keycat.c	2011-03-04 14:40:23.000000000 +0100
+@@ -0,0 +1,238 @@
 +/*
 + * Redistribution and use in source and binary forms, with or without
 + * modification, are permitted provided that the following conditions
@@ -107,6 +199,7 @@ diff -up openssh-5.8p1/ssh-keycat.c.keycat openssh-5.8p1/ssh-keycat.c
 +#define ERR_FDOPEN 10
 +#define ERR_STAT 11
 +#define ERR_WRITE 12
++#define ERR_PAM_PUTENV 13
 +#define BUFLEN 4096
 +
 +/* Just ignore the messages in the conversation function */
@@ -208,6 +301,34 @@ diff -up openssh-5.8p1/ssh-keycat.c.keycat openssh-5.8p1/ssh-keycat.c
 +	return rv;
 +}
 +
++static const char *env_names[] = { "SELINUX_ROLE_REQUESTED",
++	"SELINUX_LEVEL_REQUESTED",
++	"SELINUX_USE_CURRENT_RANGE"
++};
++
++extern char **environ;
++
++int
++set_pam_environment(pam_handle_t *pamh)
++{
++	int i;
++	size_t j;
++
++	for (j = 0; j < sizeof(env_names)/sizeof(env_names[0]); ++j) {
++		int len = strlen(env_names[j]);
++
++		for (i = 0; environ[i] != NULL; ++i) {
++			if (strncmp(env_names[j], environ[i], len) == 0 &&
++			    environ[i][len] == '=') {
++				if (pam_putenv(pamh, environ[i]) != PAM_SUCCESS)
++					return ERR_PAM_PUTENV;
++			}
++		}
++	}
++
++	return 0;
++}
++
 +int
 +main(int argc, char *argv[])
 +{
@@ -224,6 +345,10 @@ diff -up openssh-5.8p1/ssh-keycat.c.keycat openssh-5.8p1/ssh-keycat.c
 +	if (retval != PAM_SUCCESS) {
 +		return ERR_PAM_START;
 +	}
++
++	ev = set_pam_environment(pamh);
++	if (ev != 0)
++		goto finish;
 +
 +	retval = pam_open_session(pamh, PAM_SILENT);
 +	if (retval != PAM_SUCCESS) {
