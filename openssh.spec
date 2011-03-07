@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 14
+%define openssh_rel 15
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -138,6 +138,8 @@ Patch32: openssh-5.8p1-randclean.patch
 # Patch33: openssh-5.1p1-log-in-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch34: openssh-5.8p1-kuserok.patch
+#http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
+Patch35: openssh-5.8p1-glob.patch
 #?
 Patch50: openssh-5.8p1-fips.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
@@ -346,6 +348,7 @@ popd
 %patch31 -p1 -b .ip-opts
 %patch32 -p1 -b .randclean
 %patch34 -p1 -b .kuserok
+%patch35 -p1 -b .glob
 %patch50 -p1 -b .fips
 %patch51 -p1 -b .x11
 %patch52 -p1 -b .exit-deadlock
@@ -649,6 +652,9 @@ fi
 %endif
 
 %changelog
+* Mon Mar  7 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-15 + 0.9.2-30
+- CVE-2010-4755
+
 * Fri Mar  4 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-14 + 0.9.2-30
 - improove ssk-keycat (documentation)
 
