@@ -117,7 +117,7 @@ diff -up openssh-5.8p1/HOWTO.ldap-keys.ldap openssh-5.8p1/HOWTO.ldap-keys
 +2) add appropriate schema
 +3) insert users into LDAP
 +4) on the ssh side set in sshd_config
-+AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-wrapper
++AuthorizedKeysCommand "/usr/libexec/openssh/ssh-ldap-wrapper"
 +AuthorizedKeysCommandRunAs <appropriate user to run LDAP>
 +5) do not forget to set
 +PubkeyAuthentication yes
@@ -2262,7 +2262,7 @@ diff -up openssh-5.8p1/README.lpk.ldap openssh-5.8p1/README.lpk
 +
 +  2 tokens are added to sshd_config :
 +  # here is the new patched ldap related tokens
-+  AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-helper -s %u
++  AuthorizedKeysCommand "/usr/libexec/openssh/ssh-ldap-wrapper"
 +  AuthorizedKeysCommandRunAs nobody
 +
 +  The LDAP configuratin is read from common /etc/ldap.conf configuration file.
