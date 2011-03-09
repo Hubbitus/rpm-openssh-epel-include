@@ -357,9 +357,9 @@ popd
 %patch56 -p1 -b .edns
 %patch57 -p1 -b .manpage
 %patch58 -p1 -b .keycat
-%patch158 -p1 -b .keycat2
-%patch60 -p1 -b .gsskex
-%patch61 -p1 -b .canohost
+###%patch158 -p1 -b .keycat2
+###%patch60 -p1 -b .gsskex
+###%patch61 -p1 -b .canohost
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}

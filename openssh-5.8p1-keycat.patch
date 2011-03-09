@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/auth2-pubkey.c.keycat openssh-5.8p1/auth2-pubkey.c
---- openssh-5.8p1/auth2-pubkey.c.keycat	2011-03-04 15:58:59.000000000 +0100
-+++ openssh-5.8p1/auth2-pubkey.c	2011-03-04 15:58:59.000000000 +0100
+--- openssh-5.8p1/auth2-pubkey.c.keycat	2011-03-09 09:03:37.000000000 +0100
++++ openssh-5.8p1/auth2-pubkey.c	2011-03-09 09:03:40.000000000 +0100
 @@ -579,6 +579,14 @@ user_key_via_command_allowed2(struct pas
  			close(i);
  		}
@@ -17,24 +17,24 @@ diff -up openssh-5.8p1/auth2-pubkey.c.keycat openssh-5.8p1/auth2-pubkey.c
  
  		/* if we got here, it didn't work */
 diff -up openssh-5.8p1/HOWTO.ssh-keycat.keycat openssh-5.8p1/HOWTO.ssh-keycat
---- openssh-5.8p1/HOWTO.ssh-keycat.keycat	2011-03-04 15:58:59.000000000 +0100
-+++ openssh-5.8p1/HOWTO.ssh-keycat	2011-03-04 15:57:55.000000000 +0100
+--- openssh-5.8p1/HOWTO.ssh-keycat.keycat	2011-03-09 09:03:40.000000000 +0100
++++ openssh-5.8p1/HOWTO.ssh-keycat	2011-03-08 12:19:07.000000000 +0100
 @@ -0,0 +1,12 @@
++The ssh-keycat retrieves the content of the ~/.ssh/authorized_keys
++of an user in any environment. This includes environments with
++polyinstantiation of home directories and SELinux MLS policy enabled.
 +
-+The ssh-keycat cats the content of the ~/.ssh/authorized_keys
-+of any user in any environment, including polyinstatination and mls.
++To use ssh-keycat, set these options in /etc/ssh/sshd_config file:
++        AuthorizedKeysCommand "/usr/libexec/openssh/ssh-keycat"
++        AuthorizedKeysCommandRunAs root
 +
-+To use it set:
-+	AuthorizedKeysCommand /usr/libexec/openssh/ssh-keycat
-+	AuthorizedKeysCommandRunAs root
-+
-+Do not forget to set
-+	PubkeyAuthentication yes
++Do not forget to enable public key authentication:
++        PubkeyAuthentication yes
 +
 +
 diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
---- openssh-5.8p1/Makefile.in.keycat	2011-03-04 15:58:59.000000000 +0100
-+++ openssh-5.8p1/Makefile.in	2011-03-04 15:58:59.000000000 +0100
+--- openssh-5.8p1/Makefile.in.keycat	2011-03-09 09:03:39.000000000 +0100
++++ openssh-5.8p1/Makefile.in	2011-03-09 09:03:40.000000000 +0100
 @@ -28,6 +28,7 @@ SSH_KEYSIGN=$(libexecdir)/ssh-keysign
  SSH_PKCS11_HELPER=$(libexecdir)/ssh-pkcs11-helper
  SSH_LDAP_HELPER=$(libexecdir)/ssh-ldap-helper
@@ -71,8 +71,8 @@ diff -up openssh-5.8p1/Makefile.in.keycat openssh-5.8p1/Makefile.in
  	$(INSTALL) -m 0755 $(STRIP_OPT) sftp-server$(EXEEXT) $(DESTDIR)$(SFTP_SERVER)$(EXEEXT)
  	$(INSTALL) -m 644 ssh.1.out $(DESTDIR)$(mandir)/$(mansubdir)1/ssh.1
 diff -up openssh-5.8p1/openbsd-compat/port-linux.c.keycat openssh-5.8p1/openbsd-compat/port-linux.c
---- openssh-5.8p1/openbsd-compat/port-linux.c.keycat	2011-03-04 15:58:59.000000000 +0100
-+++ openssh-5.8p1/openbsd-compat/port-linux.c	2011-03-04 15:58:59.000000000 +0100
+--- openssh-5.8p1/openbsd-compat/port-linux.c.keycat	2011-03-09 09:03:38.000000000 +0100
++++ openssh-5.8p1/openbsd-compat/port-linux.c	2011-03-09 09:03:40.000000000 +0100
 @@ -309,7 +309,7 @@ ssh_selinux_getctxbyname(char *pwname,
  
  /* Setup environment variables for pam_selinux */
@@ -128,8 +128,8 @@ diff -up openssh-5.8p1/openbsd-compat/port-linux.c.keycat openssh-5.8p1/openbsd-
  void
  ssh_selinux_setup_exec_context(char *pwname)
 diff -up openssh-5.8p1/ssh-keycat.c.keycat openssh-5.8p1/ssh-keycat.c
---- openssh-5.8p1/ssh-keycat.c.keycat	2011-03-04 15:58:59.000000000 +0100
-+++ openssh-5.8p1/ssh-keycat.c	2011-03-04 15:58:59.000000000 +0100
+--- openssh-5.8p1/ssh-keycat.c.keycat	2011-03-09 09:03:40.000000000 +0100
++++ openssh-5.8p1/ssh-keycat.c	2011-03-09 09:03:40.000000000 +0100
 @@ -0,0 +1,238 @@
 +/*
 + * Redistribution and use in source and binary forms, with or without
