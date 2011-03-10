@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/HOWTO.ldap-keys.ldap2 openssh-5.8p1/HOWTO.ldap-keys
---- openssh-5.8p1/HOWTO.ldap-keys.ldap2	2011-03-10 18:22:10.469855868 +0100
-+++ openssh-5.8p1/HOWTO.ldap-keys	2011-03-10 18:22:11.018980430 +0100
+--- openssh-5.8p1/HOWTO.ldap-keys.ldap2	2011-03-10 21:45:52.706855323 +0100
++++ openssh-5.8p1/HOWTO.ldap-keys	2011-03-10 19:35:50.000000000 +0100
 @@ -1,14 +1,108 @@
  
 +HOW TO START
@@ -67,26 +67,26 @@ diff -up openssh-5.8p1/HOWTO.ldap-keys.ldap2 openssh-5.8p1/HOWTO.ldap-keys
 +  * /usr/sbin/sshd -d -d -d -d
 +2) use debug in ssh-ldap-helper
 +  * ssh-ldap-helper -d -d -d -d -s <username>
-+3) use tcpdump ... other ldap client &tc..
++3) use tcpdump ... other ldap client etc.
 +
-+ADWANTAGES
++ADVANTAGES
 +
-+1) Blocking a user account can be done directly from the LDAP (if sshd is using PubkeyAuthentication + AuthorizedKeysCommand with ldap only).
++1) Blocking an user account can be done directly from LDAP (if sshd is using PubkeyAuthentication + AuthorizedKeysCommand with ldap only).
 +
 +DISADVANTAGES
 +
 +1)  LDAP must be well configured, getting the public key of some user is not a problem, but if anonymous LDAP 
-+  allow write to users dn, somebody could replace someuser's public key by its own and impersonate some 
-+  of your users in all your server farm be VERY CAREFUL.
++  allows write to users dn, somebody could replace some user's public key by his own and impersonate some 
++  of your users in all your server farm -- be VERY CAREFUL.
 +2) With incomplete PKI the MITM attack when sshd is requesting the public key, could lead to a compromise of your servers allowing login 
-+  as the impersonnated user.
-+3 If LDAP server is down then ma be no fallback on passwd auth.
++  as the impersonated user.
++3) If LDAP server is down there may be no fallback on passwd auth.
 +  
 +MISC.
 +  
 +1) todo
 +  * Possibility to reuse the ssh-ldap-helper.
-+  * Tune the LDAP part to all possible LDAP configurations.
++  * Tune the LDAP part to accept  all possible LDAP configurations.
 +
 +2) differences from original lpk
 +  * No LDAP code in sshd.
@@ -118,8 +118,8 @@ diff -up openssh-5.8p1/HOWTO.ldap-keys.ldap2 openssh-5.8p1/HOWTO.ldap-keys
 +    Jan F. Chadima <jchadima@redhat.com>
  
 diff -up openssh-5.8p1/ldap-helper.c.ldap2 openssh-5.8p1/ldap-helper.c
---- openssh-5.8p1/ldap-helper.c.ldap2	2011-03-10 18:22:48.870980079 +0100
-+++ openssh-5.8p1/ldap-helper.c	2011-03-10 18:07:41.000000000 +0100
+--- openssh-5.8p1/ldap-helper.c.ldap2	2011-03-10 21:45:52.872854838 +0100
++++ openssh-5.8p1/ldap-helper.c	2011-03-10 21:45:53.342855061 +0100
 @@ -138,6 +138,7 @@ main(int ac, char **av)
  	if (config_single_user) {
  		process_user (config_single_user, outfile);
@@ -129,8 +129,8 @@ diff -up openssh-5.8p1/ldap-helper.c.ldap2 openssh-5.8p1/ldap-helper.c
  /* TODO
   * open unix socket a run the loop on it
 diff -up openssh-5.8p1/lpk-user-example.txt.ldap2 openssh-5.8p1/lpk-user-example.txt
---- openssh-5.8p1/lpk-user-example.txt.ldap2	2011-03-10 18:22:10.745854874 +0100
-+++ openssh-5.8p1/lpk-user-example.txt	2011-03-10 18:22:11.053980912 +0100
+--- openssh-5.8p1/lpk-user-example.txt.ldap2	2011-03-10 21:45:52.986980339 +0100
++++ openssh-5.8p1/lpk-user-example.txt	2011-03-10 21:45:53.379854929 +0100
 @@ -1,117 +0,0 @@
 -
 -Post to ML -> User Made Quick Install Doc.
@@ -250,8 +250,8 @@ diff -up openssh-5.8p1/lpk-user-example.txt.ldap2 openssh-5.8p1/lpk-user-example
 -
 -++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 diff -up openssh-5.8p1/README.lpk.ldap2 openssh-5.8p1/README.lpk
---- openssh-5.8p1/README.lpk.ldap2	2011-03-10 18:22:10.872981060 +0100
-+++ openssh-5.8p1/README.lpk	2011-03-10 18:22:11.089980853 +0100
+--- openssh-5.8p1/README.lpk.ldap2	2011-03-10 21:45:53.112979980 +0100
++++ openssh-5.8p1/README.lpk	2011-03-10 21:45:53.416856007 +0100
 @@ -1,274 +0,0 @@
 -OpenSSH LDAP PUBLIC KEY PATCH 
 -Copyright (c) 2003 Eric AUGE (eau@phear.org)
@@ -528,8 +528,8 @@ diff -up openssh-5.8p1/README.lpk.ldap2 openssh-5.8p1/README.lpk
 -    Jan F. Chadima <jchadima@redhat.com>
 -
 diff -up openssh-5.8p1/ssh-ldap-helper.8.ldap2 openssh-5.8p1/ssh-ldap-helper.8
---- openssh-5.8p1/ssh-ldap-helper.8.ldap2	2011-03-10 18:22:10.921854948 +0100
-+++ openssh-5.8p1/ssh-ldap-helper.8	2011-03-10 18:20:17.000000000 +0100
+--- openssh-5.8p1/ssh-ldap-helper.8.ldap2	2011-03-10 21:45:53.170854817 +0100
++++ openssh-5.8p1/ssh-ldap-helper.8	2011-03-10 21:45:53.454980272 +0100
 @@ -37,11 +37,12 @@ sshd configuration file
  by setting
  .Cm AuthorizedKeysCommand
