@@ -341,25 +341,25 @@ popd
 %if %{WITH_SELINUX}
 #SELinux
 %patch22 -p1 -b .selinux
-###%patch23 -p1 -b .role
-###%patch24 -p1 -b .mls
+%patch23 -p1 -b .role
+%patch24 -p1 -b .mls
 %endif
-###%patch30 -p1 -b .keygen
-###%patch31 -p1 -b .ip-opts
-###%patch32 -p1 -b .randclean
-###%patch34 -p1 -b .kuserok
-###%patch35 -p1 -b .glob
-###%patch50 -p1 -b .fips
-###%patch51 -p1 -b .x11
-###%patch52 -p1 -b .exit-deadlock
-###%patch53 -p1 -b .progress
-###%patch54 -p1 -b .grab-info
-###%patch56 -p1 -b .edns
-###%patch57 -p1 -b .manpage
-###%patch58 -p1 -b .keycat
-###%patch158 -p1 -b .keycat2
-###%patch60 -p1 -b .gsskex
-###%patch61 -p1 -b .canohost
+%patch30 -p1 -b .keygen
+%patch31 -p1 -b .ip-opts
+%patch32 -p1 -b .randclean
+%patch34 -p1 -b .kuserok
+%patch35 -p1 -b .glob
+%patch50 -p1 -b .fips
+%patch51 -p1 -b .x11
+%patch52 -p1 -b .exit-deadlock
+%patch53 -p1 -b .progress
+%patch54 -p1 -b .grab-info
+%patch56 -p1 -b .edns
+%patch57 -p1 -b .manpage
+%patch58 -p1 -b .keycat
+%patch158 -p1 -b .keycat2
+%patch60 -p1 -b .gsskex
+%patch61 -p1 -b .canohost
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
