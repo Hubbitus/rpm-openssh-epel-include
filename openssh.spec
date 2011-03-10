@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 16
+%define openssh_rel 17
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -622,7 +622,7 @@ fi
 %if %{ldap}
 %files ldap
 %defattr(-,root,root)
-%doc HOWTO.ldap-keys README.lpk lpk-user-example.txt openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
+%doc HOWTO.ldap-keys openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-wrapper
 %attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
@@ -652,6 +652,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar 10 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-17 + 0.9.2-30
+- improove ssh-ldap (documentation)
+
 * Tue Mar  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-16 + 0.9.2-30
 - improve session keys audit
 
@@ -659,7 +662,7 @@ fi
 - CVE-2010-4755
 
 * Fri Mar  4 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-14 + 0.9.2-30
-- improove ssk-keycat (documentation)
+- improove ssh-keycat (documentation)
 
 * Thu Mar  3 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-13 + 0.9.2-30
 - improve audit of logins and auths
