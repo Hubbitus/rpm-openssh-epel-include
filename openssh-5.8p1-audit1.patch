@@ -271,16 +271,16 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
  	case SSH_AUTH_SUCCESS:
 -	case SSH_CONNECTION_CLOSE:
 +		linux_audit_user_auth(-1, audit_username(), NULL,
-+			get_remote_ipaddr(), "sshd", 1, event);
++			get_remote_ipaddr(), "ssh", 1, event);
 +		break;
 +
  	case SSH_NOLOGIN:
 -	case SSH_LOGIN_EXCEED_MAXTRIES:
  	case SSH_LOGIN_ROOT_DENIED:
 +		linux_audit_user_auth(-1, audit_username(), NULL,
-+			get_remote_ipaddr(), "sshd", 0, event);
++			get_remote_ipaddr(), "ssh", 0, event);
 +		linux_audit_user_logxxx(-1, audit_username(), NULL,
-+			get_remote_ipaddr(), "sshd", 0, AUDIT_USER_LOGIN);
++			get_remote_ipaddr(), "ssh", 0, AUDIT_USER_LOGIN);
  		break;
  
 +	case SSH_LOGIN_EXCEED_MAXTRIES:
@@ -291,7 +291,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
  	case SSH_AUTH_FAIL_HOSTBASED:
  	case SSH_AUTH_FAIL_GSSAPI:
 +		linux_audit_user_auth(-1, audit_username(), NULL,
-+			get_remote_ipaddr(), "sshd", 0, event);
++			get_remote_ipaddr(), "ssh", 0, event);
 +		break;
 +
 +	case SSH_CONNECTION_CLOSE:
@@ -309,7 +309,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit1 openssh-5.8p1/audit-linux.c
 -		linux_audit_record_event(-1, audit_username(), NULL,
 -			get_remote_ipaddr(), "sshd", 0);
 +		linux_audit_user_logxxx(-1, audit_username(), NULL,
-+			get_remote_ipaddr(), "sshd", 0, AUDIT_USER_LOGIN);
++			get_remote_ipaddr(), "ssh", 0, AUDIT_USER_LOGIN);
  		break;
  
  	default:

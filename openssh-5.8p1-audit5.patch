@@ -85,7 +85,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit5 openssh-5.8p1/audit-linux.c
 +	char buf[AUDIT_LOG_SIZE];
 +	int audit_fd, audit_ok;
 +
-+	snprintf(buf, sizeof(buf), "op=destroy kind=server fp=%s direction=? spid=%jd suid=%jd",
++	snprintf(buf, sizeof(buf), "op=destroy kind=server fp=%s direction=? spid=%jd suid=%jd ",
 +		fp, (intmax_t)pid, (intmax_t)uid);
 +	audit_fd = audit_open();
 +	if (audit_fd < 0) {
@@ -110,7 +110,7 @@ diff -up openssh-5.8p1/audit-linux.c.audit5 openssh-5.8p1/audit-linux.c
 +	char buf[AUDIT_LOG_SIZE];
 +	int audit_fd, audit_ok;
 +
-+	snprintf(buf, sizeof(buf), "op=create kind=server fp=%s direction=?", fp);
++	snprintf(buf, sizeof(buf), "op=create kind=server fp=%s direction=? ", fp);
 +	audit_fd = audit_open();
 +	if (audit_fd < 0) {
 +		if (errno != EINVAL && errno != EPROTONOSUPPORT &&
