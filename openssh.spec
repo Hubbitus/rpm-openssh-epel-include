@@ -95,10 +95,11 @@ Source5: pam_ssh_agent-rmheaders
 Source6: ssh-keycat.pam
 
 Patch99: openssh-5.8p1-wIm.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch100: openssh-5.8p1-fingerprint.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1879
 Patch200: openssh-5.8p1-exit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch8: openssh-5.8p1-audit0.patch
@@ -117,23 +118,25 @@ Patch105: openssh-5.8p1-audit5a.patch
 Patch6: openssh-5.8p1-reseed.patch
 #?
 Patch7: openssh-5.8p1-entropy.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1640
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
 # --- pam_ssh-agent ---
 Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch20: openssh-5.8p1-authorized-keys-command.patch
+#?
 Patch21: openssh-5.8p1-ldap.patch
 Patch121: openssh-5.8p1-ldap2.patch
-#?mail-conf
+#-mail-conf
 Patch22: openssh-5.8p1-selinux.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1641
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch23: openssh-5.8p1-selinux-role.patch
 #?
 Patch24: openssh-5.8p1-mls.patch
 # #https://bugzilla.mindrot.org/show_bug.cgi?id=1614
 # Patch25: openssh-5.6p1-selabel.patch
+#was https://bugzilla.mindrot.org/show_bug.cgi?id=1637
 #?
 Patch26: openssh-5.8p1-sftpcontext.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
@@ -170,6 +173,8 @@ Patch60: openssh-5.8p1-gsskex.patch
 #?
 Patch61: openssh-5.8p1-gssapi-canohost.patch
 #---
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1604
+# sctp
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1873 => https://bugzilla.redhat.com/show_bug.cgi?id=668993
 
 License: BSD
