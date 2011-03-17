@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 17
+%define openssh_rel 18
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -98,6 +98,8 @@ Patch99: openssh-5.8p1-wIm.patch
 Patch0: openssh-5.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch100: openssh-5.8p1-fingerprint.patch
+#?
+Patch200: openssh-5.8p1-exit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch8: openssh-5.8p1-audit0.patch
 Patch108: openssh-5.8p1-audit0a.patch
@@ -111,6 +113,10 @@ Patch4: openssh-5.8p1-audit4.patch
 Patch104: openssh-5.8p1-audit4a.patch
 Patch5: openssh-5.8p1-audit5.patch
 Patch105: openssh-5.8p1-audit5a.patch
+#?
+Patch6: openssh-5.8p1-reseed.patch
+#?
+Patch7: openssh-5.8p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640
 Patch9: openssh-5.8p1-vendor.patch
 # --- pam_ssh-agent ---
@@ -128,6 +134,8 @@ Patch23: openssh-5.8p1-selinux-role.patch
 Patch24: openssh-5.8p1-mls.patch
 # #https://bugzilla.mindrot.org/show_bug.cgi?id=1614
 # Patch25: openssh-5.6p1-selabel.patch
+#?
+Patch26: openssh-5.8p1-sftpcontext.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
 Patch30: openssh-5.6p1-keygen.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1644
@@ -161,8 +169,8 @@ Patch158: openssh-5.8p1-keycat2.patch
 Patch60: openssh-5.8p1-gsskex.patch
 #?
 Patch61: openssh-5.8p1-gssapi-canohost.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1873
-#=>https://bugzilla.redhat.com/show_bug.cgi?id=668993
+#---
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1873 => https://bugzilla.redhat.com/show_bug.cgi?id=668993
 
 License: BSD
 Group: Applications/Internet
@@ -312,6 +320,7 @@ The module is most useful for su and sudo service stacks.
 ###%patch99 -p1 -b .wIm
 %patch0 -p1 -b .redhat
 %patch100 -p1 -b .fingerprint
+%patch200 -p1 -b .exit
 %patch8 -p1 -b .audit0
 %patch108 -p1 -b .audit0a
 %patch1 -p1 -b .audit1
@@ -324,6 +333,8 @@ The module is most useful for su and sudo service stacks.
 %patch104 -p1 -b .audit4a
 %patch5 -p1 -b .audit5
 %patch105 -p1 -b .audit5a
+%patch6 -p1 -b .reseed
+%patch7 -p1 -b .entropy
 %patch9 -p1 -b .vendor
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -343,6 +354,7 @@ popd
 %patch22 -p1 -b .selinux
 %patch23 -p1 -b .role
 %patch24 -p1 -b .mls
+%patch26 -p1 -b .sftpcontext
 %endif
 %patch30 -p1 -b .keygen
 %patch31 -p1 -b .ip-opts
@@ -652,6 +664,11 @@ fi
 %endif
 
 %changelog
+* Thu Mar 17 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-18 + 0.9.2-30
+- add periodical reseeding of random generator 
+- change selinux contex for internal sftp in do_usercontext
+- exit(0) after sigterm
+
 * Thu Mar 10 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-17 + 0.9.2-30
 - improove ssh-ldap (documentation)
 

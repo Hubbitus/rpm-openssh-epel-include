@@ -5,8 +5,8 @@ diff -up openssh-5.8p1/log.h.wIm openssh-5.8p1/log.h
  void     debug(const char *, ...) __attribute__((format(printf, 1, 2)));
  void     debug2(const char *, ...) __attribute__((format(printf, 1, 2)));
  void     debug3(const char *, ...) __attribute__((format(printf, 1, 2)));
-+void	 _debug_wIm_body(const char *, const char *);
-+#define	debug_wIm(a) _debug_wIm_body(a,__func__)
++void	 _debug_wIm_body(const char *, const char *, const char *, int);
++#define	debug_wIm(a) _debug_wIm_body(a,__func__,__FILE__,__LINE__)
  
  void	 do_log(LogLevel, const char *, va_list);
  void	 cleanup_exit(int) __attribute__((noreturn));
@@ -67,9 +67,9 @@ diff -up openssh-5.8p1/whereIam.c.wIm openssh-5.8p1/whereIam.c
 +
 +int whereIam = -1;
 +
-+void _debug_wIm_body(const char *txt, const char *func)
++void _debug_wIm_body(const char *txt, const char *func, const char *file, int line)
 +{
-+	debug("%s: %s wIm = %d, uid=%d, euid=%d", txt, func, whereIam, getuid(), geteuid());
++	debug("%s: %s(%s:%d) wIm = %d, uid=%d, euid=%d", txt, func, file, line, whereIam, getuid(), geteuid());
 +}
 +
 +

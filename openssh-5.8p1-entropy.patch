@@ -1,0 +1,13 @@
+diff -up openssh-5.8p1/entropy.c.reseed openssh-5.8p1/entropy.c
+--- openssh-5.8p1/entropy.c.reseed	2011-01-13 11:05:29.000000000 +0100
++++ openssh-5.8p1/entropy.c	2011-03-15 10:18:16.623980109 +0100
+@@ -70,6 +70,9 @@ static uid_t original_uid, original_euid
+ void
+ seed_rng(void)
+ {
++#ifdef USE_PRNG_DEVICE
++/* not yet */
++#endif
+ #ifndef OPENSSL_PRNG_ONLY
+ 	int devnull;
+ 	int p[2];
