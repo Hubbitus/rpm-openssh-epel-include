@@ -1,13 +1,85 @@
-diff -up openssh-5.8p1/entropy.c.reseed openssh-5.8p1/entropy.c
---- openssh-5.8p1/entropy.c.reseed	2011-01-13 11:05:29.000000000 +0100
-+++ openssh-5.8p1/entropy.c	2011-03-15 10:18:16.623980109 +0100
-@@ -70,6 +70,9 @@ static uid_t original_uid, original_euid
- void
- seed_rng(void)
- {
-+#ifdef USE_PRNG_DEVICE
-+/* not yet */
-+#endif
- #ifndef OPENSSL_PRNG_ONLY
- 	int devnull;
- 	int p[2];
+diff -up openssh-5.8p1/entropy.c.entropy openssh-5.8p1/entropy.c
+--- openssh-5.8p1/entropy.c.entropy	2011-01-13 11:05:29.000000000 +0100
++++ openssh-5.8p1/entropy.c	2011-03-22 18:26:41.013648606 +0100
+@@ -144,6 +144,9 @@ seed_rng(void)
+ 	memset(buf, '\0', sizeof(buf));
+ 
+ #endif /* OPENSSL_PRNG_ONLY */
++#ifdef __linux__
++	linux_seed();
++#endif /* __linux__ */
+ 	if (RAND_status() != 1)
+ 		fatal("PRNG is not seeded");
+ }
+diff -up openssh-5.8p1/openbsd-compat/Makefile.in.entropy openssh-5.8p1/openbsd-compat/Makefile.in
+--- openssh-5.8p1/openbsd-compat/Makefile.in.entropy	2010-10-07 13:19:24.000000000 +0200
++++ openssh-5.8p1/openbsd-compat/Makefile.in	2011-03-22 18:28:31.835648739 +0100
+@@ -20,7 +20,7 @@ OPENBSD=base64.o basename.o bindresvport
+ 
+ COMPAT=bsd-arc4random.o bsd-asprintf.o bsd-closefrom.o bsd-cray.o bsd-cygwin_util.o bsd-getpeereid.o bsd-misc.o bsd-nextstep.o bsd-openpty.o bsd-poll.o bsd-snprintf.o bsd-statvfs.o bsd-waitpid.o fake-rfc2553.o openssl-compat.o xmmap.o xcrypt.o
+ 
+-PORTS=port-aix.o port-irix.o port-linux.o port-solaris.o port-tun.o port-uw.o
++PORTS=port-aix.o port-irix.o port-linux.o port-linux-prng.o port-solaris.o port-tun.o port-uw.o
+ 
+ .c.o:
+ 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+diff -up openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy openssh-5.8p1/openbsd-compat/port-linux-prng.c
+--- openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy	2011-03-22 18:27:57.422648991 +0100
++++ openssh-5.8p1/openbsd-compat/port-linux-prng.c	2011-03-22 18:27:57.401648964 +0100
+@@ -0,0 +1,56 @@
++/* $Id: port-linux.c,v 1.11.4.2 2011/02/04 00:43:08 djm Exp $ */
++
++/*
++ * Copyright (c) 2005 Daniel Walsh <dwalsh@redhat.com>
++ * Copyright (c) 2006 Damien Miller <djm@openbsd.org>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * Linux-specific portability code - prng support
++ */
++
++#include "includes.h"
++
++#include <errno.h>
++#include <stdarg.h>
++#include <string.h>
++#include <stdio.h>
++
++#include "log.h"
++#include "xmalloc.h"
++#include "servconf.h"
++#include "port-linux.h"
++#include "key.h"
++#include "hostfile.h"
++#include "auth.h"
++
++void
++linux_seed(void)
++{
++	int len;
++	char *env = getenv("SSH_USE_STRONG_RNG");
++	char *random = "/dev/urandom";
++
++	if (env && !strcmp(env, "1"))
++		random = "/dev/random";
++
++	errno = 0;
++	if ((len = RAND_load_file(random, 48)) != 48) {
++		if (errno)
++			fatal ("cannot read from %s, %s", random, strerror(errno));
++		else
++			fatal ("EOF reading %s", random);
++	}
++}
