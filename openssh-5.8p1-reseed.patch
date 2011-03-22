@@ -28,7 +28,7 @@ diff -up openssh-5.8p1/sshd.c.reseed openssh-5.8p1/sshd.c
  }
  
  static void
-@@ -1277,6 +1285,12 @@ server_accept_loop(int *sock_in, int *so
+@@ -1277,6 +1285,13 @@ server_accept_loop(int *sock_in, int *so
  			 * the child process the connection. The
  			 * parent continues listening.
  			 */
@@ -36,6 +36,7 @@ diff -up openssh-5.8p1/sshd.c.reseed openssh-5.8p1/sshd.c
 +				seed_rng();
 +				logit("random reseeded");
 +				need_reseed = 0;
++				signal(SIGALRM, key_regeneration_alarm);
 +				alarm(options.key_regeneration_time);
 +			}
  			platform_pre_fork();
