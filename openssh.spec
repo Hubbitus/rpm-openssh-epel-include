@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 20
+%define openssh_rel 21
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -116,8 +116,10 @@ Patch5: openssh-5.8p1-audit5.patch
 Patch105: openssh-5.8p1-audit5a.patch
 #?
 Patch6: openssh-5.8p1-reseed.patch
+Patch106: openssh-5.8p1-reseed2.patch
 #?
 Patch7: openssh-5.8p1-entropy.patch
+Patch107: openssh-5.8p1-entropy2.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
 # --- pam_ssh-agent ---
@@ -339,7 +341,9 @@ The module is most useful for su and sudo service stacks.
 %patch5 -p1 -b .audit5
 %patch105 -p1 -b .audit5a
 %patch6 -p1 -b .reseed
+%patch106 -p1 -b .reseed2
 %patch7 -p1 -b .entropy
+%patch107 -p1 -b .entropy2
 %patch9 -p1 -b .vendor
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -669,6 +673,9 @@ fi
 %endif
 
 %changelog
+* Mon Mar 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-21 + 0.9.2-30
+- improve reseeding and seed source (cocumentation)
+
 * Tue Mar 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-20 + 0.9.2-30
 - use /dev/random or /dev/urandom for seeding prng
 - improve periodical reseeding of random generator
