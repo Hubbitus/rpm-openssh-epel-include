@@ -115,9 +115,6 @@ Patch104: openssh-5.8p1-audit4a.patch
 Patch5: openssh-5.8p1-audit5.patch
 Patch105: openssh-5.8p1-audit5a.patch
 #?
-Patch6: openssh-5.8p1-reseed.patch
-Patch106: openssh-5.8p1-reseed2.patch
-#?
 Patch7: openssh-5.8p1-entropy.patch
 Patch107: openssh-5.8p1-entropy2.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
@@ -340,8 +337,6 @@ The module is most useful for su and sudo service stacks.
 %patch104 -p1 -b .audit4a
 %patch5 -p1 -b .audit5
 %patch105 -p1 -b .audit5a
-%patch6 -p1 -b .reseed
-%patch106 -p1 -b .reseed2
 %patch7 -p1 -b .entropy
 %patch107 -p1 -b .entropy2
 %patch9 -p1 -b .vendor

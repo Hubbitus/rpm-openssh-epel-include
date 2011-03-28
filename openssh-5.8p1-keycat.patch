@@ -25,7 +25,7 @@ diff -up openssh-5.8p1/HOWTO.ssh-keycat.keycat openssh-5.8p1/HOWTO.ssh-keycat
 +polyinstantiation of home directories and SELinux MLS policy enabled.
 +
 +To use ssh-keycat, set these options in /etc/ssh/sshd_config file:
-+        AuthorizedKeysCommand "/usr/libexec/openssh/ssh-keycat"
++        AuthorizedKeysCommand /usr/libexec/openssh/ssh-keycat
 +        AuthorizedKeysCommandRunAs root
 +
 +Do not forget to enable public key authentication:
