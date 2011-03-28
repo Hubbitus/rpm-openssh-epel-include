@@ -12,7 +12,7 @@ diff -up openssh-5.8p1/ssh.1.entropy2 openssh-5.8p1/ssh.1
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .Sh FILES
  .Bl -tag -width Ds -compact
@@ -31,7 +31,7 @@ diff -up openssh-5.8p1/ssh-add.1.entropy2 openssh-5.8p1/ssh-add.1
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .El
  .Sh FILES
@@ -53,7 +53,7 @@ diff -up openssh-5.8p1/ssh-agent.1.entropy2 openssh-5.8p1/ssh-agent.1
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .Sh SEE ALSO
  .Xr ssh 1 ,
@@ -75,7 +75,7 @@ diff -up openssh-5.8p1/sshd.8.entropy2 openssh-5.8p1/sshd.8
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .Sh SEE ALSO
  .Xr scp 1 ,
@@ -97,7 +97,7 @@ diff -up openssh-5.8p1/ssh-keygen.1.entropy2 openssh-5.8p1/ssh-keygen.1
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .Sh SEE ALSO
  .Xr ssh 1 ,
@@ -119,7 +119,7 @@ diff -up openssh-5.8p1/ssh-keysign.8.entropy2 openssh-5.8p1/ssh-keysign.8
 +.Cm SSH_USE_STRONG_RNG
 +is set to
 +.Cm 1 ,
-+the OpenSSL random generator is reseed from
++the OpenSSL random generator is reseeded from
 +.Cm /dev/random .
  .Sh SEE ALSO
  .Xr ssh 1 ,
