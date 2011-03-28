@@ -1,6 +1,6 @@
 diff -up openssh-5.8p1/entropy.c.entropy openssh-5.8p1/entropy.c
 --- openssh-5.8p1/entropy.c.entropy	2011-01-13 11:05:29.000000000 +0100
-+++ openssh-5.8p1/entropy.c	2011-03-22 18:26:41.013648606 +0100
++++ openssh-5.8p1/entropy.c	2011-03-28 16:22:37.422648742 +0200
 @@ -144,6 +144,9 @@ seed_rng(void)
  	memset(buf, '\0', sizeof(buf));
  
@@ -13,7 +13,7 @@ diff -up openssh-5.8p1/entropy.c.entropy openssh-5.8p1/entropy.c
  }
 diff -up openssh-5.8p1/openbsd-compat/Makefile.in.entropy openssh-5.8p1/openbsd-compat/Makefile.in
 --- openssh-5.8p1/openbsd-compat/Makefile.in.entropy	2010-10-07 13:19:24.000000000 +0200
-+++ openssh-5.8p1/openbsd-compat/Makefile.in	2011-03-22 18:28:31.835648739 +0100
++++ openssh-5.8p1/openbsd-compat/Makefile.in	2011-03-28 16:22:37.484648793 +0200
 @@ -20,7 +20,7 @@ OPENBSD=base64.o basename.o bindresvport
  
  COMPAT=bsd-arc4random.o bsd-asprintf.o bsd-closefrom.o bsd-cray.o bsd-cygwin_util.o bsd-getpeereid.o bsd-misc.o bsd-nextstep.o bsd-openpty.o bsd-poll.o bsd-snprintf.o bsd-statvfs.o bsd-waitpid.o fake-rfc2553.o openssl-compat.o xmmap.o xcrypt.o
@@ -24,8 +24,8 @@ diff -up openssh-5.8p1/openbsd-compat/Makefile.in.entropy openssh-5.8p1/openbsd-
  .c.o:
  	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 diff -up openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy openssh-5.8p1/openbsd-compat/port-linux-prng.c
---- openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy	2011-03-22 18:27:57.422648991 +0100
-+++ openssh-5.8p1/openbsd-compat/port-linux-prng.c	2011-03-22 18:27:57.401648964 +0100
+--- openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy	2011-03-28 16:22:37.508648739 +0200
++++ openssh-5.8p1/openbsd-compat/port-linux-prng.c	2011-03-28 16:22:37.520650578 +0200
 @@ -0,0 +1,56 @@
 +/* $Id: port-linux.c,v 1.11.4.2 2011/02/04 00:43:08 djm Exp $ */
 +
@@ -83,3 +83,129 @@ diff -up openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy openssh-5.8p1/op
 +			fatal ("EOF reading %s", random);
 +	}
 +}
+diff -up openssh-5.8p1/ssh.1.entropy openssh-5.8p1/ssh.1
+--- openssh-5.8p1/ssh.1.entropy	2010-11-20 05:21:03.000000000 +0100
++++ openssh-5.8p1/ssh.1	2011-03-28 16:22:37.621648461 +0200
+@@ -1250,6 +1250,15 @@ For more information, see the
+ .Cm PermitUserEnvironment
+ option in
+ .Xr sshd_config 5 .
++.It Ev SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .Sh FILES
+ .Bl -tag -width Ds -compact
+ .It Pa ~/.rhosts
+diff -up openssh-5.8p1/ssh-add.1.entropy openssh-5.8p1/ssh-add.1
+--- openssh-5.8p1/ssh-add.1.entropy	2010-11-05 00:20:14.000000000 +0100
++++ openssh-5.8p1/ssh-add.1	2011-03-28 16:22:37.674648474 +0200
+@@ -157,6 +157,15 @@ to make this work.)
+ Identifies the path of a
+ .Ux Ns -domain
+ socket used to communicate with the agent.
++.It Ev SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .El
+ .Sh FILES
+ .Bl -tag -width Ds
+diff -up openssh-5.8p1/ssh-agent.1.entropy openssh-5.8p1/ssh-agent.1
+--- openssh-5.8p1/ssh-agent.1.entropy	2010-12-01 01:50:35.000000000 +0100
++++ openssh-5.8p1/ssh-agent.1	2011-03-28 16:22:37.729648529 +0200
+@@ -198,6 +198,18 @@ sockets used to contain the connection t
+ These sockets should only be readable by the owner.
+ The sockets should get automatically removed when the agent exits.
+ .El
++.Sh ENVIRONMENT
++.Bl -tag -width Ds -compact
++.Pp
++.It Pa SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .Sh SEE ALSO
+ .Xr ssh 1 ,
+ .Xr ssh-add 1 ,
+diff -up openssh-5.8p1/sshd.8.entropy openssh-5.8p1/sshd.8
+--- openssh-5.8p1/sshd.8.entropy	2010-11-05 00:20:14.000000000 +0100
++++ openssh-5.8p1/sshd.8	2011-03-28 16:22:37.789648521 +0200
+@@ -937,6 +937,18 @@ concurrently for different ports, this c
+ started last).
+ The content of this file is not sensitive; it can be world-readable.
+ .El
++.Sh ENVIRONMENT
++.Bl -tag -width Ds -compact
++.Pp
++.It Pa SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .Sh SEE ALSO
+ .Xr scp 1 ,
+ .Xr sftp 1 ,
+diff -up openssh-5.8p1/ssh-keygen.1.entropy openssh-5.8p1/ssh-keygen.1
+--- openssh-5.8p1/ssh-keygen.1.entropy	2010-11-05 00:20:14.000000000 +0100
++++ openssh-5.8p1/ssh-keygen.1	2011-03-28 16:22:37.845648487 +0200
+@@ -655,6 +655,18 @@ Contains Diffie-Hellman groups used for 
+ The file format is described in
+ .Xr moduli 5 .
+ .El
++.Sh ENVIRONMENT
++.Bl -tag -width Ds -compact
++.Pp
++.It Pa SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .Sh SEE ALSO
+ .Xr ssh 1 ,
+ .Xr ssh-add 1 ,
+diff -up openssh-5.8p1/ssh-keysign.8.entropy openssh-5.8p1/ssh-keysign.8
+--- openssh-5.8p1/ssh-keysign.8.entropy	2010-08-31 14:41:14.000000000 +0200
++++ openssh-5.8p1/ssh-keysign.8	2011-03-28 16:22:37.900648475 +0200
+@@ -78,6 +78,18 @@ must be set-uid root if host-based authe
+ If these files exist they are assumed to contain public certificate
+ information corresponding with the private keys above.
+ .El
++.Sh ENVIRONMENT
++.Bl -tag -width Ds -compact
++.Pp
++.It Pa SSH_USE_STRONG_RNG
++The reseeding of the OpenSSL random generator is usually done from
++.Cm /dev/urandom .
++If the 
++.Cm SSH_USE_STRONG_RNG
++is set to
++.Cm 1 ,
++the OpenSSL random generator is reseeded from
++.Cm /dev/random .
+ .Sh SEE ALSO
+ .Xr ssh 1 ,
+ .Xr ssh-keygen 1 ,
