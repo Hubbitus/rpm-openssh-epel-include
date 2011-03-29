@@ -26,12 +26,11 @@ diff -up openssh-5.8p1/openbsd-compat/Makefile.in.entropy openssh-5.8p1/openbsd-
 diff -up openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy openssh-5.8p1/openbsd-compat/port-linux-prng.c
 --- openssh-5.8p1/openbsd-compat/port-linux-prng.c.entropy	2011-03-28 16:22:37.508648739 +0200
 +++ openssh-5.8p1/openbsd-compat/port-linux-prng.c	2011-03-28 16:22:37.520650578 +0200
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,55 @@
 +/* $Id: port-linux.c,v 1.11.4.2 2011/02/04 00:43:08 djm Exp $ */
 +
 +/*
-+ * Copyright (c) 2005 Daniel Walsh <dwalsh@redhat.com>
-+ * Copyright (c) 2006 Damien Miller <djm@openbsd.org>
++ * Copyright (c) 2011 Jan F. Chadima <jchadima@redhat.com>
 + *
 + * Permission to use, copy, modify, and distribute this software for any
 + * purpose with or without fee is hereby granted, provided that the above

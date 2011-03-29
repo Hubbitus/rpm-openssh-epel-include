@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 22
+%define openssh_rel 23
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -93,6 +93,7 @@ Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
 Source6: ssh-keycat.pam
+Source7: sshd.sysconfig
 
 Patch99: openssh-5.8p1-wIm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
@@ -508,12 +509,14 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{_sysconfdir}/ssh/ldap.conf
 
 install -d $RPM_BUILD_ROOT/etc/pam.d/
+install -d $RPM_BUILD_ROOT/etc/sysconfig/
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
 install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
+install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -632,6 +635,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/sftp-server.8*
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
+%attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
 %endif
 
@@ -668,6 +672,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 29 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-23 + 0.9.2-30
+- add /etc/sysconfig/sshd
+
 * Mon Mar 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-22 + 0.9.2-30
 - improve reseeding and seed source (documentation)
 
