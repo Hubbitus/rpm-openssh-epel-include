@@ -152,6 +152,8 @@ Patch34: openssh-5.8p1-kuserok.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch35: openssh-5.8p1-glob.patch
 #?
+Patch36: openssh-5.8p1-pwchange.patch
+#?
 Patch50: openssh-5.8p1-fips.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
 Patch51: openssh-5.5p1-x11.patch
