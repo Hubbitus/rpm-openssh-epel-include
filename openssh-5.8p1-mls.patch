@@ -191,7 +191,7 @@ diff -up openssh-5.8p1/openbsd-compat/port-linux.c.mls openssh-5.8p1/openbsd-com
  static void
  ssh_selinux_get_role_level(char **role, const char **level)
  {
-@@ -65,14 +216,16 @@ ssh_selinux_get_role_level(char **role, 
+@@ -65,14 +216,15 @@ ssh_selinux_get_role_level(char **role, 
  }
  
  /* Return the default security context for the given username */
@@ -201,12 +201,12 @@ diff -up openssh-5.8p1/openbsd-compat/port-linux.c.mls openssh-5.8p1/openbsd-com
 +ssh_selinux_getctxbyname(char *pwname,
 +	security_context_t *default_sc, security_context_t *user_sc)
  {
- 	security_context_t sc = NULL;
+-	security_context_t sc = NULL;
  	char *sename, *lvl;
  	char *role;
  	const char *reqlvl;
  	int r = 0;
-+	context_t con;
++	context_t con = NULL;
  
  	ssh_selinux_get_role_level(&role, &reqlvl);
  #ifdef HAVE_GETSEUSERBYNAME
