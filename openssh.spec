@@ -104,20 +104,13 @@ Patch100: openssh-5.8p1-fingerprint.patch
 Patch200: openssh-5.8p1-exit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch8: openssh-5.8p1-audit0.patch
-Patch108: openssh-5.8p1-audit0a.patch
 Patch1: openssh-5.8p1-audit1.patch
-Patch101: openssh-5.8p1-audit1a.patch
 Patch2: openssh-5.8p1-audit2.patch
-Patch102: openssh-5.8p1-audit2a.patch
 Patch3: openssh-5.8p1-audit3.patch
-Patch103: openssh-5.8p1-audit3a.patch
 Patch4: openssh-5.8p1-audit4.patch
-Patch104: openssh-5.8p1-audit4a.patch
 Patch5: openssh-5.8p1-audit5.patch
-Patch105: openssh-5.8p1-audit5a.patch
 #?
 Patch7: openssh-5.8p1-entropy.patch
-Patch107: openssh-5.8p1-entropy2.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
 # --- pam_ssh-agent ---
@@ -127,7 +120,6 @@ Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 Patch20: openssh-5.8p1-authorized-keys-command.patch
 #?
 Patch21: openssh-5.8p1-ldap.patch
-Patch121: openssh-5.8p1-ldap2.patch
 #-mail-conf
 Patch22: openssh-5.8p1-selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
@@ -169,7 +161,6 @@ Patch56: openssh-5.2p1-edns.patch
 Patch57: openssh-5.1p1-scp-manpage.patch
 #?
 Patch58: openssh-5.8p1-keycat.patch
-Patch158: openssh-5.8p1-keycat2.patch
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch60: openssh-5.8p1-gsskex.patch
 #?
@@ -329,19 +320,12 @@ The module is most useful for su and sudo service stacks.
 %patch100 -p1 -b .fingerprint
 %patch200 -p1 -b .exit
 %patch8 -p1 -b .audit0
-%patch108 -p1 -b .audit0a
 %patch1 -p1 -b .audit1
-%patch101 -p1 -b .audit1a
 %patch2 -p1 -b .audit2
-%patch102 -p1 -b .audit2a
 %patch3 -p1 -b .audit3
-%patch103 -p1 -b .audit3a
 %patch4 -p1 -b .audit4
-%patch104 -p1 -b .audit4a
 %patch5 -p1 -b .audit5
-%patch105 -p1 -b .audit5a
 %patch7 -p1 -b .entropy
-%patch107 -p1 -b .entropy2
 %patch9 -p1 -b .vendor
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -354,7 +338,6 @@ popd
 %patch20 -p1 -b .akc
 %if %{ldap}
 %patch21 -p1 -b .ldap
-%patch121 -p1 -b .ldap2
 %endif
 %if %{WITH_SELINUX}
 #SELinux
@@ -368,6 +351,8 @@ popd
 %patch32 -p1 -b .randclean
 %patch34 -p1 -b .kuserok
 %patch35 -p1 -b .glob
+%patch36 -p1 -b .pwchange
+
 %patch50 -p1 -b .fips
 %patch51 -p1 -b .x11
 %patch52 -p1 -b .exit-deadlock
@@ -376,7 +361,6 @@ popd
 %patch56 -p1 -b .edns
 %patch57 -p1 -b .manpage
 %patch58 -p1 -b .keycat
-%patch158 -p1 -b .keycat2
 %patch60 -p1 -b .gsskex
 %patch61 -p1 -b .canohost
 
