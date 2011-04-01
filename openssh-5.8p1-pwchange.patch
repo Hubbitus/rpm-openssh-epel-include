@@ -6,7 +6,7 @@ diff -up openssh-5.8p1/session.c.pwchange openssh-5.8p1/session.c
  		fprintf(stderr,
  		    "You must change your password now and login again!\n");
 +#ifdef __linux__
-+		execl("/bin/sh", "sh", "-c", "passwd", s->pw->pw_name,
++		execl("/bin/sh", "sh", "-c", _PATH_PASSWD_PROG, s->pw->pw_name,
 +		    (char *)NULL);
 +#else
  #ifdef PASSWD_NEEDS_USERNAME
