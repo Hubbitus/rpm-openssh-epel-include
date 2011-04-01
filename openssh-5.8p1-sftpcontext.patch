@@ -1,53 +1,18 @@
 diff -up openssh-5.8p1/session.c.sftpcontext openssh-5.8p1/session.c
---- openssh-5.8p1/session.c.sftpcontext	2011-03-17 06:20:41.651773603 +0100
-+++ openssh-5.8p1/session.c	2011-03-17 06:39:11.947648737 +0100
-@@ -1479,12 +1479,21 @@ safely_chroot(const char *path, uid_t ui
- 
- /* Set login name, uid, gid, and groups. */
- void
+--- openssh-5.8p1/session.c.sftpcontext	2011-04-01 11:22:26.988648474 +0200
++++ openssh-5.8p1/session.c	2011-04-01 11:31:49.127665411 +0200
+@@ -831,6 +831,10 @@ do_exec(Session *s, const char *command)
+ 	if (s->command != NULL)
+ 		s->command_handle = PRIVSEP(audit_run_command(s->command));
+ #endif
 +#ifdef WITH_SELINUX
-+do_setusercontext(struct passwd *pw, const char *context)
-+#else
- do_setusercontext(struct passwd *pw)
++debug(">>> %d:%d %s ~ %d", getuid(), geteuid(), s->command, IS_INTERNAL_SFTP(s->command));
++//	ssh_selinux_change_context("sftpd_t");
 +#endif
- {
- 	char *chroot_path, *tmp;
- 
- 	platform_setusercontext(pw);
- 
-+#ifdef WITH_SELINUX
-+	if (context)
-+		ssh_selinux_change_context(context);
-+#endif
-+
- 	if (platform_privileged_uidswap()) {
- #ifdef HAVE_LOGIN_CAP
- 		if (setusercontext(lc, pw, pw->pw_uid,
-@@ -1633,7 +1642,11 @@ do_child(Session *s, const char *command
- 
- 	/* Force a password change */
- 	if (s->authctxt->force_pwchange) {
-+#ifdef WITH_SELINUX
-+		do_setusercontext(pw, NULL); //should be passwd_t context set here?
-+#else
- 		do_setusercontext(pw);
-+#endif
- 		child_close_fds();
- 		do_pwchange(s);
- 		exit(1);
-@@ -1660,7 +1673,11 @@ do_child(Session *s, const char *command
- 		/* When PAM is enabled we rely on it to do the nologin check */
- 		if (!options.use_pam)
- 			do_nologin(pw);
-+#ifdef WITH_SELINUX
-+		do_setusercontext(pw, s->is_subsystem == SUBSYSTEM_INT_SFTP ? "sftpd_t" : NULL);
-+#else
- 		do_setusercontext(pw);
-+#endif
- 		/*
- 		 * PAM session modules in do_setusercontext may have
- 		 * generated messages, so if this in an interactive
-@@ -1780,9 +1797,6 @@ do_child(Session *s, const char *command
+ 	if (s->ttyfd != -1)
+ 		ret = do_exec_pty(s, command);
+ 	else
+@@ -1780,9 +1784,6 @@ do_child(Session *s, const char *command
  		argv[i] = NULL;
  		optind = optreset = 1;
  		__progname = argv[0];
@@ -57,34 +22,3 @@ diff -up openssh-5.8p1/session.c.sftpcontext openssh-5.8p1/session.c
  		exit(sftp_server_main(i, argv, s->pw));
  	}
  
-diff -up openssh-5.8p1/session.h.sftpcontext openssh-5.8p1/session.h
---- openssh-5.8p1/session.h.sftpcontext	2011-03-17 06:38:15.287648531 +0100
-+++ openssh-5.8p1/session.h	2011-03-17 06:40:25.907648653 +0100
-@@ -84,7 +84,11 @@ Session	*session_new(void);
- Session *session_by_id(int);
- Session	*session_by_tty(char *);
- void	 session_close(Session *);
-+#ifdef WITH_SELINUX
-+void	 do_setusercontext(struct passwd *, const char *);
-+#else
- void	 do_setusercontext(struct passwd *);
-+#endif
- void	 child_set_env(char ***envp, u_int *envsizep, const char *name,
- 		       const char *value);
- 
-diff -up openssh-5.8p1/sshd.c.sftpcontext openssh-5.8p1/sshd.c
---- openssh-5.8p1/sshd.c.sftpcontext	2011-03-17 06:40:55.961663207 +0100
-+++ openssh-5.8p1/sshd.c	2011-03-17 06:45:14.037735849 +0100
-@@ -772,7 +772,11 @@ privsep_postauth(Authctxt *authctxt)
- 	RAND_seed(rnd, sizeof(rnd));
- 
- 	/* Drop privileges */
--	do_setusercontext(authctxt->pw);
-+#ifdef WITH_SELINUX
-+	do_setusercontext(authctxt->pw, NULL);
-+#else
-+	do_setusercontext(authctxt->pw);
-+#endif
- 
-  skip:
- 	/* It is safe now to apply the key state */
