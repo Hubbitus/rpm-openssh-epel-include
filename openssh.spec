@@ -110,6 +110,8 @@ Patch3: openssh-5.8p1-audit3.patch
 Patch4: openssh-5.8p1-audit4.patch
 Patch5: openssh-5.8p1-audit5.patch
 #?
+Patch6: openssh-5.8p1-packet.patch
+#?
 Patch7: openssh-5.8p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
@@ -325,6 +327,7 @@ The module is most useful for su and sudo service stacks.
 %patch3 -p1 -b .audit3
 %patch4 -p1 -b .audit4
 %patch5 -p1 -b .audit5
+%patch6 -p1 -b .packet
 %patch7 -p1 -b .entropy
 %patch9 -p1 -b .vendor
 %if %{pam_ssh_agent}
@@ -658,6 +661,10 @@ fi
 %endif
 
 %changelog
+* Tue Apr  5 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-24 + 0.9.2-30
+- the intermediate context is set to sshd_sftpd_t
+- do not crash in packet.c if no connection
+
 * Thu Mar 31 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-24 + 0.9.2-30
 - resolve warnings in port_linux.c
 

@@ -1,24 +1,14 @@
 diff -up openssh-5.8p1/session.c.sftpcontext openssh-5.8p1/session.c
---- openssh-5.8p1/session.c.sftpcontext	2011-04-01 11:22:26.988648474 +0200
-+++ openssh-5.8p1/session.c	2011-04-01 11:31:49.127665411 +0200
-@@ -831,6 +831,10 @@ do_exec(Session *s, const char *command)
- 	if (s->command != NULL)
- 		s->command_handle = PRIVSEP(audit_run_command(s->command));
- #endif
-+#ifdef WITH_SELINUX
-+debug(">>> %d:%d %s ~ %d", getuid(), geteuid(), s->command, IS_INTERNAL_SFTP(s->command));
-+//	ssh_selinux_change_context("sftpd_t");
-+#endif
- 	if (s->ttyfd != -1)
- 		ret = do_exec_pty(s, command);
- 	else
-@@ -1780,9 +1784,6 @@ do_child(Session *s, const char *command
- 		argv[i] = NULL;
- 		optind = optreset = 1;
- 		__progname = argv[0];
--#ifdef WITH_SELINUX
--		ssh_selinux_change_context("sftpd_t");
--#endif
- 		exit(sftp_server_main(i, argv, s->pw));
- 	}
+--- openssh-5.8p1/session.c.sftpcontext	2011-04-05 19:46:53.674654050 +0200
++++ openssh-5.8p1/session.c	2011-04-05 19:48:32.942658237 +0200
+@@ -1520,6 +1520,10 @@ do_setusercontext(struct passwd *pw)
+ 			free(chroot_path);
+ 		}
  
++#ifdef WITH_SELINUX
++		ssh_selinux_change_context("sshd_sftpd_t");
++#endif
++
+ #ifdef HAVE_LOGIN_CAP
+ 		if (setusercontext(lc, pw, pw->pw_uid, LOGIN_SETUSER) < 0) {
+ 			perror("unable to set user context (setuser)");
