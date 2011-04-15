@@ -31,7 +31,7 @@
 %define ldap 1
 
 # Do we want NSS tokens support
-#NSS support is broken from 5.4p1
+# NSS support is broken from 5.4p1
 %define nss 0
 
 # Whether or not /sbin/nologin exists.
@@ -109,9 +109,9 @@ Patch2: openssh-5.8p1-audit2.patch
 Patch3: openssh-5.8p1-audit3.patch
 Patch4: openssh-5.8p1-audit4.patch
 Patch5: openssh-5.8p1-audit5.patch
-#?
+#?https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch6: openssh-5.8p1-packet.patch
-#?
+#?https://bugzilla.mindrot.org/show_bug.cgi?id=1890
 Patch7: openssh-5.8p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
@@ -120,7 +120,7 @@ Patch10: pam_ssh_agent_auth-0.9-build.patch
 Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch20: openssh-5.8p1-authorized-keys-command.patch
-#?
+#?-- unwanted child :(
 Patch21: openssh-5.8p1-ldap.patch
 #-mail-conf
 Patch22: openssh-5.8p1-selinux.patch
@@ -145,7 +145,7 @@ Patch32: openssh-5.8p1-randclean.patch
 Patch34: openssh-5.8p1-kuserok.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch35: openssh-5.8p1-glob.patch
-#?
+#?https://bugzilla.mindrot.org/show_bug.cgi?id=1891
 Patch36: openssh-5.8p1-pwchange.patch
 #?
 Patch50: openssh-5.8p1-fips.patch
