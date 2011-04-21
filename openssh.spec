@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 26
+%define openssh_rel 27
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -109,9 +109,9 @@ Patch2: openssh-5.8p1-audit2.patch
 Patch3: openssh-5.8p1-audit3.patch
 Patch4: openssh-5.8p1-audit4.patch
 Patch5: openssh-5.8p1-audit5.patch
-#?https://bugzilla.mindrot.org/show_bug.cgi?id=1889
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch6: openssh-5.8p1-packet.patch
-#?https://bugzilla.mindrot.org/show_bug.cgi?id=1890
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1890
 Patch7: openssh-5.8p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
@@ -145,8 +145,10 @@ Patch32: openssh-5.8p1-randclean.patch
 Patch34: openssh-5.8p1-kuserok.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch35: openssh-5.8p1-glob.patch
-#?https://bugzilla.mindrot.org/show_bug.cgi?id=1891
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1891
 Patch36: openssh-5.8p1-pwchange.patch
+#?
+Patch37: openssh-5.8p1-keyperm.patch
 #?
 Patch50: openssh-5.8p1-fips.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
@@ -355,6 +357,7 @@ popd
 %patch34 -p1 -b .kuserok
 %patch35 -p1 -b .glob
 %patch36 -p1 -b .pwchange
+%patch37 -p1 -b .keyperm
 
 %patch50 -p1 -b .fips
 %patch51 -p1 -b .x11
@@ -543,6 +546,9 @@ popd
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre
+getent group ssh_keys >/dev/null || groupadd -r ssh_keys || :
+
 %pre server
 getent group sshd >/dev/null || groupadd -g %{sshd_uid} -r sshd || :
 %if %{nologin}
@@ -577,7 +583,7 @@ fi
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
-%attr(4111,root,root) %{_libexecdir}/openssh/ssh-keysign
+%attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -661,6 +667,9 @@ fi
 %endif
 
 %changelog
+* Thu Apr 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-27 + 0.9.2-30
+- the private keys may be 640 root:ssh_keys ssh_keysign is sgid
+
 * Wed Apr 20 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-26 + 0.9.2-30
 - improving sshd -> passwd transation
 
