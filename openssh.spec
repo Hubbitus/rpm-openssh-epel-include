@@ -147,8 +147,9 @@ Patch34: openssh-5.8p1-kuserok.patch
 Patch35: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1891
 Patch36: openssh-5.8p1-pwchange.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1893
 Patch37: openssh-5.8p1-keyperm.patch
+
 #?
 Patch50: openssh-5.8p1-fips.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789

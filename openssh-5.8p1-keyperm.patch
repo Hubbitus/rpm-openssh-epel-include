@@ -17,7 +17,7 @@ diff -up openssh-5.8p1/authfile.c.keyperm openssh-5.8p1/authfile.c
 +		struct group *gr;
 +
 +		if ((gr = getgrnam("ssh_keys")) && (st.st_gid == gr->gr_gid))
-+			st.st_mode &= ~040;
++			st.st-mode &= ~040;
 +	}
 +
  	if ((st.st_uid == getuid()) && (st.st_mode & 077) != 0) {
