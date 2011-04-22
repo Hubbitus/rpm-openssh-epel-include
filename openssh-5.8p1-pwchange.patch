@@ -1,30 +1,12 @@
 diff -up openssh-5.8p1/session.c.pwchange openssh-5.8p1/session.c
---- openssh-5.8p1/session.c.pwchange	2011-04-20 10:46:50.144658782 +0200
-+++ openssh-5.8p1/session.c	2011-04-20 11:36:09.055648048 +0200
-@@ -1542,11 +1542,27 @@ do_setusercontext(struct passwd *pw)
- static void
- do_pwchange(Session *s)
- {
-+#ifdef WITH_SELINUX
-+	pid_t pid;
-+#endif
-+
- 	fflush(NULL);
- 	fprintf(stderr, "WARNING: Your password has expired.\n");
+--- openssh-5.8p1/session.c.pwchange	2011-04-22 09:33:52.000000000 +0200
++++ openssh-5.8p1/session.c	2011-04-22 09:37:14.090653775 +0200
+@@ -1547,6 +1547,9 @@ do_pwchange(Session *s)
  	if (s->ttyfd != -1) {
  		fprintf(stderr,
  		    "You must change your password now and login again!\n");
 +#ifdef WITH_SELINUX
-+		switch (pid = fork()) {
-+			case -1:
-+				fatal("cannot fork");
-+			case 0:
-+				setexeccon(NULL);
-+				break;
-+			default:
-+				waitpid(pid, NULL, 0);
-+				exit(0);
-+		}
++		setexeccon(NULL);
 +#endif
  #ifdef PASSWD_NEEDS_USERNAME
  		execl(_PATH_PASSWD_PROG, "passwd", s->pw->pw_name,
