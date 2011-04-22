@@ -170,6 +170,8 @@ Patch58: openssh-5.8p1-keycat.patch
 Patch60: openssh-5.8p1-gsskex.patch
 #?
 Patch61: openssh-5.8p1-gssapi-canohost.patch
+#?
+Patch62: openssh-5.8p1-localdomain.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -370,6 +372,7 @@ popd
 %patch58 -p1 -b .keycat
 %patch60 -p1 -b .gsskex
 %patch61 -p1 -b .canohost
+%patch62 -p1 -b .localdomain
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -670,6 +673,7 @@ fi
 %changelog
 * Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-28 + 0.9.2-30
 - improving sshd -> passwd transation
+- add template for .local domain to sshd_config
 
 * Thu Apr 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-27 + 0.9.2-30
 - the private keys may be 640 root:ssh_keys ssh_keysign is sgid
