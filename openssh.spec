@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 28
+%define openssh_rel 29
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -94,6 +94,11 @@ Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/p
 Source5: pam_ssh_agent-rmheaders
 Source6: ssh-keycat.pam
 Source7: sshd.sysconfig
+Source8: ssh-keygen-dsa.service
+Source9: ssh-keygen-rsa.service
+Source10: ssh-keygen-rsa1.service
+Source11: sshd.service
+Source12: sshd.socket
 
 Patch99: openssh-5.8p1-wIm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
@@ -513,6 +518,11 @@ install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
+install -m644 %{SOURCE8} %{_unitdir}/ssh-keygen-dsa.service
+install -m644 %{SOURCE9} %{_unitdir}/ssh-keygen-rsa.service
+install -m644 %{SOURCE10} %{_unitdir}/ssh-keygen-rsa1.service
+install -m644 %{SOURCE11} %{_unitdir}/sshd.service
+install -m644 %{SOURCE12} %{_unitdir}/sshd.socket
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -636,6 +646,11 @@ fi
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
+%attr(0644,root,root) %{_unitdir}/ssh-keygen-dsa.service
+%attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa.service
+%attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa1.service
+%attr(0644,root,root) %{_unitdir}/sshd.service
+%attr(0644,root,root) %{_unitdir}/sshd.socket
 %endif
 
 %if %{ldap}
@@ -671,6 +686,9 @@ fi
 %endif
 
 %changelog
+* Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-28 + 0.9.2-30
+- add systemd units
+
 * Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-28 + 0.9.2-30
 - improving sshd -> passwd transation
 - add template for .local domain to sshd_config
