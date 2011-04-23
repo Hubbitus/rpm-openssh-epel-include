@@ -518,11 +518,11 @@ install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
-install -m644 %{SOURCE8} %{_unitdir}/ssh-keygen-dsa.service
-install -m644 %{SOURCE9} %{_unitdir}/ssh-keygen-rsa.service
-install -m644 %{SOURCE10} %{_unitdir}/ssh-keygen-rsa1.service
-install -m644 %{SOURCE11} %{_unitdir}/sshd.service
-install -m644 %{SOURCE12} %{_unitdir}/sshd.socket
+install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-dsa.service
+install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa.service
+install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa1.service
+install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
+install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
