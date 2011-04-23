@@ -518,6 +518,7 @@ install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
+install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
 install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-dsa.service
 install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa.service
 install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa1.service
@@ -686,7 +687,7 @@ fi
 %endif
 
 %changelog
-* Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-28 + 0.9.2-30
+* Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-29 + 0.9.2-30
 - add systemd units
 
 * Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-28 + 0.9.2-30
