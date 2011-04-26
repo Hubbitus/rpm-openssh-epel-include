@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 30
+%define openssh_rel 31
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -577,16 +577,44 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %post server
-/sbin/chkconfig --add sshd
+if [ -x /bin/systemctl ]; then
+  if [ $1 -eq 1 ]; then
+    /bin/systemctl enable sshd.service >/dev/null 2>&1 || :
+    /bin/systemctl enable ssh-keygen-dsa.service >/dev/null 2>&1 || :
+    /bin/systemctl enable ssh-keygen-rsa.service >/dev/null 2>&1 || :
+    /bin/systemctl enable ssh-keygen-rsa1.service >/dev/null 2>&1 || :
+  fi
+fi
+if [ -x /sbin/chkconfig ]; then
+  /sbin/chkconfig --add sshd
+fi
 
 %postun server
-/sbin/service sshd condrestart > /dev/null 2>&1 || :
+if [ -x /bin/systemctl ]; then
+  /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+  if [ $1 -ge 1 ]; then
+    /bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
+  fi
+fi
+if [ -x /sbin/service ]; then
+  /sbin/service sshd condrestart > /dev/null 2>&1 || :
+fi
 
 %preun server
-if [ "$1" = 0 ]
-then
-	/sbin/service sshd stop > /dev/null 2>&1 || :
-	/sbin/chkconfig --del sshd
+if [ $1 -eq 0 ]; then
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl disable sshd.service > /dev/null 2>&1 || :
+    /bin/systemctl disable ssh-keygen-dsa.service > /dev/null 2>&1 || :
+    /bin/systemctl disable ssh-keygen-rsa.service > /dev/null 2>&1 || :
+    /bin/systemctl disable ssh-keygen-rsa1.service > /dev/null 2>&1 || :
+    /bin/systemctl stop sshd.service > /dev/null 2>&1 || :
+  fi
+  if [ -x /sbin/service ]; then
+    /sbin/service sshd stop > /dev/null 2>&1 || :
+  fi
+  if [ -x /sbin/chkconfig ]; then
+    /sbin/chkconfig --del sshd
+  fi
 fi
 
 %files
@@ -687,6 +715,9 @@ fi
 %endif
 
 %changelog
+* Tue Apr 26 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-31 + 0.9.2-30
+- update scriptlets
+
 * Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-30 + 0.9.2-30
 - add systemd units
 
