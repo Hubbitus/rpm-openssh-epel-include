@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 31
+%define openssh_rel 32
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -588,6 +588,7 @@ fi
 if [ -x /sbin/chkconfig ]; then
   /sbin/chkconfig --add sshd
 fi
+exit 0
 
 %postun server
 if [ -x /bin/systemctl ]; then
@@ -597,8 +598,11 @@ if [ -x /bin/systemctl ]; then
   fi
 fi
 if [ -x /sbin/service ]; then
-  /sbin/service sshd condrestart > /dev/null 2>&1 || :
+  if [ $1 -ne 0 ]; then
+    /sbin/service sshd condrestart > /dev/null 2>&1 || :
+  fi
 fi
+exit 0
 
 %preun server
 if [ $1 -eq 0 ]; then
@@ -616,6 +620,7 @@ if [ $1 -eq 0 ]; then
     /sbin/chkconfig --del sshd
   fi
 fi
+exit 0
 
 %files
 %defattr(-,root,root)
@@ -715,7 +720,7 @@ fi
 %endif
 
 %changelog
-* Tue Apr 26 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-31 + 0.9.2-30
+* Tue Apr 26 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-32 + 0.9.2-30
 - update scriptlets
 
 * Fri Apr 22 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-30 + 0.9.2-30
