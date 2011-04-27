@@ -71,7 +71,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 32
+%define openssh_rel 33
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -107,6 +107,8 @@ Patch0: openssh-5.6p1-redhat.patch
 Patch100: openssh-5.8p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1879
 Patch200: openssh-5.8p1-exit.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1894
+Patch300: openssh-5.8p1-getaddrinfo.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch8: openssh-5.8p1-audit0.patch
 Patch1: openssh-5.8p1-audit1.patch
@@ -116,7 +118,7 @@ Patch4: openssh-5.8p1-audit4.patch
 Patch5: openssh-5.8p1-audit5.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch6: openssh-5.8p1-packet.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1890
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper
 Patch7: openssh-5.8p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch9: openssh-5.8p1-vendor.patch
@@ -331,6 +333,7 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .redhat
 %patch100 -p1 -b .fingerprint
 %patch200 -p1 -b .exit
+%patch300 -p1 -b .getaddrinfo
 %patch8 -p1 -b .audit0
 %patch1 -p1 -b .audit1
 %patch2 -p1 -b .audit2
@@ -720,6 +723,9 @@ exit 0
 %endif
 
 %changelog
+* Wed Apr 27 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-33 + 0.9.2-30
+- add flags AI_V4MAPPED and AI_ADDRCONFIG to getaddrinfo
+
 * Tue Apr 26 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-32 + 0.9.2-30
 - update scriptlets
 
