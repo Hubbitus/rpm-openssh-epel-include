@@ -40,6 +40,9 @@
 # Whether to build pam_ssh_agent_auth
 %define pam_ssh_agent 1
 
+# Whether add systemd units
+%define systemd 0
+
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
 %{?skip_gnome_askpass:%global no_gnome_askpass 1}
@@ -71,7 +74,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p1
-%define openssh_rel 33
+%define openssh_rel 34
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 30
 
@@ -521,12 +524,14 @@ install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
+%if %{systemd}
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
 install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-dsa.service
 install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa.service
 install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa1.service
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
 install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
+%endif
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -580,6 +585,7 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %post server
+%if %{systemd}
 if [ -x /bin/systemctl ]; then
   if [ $1 -eq 1 ]; then
     /bin/systemctl enable sshd.service >/dev/null 2>&1 || :
@@ -588,18 +594,21 @@ if [ -x /bin/systemctl ]; then
     /bin/systemctl enable ssh-keygen-rsa1.service >/dev/null 2>&1 || :
   fi
 fi
+%endif
 if [ -x /sbin/chkconfig ]; then
   /sbin/chkconfig --add sshd
 fi
 exit 0
 
 %postun server
+%if %{systemd}
 if [ -x /bin/systemctl ]; then
   /bin/systemctl daemon-reload >/dev/null 2>&1 || :
   if [ $1 -ge 1 ]; then
     /bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
   fi
 fi
+%endif
 if [ -x /sbin/service ]; then
   if [ $1 -ne 0 ]; then
     /sbin/service sshd condrestart > /dev/null 2>&1 || :
@@ -609,6 +618,7 @@ exit 0
 
 %preun server
 if [ $1 -eq 0 ]; then
+%if %{systemd}
   if [ -x /bin/systemctl ]; then
     /bin/systemctl disable sshd.service > /dev/null 2>&1 || :
     /bin/systemctl disable ssh-keygen-dsa.service > /dev/null 2>&1 || :
@@ -616,6 +626,7 @@ if [ $1 -eq 0 ]; then
     /bin/systemctl disable ssh-keygen-rsa1.service > /dev/null 2>&1 || :
     /bin/systemctl stop sshd.service > /dev/null 2>&1 || :
   fi
+%endif
   if [ -x /sbin/service ]; then
     /sbin/service sshd stop > /dev/null 2>&1 || :
   fi
@@ -683,11 +694,13 @@ exit 0
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
 %attr(0755,root,root) /etc/rc.d/init.d/sshd
+%if %{systemd}
 %attr(0644,root,root) %{_unitdir}/ssh-keygen-dsa.service
 %attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa.service
 %attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa1.service
 %attr(0644,root,root) %{_unitdir}/sshd.service
 %attr(0644,root,root) %{_unitdir}/sshd.socket
+%endif
 %endif
 
 %if %{ldap}
@@ -723,6 +736,9 @@ exit 0
 %endif
 
 %changelog
+* Thu Apr 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-34 + 0.9.2-30
+- temporarily disabling systemd units
+
 * Wed Apr 27 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-33 + 0.9.2-30
 - add flags AI_V4MAPPED and AI_ADDRCONFIG to getaddrinfo
 
