@@ -737,7 +737,7 @@ exit 0
 
 %changelog
 * Tue May  3 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-1 + 0.9.2-31
-- bounce the openssh version
+- update the openssh version
 
 * Thu Apr 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-34 + 0.9.2-30
 - temporarily disabling systemd units
