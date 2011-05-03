@@ -73,10 +73,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 5.8p1
-%define openssh_rel 34
+%define openssh_ver 5.8p2
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 30
+%define pam_ssh_agent_rel 31
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -132,8 +132,8 @@ Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 Patch20: openssh-5.8p1-authorized-keys-command.patch
 #?-- unwanted child :(
 Patch21: openssh-5.8p1-ldap.patch
-#-mail-conf
-Patch22: openssh-5.8p1-selinux.patch
+# #-mail-conf
+# Patch22: openssh-5.8p1-selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch23: openssh-5.8p1-selinux-role.patch
 #?
@@ -360,7 +360,7 @@ popd
 %endif
 %if %{WITH_SELINUX}
 #SELinux
-%patch22 -p1 -b .selinux
+# %patch22 -p1 -b .selinux
 %patch23 -p1 -b .role
 %patch24 -p1 -b .mls
 %patch26 -p1 -b .sftpcontext
@@ -736,6 +736,9 @@ exit 0
 %endif
 
 %changelog
+* Tue May  3 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-1 + 0.9.2-31
+- bounce the openssh version
+
 * Thu Apr 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p1-34 + 0.9.2-30
 - temporarily disabling systemd units
 
