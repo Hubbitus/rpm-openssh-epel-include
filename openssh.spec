@@ -74,7 +74,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -151,8 +151,6 @@ Patch31: openssh-5.2p1-allow-ip-opts.patch
 Patch32: openssh-5.8p1-randclean.patch
 # #https://bugzilla.mindrot.org/show_bug.cgi?id=1636
 # Patch33: openssh-5.1p1-log-in-chroot.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch34: openssh-5.8p1-kuserok.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch35: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1891
@@ -182,6 +180,10 @@ Patch60: openssh-5.8p1-gsskex.patch
 Patch61: openssh-5.8p1-gssapi-canohost.patch
 #?
 Patch62: openssh-5.8p1-localdomain.patch
+#http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
+Patch63: openssh-5.8p2-force_krb.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1780
+Patch64: openssh-5.8p2-kuserok.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -333,6 +335,7 @@ The module is most useful for su and sudo service stacks.
 %setup -q -a 4
 #Do not enable by default
 ###%patch99 -p1 -b .wIm
+
 %patch0 -p1 -b .redhat
 %patch100 -p1 -b .fingerprint
 %patch200 -p1 -b .exit
@@ -368,7 +371,6 @@ popd
 %patch30 -p1 -b .keygen
 %patch31 -p1 -b .ip-opts
 %patch32 -p1 -b .randclean
-%patch34 -p1 -b .kuserok
 %patch35 -p1 -b .glob
 %patch36 -p1 -b .pwchange
 %patch37 -p1 -b .keyperm
@@ -384,6 +386,8 @@ popd
 %patch60 -p1 -b .gsskex
 %patch61 -p1 -b .canohost
 %patch62 -p1 -b .localdomain
+%patch63 -p1 -b .force_krb
+%patch64 -p1 -b .kuserok
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -736,6 +740,9 @@ exit 0
 %endif
 
 %changelog
+* Mon May 23 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-2 + 0.9.2-31
+- add gssapi forced command
+
 * Tue May  3 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-1 + 0.9.2-31
 - update the openssh version
 
