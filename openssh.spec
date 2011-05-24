@@ -74,7 +74,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -132,6 +132,7 @@ Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
 Patch20: openssh-5.8p1-authorized-keys-command.patch
 #?-- unwanted child :(
 Patch21: openssh-5.8p1-ldap.patch
+Patch121: openssh-5.8p1-ldap2.patch
 # #-mail-conf
 # Patch22: openssh-5.8p1-selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
@@ -360,6 +361,7 @@ popd
 %patch20 -p1 -b .akc
 %if %{ldap}
 %patch21 -p1 -b .ldap
+%patch121 -p1 -b .ldap2
 %endif
 %if %{WITH_SELINUX}
 #SELinux
@@ -740,6 +742,9 @@ exit 0
 %endif
 
 %changelog
+* Tue May 24 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-3 + 0.9.2-31
+- improove ldap manuals
+
 * Mon May 23 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-2 + 0.9.2-31
 - add gssapi forced command
 
