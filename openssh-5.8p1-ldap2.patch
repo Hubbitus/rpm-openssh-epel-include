@@ -1,0 +1,46 @@
+diff -up openssh-5.8p2/ssh-ldap.conf.5.ldap2 openssh-5.8p2/ssh-ldap.conf.5
+--- openssh-5.8p2/ssh-ldap.conf.5.ldap2	2011-05-24 18:21:31.851167623 +0200
++++ openssh-5.8p2/ssh-ldap.conf.5	2011-05-24 18:28:20.301116545 +0200
+@@ -41,6 +41,7 @@ Quoting values that contain blanks
+ may be incorrect, as the quotes would become part of the value.
+ The possible keywords and their meanings are as follows (note that
+ keywords are case-insensitive, and arguments, on a case by case basis, may be case-sensitive).
++.Bl -tag -width Ds
+ .It Cm URI
+ The argument(s) are in the form
+ .Pa ldap[si]://[name[:port]]
+@@ -208,7 +209,7 @@ and
+ are the aliases for
+ .Dq no .
+ If
+-.Dqstart_tls
++.Dq start_tls
+ is specified then StartTLS is used rather than raw LDAP over SSL.
+ The default for ldap:// is
+ .Dq start_tls ,
+@@ -357,11 +358,13 @@ There is no default.
+ .It Cm SSH_Filter
+ Specifies the user filter applied on the LDAP serch.
+ The default is no filter.
++.El
+ .Sh FILES
+ .Bl -tag -width Ds
+ .It Pa  /etc/ssh/ldap.conf
+ Ldap configuration file for
+ .Xr ssh-ldap-helper 8 .
++.El
+ .Sh "SEE ALSO"
+ .Xr ldap.conf 5 ,
+ .Xr ssh-ldap-helper 8
+diff -up openssh-5.8p2/ssh-ldap-helper.8.ldap2 openssh-5.8p2/ssh-ldap-helper.8
+--- openssh-5.8p2/ssh-ldap-helper.8.ldap2	2011-05-24 18:29:33.476168165 +0200
++++ openssh-5.8p2/ssh-ldap-helper.8	2011-05-24 18:30:47.030173237 +0200
+@@ -66,7 +66,7 @@ increases verbosity.
+ .It Fl w
+ .Nm
+ writes warnings about unknown items in the ldap.conf configuration file.
+-
++.El
+ .Sh SEE ALSO
+ .Xr sshd 8 ,
+ .Xr sshd_config 5 ,
