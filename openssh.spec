@@ -74,7 +74,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -739,6 +739,9 @@ exit 0
 %endif
 
 %changelog
+* Tue May 31 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-5 + 0.9.2-31
+- improove entropy manuals
+
 * Fri May 27 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-4 + 0.9.2-31
 - improove entropy handling
 - concat ldap patches
