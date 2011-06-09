@@ -74,7 +74,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 5
+%define openssh_rel 6
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -183,6 +183,8 @@ Patch62: openssh-5.8p1-localdomain.patch
 Patch63: openssh-5.8p2-force_krb.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch64: openssh-5.8p2-kuserok.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
+Patch65: openssh-5.8p2-remove-stale-control-socket.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -387,6 +389,7 @@ popd
 %patch62 -p1 -b .localdomain
 %patch63 -p1 -b .force_krb
 %patch64 -p1 -b .kuserok
+%patch65 -p1 -b .remove_stale
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -739,6 +742,9 @@ exit 0
 %endif
 
 %changelog
+* Thu Jun  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-6 + 0.9.2-31
+- remove stale control sockets (#706396)
+
 * Tue May 31 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-5 + 0.9.2-31
 - improove entropy manuals
 
