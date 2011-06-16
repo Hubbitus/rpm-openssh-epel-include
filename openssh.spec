@@ -1,5 +1,9 @@
 # Do we want SELinux & Audit
+%if 0%{?!noselinux:1}
 %define WITH_SELINUX 1
+%else
+%define WITH_SELINUX 0
+%endif
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -38,7 +42,11 @@
 %define nologin 1
 
 # Whether to build pam_ssh_agent_auth
+%if 0%{?!nopam:1}
 %define pam_ssh_agent 1
+%else
+%define pam_ssh_agent 0
+%endif
 
 # Whether add systemd units
 %define systemd 0
@@ -74,7 +82,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -742,6 +750,9 @@ exit 0
 %endif
 
 %changelog
+* Thu Jun 16 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-7 + 0.9.2-31
+- Add possibility to compile openssh without downstream patches
+
 * Thu Jun  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-6 + 0.9.2-31
 - remove stale control sockets (#706396)
 
