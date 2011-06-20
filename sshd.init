@@ -42,7 +42,8 @@ SSHD=/usr/sbin/sshd
 RSA1_KEY=/etc/ssh/ssh_host_key
 RSA_KEY=/etc/ssh/ssh_host_rsa_key
 DSA_KEY=/etc/ssh/ssh_host_dsa_key
-PID_FILE=/var/run/sshd.pid
+XPID_FILE=/var/run/sshd.pid
+PID_FILE=/var/run/sshd-s.pid
 
 runlevel=$(set -- $(runlevel); eval "echo \$$#" )
 
@@ -136,6 +137,7 @@ start()
 	$SSHD $OPTIONS && success || failure
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch $lockfile
+	[ $RETVAL -eq 0 ] && cp -f $XPID_FILE $PID_FILE
 	echo
 	return $RETVAL
 }
@@ -144,12 +146,12 @@ stop()
 {
 
 	echo -n $"Stopping $prog: "
-	if [ ! -f "$PIDFILE" ]; then
+	if [ ! -f "$PID_FILE" ]; then
 		# not running; per LSB standards this is "ok"
 		action $"Stopping $prog: " /bin/true
 		return 0
 	fi
-	PID=`cat "$PIDFILE"`
+	PID=`cat "$PID_FILE"`
 	if [ -n "$PID" ]; then
 		/bin/kill "$PID" >/dev/null 2>&1
 		RETVAL=$?
@@ -172,7 +174,7 @@ stop()
 	    trap TERM
 	fi
 	[ $RETVAL -eq 0 ] && rm -f $lockfile
-	rm -f "$PIDFILE"
+	rm -f "$PID_FILE"
         return $RETVAL
 }
 
