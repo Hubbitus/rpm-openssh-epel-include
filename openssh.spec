@@ -82,7 +82,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -193,6 +193,8 @@ Patch63: openssh-5.8p2-force_krb.patch
 Patch64: openssh-5.8p2-kuserok.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
 Patch65: openssh-5.8p2-remove-stale-control-socket.patch
+#?
+Patch66: openssh-5.8p2-ipv6man.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -398,6 +400,7 @@ popd
 %patch63 -p1 -b .force_krb
 %patch64 -p1 -b .kuserok
 %patch65 -p1 -b .remove_stale
+%patch66 -p1 -b .ipv6man
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -750,6 +753,9 @@ exit 0
 %endif
 
 %changelog
+* Tue Jun 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-10 + 0.9.2-31
+- Mention IPv6 usage in man pages
+
 * Mon Jun 20 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-9 + 0.9.2-31
 - Improve init script
 
