@@ -48,9 +48,6 @@
 %define pam_ssh_agent 0
 %endif
 
-# Whether add systemd units
-%define systemd 0
-
 # Reserve options to override askpass settings with:
 # rpm -ba|--rebuild --define 'skip_xxx 1'
 %{?skip_gnome_askpass:%global no_gnome_askpass 1}
@@ -82,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 10
+%define openssh_rel 13
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -105,11 +102,11 @@ Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/p
 Source5: pam_ssh_agent-rmheaders
 Source6: ssh-keycat.pam
 Source7: sshd.sysconfig
-Source8: ssh-keygen-dsa.service
-Source9: ssh-keygen-rsa.service
-Source10: ssh-keygen-rsa1.service
+Source8: sshd-keygen.service
+Source9: sshd@.service
+Source10: sshd.socket
 Source11: sshd.service
-Source12: sshd.socket
+Source13: sshd-keygen
 
 Patch99: openssh-5.8p1-wIm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
@@ -263,10 +260,27 @@ Requires: fipscheck-lib%{_isa} >= 1.3.0
 Summary: An open source SSH server daemon
 Group: System Environment/Daemons
 Requires: openssh = %{version}-%{release}
-Requires(post): chkconfig >= 0.9, /sbin/service
 Requires(pre): /usr/sbin/useradd
 Requires: pam >= 1.0.1-3
 Requires: fipscheck-lib%{_isa} >= 1.3.0
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
+# This is actually needed for the %triggerun script but Requires(triggerun)
+# is not valid.  We can use %post because this particular %triggerun script
+# should fire just after this package is installed.
+Requires(post): systemd-sysv
+
+# Not yet ready
+# %package server-ondemand
+# Summary: Systemd unit file to run an ondemand OpenSSH server
+# Group: System Environment/Daemons
+# Requires: %{name}-server%{?_isa} = %{version}-%{release}
+
+%package server-sysvinit
+Summary: The SysV initscript to manage the OpenSSH server.
+Group: System Environment/Daemons
+Requires: %{name}-server%{?_isa} = %{version}-%{release}
 
 %if %{ldap}
 %package ldap
@@ -318,6 +332,19 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server.
+
+# %description server-ondemand
+# OpenSSH is a free version of SSH (Secure SHell), a program for logging
+# into and executing commands on a remote machine. This package contains
+# the systemd unit files to run an ondemand (socket activated) SSH server.
+
+%description server-sysvinit
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package contains
+the SysV init script to manage the OpenSSH server when running a legacy
+SysV-compatible init system.
+
+It is not required when the init system used is systemd.
 
 %if %{ldap}
 %description ldap
@@ -541,14 +568,12 @@ install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
-%if %{systemd}
+install -m755 %{SOURCE13} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
-install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-dsa.service
-install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa.service
-install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/ssh-keygen-rsa1.service
+install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
+install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
+install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
-install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
-%endif
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -602,56 +627,39 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %post server
-%if %{systemd}
-if [ -x /bin/systemctl ]; then
-  if [ $1 -eq 1 ]; then
+if [ $1 -eq 1 ] ; then
     /bin/systemctl enable sshd.service >/dev/null 2>&1 || :
-    /bin/systemctl enable ssh-keygen-dsa.service >/dev/null 2>&1 || :
-    /bin/systemctl enable ssh-keygen-rsa.service >/dev/null 2>&1 || :
-    /bin/systemctl enable ssh-keygen-rsa1.service >/dev/null 2>&1 || :
-  fi
+    /bin/systemctl enable sshd-keygen.service >/dev/null 2>&1 || :
 fi
-%endif
-if [ -x /sbin/chkconfig ]; then
-  /sbin/chkconfig --add sshd
-fi
-exit 0
 
 %postun server
-%if %{systemd}
-if [ -x /bin/systemctl ]; then
-  /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-  if [ $1 -ge 1 ]; then
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
     /bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
-  fi
+    /bin/systemctl try-restart sshd-keygen.service >/dev/null 2>&1 || :
 fi
-%endif
-if [ -x /sbin/service ]; then
-  if [ $1 -ne 0 ]; then
-    /sbin/service sshd condrestart > /dev/null 2>&1 || :
-  fi
-fi
-exit 0
 
 %preun server
-if [ $1 -eq 0 ]; then
-%if %{systemd}
-  if [ -x /bin/systemctl ]; then
-    /bin/systemctl disable sshd.service > /dev/null 2>&1 || :
-    /bin/systemctl disable ssh-keygen-dsa.service > /dev/null 2>&1 || :
-    /bin/systemctl disable ssh-keygen-rsa.service > /dev/null 2>&1 || :
-    /bin/systemctl disable ssh-keygen-rsa1.service > /dev/null 2>&1 || :
+if [ $1 -eq 0 ] ; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable sshd.service > /dev/null 2>&1 || :
+    /bin/systemctl --no-reload disable sshd-keygen.service > /dev/null 2>&1 || :
     /bin/systemctl stop sshd.service > /dev/null 2>&1 || :
-  fi
-%endif
-  if [ -x /sbin/service ]; then
-    /sbin/service sshd stop > /dev/null 2>&1 || :
-  fi
-  if [ -x /sbin/chkconfig ]; then
-    /sbin/chkconfig --del sshd
-  fi
+    /bin/systemctl stop sshd-keygen.service > /dev/null 2>&1 || :
 fi
-exit 0
+
+%triggerun -n openssh-server -- openssh-server < 5.8p2-12
+/usr/bin/systemd-sysv-convert --save sshd >/dev/null 2>&1 || :
+/bin/systemctl enable sshd.service >/dev/null 2>&1
+/bin/systemctl enable sshd-keygen.service >/dev/null 2>&1
+/sbin/chkconfig --del sshd >/dev/null 2>&1 || :
+/bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
+# This one was never a service, so we don't simply restart it
+/bin/systemctl is-active -q sshd.service && /bin/systemctl start sshd-keygen.service >/dev/null 2>&1 || :
+
+%triggerpostun -n openssh-server-sysvinit -- openssh-server < 5.8p2-12
+/sbin/chkconfig --add sshd >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root)
@@ -701,6 +709,7 @@ exit 0
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
+%attr(0755,root,root) %{_sbindir}/sshd-keygen
 %attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
@@ -710,14 +719,17 @@ exit 0
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
-%attr(0755,root,root) /etc/rc.d/init.d/sshd
-%if %{systemd}
-%attr(0644,root,root) %{_unitdir}/ssh-keygen-dsa.service
-%attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa.service
-%attr(0644,root,root) %{_unitdir}/ssh-keygen-rsa1.service
+%attr(0644,root,root) %{_unitdir}/sshd-keygen.service
 %attr(0644,root,root) %{_unitdir}/sshd.service
-%attr(0644,root,root) %{_unitdir}/sshd.socket
-%endif
+
+# %files server-ondemand
+# %defattr(-,root,root)
+# %attr(0644,root,root) %{_unitdir}/sshd@.service
+# %attr(0644,root,root) %{_unitdir}/sshd.socket
+
+%files server-sysvinit
+%defattr(-,root,root)
+%attr(0755,root,root) /etc/rc.d/init.d/sshd
 %endif
 
 %if %{ldap}
@@ -753,6 +765,14 @@ exit 0
 %endif
 
 %changelog
+* Tue Jun 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-11 + 0.9.2-31
+- Systemd compatibility according to Mathieu Bridon <bochecha@fedoraproject.org>
+- Split out the host keygen into their own command, to ease future migration
+  to systemd. Compatitbility with the init script was kept.
+- Migrate the package to full native systemd unit files, according to the Fedora
+  packaging guidelines.
+- Prepate the unit files for running an ondemand server. (do not add it actually)
+
 * Tue Jun 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-10 + 0.9.2-31
 - Mention IPv6 usage in man pages
 

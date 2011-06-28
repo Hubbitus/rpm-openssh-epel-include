@@ -1,5 +1,4 @@
 [Unit]
-Description=OpenSSH Server Socket.
 Conflicts=sshd.service
 
 [Socket]
