@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 11
+%define openssh_rel 12
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -765,7 +765,7 @@ fi
 %endif
 
 %changelog
-* Tue Jun 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-11 + 0.9.2-31
+* Tue Jun 28 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-12 + 0.9.2-31
 - Systemd compatibility according to Mathieu Bridon <bochecha@fedoraproject.org>
 - Split out the host keygen into their own command, to ease future migration
   to systemd. Compatitbility with the init script was kept.
