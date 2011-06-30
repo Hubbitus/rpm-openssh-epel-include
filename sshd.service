@@ -1,6 +1,6 @@
 [Unit]
 Description=OpenSSH server daemon.
-After=syslog.target network.target
+After=syslog.target network.target auditd.service
 
 [Service]
 ExecStart=/usr/sbin/sshd -D
