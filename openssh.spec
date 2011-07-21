@@ -190,7 +190,7 @@ Patch63: openssh-5.8p2-force_krb.patch
 Patch64: openssh-5.8p2-kuserok.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
 Patch65: openssh-5.8p2-remove-stale-control-socket.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1919
 Patch66: openssh-5.8p2-ipv6man.patch
 #?
 Patch67: openssh-5.8p2-unconfined.patch
