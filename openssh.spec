@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 14
+%define openssh_rel 15
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -192,6 +192,8 @@ Patch64: openssh-5.8p2-kuserok.patch
 Patch65: openssh-5.8p2-remove-stale-control-socket.patch
 #?
 Patch66: openssh-5.8p2-ipv6man.patch
+#?
+Patch67: openssh-5.8p2-unconfined.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -428,6 +430,7 @@ popd
 %patch64 -p1 -b .kuserok
 %patch65 -p1 -b .remove_stale
 %patch66 -p1 -b .ipv6man
+%patch67 -p1 -b .unconfined
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -765,6 +768,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-15 + 0.9.2-31
+- Do not change context when run under unconfined_t
+
 * Thu Jul 14 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-14 + 0.9.2-31
 - Add postlogin to pam. (#718807)
 
