@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 17
+%define openssh_rel 18
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -194,6 +194,8 @@ Patch65: openssh-5.8p2-remove-stale-control-socket.patch
 Patch66: openssh-5.8p2-ipv6man.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1919
 Patch67: openssh-5.8p2-unconfined.patch
+#?
+Patch68: openssh-5.8p2-sesftplog.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -431,6 +433,7 @@ popd
 %patch65 -p1 -b .remove_stale
 %patch66 -p1 -b .ipv6man
 %patch67 -p1 -b .unconfined
+%patch68 -p1 -b .sesftplog
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -768,6 +771,9 @@ fi
 %endif
 
 %changelog
+* Mon Aug  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-18 + 0.9.2-31
+- improve selinux's change context log 
+
 * Mon Aug  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-17 + 0.9.2-31
 - repair broken man pages
 
