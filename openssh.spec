@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 16
+%define openssh_rel 17
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -190,9 +190,9 @@ Patch63: openssh-5.8p2-force_krb.patch
 Patch64: openssh-5.8p2-kuserok.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
 Patch65: openssh-5.8p2-remove-stale-control-socket.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1919
-Patch66: openssh-5.8p2-ipv6man.patch
 #?
+Patch66: openssh-5.8p2-ipv6man.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1919
 Patch67: openssh-5.8p2-unconfined.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
@@ -768,8 +768,11 @@ fi
 %endif
 
 %changelog
+* Mon Aug  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-17 + 0.9.2-31
+- repair broken man pages
+
 * Mon Jul 25 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-16 + 0.9.2-31
-- rebuild
+- rebuild due to broken rpmbiild
 
 * Thu Jul 21 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-15 + 0.9.2-31
 - Do not change context when run under unconfined_t

@@ -89,10 +89,12 @@ diff -up openssh-5.8p2/openbsd-compat/port-linux-prng.c.entropy openssh-5.8p2/op
 diff -up openssh-5.8p2/ssh.1.entropy openssh-5.8p2/ssh.1
 --- openssh-5.8p2/ssh.1.entropy	2010-11-20 05:21:03.000000000 +0100
 +++ openssh-5.8p2/ssh.1	2011-05-28 21:15:27.375920967 +0200
-@@ -1250,6 +1250,20 @@ For more information, see the
+@@ -1250,6 +1250,23 @@ For more information, see the
  .Cm PermitUserEnvironment
  option in
  .Xr sshd_config 5 .
++.Sh ENVIRONMENT
++.Bl -tag -width Ds -compact
 +.It Ev SSH_USE_STRONG_RNG
 +The reseeding of the OpenSSL random generator is usually done from
 +.Cm /dev/urandom .
@@ -107,6 +109,7 @@ diff -up openssh-5.8p2/ssh.1.entropy openssh-5.8p2/ssh.1
 +This setting is not recommended on the computers without the hardware
 +random generator because insufficient entropy causes the connection to 
 +be blocked until enough entropy is available.
++.El
  .Sh FILES
  .Bl -tag -width Ds -compact
  .It Pa ~/.rhosts
@@ -137,7 +140,7 @@ diff -up openssh-5.8p2/ssh-add.1.entropy openssh-5.8p2/ssh-add.1
 diff -up openssh-5.8p2/ssh-agent.1.entropy openssh-5.8p2/ssh-agent.1
 --- openssh-5.8p2/ssh-agent.1.entropy	2010-12-01 01:50:35.000000000 +0100
 +++ openssh-5.8p2/ssh-agent.1	2011-05-28 21:13:10.086864993 +0200
-@@ -198,6 +198,23 @@ sockets used to contain the connection t
+@@ -198,6 +198,24 @@ sockets used to contain the connection t
  These sockets should only be readable by the owner.
  The sockets should get automatically removed when the agent exits.
  .El
@@ -158,13 +161,14 @@ diff -up openssh-5.8p2/ssh-agent.1.entropy openssh-5.8p2/ssh-agent.1
 +This setting is not recommended on the computers without the hardware
 +random generator because insufficient entropy causes the connection to 
 +be blocked until enough entropy is available.
++.El
  .Sh SEE ALSO
  .Xr ssh 1 ,
  .Xr ssh-add 1 ,
 diff -up openssh-5.8p2/sshd.8.entropy openssh-5.8p2/sshd.8
 --- openssh-5.8p2/sshd.8.entropy	2010-11-05 00:20:14.000000000 +0100
 +++ openssh-5.8p2/sshd.8	2011-05-28 21:13:10.241861760 +0200
-@@ -937,6 +937,23 @@ concurrently for different ports, this c
+@@ -937,6 +937,24 @@ concurrently for different ports, this c
  started last).
  The content of this file is not sensitive; it can be world-readable.
  .El
@@ -185,13 +189,14 @@ diff -up openssh-5.8p2/sshd.8.entropy openssh-5.8p2/sshd.8
 +This setting is not recommended on the computers without the hardware
 +random generator because insufficient entropy causes the connection to 
 +be blocked until enough entropy is available.
++.El
  .Sh SEE ALSO
  .Xr scp 1 ,
  .Xr sftp 1 ,
 diff -up openssh-5.8p2/ssh-keygen.1.entropy openssh-5.8p2/ssh-keygen.1
 --- openssh-5.8p2/ssh-keygen.1.entropy	2010-11-05 00:20:14.000000000 +0100
 +++ openssh-5.8p2/ssh-keygen.1	2011-05-28 21:13:10.389856432 +0200
-@@ -655,6 +655,23 @@ Contains Diffie-Hellman groups used for
+@@ -655,6 +655,24 @@ Contains Diffie-Hellman groups used for
  The file format is described in
  .Xr moduli 5 .
  .El
@@ -212,13 +217,14 @@ diff -up openssh-5.8p2/ssh-keygen.1.entropy openssh-5.8p2/ssh-keygen.1
 +This setting is not recommended on the computers without the hardware
 +random generator because insufficient entropy causes the connection to 
 +be blocked until enough entropy is available.
++.El
  .Sh SEE ALSO
  .Xr ssh 1 ,
  .Xr ssh-add 1 ,
 diff -up openssh-5.8p2/ssh-keysign.8.entropy openssh-5.8p2/ssh-keysign.8
 --- openssh-5.8p2/ssh-keysign.8.entropy	2010-08-31 14:41:14.000000000 +0200
 +++ openssh-5.8p2/ssh-keysign.8	2011-05-28 21:17:32.399856797 +0200
-@@ -78,6 +78,23 @@ must be set-uid root if host-based authe
+@@ -78,6 +78,24 @@ must be set-uid root if host-based authe
  If these files exist they are assumed to contain public certificate
  information corresponding with the private keys above.
  .El
@@ -239,6 +245,7 @@ diff -up openssh-5.8p2/ssh-keysign.8.entropy openssh-5.8p2/ssh-keysign.8
 +This setting is not recommended on the computers without the hardware
 +random generator because insufficient entropy causes the connection to 
 +be blocked until enough entropy is available.
++.El
  .Sh SEE ALSO
  .Xr ssh 1 ,
  .Xr ssh-keygen 1 ,
