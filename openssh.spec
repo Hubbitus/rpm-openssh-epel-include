@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 19
+%define openssh_rel 20
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -587,7 +587,7 @@ install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
 %if ! %{no_gnome_askpass}
-install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
+install contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
 
 %if ! %{scard}
@@ -774,6 +774,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-20 + 0.9.2-31
+- save ssh-askpass's debuginfo
+
 * Mon Aug  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-19 + 0.9.2-31
 - compile ssh-askpass with corect CFLAGS
 
