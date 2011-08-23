@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.8p2
-%define openssh_rel 20
+%define openssh_rel 21
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 31
 
@@ -198,6 +198,8 @@ Patch67: openssh-5.8p2-unconfined.patch
 Patch68: openssh-5.8p2-sesftplog.patch
 #?
 Patch69: openssh-5.8p2-askpass-ld.patch
+#?
+Patch70: openssh-5.8p2-sigpipe.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -437,6 +439,7 @@ popd
 %patch67 -p1 -b .unconfined
 %patch68 -p1 -b .sesftplog
 %patch69 -p1 -b .askpass-ld
+%patch70 -p1 -b .sigpipe
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -774,6 +777,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug 23 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-21 + 0.9.2-31
+- ignore SIGPIPE in ssh keyscan
+
 * Tue Aug  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-20 + 0.9.2-31
 - save ssh-askpass's debuginfo
 
