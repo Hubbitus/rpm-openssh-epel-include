@@ -78,10 +78,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 5.8p2
-%define openssh_rel 21
+%define openssh_ver 5.9p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 31
+%define pam_ssh_agent_rel 32
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -108,98 +108,100 @@ Source10: sshd.socket
 Source11: sshd.service
 Source13: sshd-keygen
 
-Patch99: openssh-5.8p1-wIm.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
-Patch0: openssh-5.6p1-redhat.patch
+# Internal debug
+Patch0: openssh-5.8p1-wIm.patch
+
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch100: openssh-5.8p1-fingerprint.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1879
-Patch200: openssh-5.8p1-exit.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
-Patch300: openssh-5.8p1-getaddrinfo.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch8: openssh-5.8p1-audit0.patch
-Patch1: openssh-5.8p1-audit1.patch
-Patch2: openssh-5.8p1-audit2.patch
-Patch3: openssh-5.8p1-audit3.patch
-Patch4: openssh-5.8p1-audit4.patch
-Patch5: openssh-5.8p1-audit5.patch
+Patch101: openssh-5.8p1-getaddrinfo.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1889
-Patch6: openssh-5.8p1-packet.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper
-Patch7: openssh-5.8p1-entropy.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
-Patch9: openssh-5.8p1-vendor.patch
+Patch102: openssh-5.8p1-packet.patch
+#?
+Patch103: openssh-5.9p1-2auth.patch
+
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1402
+Patch200: openssh-5.8p1-audit0.patch
+# -"-
+Patch201: openssh-5.9p1-audit1.patch
+# -"-
+Patch202: openssh-5.9p1-audit2.patch
+# -"-
+Patch203: openssh-5.9p1-audit3.patch
+# -"-
+Patch204: openssh-5.9p1-audit4.patch
+# -"-
+Patch205: openssh-5.9p1-audit5.patch
+
 # --- pam_ssh-agent ---
-Patch10: pam_ssh_agent_auth-0.9-build.patch
-Patch11: pam_ssh_agent_auth-0.9.2-seteuid.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch20: openssh-5.8p1-authorized-keys-command.patch
-#?-- unwanted child :(
-Patch21: openssh-5.8p1-ldap.patch
-# #-mail-conf
-# Patch22: openssh-5.8p1-selinux.patch
+Patch300: pam_ssh_agent_auth-0.9-build.patch
+Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
+
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch23: openssh-5.8p1-selinux-role.patch
+Patch400: openssh-5.9p1-role.patch
 #?
-Patch24: openssh-5.8p1-mls.patch
-# #https://bugzilla.mindrot.org/show_bug.cgi?id=1614
-# Patch25: openssh-5.6p1-selabel.patch
-#was https://bugzilla.mindrot.org/show_bug.cgi?id=1637
+Patch401: openssh-5.9p1-mls.patch
 #?
-Patch26: openssh-5.8p1-sftpcontext.patch
+Patch402: openssh-5.9p1-sftp-chroot.patch
+
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1663
+Patch500: openssh-5.9p1-akc.patch
+#?-- unwanted child :(
+Patch501: openssh-5.9p1-ldap.patch
+#?
+Patch502: openssh-5.9p1-keycat.patch
+
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
-Patch30: openssh-5.6p1-keygen.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1644
-Patch31: openssh-5.2p1-allow-ip-opts.patch
+Patch600: openssh-5.9p1-keygen.patch
+#http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
+Patch601: openssh-5.2p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
-Patch32: openssh-5.8p1-randclean.patch
-# #https://bugzilla.mindrot.org/show_bug.cgi?id=1636
-# Patch33: openssh-5.1p1-log-in-chroot.patch
+Patch602: openssh-5.9p1-randclean.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
-Patch35: openssh-5.8p1-glob.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1891
-Patch36: openssh-5.8p1-pwchange.patch
+Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
-Patch37: openssh-5.8p1-keyperm.patch
-#?
-Patch50: openssh-5.8p1-fips.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1789
-Patch51: openssh-5.5p1-x11.patch
-#?
-Patch52: openssh-5.6p1-exit-deadlock.patch
-#?
-Patch53: openssh-5.1p1-askpass-progress.patch
-#?
-Patch54: openssh-4.3p2-askpass-grab-info.patch
-#?
-Patch56: openssh-5.2p1-edns.patch
-#?
-Patch57: openssh-5.1p1-scp-manpage.patch
-#?
-Patch58: openssh-5.8p1-keycat.patch
-#http://www.sxw.org.uk/computing/patches/openssh.html
-Patch60: openssh-5.8p1-gsskex.patch
-#?
-Patch61: openssh-5.8p1-gssapi-canohost.patch
-#?
-Patch62: openssh-5.8p1-localdomain.patch
-#http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
-Patch63: openssh-5.8p2-force_krb.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch64: openssh-5.8p2-kuserok.patch
+Patch604: openssh-5.8p1-keyperm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
-Patch65: openssh-5.8p2-remove-stale-control-socket.patch
+Patch605: openssh-5.8p2-remove-stale-control-socket.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1925
-Patch66: openssh-5.8p2-ipv6man.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1919
-Patch67: openssh-5.8p2-unconfined.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1924
-Patch68: openssh-5.8p2-sesftplog.patch
+Patch606: openssh-5.9p1-ipv6man.patch
 #?
-Patch69: openssh-5.8p2-askpass-ld.patch
+Patch607: openssh-5.8p2-sigpipe.patch
 #?
-Patch70: openssh-5.8p2-sigpipe.patch
+Patch608: openssh-5.8p2-askpass-ld.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1789
+Patch609: openssh-5.5p1-x11.patch
+
+#?
+Patch700: openssh-5.9p1-fips.patch
+#?
+Patch701: openssh-5.6p1-exit-deadlock.patch
+#?
+Patch702: openssh-5.1p1-askpass-progress.patch
+#?
+Patch703: openssh-4.3p2-askpass-grab-info.patch
+#?
+Patch704: openssh-5.2p1-edns.patch
+#?
+Patch705: openssh-5.1p1-scp-manpage.patch
+#?
+Patch706: openssh-5.8p1-localdomain.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
+Patch707: openssh-5.9p1-redhat.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
+Patch708: openssh-5.9p1-entropy.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
+Patch709: openssh-5.9p1-vendor.patch
+
+#http://www.sxw.org.uk/computing/patches/openssh.html
+Patch800: openssh-5.9p1-gsskex.patch
+#http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
+Patch801: openssh-5.8p2-force_krb.patch
+
+#?
+Patch900: openssh-5.8p1-gssapi-canohost.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1780
+Patch901: openssh-5.9p1-kuserok.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -380,66 +382,68 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 #Do not enable by default
-###%patch99 -p1 -b .wIm
+###%patch0 -p1 -b .wIm
 
-%patch0 -p1 -b .redhat
 %patch100 -p1 -b .fingerprint
-%patch200 -p1 -b .exit
-%patch300 -p1 -b .getaddrinfo
-%patch8 -p1 -b .audit0
-%patch1 -p1 -b .audit1
-%patch2 -p1 -b .audit2
-%patch3 -p1 -b .audit3
-%patch4 -p1 -b .audit4
-%patch5 -p1 -b .audit5
-%patch6 -p1 -b .packet
-%patch7 -p1 -b .entropy
-%patch9 -p1 -b .vendor
+%patch101 -p1 -b .getaddrinfo
+%patch102 -p1 -b .packet
+%patch103 -p1 -b .2auth
+
+%patch200 -p1 -b .audit0
+%patch201 -p1 -b .audit1
+%patch202 -p1 -b .audit2
+%patch203 -p1 -b .audit3
+%patch204 -p1 -b .audit4
+%patch205 -p1 -b .audit5
+
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
-%patch10 -p1 -b .psaa-build
-%patch11 -p1 -b .psaa-seteuid
+%patch300 -p1 -b .psaa-build
+%patch301 -p1 -b .psaa-seteuid
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
 %endif
-%patch20 -p1 -b .akc
-%if %{ldap}
-%patch21 -p1 -b .ldap
-%endif
-%if %{WITH_SELINUX}
-#SELinux
-# %patch22 -p1 -b .selinux
-%patch23 -p1 -b .role
-%patch24 -p1 -b .mls
-%patch26 -p1 -b .sftpcontext
-%endif
-%patch30 -p1 -b .keygen
-%patch31 -p1 -b .ip-opts
-%patch32 -p1 -b .randclean
-%patch35 -p1 -b .glob
-%patch36 -p1 -b .pwchange
-%patch37 -p1 -b .keyperm
 
-%patch50 -p1 -b .fips
-%patch51 -p1 -b .x11
-%patch52 -p1 -b .exit-deadlock
-%patch53 -p1 -b .progress
-%patch54 -p1 -b .grab-info
-%patch56 -p1 -b .edns
-%patch57 -p1 -b .manpage
-%patch58 -p1 -b .keycat
-%patch60 -p1 -b .gsskex
-%patch61 -p1 -b .canohost
-%patch62 -p1 -b .localdomain
-%patch63 -p1 -b .force_krb
-%patch64 -p1 -b .kuserok
-%patch65 -p1 -b .remove_stale
-%patch66 -p1 -b .ipv6man
-%patch67 -p1 -b .unconfined
-%patch68 -p1 -b .sesftplog
-%patch69 -p1 -b .askpass-ld
-%patch70 -p1 -b .sigpipe
+%if %{WITH_SELINUX}
+%patch400 -p1 -b .role
+%patch401 -p1 -b .mls
+%patch402 -p1 -b .sftp-chroot
+%endif
+
+%patch500 -p1 -b .akc
+%if %{ldap}
+%patch501 -p1 -b .ldap
+%endif
+%patch502 -p1 -b .keycat
+
+%patch600 -p1 -b .keygen
+%patch601 -p1 -b .ip-opts
+%patch602 -p1 -b .randclean
+%patch603 -p1 -b .glob
+%patch604 -p1 -b .keyperm
+%patch605 -p1 -b .remove_stale
+%patch606 -p1 -b .ipv6man
+%patch607 -p1 -b .sigpipe
+%patch608 -p1 -b .askpass-ld
+%patch609 -p1 -b .x11
+
+%patch700 -p1 -b .fips
+%patch701 -p1 -b .exit-deadlock
+%patch702 -p1 -b .progress
+%patch703 -p1 -b .grab-info
+%patch704 -p1 -b .edns
+%patch705 -p1 -b .manpage
+%patch706 -p1 -b .localdomain
+%patch707 -p1 -b .redhat
+%patch708 -p1 -b .entropy
+%patch709 -p1 -b .vendor
+
+%patch800 -p1 -b .gsskex
+%patch801 -p1 -b .force_krb
+
+%patch900 -p1 -b .canohost
+%patch901 -p1 -b .kuserok
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -675,7 +679,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO WARNING*
+%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}

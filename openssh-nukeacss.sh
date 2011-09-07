@@ -18,3 +18,4 @@ patch -sp0 << EOF
  extern const EVP_CIPHER *evp_ssh1_bf(void);
  extern const EVP_CIPHER *evp_ssh1_3des(void);
 EOF
+echo "Well done."
