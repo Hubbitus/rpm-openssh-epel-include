@@ -781,6 +781,11 @@ fi
 %endif
 
 %changelog
+* Wed Sep  7 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-1 + 0.9.2-32
+- Rebase to 5.9p1
+- Add chroot sftp patch
+- Add two factor auth patch
+
 * Tue Aug 23 2011 Jan F. Chadima <jchadima@redhat.com> - 5.8p2-21 + 0.9.2-31
 - ignore SIGPIPE in ssh keyscan
 
