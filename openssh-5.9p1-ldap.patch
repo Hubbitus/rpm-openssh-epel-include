@@ -473,7 +473,7 @@ diff -up openssh-5.9p0/ldap-helper.c.ldap openssh-5.9p0/ldap-helper.c
 +}
 +
 +/* Ugly hack */
-+void   *buffer_get_string(Buffer *b, u_int *l) {}
++void   *buffer_get_string(Buffer *b, u_int *l) { return NULL; }
 +void    buffer_put_string(Buffer *b, const void *f, u_int l) {}
 +
 diff -up openssh-5.9p0/ldap-helper.h.ldap openssh-5.9p0/ldap-helper.h
@@ -776,7 +776,7 @@ diff -up openssh-5.9p0/ldapbody.c.ldap openssh-5.9p0/ldapbody.c
 +				ber_set_option (NULL, LBER_OPT_DEBUG_LEVEL, &options.debug);
 +#endif /* LBER_OPT_DEBUG_LEVEL */
 +#ifdef LDAP_OPT_DEBUG_LEVEL
-+				ldap_set_option (NULL, LDAP_OPT_DEBUG_LEVEL, &options.debug);
++				(void) ldap_set_option (NULL, LDAP_OPT_DEBUG_LEVEL, &options.debug);
 +#endif /* LDAP_OPT_DEBUG_LEVEL */
 +				debug3 ("Set LDAP debug to %d", options.debug);
 +			}

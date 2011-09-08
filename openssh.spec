@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -111,14 +111,16 @@ Source13: sshd-keygen
 # Internal debug
 Patch0: openssh-5.8p1-wIm.patch
 
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch100: openssh-5.8p1-fingerprint.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1894
-Patch101: openssh-5.8p1-getaddrinfo.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1889
-Patch102: openssh-5.8p1-packet.patch
 #?
-Patch103: openssh-5.9p1-2auth.patch
+Patch100: openssh-5.9p1-coverity.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1872
+Patch101: openssh-5.8p1-fingerprint.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1894
+Patch102: openssh-5.8p1-getaddrinfo.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1889
+Patch103: openssh-5.8p1-packet.patch
+#https://bugzilla.mindrot.org/show_bug.cgi?id=983
+Patch104: openssh-5.9p1-2auth.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-5.8p1-audit0.patch
@@ -384,10 +386,11 @@ The module is most useful for su and sudo service stacks.
 #Do not enable by default
 ###%patch0 -p1 -b .wIm
 
-%patch100 -p1 -b .fingerprint
-%patch101 -p1 -b .getaddrinfo
-%patch102 -p1 -b .packet
-%patch103 -p1 -b .2auth
+%patch100 -p1 -b .coverity
+%patch101 -p1 -b .fingerprint
+%patch102 -p1 -b .getaddrinfo
+%patch103 -p1 -b .packet
+%patch104 -p1 -b .2auth
 
 %patch200 -p1 -b .audit0
 %patch201 -p1 -b .audit1
@@ -415,6 +418,7 @@ popd
 %if %{ldap}
 %patch501 -p1 -b .ldap
 %endif
+
 %patch502 -p1 -b .keycat
 
 %patch600 -p1 -b .keygen
@@ -781,6 +785,9 @@ fi
 %endif
 
 %changelog
+* Thu Sep  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-2 + 0.9.2-32
+- Coverity first pass
+
 * Wed Sep  7 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-1 + 0.9.2-32
 - Rebase to 5.9p1
 - Add chroot sftp patch

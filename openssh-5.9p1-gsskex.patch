@@ -1454,7 +1454,7 @@ diff -up openssh-5.9p0/kexgssc.c.gsskex openssh-5.9p0/kexgssc.c
 +	klen = DH_size(dh);
 +	kbuf = xmalloc(klen);
 +	kout = DH_compute_key(kbuf, dh_server_pub, dh);
-+	if (kout < 0)
++	if ((int)kout < 0)
 +		fatal("DH_compute_key: failed");
 +
 +	shared_secret = BN_new();
@@ -1738,7 +1738,7 @@ diff -up openssh-5.9p0/kexgsss.c.gsskex openssh-5.9p0/kexgsss.c
 +	klen = DH_size(dh);
 +	kbuf = xmalloc(klen); 
 +	kout = DH_compute_key(kbuf, dh_client_pub, dh);
-+	if (kout < 0)
++	if ((int)kout < 0)
 +		fatal("DH_compute_key: failed");
 +
 +	shared_secret = BN_new();
