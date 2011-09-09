@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -183,7 +183,7 @@ Patch702: openssh-5.1p1-askpass-progress.patch
 #?
 Patch703: openssh-4.3p2-askpass-grab-info.patch
 #?
-Patch704: openssh-5.2p1-edns.patch
+Patch704: openssh-5.9p1-edns.patch
 #?
 Patch705: openssh-5.1p1-scp-manpage.patch
 #?
@@ -785,6 +785,10 @@ fi
 %endif
 
 %changelog
+* Fri Sep  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-3 + 0.9.2-32
+- Coverity second pass
+- Reenable akc patch
+
 * Thu Sep  8 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-2 + 0.9.2-32
 - Coverity first pass
 

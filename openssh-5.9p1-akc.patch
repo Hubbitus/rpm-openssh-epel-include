@@ -1,6 +1,6 @@
 diff -up openssh-5.9p1/auth2-pubkey.c.akc openssh-5.9p1/auth2-pubkey.c
---- openssh-5.9p1/auth2-pubkey.c.akc	2011-09-09 17:26:31.000000000 +0200
-+++ openssh-5.9p1/auth2-pubkey.c	2011-09-09 17:28:15.000000000 +0200
+--- openssh-5.9p1/auth2-pubkey.c.akc	2011-09-09 19:27:15.369501615 +0200
++++ openssh-5.9p1/auth2-pubkey.c	2011-09-09 19:30:32.958509941 +0200
 @@ -27,6 +27,7 @@
  
  #include <sys/types.h>
@@ -47,7 +47,7 @@ diff -up openssh-5.9p1/auth2-pubkey.c.akc openssh-5.9p1/auth2-pubkey.c
  	key_free(found);
  	if (!found_key)
  		debug2("key not found");
-@@ -452,13 +439,191 @@ user_cert_trusted_ca(struct passwd *pw, 
+@@ -452,13 +439,191 @@ user_cert_trusted_ca(struct passwd *pw,
  	return ret;
  }
  
@@ -242,7 +242,7 @@ diff -up openssh-5.9p1/auth2-pubkey.c.akc openssh-5.9p1/auth2-pubkey.c
  	if (key_is_cert(key) && auth_key_is_revoked(key->cert->signature_key))
 diff -up openssh-5.9p1/configure.ac.akc openssh-5.9p1/configure.ac
 --- openssh-5.9p1/configure.ac.akc	2011-08-18 06:48:24.000000000 +0200
-+++ openssh-5.9p1/configure.ac	2011-09-09 17:26:31.000000000 +0200
++++ openssh-5.9p1/configure.ac	2011-09-09 19:27:17.548440048 +0200
 @@ -1421,6 +1421,18 @@ AC_ARG_WITH([audit],
  	esac ]
  )
@@ -271,9 +271,9 @@ diff -up openssh-5.9p1/configure.ac.akc openssh-5.9p1/configure.ac
  echo "                   libedit support: $LIBEDIT_MSG"
  echo "  Solaris process contract support: $SPC_MSG"
 diff -up openssh-5.9p1/servconf.c.akc openssh-5.9p1/servconf.c
---- openssh-5.9p1/servconf.c.akc	2011-09-09 17:26:30.000000000 +0200
-+++ openssh-5.9p1/servconf.c	2011-09-09 17:26:31.000000000 +0200
-@@ -139,6 +139,8 @@ initialize_server_options(ServerOptions 
+--- openssh-5.9p1/servconf.c.akc	2011-09-09 19:27:03.490455245 +0200
++++ openssh-5.9p1/servconf.c	2011-09-09 19:27:17.666565662 +0200
+@@ -139,6 +139,8 @@ initialize_server_options(ServerOptions
  	options->num_permitted_opens = -1;
  	options->adm_forced_command = NULL;
  	options->chroot_directory = NULL;
@@ -344,8 +344,8 @@ diff -up openssh-5.9p1/servconf.c.akc openssh-5.9p1/servconf.c
  	/* string arguments requiring a lookup */
  	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
 diff -up openssh-5.9p1/servconf.h.akc openssh-5.9p1/servconf.h
---- openssh-5.9p1/servconf.h.akc	2011-09-09 17:26:30.000000000 +0200
-+++ openssh-5.9p1/servconf.h	2011-09-09 17:26:31.000000000 +0200
+--- openssh-5.9p1/servconf.h.akc	2011-09-09 19:27:03.614494286 +0200
++++ openssh-5.9p1/servconf.h	2011-09-09 19:27:18.043502934 +0200
 @@ -174,6 +174,8 @@ typedef struct {
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
@@ -355,22 +355,9 @@ diff -up openssh-5.9p1/servconf.h.akc openssh-5.9p1/servconf.h
  }       ServerOptions;
  
  /*
-diff -up openssh-5.9p1/sshd_config.akc openssh-5.9p1/sshd_config
---- openssh-5.9p1/sshd_config.akc	2011-09-09 17:26:30.000000000 +0200
-+++ openssh-5.9p1/sshd_config	2011-09-09 17:26:31.000000000 +0200
-@@ -49,6 +49,9 @@
- # but this is overridden so installations will only check .ssh/authorized_keys
- AuthorizedKeysFile	.ssh/authorized_keys
- 
-+#AuthorizedKeysCommand none
-+#AuthorizedKeysCommandRunAs nobody
-+
- # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
- #RhostsRSAAuthentication no
- # similar for protocol version 2
 diff -up openssh-5.9p1/sshd_config.0.akc openssh-5.9p1/sshd_config.0
 --- openssh-5.9p1/sshd_config.0.akc	2011-09-07 01:16:30.000000000 +0200
-+++ openssh-5.9p1/sshd_config.0	2011-09-09 17:26:31.000000000 +0200
++++ openssh-5.9p1/sshd_config.0	2011-09-09 19:27:18.168626976 +0200
 @@ -71,6 +71,23 @@ DESCRIPTION
  
               See PATTERNS in ssh_config(5) for more information on patterns.
@@ -406,8 +393,8 @@ diff -up openssh-5.9p1/sshd_config.0.akc openssh-5.9p1/sshd_config.0
               GSSAPIAuthentication, HostbasedAuthentication,
               HostbasedUsesNameFromPacketOnly, KbdInteractiveAuthentication,
 diff -up openssh-5.9p1/sshd_config.5.akc openssh-5.9p1/sshd_config.5
---- openssh-5.9p1/sshd_config.5.akc	2011-09-09 17:26:30.000000000 +0200
-+++ openssh-5.9p1/sshd_config.5	2011-09-09 17:26:31.000000000 +0200
+--- openssh-5.9p1/sshd_config.5.akc	2011-09-09 19:27:03.912515059 +0200
++++ openssh-5.9p1/sshd_config.5	2011-09-09 19:27:18.292494317 +0200
 @@ -706,6 +706,8 @@ Available keywords are
  .Cm AllowAgentForwarding ,
  .Cm AllowTcpForwarding ,
@@ -446,3 +433,16 @@ diff -up openssh-5.9p1/sshd_config.5.akc openssh-5.9p1/sshd_config.5
  .It Cm RhostsRSAAuthentication
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful RSA host authentication is allowed.
+diff -up openssh-5.9p1/sshd_config.akc openssh-5.9p1/sshd_config
+--- openssh-5.9p1/sshd_config.akc	2011-09-09 19:27:03.754502770 +0200
++++ openssh-5.9p1/sshd_config	2011-09-09 19:27:18.446471121 +0200
+@@ -49,6 +49,9 @@
+ # but this is overridden so installations will only check .ssh/authorized_keys
+ AuthorizedKeysFile	.ssh/authorized_keys
+ 
++#AuthorizedKeysCommand none
++#AuthorizedKeysCommandRunAs nobody
++
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #RhostsRSAAuthentication no
+ # similar for protocol version 2
