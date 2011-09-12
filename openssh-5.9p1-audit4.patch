@@ -1,6 +1,6 @@
-diff -up openssh-5.9p0/audit-bsm.c.audit4 openssh-5.9p0/audit-bsm.c
---- openssh-5.9p0/audit-bsm.c.audit4	2011-09-03 19:32:58.053087996 +0200
-+++ openssh-5.9p0/audit-bsm.c	2011-09-03 19:32:59.670087560 +0200
+diff -up openssh-5.9p1/audit-bsm.c.audit4 openssh-5.9p1/audit-bsm.c
+--- openssh-5.9p1/audit-bsm.c.audit4	2011-09-10 17:56:34.180582615 +0200
++++ openssh-5.9p1/audit-bsm.c	2011-09-10 17:56:35.753521139 +0200
 @@ -408,4 +408,10 @@ audit_kex_body(int ctos, char *enc, char
  {
  	/* not implemented */
@@ -12,9 +12,9 @@ diff -up openssh-5.9p0/audit-bsm.c.audit4 openssh-5.9p0/audit-bsm.c
 +	/* not implemented */
 +}
  #endif /* BSM */
-diff -up openssh-5.9p0/audit-linux.c.audit4 openssh-5.9p0/audit-linux.c
---- openssh-5.9p0/audit-linux.c.audit4	2011-09-03 19:32:58.177086248 +0200
-+++ openssh-5.9p0/audit-linux.c	2011-09-03 19:32:59.758096254 +0200
+diff -up openssh-5.9p1/audit-linux.c.audit4 openssh-5.9p1/audit-linux.c
+--- openssh-5.9p1/audit-linux.c.audit4	2011-09-10 17:56:34.293583578 +0200
++++ openssh-5.9p1/audit-linux.c	2011-09-10 17:56:35.841521317 +0200
 @@ -292,6 +292,8 @@ audit_unsupported_body(int what)
  #endif
  }
@@ -63,9 +63,9 @@ diff -up openssh-5.9p0/audit-linux.c.audit4 openssh-5.9p0/audit-linux.c
 +}
 +
  #endif /* USE_LINUX_AUDIT */
-diff -up openssh-5.9p0/audit.c.audit4 openssh-5.9p0/audit.c
---- openssh-5.9p0/audit.c.audit4	2011-09-03 19:32:58.292030283 +0200
-+++ openssh-5.9p0/audit.c	2011-09-03 19:32:59.882149457 +0200
+diff -up openssh-5.9p1/audit.c.audit4 openssh-5.9p1/audit.c
+--- openssh-5.9p1/audit.c.audit4	2011-09-10 17:56:34.412583151 +0200
++++ openssh-5.9p1/audit.c	2011-09-10 17:56:35.946521612 +0200
 @@ -143,6 +143,12 @@ audit_kex(int ctos, char *enc, char *mac
  	PRIVSEP(audit_kex_body(ctos, enc, mac, comp, getpid(), getuid()));
  }
@@ -95,9 +95,9 @@ diff -up openssh-5.9p0/audit.c.audit4 openssh-5.9p0/audit.c
 +}
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.9p0/audit.h.audit4 openssh-5.9p0/audit.h
---- openssh-5.9p0/audit.h.audit4	2011-09-03 19:32:58.389152136 +0200
-+++ openssh-5.9p0/audit.h	2011-09-03 19:32:59.990088015 +0200
+diff -up openssh-5.9p1/audit.h.audit4 openssh-5.9p1/audit.h
+--- openssh-5.9p1/audit.h.audit4	2011-09-10 17:56:34.522585448 +0200
++++ openssh-5.9p1/audit.h	2011-09-10 17:56:36.060648282 +0200
 @@ -62,5 +62,7 @@ void	audit_unsupported(int);
  void	audit_kex(int, char *, char *, char *);
  void	audit_unsupported_body(int);
@@ -106,9 +106,9 @@ diff -up openssh-5.9p0/audit.h.audit4 openssh-5.9p0/audit.h
 +void	audit_session_key_free_body(int ctos, pid_t, uid_t);
  
  #endif /* _SSH_AUDIT_H */
-diff -up openssh-5.9p0/auditstub.c.audit4 openssh-5.9p0/auditstub.c
---- openssh-5.9p0/auditstub.c.audit4	2011-09-03 19:32:58.485025086 +0200
-+++ openssh-5.9p0/auditstub.c	2011-09-03 19:33:00.115087744 +0200
+diff -up openssh-5.9p1/auditstub.c.audit4 openssh-5.9p1/auditstub.c
+--- openssh-5.9p1/auditstub.c.audit4	2011-09-10 17:56:34.630460554 +0200
++++ openssh-5.9p1/auditstub.c	2011-09-10 17:56:36.169523019 +0200
 @@ -27,6 +27,8 @@
   * Red Hat author: Jan F. Chadima <jchadima@redhat.com>
   */
@@ -131,9 +131,9 @@ diff -up openssh-5.9p0/auditstub.c.audit4 openssh-5.9p0/auditstub.c
 +audit_session_key_free_body(int ctos, pid_t pid, uid_t uid)
 +{
 +}
-diff -up openssh-5.9p0/kex.c.audit4 openssh-5.9p0/kex.c
---- openssh-5.9p0/kex.c.audit4	2011-09-03 19:32:58.820024508 +0200
-+++ openssh-5.9p0/kex.c	2011-09-03 19:33:00.226087442 +0200
+diff -up openssh-5.9p1/kex.c.audit4 openssh-5.9p1/kex.c
+--- openssh-5.9p1/kex.c.audit4	2011-09-10 17:56:34.933645761 +0200
++++ openssh-5.9p1/kex.c	2011-09-10 17:56:36.276583128 +0200
 @@ -624,3 +624,34 @@ dump_digest(char *msg, u_char *digest, i
  	fprintf(stderr, "\n");
  }
@@ -169,9 +169,9 @@ diff -up openssh-5.9p0/kex.c.audit4 openssh-5.9p0/kex.c
 +	memset(&newkeys->comp, 0, sizeof(newkeys->comp));
 +}
 +
-diff -up openssh-5.9p0/kex.h.audit4 openssh-5.9p0/kex.h
---- openssh-5.9p0/kex.h.audit4	2010-09-24 14:11:14.000000000 +0200
-+++ openssh-5.9p0/kex.h	2011-09-03 19:33:00.342212519 +0200
+diff -up openssh-5.9p1/kex.h.audit4 openssh-5.9p1/kex.h
+--- openssh-5.9p1/kex.h.audit4	2010-09-24 14:11:14.000000000 +0200
++++ openssh-5.9p1/kex.h	2011-09-10 17:56:36.400497848 +0200
 @@ -156,6 +156,8 @@ void	 kexgex_server(Kex *);
  void	 kexecdh_client(Kex *);
  void	 kexecdh_server(Kex *);
@@ -181,9 +181,9 @@ diff -up openssh-5.9p0/kex.h.audit4 openssh-5.9p0/kex.h
  void
  kex_dh_hash(char *, char *, char *, int, char *, int, u_char *, int,
      BIGNUM *, BIGNUM *, BIGNUM *, u_char **, u_int *);
-diff -up openssh-5.9p0/mac.c.audit4 openssh-5.9p0/mac.c
---- openssh-5.9p0/mac.c.audit4	2011-08-17 02:29:03.000000000 +0200
-+++ openssh-5.9p0/mac.c	2011-09-03 19:33:00.476211919 +0200
+diff -up openssh-5.9p1/mac.c.audit4 openssh-5.9p1/mac.c
+--- openssh-5.9p1/mac.c.audit4	2011-08-17 02:29:03.000000000 +0200
++++ openssh-5.9p1/mac.c	2011-09-10 17:56:36.527459063 +0200
 @@ -168,6 +168,20 @@ mac_clear(Mac *mac)
  	mac->umac_ctx = NULL;
  }
@@ -205,17 +205,17 @@ diff -up openssh-5.9p0/mac.c.audit4 openssh-5.9p0/mac.c
  /* XXX copied from ciphers_valid */
  #define	MAC_SEP	","
  int
-diff -up openssh-5.9p0/mac.h.audit4 openssh-5.9p0/mac.h
---- openssh-5.9p0/mac.h.audit4	2007-06-11 06:01:42.000000000 +0200
-+++ openssh-5.9p0/mac.h	2011-09-03 19:33:00.604046419 +0200
+diff -up openssh-5.9p1/mac.h.audit4 openssh-5.9p1/mac.h
+--- openssh-5.9p1/mac.h.audit4	2007-06-11 06:01:42.000000000 +0200
++++ openssh-5.9p1/mac.h	2011-09-10 17:56:36.655459377 +0200
 @@ -28,3 +28,4 @@ int	 mac_setup(Mac *, char *);
  int	 mac_init(Mac *);
  u_char	*mac_compute(Mac *, u_int32_t, u_char *, int);
  void	 mac_clear(Mac *);
 +void	 mac_destroy(Mac *);
-diff -up openssh-5.9p0/monitor.c.audit4 openssh-5.9p0/monitor.c
---- openssh-5.9p0/monitor.c.audit4	2011-09-03 19:32:58.992150893 +0200
-+++ openssh-5.9p0/monitor.c	2011-09-03 19:33:00.711212900 +0200
+diff -up openssh-5.9p1/monitor.c.audit4 openssh-5.9p1/monitor.c
+--- openssh-5.9p1/monitor.c.audit4	2011-09-10 17:56:35.047521239 +0200
++++ openssh-5.9p1/monitor.c	2011-09-10 17:56:36.784458672 +0200
 @@ -190,6 +190,7 @@ int mm_answer_audit_command(int, Buffer
  int mm_answer_audit_end_command(int, Buffer *);
  int mm_answer_audit_unsupported_body(int, Buffer *);
@@ -256,7 +256,7 @@ diff -up openssh-5.9p0/monitor.c.audit4 openssh-5.9p0/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -1927,11 +1932,13 @@ mm_get_keystate(struct monitor *pmonitor
+@@ -1925,11 +1930,13 @@ mm_get_keystate(struct monitor *pmonitor
  
  	blob = buffer_get_string(&m, &bloblen);
  	current_keys[MODE_OUT] = mm_newkeys_from_blob(blob, bloblen);
@@ -270,24 +270,26 @@ diff -up openssh-5.9p0/monitor.c.audit4 openssh-5.9p0/monitor.c
  	xfree(blob);
  
  	/* Now get sequence numbers for the packets */
-@@ -1977,6 +1984,16 @@ mm_get_keystate(struct monitor *pmonitor
+@@ -1975,6 +1982,18 @@ mm_get_keystate(struct monitor *pmonitor
  	}
  
  	buffer_free(&m);
 +
 +#ifdef SSH_AUDIT_EVENTS
 +	if (compat20) {
++#if BUG_AUDIT4
 +		buffer_init(&m);
 +		mm_request_receive_expect(pmonitor->m_sendfd,
 +					  MONITOR_REQ_AUDIT_SESSION_KEY_FREE, &m);
 +		mm_answer_audit_session_key_free_body(pmonitor->m_sendfd, &m);
 +		buffer_free(&m);
++#endif
 +	}
 +#endif
  }
  
  
-@@ -2431,4 +2448,22 @@ mm_answer_audit_kex_body(int sock, Buffe
+@@ -2429,4 +2448,22 @@ mm_answer_audit_kex_body(int sock, Buffe
  	return 0;
  }
  
@@ -310,9 +312,9 @@ diff -up openssh-5.9p0/monitor.c.audit4 openssh-5.9p0/monitor.c
 +	return 0;
 +}
  #endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.9p0/monitor.h.audit4 openssh-5.9p0/monitor.h
---- openssh-5.9p0/monitor.h.audit4	2011-09-03 19:32:59.000000000 +0200
-+++ openssh-5.9p0/monitor.h	2011-09-03 19:33:38.376071005 +0200
+diff -up openssh-5.9p1/monitor.h.audit4 openssh-5.9p1/monitor.h
+--- openssh-5.9p1/monitor.h.audit4	2011-09-10 17:56:35.164646113 +0200
++++ openssh-5.9p1/monitor.h	2011-09-10 17:56:36.885481883 +0200
 @@ -63,6 +63,7 @@ enum monitor_reqtype {
  	MONITOR_ANS_AUDIT_COMMAND, MONITOR_REQ_AUDIT_END_COMMAND,
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
@@ -321,9 +323,9 @@ diff -up openssh-5.9p0/monitor.h.audit4 openssh-5.9p0/monitor.h
  	MONITOR_REQ_TERM,
  	MONITOR_REQ_JPAKE_STEP1, MONITOR_ANS_JPAKE_STEP1,
  	MONITOR_REQ_JPAKE_GET_PWDATA, MONITOR_ANS_JPAKE_GET_PWDATA,
-diff -up openssh-5.9p0/monitor_wrap.c.audit4 openssh-5.9p0/monitor_wrap.c
---- openssh-5.9p0/monitor_wrap.c.audit4	2011-09-03 19:32:59.246088665 +0200
-+++ openssh-5.9p0/monitor_wrap.c	2011-09-03 19:33:01.032042297 +0200
+diff -up openssh-5.9p1/monitor_wrap.c.audit4 openssh-5.9p1/monitor_wrap.c
+--- openssh-5.9p1/monitor_wrap.c.audit4	2011-09-10 17:56:35.291471815 +0200
++++ openssh-5.9p1/monitor_wrap.c	2011-09-10 17:56:37.052459705 +0200
 @@ -653,12 +653,14 @@ mm_send_keystate(struct monitor *monitor
  		fatal("%s: conversion of newkeys failed", __func__);
  
@@ -359,9 +361,9 @@ diff -up openssh-5.9p0/monitor_wrap.c.audit4 openssh-5.9p0/monitor_wrap.c
 +	buffer_free(&m);
 +}
  #endif /* SSH_AUDIT_EVENTS */
-diff -up openssh-5.9p0/monitor_wrap.h.audit4 openssh-5.9p0/monitor_wrap.h
---- openssh-5.9p0/monitor_wrap.h.audit4	2011-09-03 19:32:59.357086584 +0200
-+++ openssh-5.9p0/monitor_wrap.h	2011-09-03 19:33:01.136087512 +0200
+diff -up openssh-5.9p1/monitor_wrap.h.audit4 openssh-5.9p1/monitor_wrap.h
+--- openssh-5.9p1/monitor_wrap.h.audit4	2011-09-10 17:56:35.422523742 +0200
++++ openssh-5.9p1/monitor_wrap.h	2011-09-10 17:56:37.199468524 +0200
 @@ -80,6 +80,7 @@ int mm_audit_run_command(const char *);
  void mm_audit_end_command(int, const char *);
  void mm_audit_unsupported_body(int);
@@ -370,9 +372,9 @@ diff -up openssh-5.9p0/monitor_wrap.h.audit4 openssh-5.9p0/monitor_wrap.h
  #endif
  
  struct Session;
-diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
---- openssh-5.9p0/packet.c.audit4	2011-09-03 19:32:53.452116806 +0200
-+++ openssh-5.9p0/packet.c	2011-09-03 19:33:01.267128421 +0200
+diff -up openssh-5.9p1/packet.c.audit4 openssh-5.9p1/packet.c
+--- openssh-5.9p1/packet.c.audit4	2011-09-10 17:56:28.073580010 +0200
++++ openssh-5.9p1/packet.c	2011-09-10 17:56:37.350459743 +0200
 @@ -60,6 +60,7 @@
  #include <signal.h>
  
@@ -475,7 +477,7 @@ diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
  	}
  	active_state->newkeys[mode] = kex_get_newkeys(mode);
  	if (active_state->newkeys[mode] == NULL)
-@@ -1926,6 +1945,47 @@ packet_get_newkeys(int mode)
+@@ -1927,6 +1946,47 @@ packet_get_newkeys(int mode)
  	return (void *)active_state->newkeys[mode];
  }
  
@@ -523,7 +525,7 @@ diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
  /*
   * Save the state for the real connection, and use a separate state when
   * resuming a suspended connection.
-@@ -1933,18 +1993,12 @@ packet_get_newkeys(int mode)
+@@ -1934,18 +1994,12 @@ packet_get_newkeys(int mode)
  void
  packet_backup_state(void)
  {
@@ -543,7 +545,7 @@ diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
  }
  
  /*
-@@ -1961,9 +2015,7 @@ packet_restore_state(void)
+@@ -1962,9 +2016,7 @@ packet_restore_state(void)
  	backup_state = active_state;
  	active_state = tmp;
  	active_state->connection_in = backup_state->connection_in;
@@ -553,7 +555,7 @@ diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
  	len = buffer_len(&backup_state->input);
  	if (len > 0) {
  		buf = buffer_ptr(&backup_state->input);
-@@ -1971,4 +2023,10 @@ packet_restore_state(void)
+@@ -1972,4 +2024,10 @@ packet_restore_state(void)
  		buffer_clear(&backup_state->input);
  		add_recv_bytes(len);
  	}
@@ -564,18 +566,18 @@ diff -up openssh-5.9p0/packet.c.audit4 openssh-5.9p0/packet.c
 +	backup_state = NULL;
  }
 +
-diff -up openssh-5.9p0/packet.h.audit4 openssh-5.9p0/packet.h
---- openssh-5.9p0/packet.h.audit4	2011-05-15 00:43:13.000000000 +0200
-+++ openssh-5.9p0/packet.h	2011-09-03 19:33:01.386087369 +0200
+diff -up openssh-5.9p1/packet.h.audit4 openssh-5.9p1/packet.h
+--- openssh-5.9p1/packet.h.audit4	2011-05-15 00:43:13.000000000 +0200
++++ openssh-5.9p1/packet.h	2011-09-10 17:56:37.454521424 +0200
 @@ -124,4 +124,5 @@ void	 packet_restore_state(void);
  void	*packet_get_input(void);
  void	*packet_get_output(void);
  
 +void	 packet_destroy_all(int, int);
  #endif				/* PACKET_H */
-diff -up openssh-5.9p0/session.c.audit4 openssh-5.9p0/session.c
---- openssh-5.9p0/session.c.audit4	2011-09-03 19:32:56.232163211 +0200
-+++ openssh-5.9p0/session.c	2011-09-03 19:33:01.516024567 +0200
+diff -up openssh-5.9p1/session.c.audit4 openssh-5.9p1/session.c
+--- openssh-5.9p1/session.c.audit4	2011-09-10 17:56:30.865577814 +0200
++++ openssh-5.9p1/session.c	2011-09-10 17:56:37.945521116 +0200
 @@ -1634,6 +1634,9 @@ do_child(Session *s, const char *command
  
  	/* remove hostkey from the child's memory */
@@ -586,9 +588,9 @@ diff -up openssh-5.9p0/session.c.audit4 openssh-5.9p0/session.c
  
  	/* Force a password change */
  	if (s->authctxt->force_pwchange) {
-diff -up openssh-5.9p0/sshd.c.audit4 openssh-5.9p0/sshd.c
---- openssh-5.9p0/sshd.c.audit4	2011-09-03 19:32:59.481087303 +0200
-+++ openssh-5.9p0/sshd.c	2011-09-03 19:33:01.657089865 +0200
+diff -up openssh-5.9p1/sshd.c.audit4 openssh-5.9p1/sshd.c
+--- openssh-5.9p1/sshd.c.audit4	2011-09-10 17:56:35.553521092 +0200
++++ openssh-5.9p1/sshd.c	2011-09-10 18:02:58.379521115 +0200
 @@ -684,6 +684,8 @@ privsep_preauth(Authctxt *authctxt)
  	}
  }
@@ -609,15 +611,17 @@ diff -up openssh-5.9p0/sshd.c.audit4 openssh-5.9p0/sshd.c
  		monitor_child_postauth(pmonitor);
  
  		/* NEVERREACHED */
-@@ -1996,6 +2002,7 @@ main(int ac, char **av)
+@@ -1999,6 +2005,9 @@ main(int ac, char **av)
  	 */
  	if (use_privsep) {
  		mm_send_keystate(pmonitor);
++#if 1 /*BUG_AUDIT4*/
 +		packet_destroy_all(1, 1);
++#endif
  		exit(0);
  	}
  
-@@ -2048,6 +2055,8 @@ main(int ac, char **av)
+@@ -2051,6 +2060,8 @@ main(int ac, char **av)
  	do_authenticated(authctxt);
  
  	/* The connection has been terminated. */
@@ -626,10 +630,23 @@ diff -up openssh-5.9p0/sshd.c.audit4 openssh-5.9p0/sshd.c
  	packet_get_state(MODE_IN, NULL, NULL, NULL, &ibytes);
  	packet_get_state(MODE_OUT, NULL, NULL, NULL, &obytes);
  	verbose("Transferred: sent %llu, received %llu bytes",
-@@ -2367,6 +2376,7 @@ cleanup_exit(int i)
+@@ -2368,8 +2379,20 @@ do_ssh2_kex(void)
+ void
+ cleanup_exit(int i)
  {
++	static int in_cleanup = 0;
++	int is_privsep_child;
++
++	/* cleanup_exit can be called at the very least from the privsep
++	   wrappers used for auditing.  Make sure we don't recurse
++	   indefinitely. */
++	if (in_cleanup)
++		_exit(i);
++	in_cleanup = 1;
++
  	if (the_authctxt)
  		do_cleanup(the_authctxt);
++	is_privsep_child = use_privsep && pmonitor != NULL && !mm_is_monitor();
 +	packet_destroy_all(1, is_privsep_child);
  #ifdef SSH_AUDIT_EVENTS
  	/* done after do_cleanup so it can cancel the PAM auth 'thread' */

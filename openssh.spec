@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -501,6 +501,7 @@ fi
 	--without-zlib-version-check \
 	--with-ssl-engine \
 	--with-authorized-keys-command \
+	--with-ipaddr-display \
 %if %{nss}
 	--with-nss \
 %endif
@@ -785,6 +786,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 12 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-4 + 0.9.2-32
+- temporarily disable part of audit4 patch
+
 * Fri Sep  9 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-3 + 0.9.2-32
 - Coverity second pass
 - Reenable akc patch
