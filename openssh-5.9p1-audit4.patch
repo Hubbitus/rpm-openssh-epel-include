@@ -615,7 +615,7 @@ diff -up openssh-5.9p1/sshd.c.audit4 openssh-5.9p1/sshd.c
  	 */
  	if (use_privsep) {
  		mm_send_keystate(pmonitor);
-+#if 1 /*BUG_AUDIT4*/
++#if BUG_AUDIT4
 +		packet_destroy_all(1, 1);
 +#endif
  		exit(0);
