@@ -92,7 +92,7 @@ diff -up openssh-5.9p1/auth2-pubkey.c.akc openssh-5.9p1/auth2-pubkey.c
 +	pid_t pstat, pid, child;
 +
 +	if (options.authorized_keys_command == NULL || options.authorized_keys_command[0] != '/')
-+		return -1;
++		return 0;
 +
 +	/* get the run as identity from config */
 +	runas_pw = (options.authorized_keys_command_runas == NULL)? pw
