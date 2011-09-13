@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -145,6 +145,8 @@ Patch400: openssh-5.9p1-role.patch
 Patch401: openssh-5.9p1-mls.patch
 #?
 Patch402: openssh-5.9p1-sftp-chroot.patch
+#?
+Patch403: openssh-5.9p1-sesandbox.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch500: openssh-5.9p1-akc.patch
@@ -412,6 +414,7 @@ popd
 %patch400 -p1 -b .role
 %patch401 -p1 -b .mls
 %patch402 -p1 -b .sftp-chroot
+%patch403 -p1 -b .sesandbox
 %endif
 
 %patch500 -p1 -b .akc
@@ -517,7 +520,7 @@ fi
 	--with-pam \
 %endif
 %if %{WITH_SELINUX}
-	--with-selinux --with-audit=linux \
+	--with-selinux --with-audit=linux --with-sandbox-style=selinux \
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
@@ -786,6 +789,10 @@ fi
 %endif
 
 %changelog
+* Tue Sep 13 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-8 + 0.9.2-32
+- coverity upgrade
+- experimental selinux sandbox
+
 * Tue Sep 13 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-7 + 0.9.2-32
 - fully reanable auditing
 

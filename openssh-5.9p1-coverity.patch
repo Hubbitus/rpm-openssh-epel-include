@@ -1,18 +1,23 @@
 diff -up openssh-5.9p1/auth-pam.c.coverity openssh-5.9p1/auth-pam.c
 --- openssh-5.9p1/auth-pam.c.coverity	2009-07-12 14:07:21.000000000 +0200
-+++ openssh-5.9p1/auth-pam.c	2011-09-09 15:13:32.820565436 +0200
-@@ -216,7 +216,7 @@ pthread_join(sp_pthread_t thread, void *
++++ openssh-5.9p1/auth-pam.c	2011-09-13 08:41:24.635521346 +0200
+@@ -216,7 +216,12 @@ pthread_join(sp_pthread_t thread, void *
  	if (sshpam_thread_status != -1)
  		return (sshpam_thread_status);
  	signal(SIGCHLD, sshpam_oldsig);
 -	waitpid(thread, &status, 0);
-+	(void) waitpid(thread, &status, 0);
++	while (waitpid(thread, &status, 0) < 0) {                     
++		if (errno == EINTR)                                
++			continue;
++		fatal("%s: waitpid: %s", __func__,         
++				strerror(errno));                      
++	}
  	return (status);
  }
  #endif
 diff -up openssh-5.9p1/channels.c.coverity openssh-5.9p1/channels.c
 --- openssh-5.9p1/channels.c.coverity	2011-06-23 00:31:57.000000000 +0200
-+++ openssh-5.9p1/channels.c	2011-09-09 15:13:32.911439569 +0200
++++ openssh-5.9p1/channels.c	2011-09-13 08:26:11.771584519 +0200
 @@ -229,11 +229,11 @@ channel_register_fds(Channel *c, int rfd
  	channel_max_fd = MAX(channel_max_fd, wfd);
  	channel_max_fd = MAX(channel_max_fd, efd);
@@ -45,7 +50,7 @@ diff -up openssh-5.9p1/channels.c.coverity openssh-5.9p1/channels.c
  }
 diff -up openssh-5.9p1/clientloop.c.coverity openssh-5.9p1/clientloop.c
 --- openssh-5.9p1/clientloop.c.coverity	2011-06-23 00:31:58.000000000 +0200
-+++ openssh-5.9p1/clientloop.c	2011-09-09 15:13:33.017564323 +0200
++++ openssh-5.9p1/clientloop.c	2011-09-13 08:26:11.889458598 +0200
 @@ -1970,6 +1970,7 @@ client_input_global_request(int type, u_
  	char *rtype;
  	int want_reply;
@@ -56,7 +61,7 @@ diff -up openssh-5.9p1/clientloop.c.coverity openssh-5.9p1/clientloop.c
  	want_reply = packet_get_char();
 diff -up openssh-5.9p1/key.c.coverity openssh-5.9p1/key.c
 --- openssh-5.9p1/key.c.coverity	2011-05-20 11:03:08.000000000 +0200
-+++ openssh-5.9p1/key.c	2011-09-09 15:13:33.145442605 +0200
++++ openssh-5.9p1/key.c	2011-09-13 08:26:12.000459857 +0200
 @@ -803,8 +803,10 @@ key_read(Key *ret, char **cpp)
  		success = 1;
  /*XXXX*/
@@ -69,8 +74,8 @@ diff -up openssh-5.9p1/key.c.coverity openssh-5.9p1/key.c
  		while (*cp == ' ' || *cp == '\t')
  			cp++;
 diff -up openssh-5.9p1/monitor.c.coverity openssh-5.9p1/monitor.c
---- openssh-5.9p1/monitor.c.coverity	2011-09-09 17:13:15.937439833 +0200
-+++ openssh-5.9p1/monitor.c	2011-09-09 17:15:18.625466696 +0200
+--- openssh-5.9p1/monitor.c.coverity	2011-08-05 22:15:18.000000000 +0200
++++ openssh-5.9p1/monitor.c	2011-09-13 08:26:12.132583409 +0200
 @@ -1161,6 +1161,10 @@ mm_answer_keyallowed(int sock, Buffer *m
  			break;
  		}
@@ -93,8 +98,8 @@ diff -up openssh-5.9p1/monitor.c.coverity openssh-5.9p1/monitor.c
  	buffer_put_int(m, allowed);
  	buffer_put_int(m, forced_command != NULL);
 diff -up openssh-5.9p1/openbsd-compat/bindresvport.c.coverity openssh-5.9p1/openbsd-compat/bindresvport.c
---- openssh-5.9p1/openbsd-compat/bindresvport.c.coverity	2011-09-09 17:29:14.709442881 +0200
-+++ openssh-5.9p1/openbsd-compat/bindresvport.c	2011-09-09 17:32:48.770563974 +0200
+--- openssh-5.9p1/openbsd-compat/bindresvport.c.coverity	2010-12-03 00:50:26.000000000 +0100
++++ openssh-5.9p1/openbsd-compat/bindresvport.c	2011-09-13 08:26:12.298464549 +0200
 @@ -58,7 +58,7 @@ bindresvport_sa(int sd, struct sockaddr
  	struct sockaddr_in6 *in6;
  	u_int16_t *portp;
@@ -106,7 +111,7 @@ diff -up openssh-5.9p1/openbsd-compat/bindresvport.c.coverity openssh-5.9p1/open
  	if (sa == NULL) {
 diff -up openssh-5.9p1/packet.c.coverity openssh-5.9p1/packet.c
 --- openssh-5.9p1/packet.c.coverity	2011-05-15 00:58:15.000000000 +0200
-+++ openssh-5.9p1/packet.c	2011-09-09 15:13:33.263447887 +0200
++++ openssh-5.9p1/packet.c	2011-09-13 08:26:12.405461249 +0200
 @@ -1177,6 +1177,7 @@ packet_read_poll1(void)
  		case DEATTACK_DETECTED:
  			packet_disconnect("crc32 compensation attack: "
@@ -126,7 +131,7 @@ diff -up openssh-5.9p1/packet.c.coverity openssh-5.9p1/packet.c
  	setp = (fd_set *)xcalloc(howmany(active_state->connection_out + 1,
 diff -up openssh-5.9p1/progressmeter.c.coverity openssh-5.9p1/progressmeter.c
 --- openssh-5.9p1/progressmeter.c.coverity	2006-08-05 04:39:40.000000000 +0200
-+++ openssh-5.9p1/progressmeter.c	2011-09-09 15:13:33.382566039 +0200
++++ openssh-5.9p1/progressmeter.c	2011-09-13 08:26:12.511520013 +0200
 @@ -65,7 +65,7 @@ static void update_progress_meter(int);
  
  static time_t start;		/* start progress */
@@ -147,7 +152,7 @@ diff -up openssh-5.9p1/progressmeter.c.coverity openssh-5.9p1/progressmeter.c
  	file = f;
 diff -up openssh-5.9p1/progressmeter.h.coverity openssh-5.9p1/progressmeter.h
 --- openssh-5.9p1/progressmeter.h.coverity	2006-03-26 05:30:02.000000000 +0200
-+++ openssh-5.9p1/progressmeter.h	2011-09-09 15:13:33.501438992 +0200
++++ openssh-5.9p1/progressmeter.h	2011-09-13 08:26:12.630521541 +0200
 @@ -23,5 +23,5 @@
   * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
@@ -157,7 +162,7 @@ diff -up openssh-5.9p1/progressmeter.h.coverity openssh-5.9p1/progressmeter.h
  void	stop_progress_meter(void);
 diff -up openssh-5.9p1/scp.c.coverity openssh-5.9p1/scp.c
 --- openssh-5.9p1/scp.c.coverity	2011-01-06 12:41:21.000000000 +0100
-+++ openssh-5.9p1/scp.c	2011-09-09 15:13:33.607564009 +0200
++++ openssh-5.9p1/scp.c	2011-09-13 08:26:12.748520967 +0200
 @@ -155,7 +155,7 @@ killchild(int signo)
  {
  	if (do_cmd_pid > 1) {
@@ -168,8 +173,8 @@ diff -up openssh-5.9p1/scp.c.coverity openssh-5.9p1/scp.c
  
  	if (signo)
 diff -up openssh-5.9p1/servconf.c.coverity openssh-5.9p1/servconf.c
---- openssh-5.9p1/servconf.c.coverity	2011-09-09 17:24:09.333561142 +0200
-+++ openssh-5.9p1/servconf.c	2011-09-09 17:26:41.488502345 +0200
+--- openssh-5.9p1/servconf.c.coverity	2011-06-23 00:30:03.000000000 +0200
++++ openssh-5.9p1/servconf.c	2011-09-13 08:26:12.854521290 +0200
 @@ -1171,7 +1171,7 @@ process_server_config_line(ServerOptions
  			fatal("%s line %d: Missing subsystem name.",
  			    filename, linenum);
@@ -181,7 +186,7 @@ diff -up openssh-5.9p1/servconf.c.coverity openssh-5.9p1/servconf.c
  		for (i = 0; i < options->num_subsystems; i++)
 diff -up openssh-5.9p1/serverloop.c.coverity openssh-5.9p1/serverloop.c
 --- openssh-5.9p1/serverloop.c.coverity	2011-05-20 11:02:50.000000000 +0200
-+++ openssh-5.9p1/serverloop.c	2011-09-09 15:13:33.723564433 +0200
++++ openssh-5.9p1/serverloop.c	2011-09-13 08:26:12.968645756 +0200
 @@ -147,13 +147,13 @@ notify_setup(void)
  static void
  notify_parent(void)
@@ -293,7 +298,7 @@ diff -up openssh-5.9p1/serverloop.c.coverity openssh-5.9p1/serverloop.c
  		tun = forced_tun_device;
 diff -up openssh-5.9p1/sftp-client.c.coverity openssh-5.9p1/sftp-client.c
 --- openssh-5.9p1/sftp-client.c.coverity	2010-12-04 23:02:48.000000000 +0100
-+++ openssh-5.9p1/sftp-client.c	2011-09-09 15:13:33.845564522 +0200
++++ openssh-5.9p1/sftp-client.c	2011-09-13 08:26:13.083520760 +0200
 @@ -149,7 +149,7 @@ get_msg(struct sftp_conn *conn, Buffer *
  }
  
@@ -518,7 +523,7 @@ diff -up openssh-5.9p1/sftp-client.c.coverity openssh-5.9p1/sftp-client.c
  	size_t len = strlen(p1) + strlen(p2) + 2;
 diff -up openssh-5.9p1/sftp-client.h.coverity openssh-5.9p1/sftp-client.h
 --- openssh-5.9p1/sftp-client.h.coverity	2010-12-04 23:02:48.000000000 +0100
-+++ openssh-5.9p1/sftp-client.h	2011-09-09 15:13:33.954567073 +0200
++++ openssh-5.9p1/sftp-client.h	2011-09-13 08:26:13.181525164 +0200
 @@ -56,49 +56,49 @@ struct sftp_conn *do_init(int, int, u_in
  u_int sftp_proto_version(struct sftp_conn *);
  
@@ -618,7 +623,7 @@ diff -up openssh-5.9p1/sftp-client.h.coverity openssh-5.9p1/sftp-client.h
  #endif
 diff -up openssh-5.9p1/sftp.c.coverity openssh-5.9p1/sftp.c
 --- openssh-5.9p1/sftp.c.coverity	2010-12-04 23:02:48.000000000 +0100
-+++ openssh-5.9p1/sftp.c	2011-09-09 15:13:34.086441893 +0200
++++ openssh-5.9p1/sftp.c	2011-09-13 08:26:13.311521187 +0200
 @@ -206,7 +206,7 @@ killchild(int signo)
  {
  	if (sshpid > 1) {
@@ -733,7 +738,7 @@ diff -up openssh-5.9p1/sftp.c.coverity openssh-5.9p1/sftp.c
  	char s_used[FMT_SCALED_STRSIZE];
 diff -up openssh-5.9p1/ssh-agent.c.coverity openssh-5.9p1/ssh-agent.c
 --- openssh-5.9p1/ssh-agent.c.coverity	2011-06-03 06:14:16.000000000 +0200
-+++ openssh-5.9p1/ssh-agent.c	2011-09-09 15:13:34.203567987 +0200
++++ openssh-5.9p1/ssh-agent.c	2011-09-13 08:26:13.416521025 +0200
 @@ -1147,8 +1147,8 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
@@ -747,7 +752,7 @@ diff -up openssh-5.9p1/ssh-agent.c.coverity openssh-5.9p1/ssh-agent.c
  	/* Disable ptrace on Linux without sgid bit */
 diff -up openssh-5.9p1/sshd.c.coverity openssh-5.9p1/sshd.c
 --- openssh-5.9p1/sshd.c.coverity	2011-06-23 11:45:51.000000000 +0200
-+++ openssh-5.9p1/sshd.c	2011-09-09 15:13:34.317564195 +0200
++++ openssh-5.9p1/sshd.c	2011-09-13 08:26:13.565519531 +0200
 @@ -1302,6 +1302,9 @@ server_accept_loop(int *sock_in, int *so
  		if (num_listen_socks < 0)
  			break;
