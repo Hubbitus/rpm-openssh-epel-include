@@ -79,7 +79,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -786,6 +786,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 13 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-7 + 0.9.2-32
+- fully reanable auditing
+
 * Mon Sep 12 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-6 + 0.9.2-32
 - repair signedness in akc patch
 
