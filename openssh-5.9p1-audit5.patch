@@ -1,6 +1,6 @@
 diff -up openssh-5.9p1/audit-bsm.c.audit5 openssh-5.9p1/audit-bsm.c
---- openssh-5.9p1/audit-bsm.c.audit5	2011-09-10 19:40:19.638521318 +0200
-+++ openssh-5.9p1/audit-bsm.c	2011-09-10 19:40:21.675487204 +0200
+--- openssh-5.9p1/audit-bsm.c.audit5	2011-09-13 22:07:31.262575526 +0200
++++ openssh-5.9p1/audit-bsm.c	2011-09-13 22:07:33.268491813 +0200
 @@ -414,4 +414,22 @@ audit_session_key_free_body(int ctos, pi
  {
  	/* not implemented */
@@ -25,8 +25,8 @@ diff -up openssh-5.9p1/audit-bsm.c.audit5 openssh-5.9p1/audit-bsm.c
 +}
  #endif /* BSM */
 diff -up openssh-5.9p1/audit-linux.c.audit5 openssh-5.9p1/audit-linux.c
---- openssh-5.9p1/audit-linux.c.audit5	2011-09-10 19:40:19.713521349 +0200
-+++ openssh-5.9p1/audit-linux.c	2011-09-10 19:40:21.765473529 +0200
+--- openssh-5.9p1/audit-linux.c.audit5	2011-09-13 22:07:31.400584308 +0200
++++ openssh-5.9p1/audit-linux.c	2011-09-13 22:07:33.357460348 +0200
 @@ -350,4 +350,50 @@ audit_session_key_free_body(int ctos, pi
  		error("cannot write into audit");
  }
@@ -79,8 +79,8 @@ diff -up openssh-5.9p1/audit-linux.c.audit5 openssh-5.9p1/audit-linux.c
 +}
  #endif /* USE_LINUX_AUDIT */
 diff -up openssh-5.9p1/audit.c.audit5 openssh-5.9p1/audit.c
---- openssh-5.9p1/audit.c.audit5	2011-09-10 19:40:19.814646179 +0200
-+++ openssh-5.9p1/audit.c	2011-09-10 19:40:21.872459880 +0200
+--- openssh-5.9p1/audit.c.audit5	2011-09-13 22:07:31.495458797 +0200
++++ openssh-5.9p1/audit.c	2011-09-13 22:07:33.478458341 +0200
 @@ -290,5 +290,24 @@ audit_session_key_free_body(int ctos, pi
  	debug("audit session key discard euid %u direction %d from pid %ld uid %u",
  		(unsigned)geteuid(), ctos, (long)pid, (unsigned)uid);
@@ -107,8 +107,8 @@ diff -up openssh-5.9p1/audit.c.audit5 openssh-5.9p1/audit.c
  # endif  /* !defined CUSTOM_SSH_AUDIT_EVENTS */
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.9p1/audit.h.audit5 openssh-5.9p1/audit.h
---- openssh-5.9p1/audit.h.audit5	2011-09-10 19:40:19.945521685 +0200
-+++ openssh-5.9p1/audit.h	2011-09-10 19:40:21.990457118 +0200
+--- openssh-5.9p1/audit.h.audit5	2011-09-13 22:07:31.616459125 +0200
++++ openssh-5.9p1/audit.h	2011-09-13 22:07:33.612458074 +0200
 @@ -48,6 +48,8 @@ enum ssh_audit_event_type {
  };
  typedef enum ssh_audit_event_type ssh_audit_event_t;
@@ -127,8 +127,8 @@ diff -up openssh-5.9p1/audit.h.audit5 openssh-5.9p1/audit.h
  
  #endif /* _SSH_AUDIT_H */
 diff -up openssh-5.9p1/key.c.audit5 openssh-5.9p1/key.c
---- openssh-5.9p1/key.c.audit5	2011-09-10 19:40:11.396460430 +0200
-+++ openssh-5.9p1/key.c	2011-09-10 19:40:22.096459112 +0200
+--- openssh-5.9p1/key.c.audit5	2011-09-13 22:07:23.054490740 +0200
++++ openssh-5.9p1/key.c	2011-09-13 22:07:33.721583661 +0200
 @@ -1799,6 +1799,30 @@ key_demote(const Key *k)
  }
  
@@ -161,8 +161,8 @@ diff -up openssh-5.9p1/key.c.audit5 openssh-5.9p1/key.c
  {
  	if (k == NULL)
 diff -up openssh-5.9p1/key.h.audit5 openssh-5.9p1/key.h
---- openssh-5.9p1/key.h.audit5	2011-09-10 19:40:11.510460018 +0200
-+++ openssh-5.9p1/key.h	2011-09-10 19:40:22.208459363 +0200
+--- openssh-5.9p1/key.h.audit5	2011-09-13 22:07:23.160459285 +0200
++++ openssh-5.9p1/key.h	2011-09-13 22:07:33.847459341 +0200
 @@ -109,6 +109,7 @@ Key	*key_generate(int, u_int);
  Key	*key_from_private(const Key *);
  int	 key_type_from_name(char *);
@@ -172,8 +172,8 @@ diff -up openssh-5.9p1/key.h.audit5 openssh-5.9p1/key.h
  int	 key_to_certified(Key *, int);
  int	 key_drop_cert(Key *);
 diff -up openssh-5.9p1/monitor.c.audit5 openssh-5.9p1/monitor.c
---- openssh-5.9p1/monitor.c.audit5	2011-09-10 19:40:20.635514835 +0200
-+++ openssh-5.9p1/monitor.c	2011-09-10 19:40:22.327585849 +0200
+--- openssh-5.9p1/monitor.c.audit5	2011-09-13 22:07:32.285495537 +0200
++++ openssh-5.9p1/monitor.c	2011-09-13 22:10:04.148554239 +0200
 @@ -114,6 +114,8 @@ extern Buffer auth_debug;
  extern int auth_debug_init;
  extern Buffer loginmsg;
@@ -223,7 +223,7 @@ diff -up openssh-5.9p1/monitor.c.audit5 openssh-5.9p1/monitor.c
  #endif
      {0, 0, NULL}
  };
-@@ -1720,6 +1727,8 @@ mm_answer_term(int sock, Buffer *req)
+@@ -1716,6 +1723,8 @@ mm_answer_term(int sock, Buffer *req)
  		sshpam_cleanup();
  #endif
  
@@ -232,7 +232,7 @@ diff -up openssh-5.9p1/monitor.c.audit5 openssh-5.9p1/monitor.c
  	while (waitpid(pmonitor->m_pid, &status, 0) == -1)
  		if (errno != EINTR)
  			exit(1);
-@@ -2466,4 +2475,24 @@ mm_answer_audit_session_key_free_body(in
+@@ -2470,4 +2479,25 @@ mm_answer_audit_session_key_free_body(in
  	mm_request_send(sock, MONITOR_ANS_AUDIT_SESSION_KEY_FREE, m);
  	return 0;
  }
@@ -251,6 +251,7 @@ diff -up openssh-5.9p1/monitor.c.audit5 openssh-5.9p1/monitor.c
 +
 +	audit_destroy_sensitive_data(fp, pid, uid);
 +
++	xfree(fp);
 +	buffer_clear(m);
 +
 +	mm_request_send(sock, MONITOR_ANS_AUDIT_SERVER_KEY_FREE, m);
@@ -258,8 +259,8 @@ diff -up openssh-5.9p1/monitor.c.audit5 openssh-5.9p1/monitor.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.9p1/monitor.h.audit5 openssh-5.9p1/monitor.h
---- openssh-5.9p1/monitor.h.audit5	2011-09-10 19:40:20.741522656 +0200
-+++ openssh-5.9p1/monitor.h	2011-09-10 19:40:22.440461159 +0200
+--- openssh-5.9p1/monitor.h.audit5	2011-09-13 22:07:32.385522626 +0200
++++ openssh-5.9p1/monitor.h	2011-09-13 22:07:34.098459356 +0200
 @@ -64,6 +64,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_AUDIT_UNSUPPORTED, MONITOR_ANS_AUDIT_UNSUPPORTED,
  	MONITOR_REQ_AUDIT_KEX, MONITOR_ANS_AUDIT_KEX,
@@ -269,8 +270,8 @@ diff -up openssh-5.9p1/monitor.h.audit5 openssh-5.9p1/monitor.h
  	MONITOR_REQ_JPAKE_STEP1, MONITOR_ANS_JPAKE_STEP1,
  	MONITOR_REQ_JPAKE_GET_PWDATA, MONITOR_ANS_JPAKE_GET_PWDATA,
 diff -up openssh-5.9p1/monitor_wrap.c.audit5 openssh-5.9p1/monitor_wrap.c
---- openssh-5.9p1/monitor_wrap.c.audit5	2011-09-10 19:40:20.871609482 +0200
-+++ openssh-5.9p1/monitor_wrap.c	2011-09-10 19:40:22.559458727 +0200
+--- openssh-5.9p1/monitor_wrap.c.audit5	2011-09-13 22:07:32.510521163 +0200
++++ openssh-5.9p1/monitor_wrap.c	2011-09-13 22:07:34.610458275 +0200
 @@ -1559,4 +1559,20 @@ mm_audit_session_key_free_body(int ctos,
  				  &m);
  	buffer_free(&m);
@@ -293,8 +294,8 @@ diff -up openssh-5.9p1/monitor_wrap.c.audit5 openssh-5.9p1/monitor_wrap.c
 +}
  #endif /* SSH_AUDIT_EVENTS */
 diff -up openssh-5.9p1/monitor_wrap.h.audit5 openssh-5.9p1/monitor_wrap.h
---- openssh-5.9p1/monitor_wrap.h.audit5	2011-09-10 19:40:20.983521729 +0200
-+++ openssh-5.9p1/monitor_wrap.h	2011-09-10 19:40:22.730460011 +0200
+--- openssh-5.9p1/monitor_wrap.h.audit5	2011-09-13 22:07:32.607520810 +0200
++++ openssh-5.9p1/monitor_wrap.h	2011-09-13 22:07:34.716458214 +0200
 @@ -81,6 +81,7 @@ void mm_audit_end_command(int, const cha
  void mm_audit_unsupported_body(int);
  void mm_audit_kex_body(int, char *, char *, char *, pid_t, uid_t);
@@ -304,8 +305,8 @@ diff -up openssh-5.9p1/monitor_wrap.h.audit5 openssh-5.9p1/monitor_wrap.h
  
  struct Session;
 diff -up openssh-5.9p1/session.c.audit5 openssh-5.9p1/session.c
---- openssh-5.9p1/session.c.audit5	2011-09-10 19:40:21.385531298 +0200
-+++ openssh-5.9p1/session.c	2011-09-10 19:40:22.903583654 +0200
+--- openssh-5.9p1/session.c.audit5	2011-09-13 22:07:32.973544819 +0200
++++ openssh-5.9p1/session.c	2011-09-13 22:07:34.849585578 +0200
 @@ -136,7 +136,7 @@ extern int log_stderr;
  extern int debug_flag;
  extern u_int utmp_len;
@@ -325,8 +326,8 @@ diff -up openssh-5.9p1/session.c.audit5 openssh-5.9p1/session.c
  	   monitor over a single socket, with no synchronization. */
  	packet_destroy_all(0, 1);
 diff -up openssh-5.9p1/sshd.c.audit5 openssh-5.9p1/sshd.c
---- openssh-5.9p1/sshd.c.audit5	2011-09-10 19:40:21.520510716 +0200
-+++ openssh-5.9p1/sshd.c	2011-09-10 19:42:06.573520393 +0200
+--- openssh-5.9p1/sshd.c.audit5	2011-09-13 22:07:33.106516378 +0200
++++ openssh-5.9p1/sshd.c	2011-09-13 22:07:34.989470331 +0200
 @@ -254,7 +254,7 @@ Buffer loginmsg;
  struct passwd *privsep_pw = NULL;
  
@@ -440,7 +441,7 @@ diff -up openssh-5.9p1/sshd.c.audit5 openssh-5.9p1/sshd.c
  		}
  		/* Certs do not need demotion */
  	}
-@@ -1143,6 +1193,7 @@ server_accept_loop(int *sock_in, int *so
+@@ -1145,6 +1195,7 @@ server_accept_loop(int *sock_in, int *so
  		if (received_sigterm) {
  			logit("Received signal %d; terminating.",
  			    (int) received_sigterm);

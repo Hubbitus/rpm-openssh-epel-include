@@ -1,6 +1,6 @@
-diff -up openssh-5.9p0/auth.h.2auth openssh-5.9p0/auth.h
---- openssh-5.9p0/auth.h.2auth	2011-05-29 13:39:38.000000000 +0200
-+++ openssh-5.9p0/auth.h	2011-09-05 13:16:00.550626991 +0200
+diff -up openssh-5.9p1/auth.h.2auth openssh-5.9p1/auth.h
+--- openssh-5.9p1/auth.h.2auth	2011-05-29 13:39:38.000000000 +0200
++++ openssh-5.9p1/auth.h	2011-09-13 20:25:22.250474950 +0200
 @@ -149,6 +149,8 @@ int	auth_root_allowed(char *);
  
  char	*auth2_read_banner(void);
@@ -10,9 +10,9 @@ diff -up openssh-5.9p0/auth.h.2auth openssh-5.9p0/auth.h
  void	privsep_challenge_enable(void);
  
  int	auth2_challenge(Authctxt *, char *);
-diff -up openssh-5.9p0/auth2.c.2auth openssh-5.9p0/auth2.c
---- openssh-5.9p0/auth2.c.2auth	2011-05-05 06:04:11.000000000 +0200
-+++ openssh-5.9p0/auth2.c	2011-09-05 13:16:00.640626827 +0200
+diff -up openssh-5.9p1/auth2.c.2auth openssh-5.9p1/auth2.c
+--- openssh-5.9p1/auth2.c.2auth	2011-05-05 06:04:11.000000000 +0200
++++ openssh-5.9p1/auth2.c	2011-09-13 20:25:22.348458588 +0200
 @@ -290,6 +290,23 @@ input_userauth_request(int type, u_int32
  }
  
@@ -61,9 +61,9 @@ diff -up openssh-5.9p0/auth2.c.2auth openssh-5.9p0/auth2.c
  		methods = authmethods_get();
  		packet_start(SSH2_MSG_USERAUTH_FAILURE);
  		packet_put_cstring(methods);
-diff -up openssh-5.9p0/monitor.c.2auth openssh-5.9p0/monitor.c
---- openssh-5.9p0/monitor.c.2auth	2011-08-05 22:15:18.000000000 +0200
-+++ openssh-5.9p0/monitor.c	2011-09-05 13:37:35.468502112 +0200
+diff -up openssh-5.9p1/monitor.c.2auth openssh-5.9p1/monitor.c
+--- openssh-5.9p1/monitor.c.2auth	2011-09-13 20:25:18.031458843 +0200
++++ openssh-5.9p1/monitor.c	2011-09-13 20:53:29.345644462 +0200
 @@ -165,6 +165,7 @@ int mm_answer_jpake_step1(int, Buffer *)
  int mm_answer_jpake_step2(int, Buffer *);
  int mm_answer_jpake_key_confirm(int, Buffer *);
@@ -80,7 +80,7 @@ diff -up openssh-5.9p0/monitor.c.2auth openssh-5.9p0/monitor.c
      {0, 0, NULL}
  };
  
-@@ -378,9 +380,9 @@ monitor_child_preauth(Authctxt *_authctx
+@@ -378,7 +380,7 @@ monitor_child_preauth(Authctxt *_authctx
  	}
  
  	/* The first few requests do not require asynchronous access */
@@ -89,9 +89,7 @@ diff -up openssh-5.9p0/monitor.c.2auth openssh-5.9p0/monitor.c
  		auth_method = "unknown";
  		authenticated = (monitor_read(pmonitor, mon_dispatch, &ent) == 1);
  		if (authenticated) {
- 			if (!(ent->flags & MON_AUTHDECIDE))
- 				fatal("%s: unexpected authentication from %d",
-@@ -390,7 +393,7 @@ monitor_child_preauth(Authctxt *_authctx
+@@ -390,7 +392,7 @@ monitor_child_preauth(Authctxt *_authctx
  				authenticated = 0;
  #ifdef USE_PAM
  			/* PAM needs to perform account checks after auth */
@@ -100,7 +98,7 @@ diff -up openssh-5.9p0/monitor.c.2auth openssh-5.9p0/monitor.c
  				Buffer m;
  
  				buffer_init(&m);
-@@ -2000,6 +2006,19 @@ monitor_reinit(struct monitor *mon)
+@@ -2001,6 +2003,24 @@ monitor_reinit(struct monitor *mon)
  	monitor_openfds(mon, 0);
  }
  
@@ -114,15 +112,20 @@ diff -up openssh-5.9p0/monitor.c.2auth openssh-5.9p0/monitor.c
 +
 +	userauth_restart(method);
 +
++	xfree(method);
++	buffer_clear(m);
++
 +	mm_request_send(sock, MONITOR_ANS_USERAUTH_RESTART, m);
++
++	return (0);
 +}
 +
  #ifdef GSSAPI
  int
  mm_answer_gss_setup_ctx(int sock, Buffer *m)
-diff -up openssh-5.9p0/monitor.h.2auth openssh-5.9p0/monitor.h
---- openssh-5.9p0/monitor.h.2auth	2011-06-20 06:42:23.000000000 +0200
-+++ openssh-5.9p0/monitor.h	2011-09-05 13:16:00.855502353 +0200
+diff -up openssh-5.9p1/monitor.h.2auth openssh-5.9p1/monitor.h
+--- openssh-5.9p1/monitor.h.2auth	2011-06-20 06:42:23.000000000 +0200
++++ openssh-5.9p1/monitor.h	2011-09-13 20:25:22.615458574 +0200
 @@ -66,6 +66,7 @@ enum monitor_reqtype {
  	MONITOR_REQ_JPAKE_STEP2, MONITOR_ANS_JPAKE_STEP2,
  	MONITOR_REQ_JPAKE_KEY_CONFIRM, MONITOR_ANS_JPAKE_KEY_CONFIRM,
@@ -131,9 +134,9 @@ diff -up openssh-5.9p0/monitor.h.2auth openssh-5.9p0/monitor.h
  };
  
  struct mm_master;
-diff -up openssh-5.9p0/monitor_wrap.c.2auth openssh-5.9p0/monitor_wrap.c
---- openssh-5.9p0/monitor_wrap.c.2auth	2011-06-20 06:42:23.000000000 +0200
-+++ openssh-5.9p0/monitor_wrap.c	2011-09-05 13:16:00.968503257 +0200
+diff -up openssh-5.9p1/monitor_wrap.c.2auth openssh-5.9p1/monitor_wrap.c
+--- openssh-5.9p1/monitor_wrap.c.2auth	2011-06-20 06:42:23.000000000 +0200
++++ openssh-5.9p1/monitor_wrap.c	2011-09-13 20:25:22.735468462 +0200
 @@ -1173,6 +1173,26 @@ mm_auth_rsa_verify_response(Key *key, BI
  	return (success);
  }
@@ -161,9 +164,9 @@ diff -up openssh-5.9p0/monitor_wrap.c.2auth openssh-5.9p0/monitor_wrap.c
  #ifdef SSH_AUDIT_EVENTS
  void
  mm_audit_event(ssh_audit_event_t event)
-diff -up openssh-5.9p0/monitor_wrap.h.2auth openssh-5.9p0/monitor_wrap.h
---- openssh-5.9p0/monitor_wrap.h.2auth	2011-06-20 06:42:23.000000000 +0200
-+++ openssh-5.9p0/monitor_wrap.h	2011-09-05 13:16:01.074502211 +0200
+diff -up openssh-5.9p1/monitor_wrap.h.2auth openssh-5.9p1/monitor_wrap.h
+--- openssh-5.9p1/monitor_wrap.h.2auth	2011-06-20 06:42:23.000000000 +0200
++++ openssh-5.9p1/monitor_wrap.h	2011-09-13 20:25:22.847457505 +0200
 @@ -53,6 +53,7 @@ int mm_key_verify(Key *, u_char *, u_int
  int mm_auth_rsa_key_allowed(struct passwd *, BIGNUM *, Key **);
  int mm_auth_rsa_verify_response(Key *, BIGNUM *, u_char *);
@@ -172,9 +175,9 @@ diff -up openssh-5.9p0/monitor_wrap.h.2auth openssh-5.9p0/monitor_wrap.h
  
  #ifdef GSSAPI
  OM_uint32 mm_ssh_gssapi_server_ctx(Gssctxt **, gss_OID);
-diff -up openssh-5.9p0/servconf.c.2auth openssh-5.9p0/servconf.c
---- openssh-5.9p0/servconf.c.2auth	2011-06-23 00:30:03.000000000 +0200
-+++ openssh-5.9p0/servconf.c	2011-09-05 13:16:01.223441110 +0200
+diff -up openssh-5.9p1/servconf.c.2auth openssh-5.9p1/servconf.c
+--- openssh-5.9p1/servconf.c.2auth	2011-09-13 20:25:18.836495701 +0200
++++ openssh-5.9p1/servconf.c	2011-09-13 20:25:22.994584169 +0200
 @@ -92,6 +92,13 @@ initialize_server_options(ServerOptions
  	options->hostbased_uses_name_from_packet_only = -1;
  	options->rsa_authentication = -1;
@@ -328,9 +331,9 @@ diff -up openssh-5.9p0/servconf.c.2auth openssh-5.9p0/servconf.c
  	dump_cfg_fmtint(sPrintMotd, o->print_motd);
  	dump_cfg_fmtint(sPrintLastLog, o->print_lastlog);
  	dump_cfg_fmtint(sX11Forwarding, o->x11_forwarding);
-diff -up openssh-5.9p0/servconf.h.2auth openssh-5.9p0/servconf.h
---- openssh-5.9p0/servconf.h.2auth	2011-06-23 00:30:03.000000000 +0200
-+++ openssh-5.9p0/servconf.h	2011-09-05 13:16:01.352564530 +0200
+diff -up openssh-5.9p1/servconf.h.2auth openssh-5.9p1/servconf.h
+--- openssh-5.9p1/servconf.h.2auth	2011-06-23 00:30:03.000000000 +0200
++++ openssh-5.9p1/servconf.h	2011-09-13 20:25:23.103459846 +0200
 @@ -112,6 +112,14 @@ typedef struct {
  					/* If true, permit jpake auth */
  	int     permit_empty_passwd;	/* If false, do not permit empty
@@ -346,9 +349,9 @@ diff -up openssh-5.9p0/servconf.h.2auth openssh-5.9p0/servconf.h
  	int     permit_user_env;	/* If true, read ~/.ssh/environment */
  	int     use_login;	/* If true, login(1) is used */
  	int     compression;	/* If true, compression is allowed */
-diff -up openssh-5.9p0/sshd_config.2auth openssh-5.9p0/sshd_config
---- openssh-5.9p0/sshd_config.2auth	2011-05-29 13:39:39.000000000 +0200
-+++ openssh-5.9p0/sshd_config	2011-09-05 13:16:01.461565750 +0200
+diff -up openssh-5.9p1/sshd_config.2auth openssh-5.9p1/sshd_config
+--- openssh-5.9p1/sshd_config.2auth	2011-05-29 13:39:39.000000000 +0200
++++ openssh-5.9p1/sshd_config	2011-09-13 20:25:23.221458447 +0200
 @@ -87,6 +87,13 @@ AuthorizedKeysFile	.ssh/authorized_keys
  # and ChallengeResponseAuthentication to 'no'.
  #UsePAM no
@@ -363,9 +366,9 @@ diff -up openssh-5.9p0/sshd_config.2auth openssh-5.9p0/sshd_config
  #AllowAgentForwarding yes
  #AllowTcpForwarding yes
  #GatewayPorts no
-diff -up openssh-5.9p0/sshd_config.5.2auth openssh-5.9p0/sshd_config.5
---- openssh-5.9p0/sshd_config.5.2auth	2011-08-05 22:17:33.000000000 +0200
-+++ openssh-5.9p0/sshd_config.5	2011-09-05 13:16:01.572564496 +0200
+diff -up openssh-5.9p1/sshd_config.5.2auth openssh-5.9p1/sshd_config.5
+--- openssh-5.9p1/sshd_config.5.2auth	2011-08-05 22:17:33.000000000 +0200
++++ openssh-5.9p1/sshd_config.5	2011-09-13 20:25:23.416458539 +0200
 @@ -726,6 +726,12 @@ Available keywords are
  .Cm PubkeyAuthentication ,
  .Cm RhostsRSAAuthentication ,

@@ -34,10 +34,6 @@
 # Do we want LDAP support
 %define ldap 1
 
-# Do we want NSS tokens support
-# NSS support is broken from 5.4p1
-%define nss 0
-
 # Whether or not /sbin/nologin exists.
 %define nologin 1
 
@@ -79,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -109,7 +105,7 @@ Source11: sshd.service
 Source13: sshd-keygen
 
 # Internal debug
-Patch0: openssh-5.8p1-wIm.patch
+Patch0: openssh-5.9p1-wIm.patch
 
 #?
 Patch100: openssh-5.9p1-coverity.patch
@@ -249,10 +245,6 @@ BuildRequires: krb5-devel
 
 %if %{libedit}
 BuildRequires: libedit-devel ncurses-devel
-%endif
-
-%if %{nss}
-BuildRequires: nss-devel
 %endif
 
 %if %{WITH_SELINUX}
@@ -505,9 +497,6 @@ fi
 	--with-ssl-engine \
 	--with-authorized-keys-command \
 	--with-ipaddr-display \
-%if %{nss}
-	--with-nss \
-%endif
 %if %{scard}
 	--with-smartcard \
 %endif
@@ -520,7 +509,7 @@ fi
 	--with-pam \
 %endif
 %if %{WITH_SELINUX}
-	--with-selinux --with-audit=linux --with-sandbox-style=selinux \
+	--with-selinux --with-audit=linux --with-sandbox=selinux \
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
@@ -621,11 +610,6 @@ rm -f $RPM_BUILD_ROOT/etc/profile.d/gnome-ssh-askpass.*
 %endif
 
 perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_mandir}/man*/*
-
-rm -f README.nss.nss-keys
-%if ! %{nss}
-rm -f README.nss
-%endif
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -789,6 +773,11 @@ fi
 %endif
 
 %changelog
+* Wed Sep 14 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-9 + 0.9.2-32
+- coverity upgrade
+- wipe off nonfunctional nss
+- selinux sandbox tweaking
+
 * Tue Sep 13 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-8 + 0.9.2-32
 - coverity upgrade
 - experimental selinux sandbox

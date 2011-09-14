@@ -26,7 +26,7 @@ diff -up openssh-5.9p1/configure.ac.sesandbox openssh-5.9p1/configure.ac
  		AC_MSG_ERROR([Darwin seatbelt sandbox requires sandbox.h and sandbox_init function])
  	SANDBOX_STYLE="darwin"
  	AC_DEFINE([SANDBOX_DARWIN], [1], [Sandbox using Darwin sandbox_init(3)])
-+elif test "x$sandbox_arg" = "xselinux" \\
++elif test "x$sandbox_arg" = "xselinux"  || \
 +    test "x$WITH_SELINUX" = "x1"; then
 +	SANDBOX_STYLE="selinux"
 +	AC_DEFINE([SANDBOX_SELINUX], [1], [Sandbox using selinux(8)])
@@ -105,7 +105,7 @@ diff -up openssh-5.9p1/openbsd-compat/port-linux.h.sesandbox openssh-5.9p1/openb
 diff -up openssh-5.9p1/sandbox-selinux.c.sesandbox openssh-5.9p1/sandbox-selinux.c
 --- openssh-5.9p1/sandbox-selinux.c.sesandbox	2011-09-13 16:01:08.715520826 +0200
 +++ openssh-5.9p1/sandbox-selinux.c	2011-09-13 16:20:02.463511312 +0200
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,121 @@
 +/* $Id: sandbox-selinux.c,v 1.0 2011/01/17 10:15:30 jfch Exp $ */
 + 
 +/*
@@ -148,11 +148,12 @@ diff -up openssh-5.9p1/sandbox-selinux.c.sesandbox openssh-5.9p1/sandbox-selinux
 +#include <stdlib.h>
 +#include <string.h>
 +#include <unistd.h>
++#include <sys/resource.h>
 +
 +#include "log.h"
 +#include "ssh-sandbox.h"
 +#include "xmalloc.h"
-+#include "openbsd-comnpat/port-linux.h"
++#include "openbsd-compat/port-linux.h"
 +
 +/* selinux based sandbox */
 +
