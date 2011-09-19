@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -378,7 +378,9 @@ The module is most useful for su and sudo service stacks.
 %prep
 %setup -q -a 4
 #Do not enable by default
-###%patch0 -p1 -b .wIm
+%if 0
+%patch0 -p1 -b .wIm
+%endif
 
 %patch100 -p1 -b .coverity
 %patch101 -p1 -b .fingerprint
@@ -413,7 +415,6 @@ popd
 %if %{ldap}
 %patch501 -p1 -b .ldap
 %endif
-
 %patch502 -p1 -b .keycat
 
 %patch600 -p1 -b .keygen
@@ -443,6 +444,10 @@ popd
 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
+
+%if 0
+# Nothing here yet
+%endif
 
 autoreconf
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -509,7 +514,12 @@ fi
 	--with-pam \
 %endif
 %if %{WITH_SELINUX}
-	--with-selinux --with-audit=linux --with-sandbox=selinux \
+	--with-selinux --with-audit=linux \
+%if 1
+	--with-sandbox=selinux \
+%else
+	--with-sandbox=no \
+%endif
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
@@ -773,6 +783,10 @@ fi
 %endif
 
 %changelog
+* Mon Sep 19 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-10 + 0.9.2-32
+- selinux sandbox rewrite
+- two factor authentication tweaking
+
 * Wed Sep 14 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-9 + 0.9.2-32
 - coverity upgrade
 - wipe off nonfunctional nss
