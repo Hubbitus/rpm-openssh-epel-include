@@ -141,7 +141,7 @@ Patch400: openssh-5.9p1-role.patch
 Patch401: openssh-5.9p1-mls.patch
 #?
 Patch402: openssh-5.9p1-sftp-chroot.patch
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1940
 Patch403: openssh-5.9p1-sesandbox.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
