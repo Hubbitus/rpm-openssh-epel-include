@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 10
+%define openssh_rel 11
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -214,8 +214,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: /sbin/nologin
 %endif
 
-Requires: initscripts >= 5.20
-
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
 BuildRequires: gtk2-devel
@@ -276,6 +274,7 @@ Requires(postun): systemd-units
 # is not valid.  We can use %post because this particular %triggerun script
 # should fire just after this package is installed.
 Requires(post): systemd-sysv
+Requires(post): chkconfig
 
 # Not yet ready
 # %package server-ondemand
@@ -783,6 +782,10 @@ fi
 %endif
 
 %changelog
+* Fri Oct 14 2011 Tomas Mraz <tmraz@redhat.com> - 5.9p1-11 + 0.9.2-32
+- remove unnecessary requires on initscripts
+- set VerifyHostKeyDNS to ask in the default configuration (#739856)
+
 * Mon Sep 19 2011 Jan F. Chadima <jchadima@redhat.com> - 5.9p1-10 + 0.9.2-32
 - selinux sandbox rewrite
 - two factor authentication tweaking
