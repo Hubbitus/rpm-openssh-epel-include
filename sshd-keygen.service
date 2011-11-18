@@ -5,6 +5,7 @@ Before=sshd.service
 
 [Service]
 Type=oneshot
+EnvironmentFile=/etc/sysconfig/sshd
 ExecStart=/usr/sbin/sshd-keygen
 RemainAfterExit=yes
 
