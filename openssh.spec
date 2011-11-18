@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 11
+%define openssh_rel 12
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -782,6 +782,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 18 2011 Tomas Mraz <tmraz@redhat.com> - 5.9p1-12 + 0.9.2-32
+- still support /etc/sysconfig/sshd loading in sshd service (#754732)
+
 * Fri Oct 14 2011 Tomas Mraz <tmraz@redhat.com> - 5.9p1-11 + 0.9.2-32
 - remove unnecessary requires on initscripts
 - set VerifyHostKeyDNS to ask in the default configuration (#739856)
