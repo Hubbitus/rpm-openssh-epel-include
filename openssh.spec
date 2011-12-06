@@ -194,6 +194,9 @@ Patch708: openssh-5.9p1-entropy.patch
 Patch709: openssh-5.9p1-vendor.patch
 #?
 Patch710: openssh-5.9p1-copy-id-restorecon.patch
+# warn users for unsupported UsePAM=no (#757545)
+Patch711: openssh-5.9p1-log-usepam-no.patch
+
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch800: openssh-5.9p1-gsskex.patch
@@ -440,6 +443,7 @@ popd
 %patch708 -p1 -b .entropy
 %patch709 -p1 -b .vendor
 %patch710 -p1 -b .restorecon
+%patch711 -p1 -b .log-usepam-no
 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
