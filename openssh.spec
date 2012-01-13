@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 15
+%define openssh_rel 16
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -198,6 +198,8 @@ Patch710: openssh-5.9p1-copy-id-restorecon.patch
 Patch711: openssh-5.9p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
 Patch712: openssh-5.9p1-ctr-evp-fast.patch
+# add cavs test binary for the aes-ctr
+Patch713: openssh-5.9p1-ctr-cavstest.patch
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch800: openssh-5.9p1-gsskex.patch
@@ -446,6 +448,7 @@ popd
 %patch710 -p1 -b .restorecon
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
+%patch713 -p1 -b .ctr-cavs
 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
@@ -697,6 +700,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
 %attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
+%attr(0755,root,root) %{_libexecdir}/openssh/ctr-cavstest
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 %if %{scard}
@@ -791,7 +795,10 @@ fi
 %endif
 
 %changelog
-* Tue Dec 06 2011 Tomas Mraz <tmraz@redhat.com> 5.9p1-15 + 0.9.2-32
+* Fri Dec 13 2011 Tomas Mraz <tmraz@redhat.com> 5.9p1-16 + 0.9.2-32
+- add CAVS test driver for the aes-ctr ciphers
+
+* Wed Dec 11 2011 Tomas Mraz <tmraz@redhat.com> 5.9p1-15 + 0.9.2-32
 - enable aes-ctr ciphers use the EVP engines from OpenSSL such as the AES-NI
 
 * Tue Dec 06 2011 Petr Lautrbach <plautrba@redhat.com> 5.9p1-14 + 0.9.2-32
