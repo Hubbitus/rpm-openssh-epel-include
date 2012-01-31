@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 16
+%define openssh_rel 17
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -798,6 +798,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 31 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-17 + 0.9.2-32
+- run privsep slave process as the users SELinux context (#781634)
+
 * Fri Dec 13 2011 Tomas Mraz <tmraz@redhat.com> 5.9p1-16 + 0.9.2-32
 - add CAVS test driver for the aes-ctr ciphers
 
