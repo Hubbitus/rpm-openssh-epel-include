@@ -143,6 +143,8 @@ Patch401: openssh-5.9p1-mls.patch
 Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
 Patch403: openssh-5.9p1-sesandbox.patch
+#https://bugzilla.redhat.com/show_bug.cgi?id=781634
+Patch404: openssh-5.9p1-privsep-selinux.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch500: openssh-5.9p1-akc.patch
@@ -416,6 +418,7 @@ popd
 %patch401 -p1 -b .mls
 %patch402 -p1 -b .sftp-chroot
 %patch403 -p1 -b .sesandbox
+%patch404 -p1 -b .privsep-selinux
 %endif
 
 %patch500 -p1 -b .akc
