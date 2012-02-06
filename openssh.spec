@@ -116,7 +116,8 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch103: openssh-5.8p1-packet.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=983
-Patch104: openssh-5.9p1-2auth.patch
+#Patch104: openssh-5.9p1-2auth.patch
+Patch104: openssh-5.9p1-required-authentications.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-5.8p1-audit0.patch
@@ -395,7 +396,7 @@ The module is most useful for su and sudo service stacks.
 %patch101 -p1 -b .fingerprint
 %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
-%patch104 -p1 -b .2auth
+%patch104 -p1 -b .required-authentication
 
 %patch200 -p1 -b .audit0
 %patch201 -p1 -b .audit1
