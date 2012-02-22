@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 18
+%define openssh_rel 19
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -800,6 +800,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb 22 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-19 + 0.9.2-32
+- Look for x11 forward sockets with AI_ADDRCONFIG flag getaddrinfo (#735889)
+
 * Mon Feb 06 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-18 + 0.9.2-32
 - replace TwoFactorAuth with RequiredAuthentications[12]
   https://bugzilla.mindrot.org/show_bug.cgi?id=983
