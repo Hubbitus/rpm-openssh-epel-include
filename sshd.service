@@ -1,6 +1,7 @@
 [Unit]
 Description=OpenSSH server daemon
 After=syslog.target network.target auditd.service
+Wants=sshd-keygen.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/sshd
