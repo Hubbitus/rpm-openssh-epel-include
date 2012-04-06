@@ -609,7 +609,7 @@ install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
 install -m755 %{SOURCE13} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
-install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
+# install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
 # install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
 # install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
@@ -677,7 +677,6 @@ fi
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable sshd.service > /dev/null 2>&1 || :
-    /bin/systemctl --no-reload disable sshd-keygen.service > /dev/null 2>&1 || :
     /bin/systemctl stop sshd.service > /dev/null 2>&1 || :
 fi
 
@@ -686,8 +685,9 @@ fi
 /bin/systemctl enable sshd.service >/dev/null 2>&1
 /sbin/chkconfig --del sshd >/dev/null 2>&1 || :
 /bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
-# This one was never a service, so we don't simply restart it
-/bin/systemctl is-active -q sshd.service && /bin/systemctl start sshd-keygen.service >/dev/null 2>&1 || :
+
+%triggerun -n openssh-server -- openssh-server < 5.9p1-22
+/bin/systemctl --no-reload disable sshd-keygen.service >/dev/null 2>&1 || :
 
 %triggerpostun -n openssh-server-sysvinit -- openssh-server < 5.8p2-12
 /sbin/chkconfig --add sshd >/dev/null 2>&1 || :
@@ -751,7 +751,6 @@ fi
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/sshd_config
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
-%attr(0644,root,root) %{_unitdir}/sshd-keygen.service
 %attr(0644,root,root) %{_unitdir}/sshd.service
 
 # %files server-ondemand
