@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 21
+%define openssh_rel 22
 %define pam_ssh_agent_ver 0.9.2
 %define pam_ssh_agent_rel 32
 
@@ -796,6 +796,10 @@ fi
 %endif
 
 %changelog
+* Fri Apr 06 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-22 + 0.9.2-32
+- don't create RSA1 key in FIPS mode
+- don't install sshd-keygen.service (#810419)
+
 * Fri Mar 30 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-21 + 0.9.2-32
 - fix various issues in openssh-5.9p1-required-authentications.patch
 
