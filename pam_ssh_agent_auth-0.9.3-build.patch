@@ -1,7 +1,7 @@
-diff -up pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c
---- pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c.psaa-build	2009-08-08 11:51:04.000000000 +0200
-+++ pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c	2009-10-16 15:20:55.000000000 +0200
-@@ -41,7 +41,16 @@
+diff -up pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c
+--- pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build	2010-01-13 03:17:01.000000000 +0100
++++ pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c	2012-06-21 20:14:56.432527764 +0200
+@@ -37,7 +37,16 @@
  #include "buffer.h"
  #include "key.h"
  #include "authfd.h"
@@ -18,7 +18,7 @@ diff -up pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agen
  #include <openssl/evp.h>
  
  #include "userauth_pubkey_from_id.h"
-@@ -73,6 +82,96 @@ session_id2_gen()
+@@ -69,6 +78,96 @@ session_id2_gen()
      return cookie;
  }
  
@@ -115,7 +115,7 @@ diff -up pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agen
  int
  find_authorized_keys(uid_t uid)
  {
-@@ -85,7 +184,7 @@ find_authorized_keys(uid_t uid)
+@@ -81,7 +180,7 @@ find_authorized_keys(uid_t uid)
      OpenSSL_add_all_digests();
      session_id2 = session_id2_gen();
  
@@ -124,14 +124,14 @@ diff -up pam_ssh_agent_auth-0.9/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agen
          verbose("Contacted ssh-agent of user %s (%u)", getpwuid(uid)->pw_name, uid);
          for (key = ssh_get_first_identity(ac, &comment, 2); key != NULL; key = ssh_get_next_identity(ac, &comment, 2)) 
          {
-@@ -113,3 +212,4 @@ find_authorized_keys(uid_t uid)
+@@ -109,3 +208,4 @@ find_authorized_keys(uid_t uid)
      EVP_cleanup();
      return retval;
  }
 +
-diff -up pam_ssh_agent_auth-0.9/Makefile.in.psaa-build pam_ssh_agent_auth-0.9/Makefile.in
---- pam_ssh_agent_auth-0.9/Makefile.in.psaa-build	2009-08-06 07:40:16.000000000 +0200
-+++ pam_ssh_agent_auth-0.9/Makefile.in	2009-10-16 15:20:55.000000000 +0200
+diff -up pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build pam_ssh_agent_auth-0.9.3/Makefile.in
+--- pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build	2009-10-27 21:19:41.000000000 +0100
++++ pam_ssh_agent_auth-0.9.3/Makefile.in	2012-06-21 20:14:56.432527764 +0200
 @@ -28,7 +28,7 @@ PATHS=
  CC=@CC@
  LD=@LD@
@@ -176,15 +176,4 @@ diff -up pam_ssh_agent_auth-0.9/Makefile.in.psaa-build pam_ssh_agent_auth-0.9/Ma
  
  $(MANPAGES): $(MANPAGES_IN)
  	pod2man --section=8 --release=v0.8 --name=pam_ssh_agent_auth --official --center "PAM" pam_ssh_agent_auth.pod > pam_ssh_agent_auth.8
-diff -up pam_ssh_agent_auth-0.9/pam_user_authorized_keys.c.psaa-build pam_ssh_agent_auth-0.9/pam_user_authorized_keys.c
---- pam_ssh_agent_auth-0.9/pam_user_authorized_keys.c.psaa-build	2009-07-29 02:46:38.000000000 +0200
-+++ pam_ssh_agent_auth-0.9/pam_user_authorized_keys.c	2009-10-16 15:50:36.000000000 +0200
-@@ -94,7 +94,7 @@ parse_authorized_key_file(const char *us
-     /*
-      * temporary copy, so that both tilde expansion and percent expansion both get to apply to the path
-      */
--    strncat(auth_keys_file_buf, authorized_keys_file_input, 4096);
-+    strncat(auth_keys_file_buf, authorized_keys_file_input, sizeof(auth_keys_file_buf)-1);
- 
-     if(allow_user_owned_authorized_keys_file)
-         authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
+diff -up pam_ssh_agent_auth-0.9.3/pam_user_authorized_keys.c.psaa-build pam_ssh_agent_auth-0.9.3/pam_user_authorized_keys.c

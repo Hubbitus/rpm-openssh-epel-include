@@ -75,9 +75,9 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 22
-%define pam_ssh_agent_ver 0.9.2
-%define pam_ssh_agent_rel 32
+%define openssh_rel 23
+%define pam_ssh_agent_ver 0.9.3
+%define pam_ssh_agent_rel 1
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -134,8 +134,12 @@ Patch204: openssh-5.9p1-audit4.patch
 Patch205: openssh-5.9p1-audit5.patch
 
 # --- pam_ssh-agent ---
-Patch300: pam_ssh_agent_auth-0.9-build.patch
+# make it build reusing the openssh sources
+Patch300: pam_ssh_agent_auth-0.9.3-build.patch
+# check return value of seteuid()
 Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
+# explicitly make pam callbacks visible
+Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-5.9p1-role.patch
@@ -410,6 +414,7 @@ The module is most useful for su and sudo service stacks.
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch300 -p1 -b .psaa-build
 %patch301 -p1 -b .psaa-seteuid
+%patch302 -p1 -b .psaa-visibility
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
@@ -471,7 +476,9 @@ autoreconf
 popd
 
 %build
-CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
+# the -fvisibility=hidden is needed for clean build of the pam_ssh_agent_auth
+# and it makes the ssh build more clean and even optimized better
+CFLAGS="$RPM_OPT_FLAGS -fvisibility=hidden"; export CFLAGS
 %if %{rescue}
 CFLAGS="$CFLAGS -Os"
 %endif
@@ -796,6 +803,11 @@ fi
 %endif
 
 %changelog
+* Fri Jun 22 2012 Tomas Mraz <tmraz@redhat.com> 5.9p1-23 + 0.9.3-1
+- fix segfault in su when pam_ssh_agent_auth is used and the ssh-agent
+  is not running, most probably not exploitable
+- update pam_ssh_agent_auth to 0.9.3 upstream version
+
 * Fri Apr 06 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-22 + 0.9.2-32
 - don't create RSA1 key in FIPS mode
 - don't install sshd-keygen.service (#810419)
