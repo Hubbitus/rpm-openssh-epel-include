@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 23
+%define openssh_rel 24
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 1
 
@@ -803,6 +803,9 @@ fi
 %endif
 
 %changelog
+* Tue Jul 17 2012 Tomas Mraz <tmraz@redhat.com> 5.9p1-24 + 0.9.3-1
+- allow sha256 and sha512 hmacs in the FIPS mode
+
 * Fri Jun 22 2012 Tomas Mraz <tmraz@redhat.com> 5.9p1-23 + 0.9.3-1
 - fix segfault in su when pam_ssh_agent_auth is used and the ssh-agent
   is not running, most probably not exploitable
