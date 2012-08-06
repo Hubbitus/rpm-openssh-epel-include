@@ -208,6 +208,9 @@ Patch711: openssh-5.9p1-log-usepam-no.patch
 Patch712: openssh-5.9p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
 Patch713: openssh-5.9p1-ctr-cavstest.patch
+#https://bugzilla.redhat.com/show_bug.cgi?id=815993
+Patch714: openssh-5.9p1-null-xcrypt.patch
+
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 Patch800: openssh-5.9p1-gsskex.patch
@@ -459,6 +462,7 @@ popd
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
+%patch714 -p0 -b .null-xcrypt
 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
