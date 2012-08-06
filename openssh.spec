@@ -74,10 +74,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 5.9p1
-%define openssh_rel 26
+%define openssh_ver 6.0p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 1
+%define pam_ssh_agent_rel 2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -123,15 +123,15 @@ Patch104: openssh-5.9p1-required-authentications.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-5.8p1-audit0.patch
 # -"-
-Patch201: openssh-5.9p1-audit1.patch
+Patch201: openssh-6.0p1-audit1.patch
 # -"-
 Patch202: openssh-5.9p1-audit2.patch
 # -"-
 Patch203: openssh-5.9p1-audit3.patch
 # -"-
-Patch204: openssh-5.9p1-audit4.patch
+Patch204: openssh-6.0p1-audit4.patch
 # -"-
-Patch205: openssh-5.9p1-audit5.patch
+Patch205: openssh-6.0p1-audit5.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -140,27 +140,24 @@ Patch300: pam_ssh_agent_auth-0.9.3-build.patch
 Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
-
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch400: openssh-5.9p1-role.patch
-#?
-Patch401: openssh-5.9p1-mls.patch
+Patch400: openssh-6.0p1-role-mls.patch
 #?
 Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
-Patch403: openssh-5.9p1-sesandbox.patch
+#Patch403: openssh-5.9p1-sesandbox.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
 Patch404: openssh-5.9p1-privsep-selinux.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch500: openssh-5.9p1-akc.patch
 #?-- unwanted child :(
-Patch501: openssh-5.9p1-ldap.patch
+Patch501: openssh-6.0p1-ldap.patch
 #?
 Patch502: openssh-5.9p1-keycat.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
-Patch600: openssh-5.9p1-keygen.patch
+#Patch600: openssh-5.9p1-keygen.patch
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-5.2p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
@@ -197,7 +194,7 @@ Patch706: openssh-5.8p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch707: openssh-5.9p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
-Patch708: openssh-5.9p1-entropy.patch
+Patch708: openssh-6.0p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch709: openssh-5.9p1-vendor.patch
 #?
@@ -424,10 +421,9 @@ popd
 %endif
 
 %if %{WITH_SELINUX}
-%patch400 -p1 -b .role
-%patch401 -p1 -b .mls
+%patch400 -p1 -b .role-mls
 %patch402 -p1 -b .sftp-chroot
-%patch403 -p1 -b .sesandbox
+#%patch403 -p1 -b .sesandbox
 %patch404 -p1 -b .privsep-selinux
 %endif
 
@@ -437,7 +433,7 @@ popd
 %endif
 %patch502 -p1 -b .keycat
 
-%patch600 -p1 -b .keygen
+#%patch600 -p1 -b .keygen
 %patch601 -p1 -b .ip-opts
 %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
@@ -542,10 +538,11 @@ fi
 %endif
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
-%if 1
-	--with-sandbox=selinux \
+%if 0
+#seccomp_filter cannot be build right now
+	--with-sandbox=seccomp_filter \
 %else
-	--with-sandbox=no \
+	--with-sandbox=rlimit \
 %endif
 %endif
 %if %{kerberos5}
@@ -807,6 +804,9 @@ fi
 %endif
 
 %changelog
+* Mon Aug 06 2012 Petr Lautrbach <plautrba@redhat.com> 6.0p1-1 + 0.9.3-2
+- new upstream release
+
 * Mon Aug 06 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-26 + 0.9.3-1
 - change SELinux context also for root user (#827109)
 
