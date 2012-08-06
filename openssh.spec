@@ -75,7 +75,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 5.9p1
-%define openssh_rel 25
+%define openssh_rel 26
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 1
 
@@ -807,6 +807,9 @@ fi
 %endif
 
 %changelog
+* Mon Aug 06 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-26 + 0.9.3-1
+- change SELinux context also for root user (#827109)
+
 * Fri Jul 27 2012 Petr Lautrbach <plautrba@redhat.com> 5.9p1-25 + 0.9.3-1
 - fix various issues in openssh-5.9p1-required-authentications.patch
 
