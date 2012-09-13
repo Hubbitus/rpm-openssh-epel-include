@@ -210,7 +210,8 @@ Patch714: openssh-5.9p1-null-xcrypt.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
-Patch800: openssh-5.9p1-gsskex.patch
+#changed cache storage type - #848228
+Patch800: openssh-6.0p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
 Patch801: openssh-5.8p2-force_krb.patch
 
