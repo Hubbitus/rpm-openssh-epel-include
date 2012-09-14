@@ -1,6 +1,115 @@
-diff -up openssh-6.0p1/auth2.c.gsskex openssh-6.0p1/auth2.c
---- openssh-6.0p1/auth2.c.gsskex	2012-09-12 15:32:19.110689080 +0200
-+++ openssh-6.0p1/auth2.c	2012-09-12 15:32:28.309651601 +0200
+diff -up openssh-6.1p1/auth-krb5.c.gsskex openssh-6.1p1/auth-krb5.c
+--- openssh-6.1p1/auth-krb5.c.gsskex	2012-04-26 01:52:15.000000000 +0200
++++ openssh-6.1p1/auth-krb5.c	2012-09-14 21:07:19.695203206 +0200
+@@ -50,6 +50,7 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <string.h>
++#include <sys/stat.h>
+ #include <krb5.h>
+ 
+ extern ServerOptions	 options;
+@@ -170,8 +171,13 @@ auth_krb5_password(Authctxt *authctxt, c
+ 
+ 	len = strlen(authctxt->krb5_ticket_file) + 6;
+ 	authctxt->krb5_ccname = xmalloc(len);
+-	snprintf(authctxt->krb5_ccname, len, "FILE:%s",
++#ifdef USE_CCAPI
++	snprintf(authctxt->krb5_ccname, len, "API:%s",
+ 	    authctxt->krb5_ticket_file);
++#else
++	snprintf(authctxt->krb5_ccname, len, "DIR:%s",
++	    authctxt->krb5_ticket_file);
++#endif
+ 
+ #ifdef USE_PAM
+ 	if (options.use_pam)
+@@ -208,10 +214,33 @@ auth_krb5_password(Authctxt *authctxt, c
+ void
+ krb5_cleanup_proc(Authctxt *authctxt)
+ {
++	struct stat krb5_ccname_stat;
++	char krb5_ccname[128], *krb5_ccname_dir_end;
++
+ 	debug("krb5_cleanup_proc called");
+ 	if (authctxt->krb5_fwd_ccache) {
+ 		krb5_cc_destroy(authctxt->krb5_ctx, authctxt->krb5_fwd_ccache);
+ 		authctxt->krb5_fwd_ccache = NULL;
++
++		/* assume ticket cache type DIR - DIR::/tmp/krb5cc_876600005_T9eDKSQvzb/tkt */
++		strncpy(krb5_ccname, authctxt->krb5_ccname + strlen("DIR::"), sizeof(krb5_ccname) - 10);
++
++		krb5_ccname_dir_end = strrchr(krb5_ccname, '/');
++		if (krb5_ccname_dir_end != NULL) {
++			strcpy(krb5_ccname_dir_end, "/primary");
++
++			if (stat(krb5_ccname, &krb5_ccname_stat) == 0) {
++				if (unlink(krb5_ccname) == 0) {
++					*krb5_ccname_dir_end = '\0';
++					if (rmdir(krb5_ccname) == -1)
++						debug("cache dir '%s' remove failed: %s", krb5_ccname, strerror(errno));
++				}
++				else
++					debug("cache primary file '%s', remove failed: %s",
++						krb5_ccname, strerror(errno)
++					);
++			}
++		}
+ 	}
+ 	if (authctxt->krb5_user) {
+ 		krb5_free_principal(authctxt->krb5_ctx, authctxt->krb5_user);
+@@ -226,31 +255,37 @@ krb5_cleanup_proc(Authctxt *authctxt)
+ #ifndef HEIMDAL
+ krb5_error_code
+ ssh_krb5_cc_gen(krb5_context ctx, krb5_ccache *ccache) {
+-	int tmpfd, ret, oerrno;
+-	char ccname[40];
++	int ret, oerrno;
++	char ccname[128];
+ 	mode_t old_umask;
++#ifdef USE_CCAPI
++	char cctemplate[] = "API:krb5cc_%d";
++#else
++	char cctemplate[] = "DIR:/tmp/krb5cc_%d_XXXXXXXXXX";
++	char *tmpdir;
++#endif
+ 
+ 	ret = snprintf(ccname, sizeof(ccname),
+-	    "FILE:/tmp/krb5cc_%d_XXXXXXXXXX", geteuid());
++	    cctemplate, geteuid());
+ 	if (ret < 0 || (size_t)ret >= sizeof(ccname))
+ 		return ENOMEM;
+ 
+-	old_umask = umask(0177);
+-	tmpfd = mkstemp(ccname + strlen("FILE:"));
++#ifndef USE_CCAPI
++	old_umask = umask(0077);
++	tmpdir = mkdtemp(ccname + strlen("DIR:"));
+ 	oerrno = errno;
+ 	umask(old_umask);
+-	if (tmpfd == -1) {
+-		logit("mkstemp(): %.100s", strerror(oerrno));
++	if (tmpdir == NULL) {
++		logit("mkdtemp(): %.100s", strerror(oerrno));
+ 		return oerrno;
+ 	}
+ 
+-	if (fchmod(tmpfd,S_IRUSR | S_IWUSR) == -1) {
++	if (chmod(tmpdir, S_IRUSR | S_IWUSR | S_IXUSR) == -1) {
+ 		oerrno = errno;
+-		logit("fchmod(): %.100s", strerror(oerrno));
+-		close(tmpfd);
++		logit("chmod(): %.100s", strerror(oerrno));
+ 		return oerrno;
+ 	}
+-	close(tmpfd);
++#endif
+ 
+ 	return (krb5_cc_resolve(ctx, ccname, ccache));
+ }
+diff -up openssh-6.1p1/auth2.c.gsskex openssh-6.1p1/auth2.c
+--- openssh-6.1p1/auth2.c.gsskex	2012-09-14 20:57:55.291263269 +0200
++++ openssh-6.1p1/auth2.c	2012-09-14 20:57:55.853266860 +0200
 @@ -69,6 +69,7 @@ extern Authmethod method_passwd;
  extern Authmethod method_kbdint;
  extern Authmethod method_hostbased;
@@ -17,9 +126,9 @@ diff -up openssh-6.0p1/auth2.c.gsskex openssh-6.0p1/auth2.c
  	&method_gssapi,
  #endif
  #ifdef JPAKE
-diff -up openssh-6.0p1/auth2-gss.c.gsskex openssh-6.0p1/auth2-gss.c
---- openssh-6.0p1/auth2-gss.c.gsskex	2012-09-12 15:32:19.126689015 +0200
-+++ openssh-6.0p1/auth2-gss.c	2012-09-12 15:32:28.309651601 +0200
+diff -up openssh-6.1p1/auth2-gss.c.gsskex openssh-6.1p1/auth2-gss.c
+--- openssh-6.1p1/auth2-gss.c.gsskex	2012-09-14 20:57:55.292263276 +0200
++++ openssh-6.1p1/auth2-gss.c	2012-09-14 20:57:55.855266873 +0200
 @@ -52,6 +52,40 @@ static void input_gssapi_mic(int type, u
  static void input_gssapi_exchange_complete(int type, u_int32_t plen, void *ctxt);
  static void input_gssapi_errtok(int, u_int32_t, void *);
@@ -94,233 +203,9 @@ diff -up openssh-6.0p1/auth2-gss.c.gsskex openssh-6.0p1/auth2-gss.c
  Authmethod method_gssapi = {
  	"gssapi-with-mic",
  	userauth_gssapi,
-diff -up openssh-6.0p1/auth-krb5.c.gsskex openssh-6.0p1/auth-krb5.c
---- openssh-6.0p1/auth-krb5.c.gsskex	2012-09-12 15:32:19.118689046 +0200
-+++ openssh-6.0p1/auth-krb5.c	2012-09-12 16:03:22.216097657 +0200
-@@ -50,6 +50,7 @@
- #include <errno.h>
- #include <unistd.h>
- #include <string.h>
-+#include <sys/stat.h>
- #include <krb5.h>
- 
- extern ServerOptions	 options;
-@@ -170,8 +171,13 @@ auth_krb5_password(Authctxt *authctxt, c
- 
- 	len = strlen(authctxt->krb5_ticket_file) + 6;
- 	authctxt->krb5_ccname = xmalloc(len);
--	snprintf(authctxt->krb5_ccname, len, "FILE:%s",
-+#ifdef USE_CCAPI
-+	snprintf(authctxt->krb5_ccname, len, "API:%s",
- 	    authctxt->krb5_ticket_file);
-+#else
-+	snprintf(authctxt->krb5_ccname, len, "DIR:%s",
-+	    authctxt->krb5_ticket_file);
-+#endif
- 
- #ifdef USE_PAM
- 	if (options.use_pam)
-@@ -208,10 +214,33 @@ auth_krb5_password(Authctxt *authctxt, c
- void
- krb5_cleanup_proc(Authctxt *authctxt)
- {
-+	struct stat krb5_ccname_stat;
-+	char krb5_ccname[128], *krb5_ccname_dir_end;
-+
- 	debug("krb5_cleanup_proc called");
- 	if (authctxt->krb5_fwd_ccache) {
- 		krb5_cc_destroy(authctxt->krb5_ctx, authctxt->krb5_fwd_ccache);
- 		authctxt->krb5_fwd_ccache = NULL;
-+
-+		/* assume ticket cache type DIR - DIR::/tmp/krb5cc_876600005_T9eDKSQvzb/tkt */
-+		strncpy(krb5_ccname, authctxt->krb5_ccname + strlen("DIR::"), sizeof(krb5_ccname) - 10);
-+
-+		krb5_ccname_dir_end = strrchr(krb5_ccname, '/');
-+		if (krb5_ccname_dir_end != NULL) {
-+			strcpy(krb5_ccname_dir_end, "/primary");
-+
-+			if (stat(krb5_ccname, &krb5_ccname_stat) == 0) {
-+				if (unlink(krb5_ccname) == 0) {
-+					*krb5_ccname_dir_end = '\0';
-+					if (rmdir(krb5_ccname) == -1)
-+						debug("cache dir '%s' remove failed: %s", krb5_ccname, strerror(errno));
-+				}
-+				else
-+					debug("cache primary file '%s', remove failed: %s",
-+						krb5_ccname, strerror(errno)
-+					);
-+			}
-+		}
- 	}
- 	if (authctxt->krb5_user) {
- 		krb5_free_principal(authctxt->krb5_ctx, authctxt->krb5_user);
-@@ -226,29 +255,35 @@ krb5_cleanup_proc(Authctxt *authctxt)
- #ifndef HEIMDAL
- krb5_error_code
- ssh_krb5_cc_gen(krb5_context ctx, krb5_ccache *ccache) {
--	int tmpfd, ret;
-+	int ret;
- 	char ccname[40];
- 	mode_t old_umask;
-+#ifdef USE_CCAPI
-+	char cctemplate[] = "API:krb5cc_%d";
-+#else
-+	char cctemplate[] = "DIR:/tmp/krb5cc_%d_XXXXXXXXXX";
-+	char *tmpdir;
-+#endif
- 
- 	ret = snprintf(ccname, sizeof(ccname),
--	    "FILE:/tmp/krb5cc_%d_XXXXXXXXXX", geteuid());
-+	    cctemplate, geteuid());
- 	if (ret < 0 || (size_t)ret >= sizeof(ccname))
- 		return ENOMEM;
- 
--	old_umask = umask(0177);
--	tmpfd = mkstemp(ccname + strlen("FILE:"));
-+#ifndef USE_CCAPI
-+	old_umask = umask(0077);
-+	tmpdir = mkdtemp(ccname + strlen("DIR:"));
- 	umask(old_umask);
--	if (tmpfd == -1) {
--		logit("mkstemp(): %.100s", strerror(errno));
-+	if (tmpdir == NULL) {
-+		logit("mkdtemp(): %.100s", strerror(errno));
- 		return errno;
- 	}
--
--	if (fchmod(tmpfd,S_IRUSR | S_IWUSR) == -1) {
--		logit("fchmod(): %.100s", strerror(errno));
--		close(tmpfd);
-+	if (chmod(tmpdir, S_IRUSR | S_IWUSR | S_IXUSR) == -1) {
-+		logit("chmod(): %.100s", strerror(errno));
- 		return errno;
- 	}
--	close(tmpfd);
-+
-+#endif
- 
- 	return (krb5_cc_resolve(ctx, ccname, ccache));
- }
-diff -up openssh-6.0p1/ChangeLog.gssapi.gsskex openssh-6.0p1/ChangeLog.gssapi
---- openssh-6.0p1/ChangeLog.gssapi.gsskex	2012-09-12 15:32:19.106689094 +0200
-+++ openssh-6.0p1/ChangeLog.gssapi	2012-09-12 15:32:28.310651598 +0200
-@@ -0,0 +1,113 @@
-+20110101
-+  - Finally update for OpenSSH 5.6p1
-+  - Add GSSAPIServerIdentity option from Jim Basney
-+ 
-+20100308
-+  - [ Makefile.in, key.c, key.h ]
-+    Updates for OpenSSH 5.4p1
-+  - [ servconf.c ]
-+    Include GSSAPI options in the sshd -T configuration dump, and flag
-+    some older configuration options as being unsupported. Thanks to Colin 
-+    Watson.
-+  -
-+
-+20100124
-+  - [ sshconnect2.c ]
-+    Adapt to deal with additional element in Authmethod structure. Thanks to
-+    Colin Watson
-+
-+20090615
-+  - [ gss-genr.c gss-serv.c kexgssc.c kexgsss.c monitor.c sshconnect2.c
-+      sshd.c ]
-+    Fix issues identified by Greg Hudson following a code review
-+	Check return value of gss_indicate_mechs
-+	Protect GSSAPI calls in monitor, so they can only be used if enabled
-+	Check return values of bignum functions in key exchange
-+	Use BN_clear_free to clear other side's DH value
-+	Make ssh_gssapi_id_kex more robust
-+	Only configure kex table pointers if GSSAPI is enabled
-+	Don't leak mechanism list, or gss mechanism list
-+	Cast data.length before printing
-+	If serverkey isn't provided, use an empty string, rather than NULL
-+
-+20090201
-+  - [ gss-genr.c gss-serv.c kex.h kexgssc.c readconf.c readconf.h ssh-gss.h
-+      ssh_config.5 sshconnet2.c ]
-+    Add support for the GSSAPIClientIdentity option, which allows the user
-+    to specify which GSSAPI identity to use to contact a given server
-+
-+20080404
-+  - [ gss-serv.c ]
-+    Add code to actually implement GSSAPIStrictAcceptCheck, which had somehow
-+    been omitted from a previous version of this patch. Reported by Borislav
-+    Stoichkov
-+
-+20070317
-+  - [ gss-serv-krb5.c ]
-+    Remove C99ism, where new_ccname was being declared in the middle of a 
-+    function
-+
-+20061220
-+  - [ servconf.c ]
-+    Make default for GSSAPIStrictAcceptorCheck be Yes, to match previous, and 
-+    documented, behaviour. Reported by Dan Watson.
-+
-+20060910
-+  - [ gss-genr.c kexgssc.c kexgsss.c kex.h monitor.c sshconnect2.c sshd.c
-+      ssh-gss.h ]
-+    add support for gss-group14-sha1 key exchange mechanisms
-+  - [ gss-serv.c servconf.c servconf.h sshd_config sshd_config.5 ]
-+    Add GSSAPIStrictAcceptorCheck option to allow the disabling of
-+    acceptor principal checking on multi-homed machines.
-+    <Bugzilla #928>
-+  - [ sshd_config ssh_config ]
-+    Add settings for GSSAPIKeyExchange and GSSAPITrustDNS to the sample
-+    configuration files
-+  - [ kexgss.c kegsss.c sshconnect2.c sshd.c ]
-+    Code cleanup. Replace strlen/xmalloc/snprintf sequences with xasprintf()
-+    Limit length of error messages displayed by client
-+
-+20060909
-+  - [ gss-genr.c gss-serv.c ]
-+    move ssh_gssapi_acquire_cred() and ssh_gssapi_server_ctx to be server
-+    only, where they belong 
-+    <Bugzilla #1225>
-+
-+20060829
-+  - [ gss-serv-krb5.c ]
-+    Fix CCAPI credentials cache name when creating KRB5CCNAME environment 
-+    variable
-+
-+20060828
-+  - [ gss-genr.c ]
-+    Avoid Heimdal context freeing problem
-+    <Fixed upstream 20060829>
-+
-+20060818
-+  - [ gss-genr.c ssh-gss.h sshconnect2.c ]
-+    Make sure that SPENGO is disabled 
-+    <Bugzilla #1218 - Fixed upstream 20060818>
-+
-+20060421
-+  - [ gssgenr.c, sshconnect2.c ]
-+    a few type changes (signed versus unsigned, int versus size_t) to
-+    fix compiler errors/warnings 
-+    (from jbasney AT ncsa.uiuc.edu)
-+  - [ kexgssc.c, sshconnect2.c ]
-+    fix uninitialized variable warnings
-+    (from jbasney AT ncsa.uiuc.edu)
-+  - [ gssgenr.c ]
-+    pass oid to gss_display_status (helpful when using GSSAPI mechglue)
-+    (from jbasney AT ncsa.uiuc.edu)
-+    <Bugzilla #1220 >
-+  - [ gss-serv-krb5.c ]
-+    #ifdef HAVE_GSSAPI_KRB5 should be #ifdef HAVE_GSSAPI_KRB5_H
-+    (from jbasney AT ncsa.uiuc.edu)
-+    <Fixed upstream 20060304>
-+  - [ readconf.c, readconf.h, ssh_config.5, sshconnect2.c 
-+    add client-side GssapiKeyExchange option
-+    (from jbasney AT ncsa.uiuc.edu)
-+  - [ sshconnect2.c ]
-+    add support for GssapiTrustDns option for gssapi-with-mic
-+    (from jbasney AT ncsa.uiuc.edu)
-+    <gssapi-with-mic support is Bugzilla #1008>
-diff -up openssh-6.0p1/clientloop.c.gsskex openssh-6.0p1/clientloop.c
---- openssh-6.0p1/clientloop.c.gsskex	2012-09-12 15:32:19.113689067 +0200
-+++ openssh-6.0p1/clientloop.c	2012-09-12 15:32:28.311651595 +0200
+diff -up openssh-6.1p1/clientloop.c.gsskex openssh-6.1p1/clientloop.c
+--- openssh-6.1p1/clientloop.c.gsskex	2012-09-14 20:57:54.862260529 +0200
++++ openssh-6.1p1/clientloop.c	2012-09-14 20:57:55.861266911 +0200
 @@ -111,6 +111,10 @@
  #include "msg.h"
  #include "roaming.h"
@@ -332,7 +217,7 @@ diff -up openssh-6.0p1/clientloop.c.gsskex openssh-6.0p1/clientloop.c
  /* import options */
  extern Options options;
  
-@@ -1540,6 +1544,15 @@ client_loop(int have_pty, int escape_cha
+@@ -1544,6 +1548,15 @@ client_loop(int have_pty, int escape_cha
  		/* Do channel operations unless rekeying in progress. */
  		if (!rekeying) {
  			channel_after_select(readset, writeset);
@@ -348,9 +233,9 @@ diff -up openssh-6.0p1/clientloop.c.gsskex openssh-6.0p1/clientloop.c
  			if (need_rekeying || packet_need_rekeying()) {
  				debug("need rekeying");
  				xxx_kex->done = 0;
-diff -up openssh-6.0p1/configure.ac.gsskex openssh-6.0p1/configure.ac
---- openssh-6.0p1/configure.ac.gsskex	2012-09-12 15:32:19.085689183 +0200
-+++ openssh-6.0p1/configure.ac	2012-09-12 15:32:28.312651591 +0200
+diff -up openssh-6.1p1/configure.ac.gsskex openssh-6.1p1/configure.ac
+--- openssh-6.1p1/configure.ac.gsskex	2012-09-14 20:57:55.756266240 +0200
++++ openssh-6.1p1/configure.ac	2012-09-14 20:57:55.865266937 +0200
 @@ -545,6 +545,30 @@ main() { if (NSVersionOfRunTimeLibrary("
  	    [Use tunnel device compatibility to OpenBSD])
  	AC_DEFINE([SSH_TUN_PREPEND_AF], [1],
@@ -382,9 +267,9 @@ diff -up openssh-6.0p1/configure.ac.gsskex openssh-6.0p1/configure.ac
  	m4_pattern_allow([AU_IPv])
  	AC_CHECK_DECL([AU_IPv4], [], 
  	    AC_DEFINE([AU_IPv4], [0], [System only supports IPv4 audit records])
-diff -up openssh-6.0p1/gss-genr.c.gsskex openssh-6.0p1/gss-genr.c
---- openssh-6.0p1/gss-genr.c.gsskex	2012-09-12 15:32:19.097689132 +0200
-+++ openssh-6.0p1/gss-genr.c	2012-09-12 15:32:28.313651587 +0200
+diff -up openssh-6.1p1/gss-genr.c.gsskex openssh-6.1p1/gss-genr.c
+--- openssh-6.1p1/gss-genr.c.gsskex	2009-06-22 08:11:07.000000000 +0200
++++ openssh-6.1p1/gss-genr.c	2012-09-14 20:57:55.867266949 +0200
 @@ -1,7 +1,7 @@
  /* $OpenBSD: gss-genr.c,v 1.20 2009/06/22 05:39:28 dtucker Exp $ */
  
@@ -732,9 +617,9 @@ diff -up openssh-6.0p1/gss-genr.c.gsskex openssh-6.0p1/gss-genr.c
 +}
 +
  #endif /* GSSAPI */
-diff -up openssh-6.0p1/gss-serv.c.gsskex openssh-6.0p1/gss-serv.c
---- openssh-6.0p1/gss-serv.c.gsskex	2012-09-12 15:32:19.123689027 +0200
-+++ openssh-6.0p1/gss-serv.c	2012-09-12 15:53:27.719520213 +0200
+diff -up openssh-6.1p1/gss-serv.c.gsskex openssh-6.1p1/gss-serv.c
+--- openssh-6.1p1/gss-serv.c.gsskex	2011-08-05 22:16:46.000000000 +0200
++++ openssh-6.1p1/gss-serv.c	2012-09-14 20:57:55.870266969 +0200
 @@ -45,15 +45,20 @@
  #include "channels.h"
  #include "session.h"
@@ -1073,9 +958,9 @@ diff -up openssh-6.0p1/gss-serv.c.gsskex openssh-6.0p1/gss-serv.c
  }
  
  #endif
-diff -up openssh-6.0p1/gss-serv-krb5.c.gsskex openssh-6.0p1/gss-serv-krb5.c
---- openssh-6.0p1/gss-serv-krb5.c.gsskex	2012-09-12 15:32:19.115689059 +0200
-+++ openssh-6.0p1/gss-serv-krb5.c	2012-09-12 16:36:15.768054426 +0200
+diff -up openssh-6.1p1/gss-serv-krb5.c.gsskex openssh-6.1p1/gss-serv-krb5.c
+--- openssh-6.1p1/gss-serv-krb5.c.gsskex	2006-09-01 07:38:36.000000000 +0200
++++ openssh-6.1p1/gss-serv-krb5.c	2012-09-14 20:57:55.872266981 +0200
 @@ -1,7 +1,7 @@
  /* $OpenBSD: gss-serv-krb5.c,v 1.7 2006/08/03 03:34:42 deraadt Exp $ */
  
@@ -1198,9 +1083,126 @@ diff -up openssh-6.0p1/gss-serv-krb5.c.gsskex openssh-6.0p1/gss-serv-krb5.c
  };
  
  #endif /* KRB5 */
-diff -up openssh-6.0p1/kex.c.gsskex openssh-6.0p1/kex.c
---- openssh-6.0p1/kex.c.gsskex	2012-09-12 15:32:19.096689136 +0200
-+++ openssh-6.0p1/kex.c	2012-09-12 15:32:28.315651579 +0200
+diff -up openssh-6.1p1/ChangeLog.gssapi.gsskex openssh-6.1p1/ChangeLog.gssapi
+--- openssh-6.1p1/ChangeLog.gssapi.gsskex	2012-09-14 20:57:55.858266892 +0200
++++ openssh-6.1p1/ChangeLog.gssapi	2012-09-14 20:57:55.859266899 +0200
+@@ -0,0 +1,113 @@
++20110101
++  - Finally update for OpenSSH 5.6p1
++  - Add GSSAPIServerIdentity option from Jim Basney
++ 
++20100308
++  - [ Makefile.in, key.c, key.h ]
++    Updates for OpenSSH 5.4p1
++  - [ servconf.c ]
++    Include GSSAPI options in the sshd -T configuration dump, and flag
++    some older configuration options as being unsupported. Thanks to Colin 
++    Watson.
++  -
++
++20100124
++  - [ sshconnect2.c ]
++    Adapt to deal with additional element in Authmethod structure. Thanks to
++    Colin Watson
++
++20090615
++  - [ gss-genr.c gss-serv.c kexgssc.c kexgsss.c monitor.c sshconnect2.c
++      sshd.c ]
++    Fix issues identified by Greg Hudson following a code review
++	Check return value of gss_indicate_mechs
++	Protect GSSAPI calls in monitor, so they can only be used if enabled
++	Check return values of bignum functions in key exchange
++	Use BN_clear_free to clear other side's DH value
++	Make ssh_gssapi_id_kex more robust
++	Only configure kex table pointers if GSSAPI is enabled
++	Don't leak mechanism list, or gss mechanism list
++	Cast data.length before printing
++	If serverkey isn't provided, use an empty string, rather than NULL
++
++20090201
++  - [ gss-genr.c gss-serv.c kex.h kexgssc.c readconf.c readconf.h ssh-gss.h
++      ssh_config.5 sshconnet2.c ]
++    Add support for the GSSAPIClientIdentity option, which allows the user
++    to specify which GSSAPI identity to use to contact a given server
++
++20080404
++  - [ gss-serv.c ]
++    Add code to actually implement GSSAPIStrictAcceptCheck, which had somehow
++    been omitted from a previous version of this patch. Reported by Borislav
++    Stoichkov
++
++20070317
++  - [ gss-serv-krb5.c ]
++    Remove C99ism, where new_ccname was being declared in the middle of a 
++    function
++
++20061220
++  - [ servconf.c ]
++    Make default for GSSAPIStrictAcceptorCheck be Yes, to match previous, and 
++    documented, behaviour. Reported by Dan Watson.
++
++20060910
++  - [ gss-genr.c kexgssc.c kexgsss.c kex.h monitor.c sshconnect2.c sshd.c
++      ssh-gss.h ]
++    add support for gss-group14-sha1 key exchange mechanisms
++  - [ gss-serv.c servconf.c servconf.h sshd_config sshd_config.5 ]
++    Add GSSAPIStrictAcceptorCheck option to allow the disabling of
++    acceptor principal checking on multi-homed machines.
++    <Bugzilla #928>
++  - [ sshd_config ssh_config ]
++    Add settings for GSSAPIKeyExchange and GSSAPITrustDNS to the sample
++    configuration files
++  - [ kexgss.c kegsss.c sshconnect2.c sshd.c ]
++    Code cleanup. Replace strlen/xmalloc/snprintf sequences with xasprintf()
++    Limit length of error messages displayed by client
++
++20060909
++  - [ gss-genr.c gss-serv.c ]
++    move ssh_gssapi_acquire_cred() and ssh_gssapi_server_ctx to be server
++    only, where they belong 
++    <Bugzilla #1225>
++
++20060829
++  - [ gss-serv-krb5.c ]
++    Fix CCAPI credentials cache name when creating KRB5CCNAME environment 
++    variable
++
++20060828
++  - [ gss-genr.c ]
++    Avoid Heimdal context freeing problem
++    <Fixed upstream 20060829>
++
++20060818
++  - [ gss-genr.c ssh-gss.h sshconnect2.c ]
++    Make sure that SPENGO is disabled 
++    <Bugzilla #1218 - Fixed upstream 20060818>
++
++20060421
++  - [ gssgenr.c, sshconnect2.c ]
++    a few type changes (signed versus unsigned, int versus size_t) to
++    fix compiler errors/warnings 
++    (from jbasney AT ncsa.uiuc.edu)
++  - [ kexgssc.c, sshconnect2.c ]
++    fix uninitialized variable warnings
++    (from jbasney AT ncsa.uiuc.edu)
++  - [ gssgenr.c ]
++    pass oid to gss_display_status (helpful when using GSSAPI mechglue)
++    (from jbasney AT ncsa.uiuc.edu)
++    <Bugzilla #1220 >
++  - [ gss-serv-krb5.c ]
++    #ifdef HAVE_GSSAPI_KRB5 should be #ifdef HAVE_GSSAPI_KRB5_H
++    (from jbasney AT ncsa.uiuc.edu)
++    <Fixed upstream 20060304>
++  - [ readconf.c, readconf.h, ssh_config.5, sshconnect2.c 
++    add client-side GssapiKeyExchange option
++    (from jbasney AT ncsa.uiuc.edu)
++  - [ sshconnect2.c ]
++    add support for GssapiTrustDns option for gssapi-with-mic
++    (from jbasney AT ncsa.uiuc.edu)
++    <gssapi-with-mic support is Bugzilla #1008>
+diff -up openssh-6.1p1/kex.c.gsskex openssh-6.1p1/kex.c
+--- openssh-6.1p1/kex.c.gsskex	2012-09-14 20:57:55.139262298 +0200
++++ openssh-6.1p1/kex.c	2012-09-14 20:57:55.874266995 +0200
 @@ -51,6 +51,10 @@
  #include "roaming.h"
  #include "audit.h"
@@ -1233,9 +1235,9 @@ diff -up openssh-6.0p1/kex.c.gsskex openssh-6.0p1/kex.c
  	} else
  		fatal("bad kex alg %s", k->name);
  }
-diff -up openssh-6.0p1/kexgssc.c.gsskex openssh-6.0p1/kexgssc.c
---- openssh-6.0p1/kexgssc.c.gsskex	2012-09-12 15:32:19.105689098 +0200
-+++ openssh-6.0p1/kexgssc.c	2012-09-12 15:32:28.315651579 +0200
+diff -up openssh-6.1p1/kexgssc.c.gsskex openssh-6.1p1/kexgssc.c
+--- openssh-6.1p1/kexgssc.c.gsskex	2012-09-14 20:57:55.875267001 +0200
++++ openssh-6.1p1/kexgssc.c	2012-09-14 20:57:55.875267001 +0200
 @@ -0,0 +1,334 @@
 +/*
 + * Copyright (c) 2001-2009 Simon Wilkinson. All rights reserved.
@@ -1571,9 +1573,9 @@ diff -up openssh-6.0p1/kexgssc.c.gsskex openssh-6.0p1/kexgssc.c
 +}
 +
 +#endif /* GSSAPI */
-diff -up openssh-6.0p1/kexgsss.c.gsskex openssh-6.0p1/kexgsss.c
---- openssh-6.0p1/kexgsss.c.gsskex	2012-09-12 15:32:19.116689055 +0200
-+++ openssh-6.0p1/kexgsss.c	2012-09-12 15:32:28.316651574 +0200
+diff -up openssh-6.1p1/kexgsss.c.gsskex openssh-6.1p1/kexgsss.c
+--- openssh-6.1p1/kexgsss.c.gsskex	2012-09-14 20:57:55.876267007 +0200
++++ openssh-6.1p1/kexgsss.c	2012-09-14 20:57:55.876267007 +0200
 @@ -0,0 +1,288 @@
 +/*
 + * Copyright (c) 2001-2009 Simon Wilkinson. All rights reserved.
@@ -1863,9 +1865,9 @@ diff -up openssh-6.0p1/kexgsss.c.gsskex openssh-6.0p1/kexgsss.c
 +		ssh_gssapi_rekey_creds();
 +}
 +#endif /* GSSAPI */
-diff -up openssh-6.0p1/kex.h.gsskex openssh-6.0p1/kex.h
---- openssh-6.0p1/kex.h.gsskex	2012-09-12 15:32:19.093689148 +0200
-+++ openssh-6.0p1/kex.h	2012-09-12 15:32:28.316651574 +0200
+diff -up openssh-6.1p1/kex.h.gsskex openssh-6.1p1/kex.h
+--- openssh-6.1p1/kex.h.gsskex	2012-09-14 20:57:55.141262312 +0200
++++ openssh-6.1p1/kex.h	2012-09-14 20:57:55.878267019 +0200
 @@ -73,6 +73,9 @@ enum kex_exchange {
  	KEX_DH_GEX_SHA1,
  	KEX_DH_GEX_SHA256,
@@ -1901,10 +1903,10 @@ diff -up openssh-6.0p1/kex.h.gsskex openssh-6.0p1/kex.h
  void	newkeys_destroy(Newkeys *newkeys);
  
  void
-diff -up openssh-6.0p1/key.c.gsskex openssh-6.0p1/key.c
---- openssh-6.0p1/key.c.gsskex	2012-09-12 15:32:19.103689108 +0200
-+++ openssh-6.0p1/key.c	2012-09-12 15:32:28.317651570 +0200
-@@ -1006,6 +1006,8 @@ key_ssh_name_from_type_nid(int type, int
+diff -up openssh-6.1p1/key.c.gsskex openssh-6.1p1/key.c
+--- openssh-6.1p1/key.c.gsskex	2012-09-14 20:57:55.593265199 +0200
++++ openssh-6.1p1/key.c	2012-09-14 20:57:55.881267039 +0200
+@@ -1011,6 +1011,8 @@ key_ssh_name_from_type_nid(int type, int
  		}
  		break;
  #endif /* OPENSSL_HAS_ECC */
@@ -1913,7 +1915,7 @@ diff -up openssh-6.0p1/key.c.gsskex openssh-6.0p1/key.c
  	}
  	return "ssh-unknown";
  }
-@@ -1311,6 +1313,8 @@ key_type_from_name(char *name)
+@@ -1316,6 +1318,8 @@ key_type_from_name(char *name)
  	    strcmp(name, "ecdsa-sha2-nistp521-cert-v01@openssh.com") == 0) {
  		return KEY_ECDSA_CERT;
  #endif
@@ -1922,9 +1924,9 @@ diff -up openssh-6.0p1/key.c.gsskex openssh-6.0p1/key.c
  	}
  
  	debug2("key_type_from_name: unknown key type '%s'", name);
-diff -up openssh-6.0p1/key.h.gsskex openssh-6.0p1/key.h
---- openssh-6.0p1/key.h.gsskex	2012-09-12 15:32:19.094689144 +0200
-+++ openssh-6.0p1/key.h	2012-09-12 15:32:28.318651566 +0200
+diff -up openssh-6.1p1/key.h.gsskex openssh-6.1p1/key.h
+--- openssh-6.1p1/key.h.gsskex	2012-09-14 20:57:55.184262586 +0200
++++ openssh-6.1p1/key.h	2012-09-14 20:57:55.882267045 +0200
 @@ -44,6 +44,7 @@ enum types {
  	KEY_ECDSA_CERT,
  	KEY_RSA_CERT_V00,
@@ -1933,9 +1935,9 @@ diff -up openssh-6.0p1/key.h.gsskex openssh-6.0p1/key.h
  	KEY_UNSPEC
  };
  enum fp_type {
-diff -up openssh-6.0p1/Makefile.in.gsskex openssh-6.0p1/Makefile.in
---- openssh-6.0p1/Makefile.in.gsskex	2012-09-12 15:32:19.128689006 +0200
-+++ openssh-6.0p1/Makefile.in	2012-09-12 15:32:28.318651566 +0200
+diff -up openssh-6.1p1/Makefile.in.gsskex openssh-6.1p1/Makefile.in
+--- openssh-6.1p1/Makefile.in.gsskex	2012-09-14 20:57:55.832266726 +0200
++++ openssh-6.1p1/Makefile.in	2012-09-14 20:57:55.884267058 +0200
 @@ -75,6 +75,7 @@ LIBSSH_OBJS=acss.o authfd.o authfile.o b
  	atomicio.o key.o dispatch.o kex.o mac.o uidswap.o uuencode.o misc.o \
  	monitor_fdpass.o rijndael.o ssh-dss.o ssh-ecdsa.o ssh-rsa.o dh.o \
@@ -1953,9 +1955,9 @@ diff -up openssh-6.0p1/Makefile.in.gsskex openssh-6.0p1/Makefile.in
  	loginrec.o auth-pam.o auth-shadow.o auth-sia.o md5crypt.o \
  	sftp-server.o sftp-common.o \
  	roaming_common.o roaming_serv.o \
-diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
---- openssh-6.0p1/monitor.c.gsskex	2012-09-12 15:32:19.112689072 +0200
-+++ openssh-6.0p1/monitor.c	2012-09-12 15:32:28.319651562 +0200
+diff -up openssh-6.1p1/monitor.c.gsskex openssh-6.1p1/monitor.c
+--- openssh-6.1p1/monitor.c.gsskex	2012-09-14 20:57:55.299263321 +0200
++++ openssh-6.1p1/monitor.c	2012-09-14 20:57:55.888267083 +0200
 @@ -186,6 +186,8 @@ int mm_answer_gss_setup_ctx(int, Buffer
  int mm_answer_gss_accept_ctx(int, Buffer *);
  int mm_answer_gss_userok(int, Buffer *);
@@ -2008,7 +2010,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	} else {
  		mon_dispatch = mon_dispatch_postauth15;
  		monitor_permit(mon_dispatch, MONITOR_REQ_TERM, 1);
-@@ -1942,6 +1959,13 @@ mm_get_kex(Buffer *m)
+@@ -1939,6 +1956,13 @@ mm_get_kex(Buffer *m)
  	kex->kex[KEX_DH_GEX_SHA1] = kexgex_server;
  	kex->kex[KEX_DH_GEX_SHA256] = kexgex_server;
  	kex->kex[KEX_ECDH_SHA2] = kexecdh_server;
@@ -2022,7 +2024,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	kex->server = 1;
  	kex->hostkey_type = buffer_get_int(m);
  	kex->kex_type = buffer_get_int(m);
-@@ -2165,6 +2189,9 @@ mm_answer_gss_setup_ctx(int sock, Buffer
+@@ -2162,6 +2186,9 @@ mm_answer_gss_setup_ctx(int sock, Buffer
  	OM_uint32 major;
  	u_int len;
  
@@ -2032,7 +2034,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	goid.elements = buffer_get_string(m, &len);
  	goid.length = len;
  
-@@ -2192,6 +2219,9 @@ mm_answer_gss_accept_ctx(int sock, Buffe
+@@ -2189,6 +2216,9 @@ mm_answer_gss_accept_ctx(int sock, Buffe
  	OM_uint32 flags = 0; /* GSI needs this */
  	u_int len;
  
@@ -2042,7 +2044,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	in.value = buffer_get_string(m, &len);
  	in.length = len;
  	major = ssh_gssapi_accept_ctx(gsscontext, &in, &out, &flags);
-@@ -2209,6 +2239,7 @@ mm_answer_gss_accept_ctx(int sock, Buffe
+@@ -2206,6 +2236,7 @@ mm_answer_gss_accept_ctx(int sock, Buffe
  		monitor_permit(mon_dispatch, MONITOR_REQ_GSSSTEP, 0);
  		monitor_permit(mon_dispatch, MONITOR_REQ_GSSUSEROK, 1);
  		monitor_permit(mon_dispatch, MONITOR_REQ_GSSCHECKMIC, 1);
@@ -2050,7 +2052,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	}
  	return (0);
  }
-@@ -2220,6 +2251,9 @@ mm_answer_gss_checkmic(int sock, Buffer
+@@ -2217,6 +2248,9 @@ mm_answer_gss_checkmic(int sock, Buffer
  	OM_uint32 ret;
  	u_int len;
  
@@ -2060,7 +2062,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  	gssbuf.value = buffer_get_string(m, &len);
  	gssbuf.length = len;
  	mic.value = buffer_get_string(m, &len);
-@@ -2246,7 +2280,11 @@ mm_answer_gss_userok(int sock, Buffer *m
+@@ -2243,7 +2277,11 @@ mm_answer_gss_userok(int sock, Buffer *m
  {
  	int authenticated;
  
@@ -2073,7 +2075,7 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  
  	buffer_clear(m);
  	buffer_put_int(m, authenticated);
-@@ -2260,6 +2298,74 @@ mm_answer_gss_userok(int sock, Buffer *m
+@@ -2257,6 +2295,74 @@ mm_answer_gss_userok(int sock, Buffer *m
  	/* Monitor loop will terminate if authenticated */
  	return (authenticated);
  }
@@ -2148,9 +2150,9 @@ diff -up openssh-6.0p1/monitor.c.gsskex openssh-6.0p1/monitor.c
  #endif /* GSSAPI */
  
  #ifdef JPAKE
-diff -up openssh-6.0p1/monitor.h.gsskex openssh-6.0p1/monitor.h
---- openssh-6.0p1/monitor.h.gsskex	2012-09-12 15:32:19.119689041 +0200
-+++ openssh-6.0p1/monitor.h	2012-09-12 15:32:28.319651562 +0200
+diff -up openssh-6.1p1/monitor.h.gsskex openssh-6.1p1/monitor.h
+--- openssh-6.1p1/monitor.h.gsskex	2012-09-14 20:57:55.300263327 +0200
++++ openssh-6.1p1/monitor.h	2012-09-14 20:57:55.889267090 +0200
 @@ -56,6 +56,8 @@ enum monitor_reqtype {
  	MONITOR_REQ_GSSSTEP, MONITOR_ANS_GSSSTEP,
  	MONITOR_REQ_GSSUSEROK, MONITOR_ANS_GSSUSEROK,
@@ -2160,9 +2162,9 @@ diff -up openssh-6.0p1/monitor.h.gsskex openssh-6.0p1/monitor.h
  	MONITOR_REQ_PAM_START,
  	MONITOR_REQ_PAM_ACCOUNT, MONITOR_ANS_PAM_ACCOUNT,
  	MONITOR_REQ_PAM_INIT_CTX, MONITOR_ANS_PAM_INIT_CTX,
-diff -up openssh-6.0p1/monitor_wrap.c.gsskex openssh-6.0p1/monitor_wrap.c
---- openssh-6.0p1/monitor_wrap.c.gsskex	2012-09-12 15:32:19.122689031 +0200
-+++ openssh-6.0p1/monitor_wrap.c	2012-09-12 15:32:28.320651557 +0200
+diff -up openssh-6.1p1/monitor_wrap.c.gsskex openssh-6.1p1/monitor_wrap.c
+--- openssh-6.1p1/monitor_wrap.c.gsskex	2012-09-14 20:57:55.302263340 +0200
++++ openssh-6.1p1/monitor_wrap.c	2012-09-14 20:57:55.892267109 +0200
 @@ -1326,7 +1326,7 @@ mm_ssh_gssapi_checkmic(Gssctxt *ctx, gss
  }
  
@@ -2224,9 +2226,9 @@ diff -up openssh-6.0p1/monitor_wrap.c.gsskex openssh-6.0p1/monitor_wrap.c
  #endif /* GSSAPI */
  
  #ifdef JPAKE
-diff -up openssh-6.0p1/monitor_wrap.h.gsskex openssh-6.0p1/monitor_wrap.h
---- openssh-6.0p1/monitor_wrap.h.gsskex	2012-09-12 15:32:19.107689091 +0200
-+++ openssh-6.0p1/monitor_wrap.h	2012-09-12 15:32:28.321651552 +0200
+diff -up openssh-6.1p1/monitor_wrap.h.gsskex openssh-6.1p1/monitor_wrap.h
+--- openssh-6.1p1/monitor_wrap.h.gsskex	2012-09-14 20:57:55.304263353 +0200
++++ openssh-6.1p1/monitor_wrap.h	2012-09-14 20:57:55.893267116 +0200
 @@ -62,8 +62,10 @@ BIGNUM *mm_auth_rsa_generate_challenge(K
  OM_uint32 mm_ssh_gssapi_server_ctx(Gssctxt **, gss_OID);
  OM_uint32 mm_ssh_gssapi_accept_ctx(Gssctxt *,
@@ -2239,9 +2241,9 @@ diff -up openssh-6.0p1/monitor_wrap.h.gsskex openssh-6.0p1/monitor_wrap.h
  #endif
  
  #ifdef USE_PAM
-diff -up openssh-6.0p1/readconf.c.gsskex openssh-6.0p1/readconf.c
---- openssh-6.0p1/readconf.c.gsskex	2012-09-12 15:32:19.100689120 +0200
-+++ openssh-6.0p1/readconf.c	2012-09-12 15:32:28.321651552 +0200
+diff -up openssh-6.1p1/readconf.c.gsskex openssh-6.1p1/readconf.c
+--- openssh-6.1p1/readconf.c.gsskex	2011-10-02 09:59:03.000000000 +0200
++++ openssh-6.1p1/readconf.c	2012-09-14 20:57:55.896267134 +0200
 @@ -129,6 +129,8 @@ typedef enum {
  	oClearAllForwardings, oNoHostAuthenticationForLocalhost,
  	oEnableSSHKeysign, oRekeyLimit, oVerifyHostKeyDNS, oConnectTimeout,
@@ -2330,9 +2332,9 @@ diff -up openssh-6.0p1/readconf.c.gsskex openssh-6.0p1/readconf.c
  	if (options->password_authentication == -1)
  		options->password_authentication = 1;
  	if (options->kbd_interactive_authentication == -1)
-diff -up openssh-6.0p1/readconf.h.gsskex openssh-6.0p1/readconf.h
---- openssh-6.0p1/readconf.h.gsskex	2012-09-12 15:32:19.125689019 +0200
-+++ openssh-6.0p1/readconf.h	2012-09-12 15:32:28.322651548 +0200
+diff -up openssh-6.1p1/readconf.h.gsskex openssh-6.1p1/readconf.h
+--- openssh-6.1p1/readconf.h.gsskex	2011-10-02 09:59:03.000000000 +0200
++++ openssh-6.1p1/readconf.h	2012-09-14 20:57:55.897267141 +0200
 @@ -48,7 +48,12 @@ typedef struct {
  	int     challenge_response_authentication;
  					/* Try S/Key or TIS, authentication. */
@@ -2346,10 +2348,10 @@ diff -up openssh-6.0p1/readconf.h.gsskex openssh-6.0p1/readconf.h
  	int     password_authentication;	/* Try password
  						 * authentication. */
  	int     kbd_interactive_authentication; /* Try keyboard-interactive auth. */
-diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
---- openssh-6.0p1/servconf.c.gsskex	2012-09-12 15:32:19.088689170 +0200
-+++ openssh-6.0p1/servconf.c	2012-09-12 15:32:28.323651545 +0200
-@@ -99,7 +99,10 @@ initialize_server_options(ServerOptions
+diff -up openssh-6.1p1/servconf.c.gsskex openssh-6.1p1/servconf.c
+--- openssh-6.1p1/servconf.c.gsskex	2012-09-14 20:57:55.760266266 +0200
++++ openssh-6.1p1/servconf.c	2012-09-14 20:57:55.900267160 +0200
+@@ -102,7 +102,10 @@ initialize_server_options(ServerOptions
  	options->kerberos_ticket_cleanup = -1;
  	options->kerberos_get_afs_token = -1;
  	options->gss_authentication=-1;
@@ -2360,7 +2362,7 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  	options->password_authentication = -1;
  	options->kbd_interactive_authentication = -1;
  	options->challenge_response_authentication = -1;
-@@ -232,8 +235,14 @@ fill_default_server_options(ServerOption
+@@ -236,8 +239,14 @@ fill_default_server_options(ServerOption
  		options->kerberos_get_afs_token = 0;
  	if (options->gss_authentication == -1)
  		options->gss_authentication = 0;
@@ -2375,7 +2377,7 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  	if (options->password_authentication == -1)
  		options->password_authentication = 1;
  	if (options->kbd_interactive_authentication == -1)
-@@ -327,7 +336,9 @@ typedef enum {
+@@ -333,7 +342,9 @@ typedef enum {
  	sBanner, sShowPatchLevel, sUseDNS, sHostbasedAuthentication,
  	sHostbasedUsesNameFromPacketOnly, sClientAliveInterval,
  	sClientAliveCountMax, sAuthorizedKeysFile,
@@ -2386,7 +2388,7 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  	sRequiredAuthentications1, sRequiredAuthentications2,
  	sMatch, sPermitOpen, sForceCommand, sChrootDirectory,
  	sUsePrivilegeSeparation, sAllowAgentForwarding,
-@@ -393,10 +404,20 @@ static struct {
+@@ -399,10 +410,20 @@ static struct {
  #ifdef GSSAPI
  	{ "gssapiauthentication", sGssAuthentication, SSHCFG_ALL },
  	{ "gssapicleanupcredentials", sGssCleanupCreds, SSHCFG_GLOBAL },
@@ -2407,7 +2409,7 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  	{ "passwordauthentication", sPasswordAuthentication, SSHCFG_ALL },
  	{ "kbdinteractiveauthentication", sKbdInteractiveAuthentication, SSHCFG_ALL },
  	{ "challengeresponseauthentication", sChallengeResponseAuthentication, SSHCFG_GLOBAL },
-@@ -983,10 +1004,22 @@ process_server_config_line(ServerOptions
+@@ -1054,10 +1075,22 @@ process_server_config_line(ServerOptions
  		intptr = &options->gss_authentication;
  		goto parse_flag;
  
@@ -2430,7 +2432,7 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  	case sPasswordAuthentication:
  		intptr = &options->password_authentication;
  		goto parse_flag;
-@@ -1794,6 +1827,9 @@ dump_config(ServerOptions *o)
+@@ -1944,6 +1977,9 @@ dump_config(ServerOptions *o)
  #ifdef GSSAPI
  	dump_cfg_fmtint(sGssAuthentication, o->gss_authentication);
  	dump_cfg_fmtint(sGssCleanupCreds, o->gss_cleanup_creds);
@@ -2440,9 +2442,9 @@ diff -up openssh-6.0p1/servconf.c.gsskex openssh-6.0p1/servconf.c
  #endif
  #ifdef JPAKE
  	dump_cfg_fmtint(sZeroKnowledgePasswordAuthentication,
-diff -up openssh-6.0p1/servconf.h.gsskex openssh-6.0p1/servconf.h
---- openssh-6.0p1/servconf.h.gsskex	2012-09-12 15:32:19.121689034 +0200
-+++ openssh-6.0p1/servconf.h	2012-09-12 15:32:28.323651545 +0200
+diff -up openssh-6.1p1/servconf.h.gsskex openssh-6.1p1/servconf.h
+--- openssh-6.1p1/servconf.h.gsskex	2012-09-14 20:57:55.762266278 +0200
++++ openssh-6.1p1/servconf.h	2012-09-14 20:57:55.902267173 +0200
 @@ -103,7 +103,10 @@ typedef struct {
  	int     kerberos_get_afs_token;		/* If true, try to get AFS token if
  						 * authenticated with Kerberos. */
@@ -2454,9 +2456,21 @@ diff -up openssh-6.0p1/servconf.h.gsskex openssh-6.0p1/servconf.h
  	int     password_authentication;	/* If true, permit password
  						 * authentication. */
  	int     kbd_interactive_authentication;	/* If true, permit */
-diff -up openssh-6.0p1/ssh_config.5.gsskex openssh-6.0p1/ssh_config.5
---- openssh-6.0p1/ssh_config.5.gsskex	2012-09-12 15:32:19.091689156 +0200
-+++ openssh-6.0p1/ssh_config.5	2012-09-12 15:32:28.324651542 +0200
+diff -up openssh-6.1p1/ssh_config.gsskex openssh-6.1p1/ssh_config
+--- openssh-6.1p1/ssh_config.gsskex	2012-09-14 20:57:55.707265928 +0200
++++ openssh-6.1p1/ssh_config	2012-09-14 20:57:55.906267198 +0200
+@@ -26,6 +26,8 @@
+ #   HostbasedAuthentication no
+ #   GSSAPIAuthentication no
+ #   GSSAPIDelegateCredentials no
++#   GSSAPIKeyExchange no
++#   GSSAPITrustDNS no
+ #   BatchMode no
+ #   CheckHostIP yes
+ #   AddressFamily any
+diff -up openssh-6.1p1/ssh_config.5.gsskex openssh-6.1p1/ssh_config.5
+--- openssh-6.1p1/ssh_config.5.gsskex	2012-07-02 10:53:38.000000000 +0200
++++ openssh-6.1p1/ssh_config.5	2012-09-14 20:57:55.904267186 +0200
 @@ -527,11 +527,43 @@ Specifies whether user authentication ba
  The default is
  .Dq no .
@@ -2502,21 +2516,9 @@ diff -up openssh-6.0p1/ssh_config.5.gsskex openssh-6.0p1/ssh_config.5
  .It Cm HashKnownHosts
  Indicates that
  .Xr ssh 1
-diff -up openssh-6.0p1/ssh_config.gsskex openssh-6.0p1/ssh_config
---- openssh-6.0p1/ssh_config.gsskex	2012-09-12 15:32:19.087689174 +0200
-+++ openssh-6.0p1/ssh_config	2012-09-12 15:32:28.324651542 +0200
-@@ -26,6 +26,8 @@
- #   HostbasedAuthentication no
- #   GSSAPIAuthentication no
- #   GSSAPIDelegateCredentials no
-+#   GSSAPIKeyExchange no
-+#   GSSAPITrustDNS no
- #   BatchMode no
- #   CheckHostIP yes
- #   AddressFamily any
-diff -up openssh-6.0p1/sshconnect2.c.gsskex openssh-6.0p1/sshconnect2.c
---- openssh-6.0p1/sshconnect2.c.gsskex	2012-09-12 15:32:19.099689124 +0200
-+++ openssh-6.0p1/sshconnect2.c	2012-09-12 15:32:28.325651538 +0200
+diff -up openssh-6.1p1/sshconnect2.c.gsskex openssh-6.1p1/sshconnect2.c
+--- openssh-6.1p1/sshconnect2.c.gsskex	2012-09-14 20:57:55.605265275 +0200
++++ openssh-6.1p1/sshconnect2.c	2012-09-14 20:57:55.909267218 +0200
 @@ -162,9 +162,34 @@ ssh_kex2(char *host, struct sockaddr *ho
  {
  	Kex *kex;
@@ -2715,9 +2717,9 @@ diff -up openssh-6.0p1/sshconnect2.c.gsskex openssh-6.0p1/sshconnect2.c
  #endif /* GSSAPI */
  
  int
-diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
---- openssh-6.0p1/sshd.c.gsskex	2012-09-12 15:32:19.130688998 +0200
-+++ openssh-6.0p1/sshd.c	2012-09-12 15:32:28.326651534 +0200
+diff -up openssh-6.1p1/sshd.c.gsskex openssh-6.1p1/sshd.c
+--- openssh-6.1p1/sshd.c.gsskex	2012-09-14 20:57:55.799266515 +0200
++++ openssh-6.1p1/sshd.c	2012-09-14 20:57:55.912267237 +0200
 @@ -124,6 +124,10 @@
  #include "ssh-sandbox.h"
  #include "version.h"
@@ -2729,7 +2731,7 @@ diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
  #ifdef LIBWRAP
  #include <tcpd.h>
  #include <syslog.h>
-@@ -1701,10 +1705,13 @@ main(int ac, char **av)
+@@ -1692,10 +1696,13 @@ main(int ac, char **av)
  		logit("Disabling protocol version 1. Could not load host key");
  		options.protocol &= ~SSH_PROTO_1;
  	}
@@ -2743,7 +2745,7 @@ diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
  	if (!(options.protocol & (SSH_PROTO_1|SSH_PROTO_2))) {
  		logit("sshd: no hostkeys available -- exiting.");
  		exit(1);
-@@ -2037,6 +2044,60 @@ main(int ac, char **av)
+@@ -2027,6 +2034,60 @@ main(int ac, char **av)
  	/* Log the connection. */
  	verbose("Connection from %.500s port %d", remote_ip, remote_port);
  
@@ -2804,7 +2806,7 @@ diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
  	/*
  	 * We don't want to listen forever unless the other side
  	 * successfully authenticates itself.  So we set up an alarm which is
-@@ -2435,6 +2496,48 @@ do_ssh2_kex(void)
+@@ -2425,6 +2486,48 @@ do_ssh2_kex(void)
  
  	myproposal[PROPOSAL_SERVER_HOST_KEY_ALGS] = list_hostkey_types();
  
@@ -2853,7 +2855,7 @@ diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
  	/* start key exchange */
  	kex = kex_setup(myproposal);
  	kex->kex[KEX_DH_GRP1_SHA1] = kexdh_server;
-@@ -2442,6 +2545,13 @@ do_ssh2_kex(void)
+@@ -2432,6 +2535,13 @@ do_ssh2_kex(void)
  	kex->kex[KEX_DH_GEX_SHA1] = kexgex_server;
  	kex->kex[KEX_DH_GEX_SHA256] = kexgex_server;
  	kex->kex[KEX_ECDH_SHA2] = kexecdh_server;
@@ -2867,10 +2869,22 @@ diff -up openssh-6.0p1/sshd.c.gsskex openssh-6.0p1/sshd.c
  	kex->server = 1;
  	kex->client_version_string=client_version_string;
  	kex->server_version_string=server_version_string;
-diff -up openssh-6.0p1/sshd_config.5.gsskex openssh-6.0p1/sshd_config.5
---- openssh-6.0p1/sshd_config.5.gsskex	2012-09-12 15:32:19.109689084 +0200
-+++ openssh-6.0p1/sshd_config.5	2012-09-12 15:32:28.327651530 +0200
-@@ -437,12 +437,40 @@ Specifies whether user authentication ba
+diff -up openssh-6.1p1/sshd_config.gsskex openssh-6.1p1/sshd_config
+--- openssh-6.1p1/sshd_config.gsskex	2012-09-14 20:57:55.801266528 +0200
++++ openssh-6.1p1/sshd_config	2012-09-14 20:57:55.916267263 +0200
+@@ -85,6 +85,8 @@ ChallengeResponseAuthentication no
+ GSSAPIAuthentication yes
+ #GSSAPICleanupCredentials yes
+ GSSAPICleanupCredentials yes
++#GSSAPIStrictAcceptorCheck yes
++#GSSAPIKeyExchange no
+ 
+ # Set this to 'yes' to enable PAM authentication, account processing, 
+ # and session processing. If this is enabled, PAM authentication will 
+diff -up openssh-6.1p1/sshd_config.5.gsskex openssh-6.1p1/sshd_config.5
+--- openssh-6.1p1/sshd_config.5.gsskex	2012-09-14 20:57:55.767266310 +0200
++++ openssh-6.1p1/sshd_config.5	2012-09-14 20:57:55.915267256 +0200
+@@ -439,12 +439,40 @@ Specifies whether user authentication ba
  The default is
  .Dq no .
  Note that this option applies to protocol version 2 only.
@@ -2911,21 +2925,9 @@ diff -up openssh-6.0p1/sshd_config.5.gsskex openssh-6.0p1/sshd_config.5
  .It Cm HostbasedAuthentication
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful public key client host authentication is allowed
-diff -up openssh-6.0p1/sshd_config.gsskex openssh-6.0p1/sshd_config
---- openssh-6.0p1/sshd_config.gsskex	2012-09-12 15:32:19.102689112 +0200
-+++ openssh-6.0p1/sshd_config	2012-09-12 15:32:28.327651530 +0200
-@@ -83,6 +83,8 @@ ChallengeResponseAuthentication no
- GSSAPIAuthentication yes
- #GSSAPICleanupCredentials yes
- GSSAPICleanupCredentials yes
-+#GSSAPIStrictAcceptorCheck yes
-+#GSSAPIKeyExchange no
- 
- # Set this to 'yes' to enable PAM authentication, account processing, 
- # and session processing. If this is enabled, PAM authentication will 
-diff -up openssh-6.0p1/ssh-gss.h.gsskex openssh-6.0p1/ssh-gss.h
---- openssh-6.0p1/ssh-gss.h.gsskex	2012-09-12 15:32:19.090689160 +0200
-+++ openssh-6.0p1/ssh-gss.h	2012-09-12 15:32:28.328651526 +0200
+diff -up openssh-6.1p1/ssh-gss.h.gsskex openssh-6.1p1/ssh-gss.h
+--- openssh-6.1p1/ssh-gss.h.gsskex	2007-06-12 15:40:39.000000000 +0200
++++ openssh-6.1p1/ssh-gss.h	2012-09-14 20:57:55.918267275 +0200
 @@ -1,6 +1,6 @@
  /* $OpenBSD: ssh-gss.h,v 1.10 2007/06/12 08:20:00 djm Exp $ */
  /*

@@ -108,7 +108,7 @@ Source13: sshd-keygen
 Patch0: openssh-5.9p1-wIm.patch
 
 #?
-Patch100: openssh-5.9p1-coverity.patch
+Patch100: openssh-6.1p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch101: openssh-5.8p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
@@ -118,7 +118,7 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 Patch103: openssh-5.8p1-packet.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=983
 #Patch104: openssh-5.9p1-2auth.patch
-Patch104: openssh-5.9p1-required-authentications.patch
+Patch104: openssh-6.1p1-required-authentications.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-5.8p1-audit0.patch
@@ -150,7 +150,7 @@ Patch402: openssh-5.9p1-sftp-chroot.patch
 Patch404: openssh-5.9p1-privsep-selinux.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch500: openssh-5.9p1-akc.patch
+Patch500: openssh-6.1p1-akc.patch
 #?-- unwanted child :(
 Patch501: openssh-6.0p1-ldap.patch
 #?
@@ -173,7 +173,7 @@ Patch606: openssh-5.9p1-ipv6man.patch
 #?
 Patch607: openssh-5.8p2-sigpipe.patch
 #?
-Patch608: openssh-5.8p2-askpass-ld.patch
+Patch608: openssh-6.1p1-askpass-ld.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
 Patch609: openssh-5.5p1-x11.patch
 
@@ -196,29 +196,27 @@ Patch707: openssh-5.9p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
 Patch708: openssh-6.0p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
-Patch709: openssh-5.9p1-vendor.patch
+Patch709: openssh-6.1p1-vendor.patch
 #?
 Patch710: openssh-5.9p1-copy-id-restorecon.patch
 # warn users for unsupported UsePAM=no (#757545)
-Patch711: openssh-5.9p1-log-usepam-no.patch
+Patch711: openssh-6.1p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
 Patch712: openssh-5.9p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
 Patch713: openssh-5.9p1-ctr-cavstest.patch
-#https://bugzilla.redhat.com/show_bug.cgi?id=815993
-Patch714: openssh-5.9p1-null-xcrypt.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 #changed cache storage type - #848228
-Patch800: openssh-6.0p1-gsskex.patch
+Patch800: openssh-6.1p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
 Patch801: openssh-5.8p2-force_krb.patch
 
 #?
 Patch900: openssh-5.8p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch901: openssh-5.9p1-kuserok.patch
+Patch901: openssh-6.1p1-kuserok.patch
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -459,7 +457,6 @@ popd
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
-%patch714 -p0 -b .null-xcrypt
 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
