@@ -669,24 +669,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %post server
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-    /bin/systemctl enable sshd.service >/dev/null 2>&1 || :
-fi
-
-%postun server
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
-fi
+%systemd_post sshd.service
 
 %preun server
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable sshd.service > /dev/null 2>&1 || :
-    /bin/systemctl stop sshd.service > /dev/null 2>&1 || :
-fi
+%systemd_preun sshd.service
+
+%postun server
+%systemd_postun_with_restart sshd.service
 
 %triggerun -n openssh-server -- openssh-server < 5.8p2-12
 /usr/bin/systemd-sysv-convert --save sshd >/dev/null 2>&1 || :
