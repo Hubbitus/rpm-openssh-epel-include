@@ -596,6 +596,12 @@ popd
     fipshmac -d $RPM_BUILD_ROOT%{_libdir}/fipscheck $RPM_BUILD_ROOT%{_bindir}/ssh $RPM_BUILD_ROOT%{_sbindir}/sshd \
 %{nil}
 
+%check
+#to run tests use "--with check"
+%if %{?_with_check:1}%{!?_with_check:0}
+make tests
+%endif
+
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
