@@ -514,8 +514,8 @@ fi
 	--libexecdir=%{_libexecdir}/openssh \
 	--datadir=%{_datadir}/openssh \
 	--with-tcp-wrappers \
-	--with-default-path=/usr/local/bin:/bin:/usr/bin \
-	--with-superuser-path=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin \
+	--with-default-path=/usr/local/bin:/usr/bin \
+	--with-superuser-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin \
 	--with-privsep-path=%{_var}/empty/sshd \
 	--enable-vendor-patchlevel="FC-%{version}-%{release}" \
 	--disable-strip \
