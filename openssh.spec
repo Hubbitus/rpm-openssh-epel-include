@@ -74,10 +74,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.0p1
+%define openssh_ver 6.1p1
 %define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 2
+%define pam_ssh_agent_rel 3
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -797,6 +797,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Sat Sep 15 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-1 + 0.9.3-3
+- new upstream release (#852651)
+- use DIR: kerberos type cache (#848228)
+- don't use chroot_user_t for chrooted users (#830237)
+- replace scriptlets with systemd macros (#850249)
+- don't use /bin and /sbin paths (#856590)
+
 * Mon Aug 06 2012 Petr Lautrbach <plautrba@redhat.com> 6.0p1-1 + 0.9.3-2
 - new upstream release
 
