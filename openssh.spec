@@ -147,7 +147,7 @@ Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
 #Patch403: openssh-5.9p1-sesandbox.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
-Patch404: openssh-5.9p1-privsep-selinux.patch
+Patch404: openssh-6.1p1-privsep-selinux.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch500: openssh-6.1p1-akc.patch
