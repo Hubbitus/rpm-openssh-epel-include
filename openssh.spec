@@ -289,7 +289,6 @@ Requires(postun): systemd-units
 # is not valid.  We can use %post because this particular %triggerun script
 # should fire just after this package is installed.
 Requires(post): systemd-sysv
-Requires(post): chkconfig
 
 # Not yet ready
 # %package server-ondemand
