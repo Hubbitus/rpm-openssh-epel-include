@@ -135,7 +135,7 @@ Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.0p1-role-mls.patch
 #?
-Patch402: openssh-5.9p1-sftp-chroot.patch
+#Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
 #Patch403: openssh-5.9p1-sesandbox.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
@@ -409,7 +409,7 @@ popd
 
 %if %{WITH_SELINUX}
 %patch400 -p1 -b .role-mls
-%patch402 -p1 -b .sftp-chroot
+#%patch402 -p1 -b .sftp-chroot
 #%patch403 -p1 -b .sesandbox
 %patch404 -p1 -b .privsep-selinux
 %endif
