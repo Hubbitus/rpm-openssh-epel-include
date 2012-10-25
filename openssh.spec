@@ -15,10 +15,6 @@
 # Do we want to link against a static libcrypto? (1=yes 0=no)
 %define static_libcrypto 0
 
-# Do we want smartcard support (1=yes 0=no)
-#Smartcard support is broken from 5.4p1
-%define scard 0
-
 # Use GTK2 instead of GNOME in gnome-ssh-askpass
 %define gtk2 1
 
@@ -56,10 +52,6 @@
 # Options for static OpenSSL link:
 # rpm -ba|--rebuild --define "static_openssl 1"
 %{?static_openssl:%global static_libcrypto 1}
-
-# Options for Smartcard support: (needs libsectok and openssl-engine)
-# rpm -ba|--rebuild --define "smartcard 1"
-%{?smartcard:%global scard 1}
 
 # Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
 %define rescue 0
@@ -238,9 +230,6 @@ BuildRequires: gnome-libs-devel
 %endif
 %endif
 
-%if %{scard}
-BuildRequires: sharutils
-%endif
 %if %{ldap}
 BuildRequires: openldap-devel
 %endif
@@ -522,9 +511,6 @@ fi
 	--with-ssl-engine \
 	--with-authorized-keys-command \
 	--with-ipaddr-display \
-%if %{scard}
-	--with-smartcard \
-%endif
 %if %{ldap}
 	--with-ldap \
 %endif
@@ -631,10 +617,6 @@ install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 install contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
 
-%if ! %{scard}
-	rm -f $RPM_BUILD_ROOT%{_datadir}/openssh/Ssh.bin
-%endif
-
 %if ! %{no_gnome_askpass}
 ln -s gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/ssh-askpass
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/
@@ -704,10 +686,6 @@ getent passwd sshd >/dev/null || \
 %attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
 %attr(0755,root,root) %{_libexecdir}/openssh/ctr-cavstest
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
-%endif
-%if %{scard}
-%attr(0755,root,root) %dir %{_datadir}/openssh
-%attr(0644,root,root) %{_datadir}/openssh/Ssh.bin
 %endif
 
 %files clients
