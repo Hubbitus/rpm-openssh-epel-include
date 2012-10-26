@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.1p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -774,6 +774,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Oct 26 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-2
+- add SELinux comment to /etc/ssh/sshd_config about SELinux command to modify port (#861400)
+- drop required chkconfig (#865498)
+- drop openssh-5.9p1-sftp-chroot.patch (#830237)
+
 * Sat Sep 15 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-1 + 0.9.3-3
 - new upstream release (#852651)
 - use DIR: kerberos type cache (#848228)
