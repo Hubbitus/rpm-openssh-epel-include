@@ -204,9 +204,7 @@ Patch713: openssh-5.9p1-ctr-cavstest.patch
 Patch800: openssh-6.1p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
 Patch801: openssh-5.8p2-force_krb.patch
-
-#?
-Patch900: openssh-5.8p1-gssapi-canohost.patch
+Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.1p1-kuserok.patch
 #---
