@@ -507,7 +507,6 @@ fi
 	--disable-strip \
 	--without-zlib-version-check \
 	--with-ssl-engine \
-	--with-authorized-keys-command \
 	--with-ipaddr-display \
 %if %{ldap}
 	--with-ldap \
