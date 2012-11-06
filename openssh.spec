@@ -207,6 +207,9 @@ Patch801: openssh-5.8p2-force_krb.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.1p1-kuserok.patch
+#https://bugzilla.redhat.com/show_bug.cgi?id=841065
+Patch902: openssh-6.1p1-man-moduli.patch
+
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -449,6 +452,7 @@ popd
 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
+%patch902 -p1 -b .man-moduli
 
 %if 0
 # Nothing here yet
