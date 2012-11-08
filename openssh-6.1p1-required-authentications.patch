@@ -745,56 +745,77 @@ diff -up openssh-6.1p1/servconf.c.required-authentication openssh-6.1p1/servconf
  	{ "ipqos", sIPQoS, SSHCFG_ALL },
  	{ "versionaddendum", sVersionAddendum, SSHCFG_GLOBAL },
  	{ NULL, sBadOption, 0 }
-@@ -1298,6 +1305,33 @@ process_server_config_line(ServerOptions
+@@ -1298,6 +1305,37 @@ process_server_config_line(ServerOptions
  			options->max_startups = options->max_startups_begin;
  		break;
  
 +
 +	case sRequiredAuthentications1:
-+		charptr = &options->required_auth1;
-+		arg = strdelim(&cp);
-+		if (!arg || *arg == '\0')
-+			fatal("%.200s line %d: Missing argument.",
-+			    filename, linenum);
-+		if (auth1_check_required(arg) != 0)
-+			fatal("%.200s line %d: Invalid required authentication "
-+			    "list", filename, linenum);
-+		if (*charptr == NULL)
-+			*charptr = xstrdup(arg);
-+		break;
++		if (*activep && options->required_auth1 == NULL) {
++			charptr = &options->required_auth1;
++			arg = strdelim(&cp);
++			if (!arg || *arg == '\0')
++				fatal("%.200s line %d: Missing argument.",
++				    filename, linenum);
++			if (auth1_check_required(arg) != 0)
++				fatal("%.200s line %d: Invalid required authentication "
++				    "list", filename, linenum);
++			if (*charptr == NULL)
++				*charptr = xstrdup(arg);
++		}
++		return 0;
 +
 +	case sRequiredAuthentications2:
-+		charptr = &options->required_auth2;
-+		arg = strdelim(&cp);
-+		if (!arg || *arg == '\0')
-+			fatal("%.200s line %d: Missing argument.",
-+			    filename, linenum);
-+		if (auth2_check_required(arg) != 0)
-+			fatal("%.200s line %d: Invalid required authentication "
-+			    "list", filename, linenum);
-+		if (*charptr == NULL)
-+			*charptr = xstrdup(arg);
-+		break;
++		if (*activep && options->required_auth2 == NULL) {
++			charptr = &options->required_auth2;
++			arg = strdelim(&cp);
++			if (!arg || *arg == '\0')
++				fatal("%.200s line %d: Missing argument.",
++				    filename, linenum);
++			if (auth2_check_required(arg) != 0)
++				fatal("%.200s line %d: Invalid required authentication "
++				    "list", filename, linenum);
++			if (*charptr == NULL)
++				*charptr = xstrdup(arg);
++		}
++		return 0;
 +
  	case sMaxAuthTries:
  		intptr = &options->max_authtries;
  		goto parse_int;
+@@ -1925,6 +1963,7 @@ dump_config(ServerOptions *o)
+ 	dump_cfg_strarray(sAllowGroups, o->num_allow_groups, o->allow_groups);
+ 	dump_cfg_strarray(sDenyGroups, o->num_deny_groups, o->deny_groups);
+ 	dump_cfg_strarray(sAcceptEnv, o->num_accept_env, o->accept_env);
++	dump_cfg_string(sRequiredAuthentications2, o->required_auth2);
+ 
+ 	/* other arguments */
+ 	for (i = 0; i < o->num_subsystems; i++)
 diff -up openssh-6.1p1/servconf.h.required-authentication openssh-6.1p1/servconf.h
 --- openssh-6.1p1/servconf.h.required-authentication	2012-07-31 04:21:34.000000000 +0200
-+++ openssh-6.1p1/servconf.h	2012-09-14 20:17:56.810488571 +0200
++++ openssh-6.1p1/servconf.h	2012-11-08 13:37:33.135918526 +0100
 @@ -154,6 +154,9 @@ typedef struct {
  	u_int num_authkeys_files;	/* Files containing public keys */
  	char   *authorized_keys_files[MAX_AUTHKEYS_FILES];
  
-+	char   *required_auth1; /* Required, but not sufficient */
++	char   *required_auth1;
 +	char   *required_auth2;
 +
  	char   *adm_forced_command;
  
  	int	use_pam;		/* Enable auth via PAM */
+@@ -197,6 +200,8 @@ struct connection_info {
+ 		M_CP_STRARRAYOPT(allow_groups, num_allow_groups); \
+ 		M_CP_STRARRAYOPT(deny_groups, num_deny_groups); \
+ 		M_CP_STRARRAYOPT(accept_env, num_accept_env); \
++		M_CP_STROPT(required_auth1); \
++		M_CP_STROPT(required_auth2); \
+ 	} while (0)
+ 
+ struct connection_info *get_connection_info(int, int);
 diff -up openssh-6.1p1/sshd_config.5.required-authentication openssh-6.1p1/sshd_config.5
 --- openssh-6.1p1/sshd_config.5.required-authentication	2012-07-02 10:53:38.000000000 +0200
-+++ openssh-6.1p1/sshd_config.5	2012-09-14 20:17:56.812488582 +0200
++++ openssh-6.1p1/sshd_config.5	2012-11-08 13:28:34.669017468 +0100
 @@ -731,6 +731,8 @@ Available keywords are
  .Cm PermitOpen ,
  .Cm PermitRootLogin ,
