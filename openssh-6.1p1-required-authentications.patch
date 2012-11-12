@@ -825,25 +825,36 @@ diff -up openssh-6.1p1/sshd_config.5.required-authentication openssh-6.1p1/sshd_
  .Cm PubkeyAuthentication ,
  .Cm RhostsRSAAuthentication ,
  .Cm RSAAuthentication ,
-@@ -931,6 +933,21 @@ Specifies a list of revoked public keys.
+@@ -931,6 +933,32 @@ Specifies a list of revoked public keys.
  Keys listed in this file will be refused for public key authentication.
  Note that if this file is not readable, then public key authentication will
  be refused for all users.
 +.It Cm RequiredAuthentications[12]
-+ Specifies required methods of authentications that has to succeed before authorizing the connection.
-+ (RequiredAuthentication1 for Protocol version 1, and RequiredAuthentication2 for v2)
-+
-+ RequiredAuthentications1 method[,method...] 
-+ RequiredAuthentications2 method[,method...]
-+
++Specifies required methods of authentications that has to succeed before 
++authorizing the connection. (RequiredAuthentication1 for Protocol version 1, 
++and RequiredAuthentication2 for v2)
++.Pp
++.Bl -item -offset indent -compact
++.It
++RequiredAuthentications1 method[,method...] 
++.It
++RequiredAuthentications2 method[,method...]
++.El
 +.Pp
 +Example 1:
-+
-+ RequiredAuthentications2 password,hostbased
-+
++.Bl -item -offset indent -compact
++RequiredAuthentications2 password,hostbased
++.El
 +Example 2:
-+ RequiredAuthentications2 publickey,password
-+
++.Bl -item -offset indent -compact
++RequiredAuthentications2 publickey,password
++.El
++.Pp
++Available methods:
++.Bl -item -offset indent -compact
++.It
++password, keyboard-interactive, publickey, hostbased, gssapi-keyex, gssapi-with-mic
++.El
  .It Cm RhostsRSAAuthentication
  Specifies whether rhosts or /etc/hosts.equiv authentication together
  with successful RSA host authentication is allowed.
