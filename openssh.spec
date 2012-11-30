@@ -208,6 +208,8 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.1p1-kuserok.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=841065
 Patch902: openssh-6.1p1-man-moduli.patch
+# obsolete RequiredAuthentications options
+Patch903: openssh-6.1p1-required-authentications.patch
 
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
@@ -452,6 +454,7 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .man-moduli
+%patch903 -p1 -b .required-authentication
 
 %if 0
 # Nothing here yet
