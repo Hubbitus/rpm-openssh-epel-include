@@ -120,7 +120,7 @@ Patch202: openssh-5.9p1-audit2.patch
 # -"-
 Patch203: openssh-5.9p1-audit3.patch
 # -"-
-Patch204: openssh-6.0p1-audit4.patch
+Patch204: openssh-6.1p1-audit4.patch
 # -"-
 Patch205: openssh-6.0p1-audit5.patch
 
@@ -132,7 +132,7 @@ Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch400: openssh-6.0p1-role-mls.patch
+Patch400: openssh-6.1p1-role-mls.patch
 #?
 #Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
