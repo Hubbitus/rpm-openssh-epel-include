@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.1p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -777,6 +777,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Dec 03 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-3 + 0.9.3-3
+- replace RequiredAuthentications2 with AuthenticationMethods based on upstream
+- obsolete RequiredAuthentications[12] options
+- fix openssh-6.1p1-privsep-selinux.patch
+
 * Fri Oct 26 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-2
 - add SELinux comment to /etc/ssh/sshd_config about SELinux command to modify port (#861400)
 - drop required chkconfig (#865498)
