@@ -242,6 +242,7 @@ BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
 BuildRequires: fipscheck-devel >= 1.3.0
 BuildRequires: openssl-devel >= 0.9.8j
+BuildRequires: perl-podlators
 
 %if %{kerberos5}
 BuildRequires: krb5-devel
