@@ -210,6 +210,8 @@ Patch901: openssh-6.1p1-kuserok.patch
 Patch902: openssh-6.1p1-man-moduli.patch
 # obsolete RequiredAuthentications options
 Patch903: openssh-6.1p1-required-authentications.patch
+# change default value of MaxStartups - CVE-2010-5107 - #908707
+Patch904: openssh-6.1p1-change-max-startups.patch
 
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
@@ -456,6 +458,7 @@ popd
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .man-moduli
 %patch903 -p1 -b .required-authentication
+%patch904 -p1 -b .max-startups
 
 %if 0
 # Nothing here yet
