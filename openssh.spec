@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.1p1
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -781,6 +781,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Feb 08 2013 Petr Lautrbach <plautrba@redhat.com> 6.1p1-5 + 0.9.3-3
+- change default value of MaxStartups - CVE-2010-5107 (#908707)
+
 * Mon Dec 03 2012 Petr Lautrbach <plautrba@redhat.com> 6.1p1-4 + 0.9.3-3
 - fix segfault in openssh-5.8p2-force_krb.patch (#882541)
 
