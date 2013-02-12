@@ -575,7 +575,7 @@ popd
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 LDFLAGS="$SAVE_LDFLAGS"
-%configure --with-selinux --libexecdir=/%{_lib}/security --with-mantype=man
+%configure --with-selinux --libexecdir=/%{_libdir}/security --with-mantype=man
 make
 popd
 %endif
@@ -776,7 +776,7 @@ getent passwd sshd >/dev/null || \
 %files -n pam_ssh_agent_auth
 %defattr(-,root,root)
 %doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
-%attr(0755,root,root) /%{_lib}/security/pam_ssh_agent_auth.so
+%attr(0755,root,root) %{_libdir}/security/pam_ssh_agent_auth.so
 %attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
 %endif
 
