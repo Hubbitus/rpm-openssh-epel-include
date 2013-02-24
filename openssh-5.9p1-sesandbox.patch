@@ -247,7 +247,7 @@ diff -up openssh-5.9p1/sandbox-selinux.c.sesandbox openssh-5.9p1/sandbox-selinux
 +void
 +ssh_sandbox_privileged_child(struct ssh_sandbox *box)
 +{
-+	switch (ssh_selinux_change_context("sshd_sandbox_t")) {
++	switch (ssh_selinux_change_context("sshd_net_t")) {
 +	case 0:
 +		debug3("selinux sandbox child sucessfully enabled");
 +		break;
