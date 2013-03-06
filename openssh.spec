@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.1p1
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -781,6 +781,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Mar 06 2013 Petr Lautrbach <plautrba@redhat.com> 6.1p1-7 + 0.9.3-3
+- use SELinux type sshd_net_t for [net] childs (#915085)
+
 * Thu Feb 14 2013 Petr Lautrbach <plautrba@redhat.com> 6.1p1-6 + 0.9.3-3
 - fix AuthorizedKeysCommand option
 
