@@ -212,6 +212,10 @@ Patch903: openssh-6.1p1-required-authentications.patch
 # change default value of MaxStartups - CVE-2010-5107 - #908707
 Patch904: openssh-6.1p1-change-max-startups.patch
 
+# build regress/modpipe tests with $(CFLAGS), based on
+# http://lists.mindrot.org/pipermail/openssh-unix-dev/2013-March/031167.html
+Patch905: openssh-6.2p1-modpipe-cflags.patch
+
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
 # sctp
@@ -458,6 +462,7 @@ popd
 # %patch902 -p1 -b .man-moduli
 # %patch903 -p1 -b .required-authentication
 # %patch904 -p1 -b .max-startups
+%patch905 -p1 -b .modpipe-cflags
 
 %if 0
 # Nothing here yet
