@@ -66,10 +66,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.1p1
-%define openssh_rel 7
+%define openssh_ver 6.2p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 3
+%define pam_ssh_agent_rel 4
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -82,8 +82,7 @@ URL: http://www.openssh.com/portable.html
 # This package differs from the upstream OpenSSH tarball in that
 # the ACSS cipher is removed by running openssh-nukeacss.sh in
 # the unpacked source directory.
-Source0: openssh-%{version}-noacss.tar.bz2
-Source1: openssh-nukeacss.sh
+Source0: openssh-%{version}.tar.gz
 Source2: sshd.pam
 Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
@@ -100,9 +99,9 @@ Source13: sshd-keygen
 Patch0: openssh-5.9p1-wIm.patch
 
 #?
-Patch100: openssh-6.1p1-coverity.patch
+Patch100: openssh-6.2p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch101: openssh-5.8p1-fingerprint.patch
+Patch101: openssh-6.2p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
 Patch102: openssh-5.8p1-getaddrinfo.patch
@@ -114,15 +113,15 @@ Patch104: openssh-6.1p1-authenticationmethods.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-5.8p1-audit0.patch
 # -"-
-Patch201: openssh-6.0p1-audit1.patch
+Patch201: openssh-6.2p1-audit1.patch
 # -"-
 Patch202: openssh-5.9p1-audit2.patch
 # -"-
-Patch203: openssh-5.9p1-audit3.patch
+Patch203: openssh-6.2p1-audit3.patch
 # -"-
-Patch204: openssh-6.1p1-audit4.patch
+Patch204: openssh-6.2p1-audit4.patch
 # -"-
-Patch205: openssh-6.0p1-audit5.patch
+Patch205: openssh-6.2p1-audit5.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -132,7 +131,7 @@ Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch400: openssh-6.1p1-role-mls.patch
+Patch400: openssh-6.2p1-role-mls.patch
 #?
 #Patch402: openssh-5.9p1-sftp-chroot.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1940
@@ -143,9 +142,9 @@ Patch404: openssh-6.1p1-privsep-selinux.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1663
 Patch500: openssh-6.1p1-akc.patch
 #?-- unwanted child :(
-Patch501: openssh-6.0p1-ldap.patch
+Patch501: openssh-6.2p1-ldap.patch
 #?
-Patch502: openssh-5.9p1-keycat.patch
+Patch502: openssh-6.2p1-keycat.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1668
 #Patch600: openssh-5.9p1-keygen.patch
@@ -169,7 +168,7 @@ Patch608: openssh-6.1p1-askpass-ld.patch
 Patch609: openssh-5.5p1-x11.patch
 
 #?
-Patch700: openssh-5.9p1-fips.patch
+Patch700: openssh-6.2p1-fips.patch
 #?
 Patch701: openssh-5.6p1-exit-deadlock.patch
 #?
@@ -185,9 +184,9 @@ Patch706: openssh-5.8p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch707: openssh-6.1p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
-Patch708: openssh-6.0p1-entropy.patch
+Patch708: openssh-6.2p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
-Patch709: openssh-6.1p1-vendor.patch
+Patch709: openssh-6.2p1-vendor.patch
 #?
 Patch710: openssh-5.9p1-copy-id-restorecon.patch
 # warn users for unsupported UsePAM=no (#757545)
@@ -195,17 +194,17 @@ Patch711: openssh-6.1p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
 Patch712: openssh-5.9p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
-Patch713: openssh-5.9p1-ctr-cavstest.patch
+Patch713: openssh-6.2p1-ctr-cavstest.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 #changed cache storage type - #848228
-Patch800: openssh-6.1p1-gsskex.patch
+Patch800: openssh-6.2p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
-Patch801: openssh-5.8p2-force_krb.patch
+Patch801: openssh-6.2p1-force_krb.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch901: openssh-6.1p1-kuserok.patch
+Patch901: openssh-6.2p1-kuserok.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=841065
 Patch902: openssh-6.1p1-man-moduli.patch
 # obsolete RequiredAuthentications options
@@ -393,7 +392,7 @@ The module is most useful for su and sudo service stacks.
 %patch101 -p1 -b .fingerprint
 %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
-%patch104 -p1 -b .authenticationmethods
+# %patch104 -p1 -b .authenticationmethods
 
 %patch200 -p1 -b .audit0
 %patch201 -p1 -b .audit1
@@ -414,18 +413,18 @@ popd
 
 %if %{WITH_SELINUX}
 %patch400 -p1 -b .role-mls
-#%patch402 -p1 -b .sftp-chroot
-#%patch403 -p1 -b .sesandbox
+# %patch402 -p1 -b .sftp-chroot
+# %patch403 -p1 -b .sesandbox
 %patch404 -p1 -b .privsep-selinux
 %endif
 
-%patch500 -p1 -b .akc
+# %patch500 -p1 -b .akc
 %if %{ldap}
 %patch501 -p1 -b .ldap
 %endif
 %patch502 -p1 -b .keycat
 
-#%patch600 -p1 -b .keygen
+# %patch600 -p1 -b .keygen
 %patch601 -p1 -b .ip-opts
 %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
@@ -446,7 +445,7 @@ popd
 %patch707 -p1 -b .redhat
 %patch708 -p1 -b .entropy
 %patch709 -p1 -b .vendor
-%patch710 -p1 -b .restorecon
+# %patch710 -p1 -b .restorecon
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
@@ -456,9 +455,9 @@ popd
 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
-%patch902 -p1 -b .man-moduli
-%patch903 -p1 -b .required-authentication
-%patch904 -p1 -b .max-startups
+# %patch902 -p1 -b .man-moduli
+# %patch903 -p1 -b .required-authentication
+# %patch904 -p1 -b .max-startups
 
 %if 0
 # Nothing here yet
