@@ -111,17 +111,18 @@ Patch103: openssh-5.8p1-packet.patch
 Patch104: openssh-6.1p1-authenticationmethods.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch200: openssh-5.8p1-audit0.patch
-# -"-
-Patch201: openssh-6.2p1-audit1.patch
-# -"-
-Patch202: openssh-5.9p1-audit2.patch
-# -"-
-Patch203: openssh-6.2p1-audit3.patch
-# -"-
-Patch204: openssh-6.2p1-audit4.patch
-# -"-
-Patch205: openssh-6.2p1-audit5.patch
+Patch200: openssh-6.2p1-audit.patch
+# Patch200: openssh-5.8p1-audit0.patch
+# # -"-
+# Patch201: openssh-6.2p1-audit1.patch
+# # -"-
+# Patch202: openssh-5.9p1-audit2.patch
+# # -"-
+# Patch203: openssh-6.2p1-audit3.patch
+# # -"-
+# Patch204: openssh-6.2p1-audit4.patch
+# # -"-
+# Patch205: openssh-6.2p1-audit5.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -398,12 +399,13 @@ The module is most useful for su and sudo service stacks.
 %patch103 -p1 -b .packet
 # %patch104 -p1 -b .authenticationmethods
 
-%patch200 -p1 -b .audit0
-%patch201 -p1 -b .audit1
-%patch202 -p1 -b .audit2
-%patch203 -p1 -b .audit3
-%patch204 -p1 -b .audit4
-%patch205 -p1 -b .audit5
+%patch200 -p1 -b .audit
+# %patch200 -p1 -b .audit0
+# %patch201 -p1 -b .audit1
+# %patch202 -p1 -b .audit2
+# %patch203 -p1 -b .audit3
+# %patch204 -p1 -b .audit4
+# %patch205 -p1 -b .audit5
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
