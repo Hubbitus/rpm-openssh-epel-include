@@ -787,6 +787,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Apr 09 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-1 + 0.9.3-4
+- new upstream release (#924727)
+
 * Wed Mar 06 2013 Petr Lautrbach <plautrba@redhat.com> 6.1p1-7 + 0.9.3-3
 - use SELinux type sshd_net_t for [net] childs (#915085)
 
