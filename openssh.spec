@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -790,6 +790,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Apr 09 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-2 + 0.9.3-4
+- keep track of which IndentityFile options were manually supplied and
+  which were default options, and don't warn if the latter are missing.
+  (mindrot#2084)
+
 * Tue Apr 09 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-1 + 0.9.3-4
 - new upstream release (#924727)
 
