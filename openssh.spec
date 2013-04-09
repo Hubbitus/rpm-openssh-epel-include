@@ -216,6 +216,8 @@ Patch904: openssh-6.1p1-change-max-startups.patch
 # build regress/modpipe tests with $(CFLAGS), based on
 # http://lists.mindrot.org/pipermail/openssh-unix-dev/2013-March/031167.html
 Patch905: openssh-6.2p1-modpipe-cflags.patch
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2084
+Patch906: openssh-6.2p1-track-IdentifyFile.patch
 
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
@@ -465,6 +467,7 @@ popd
 # %patch903 -p1 -b .required-authentication
 # %patch904 -p1 -b .max-startups
 %patch905 -p1 -b .modpipe-cflags
+%patch906 -p1 -b .identityfile
 
 %if 0
 # Nothing here yet
