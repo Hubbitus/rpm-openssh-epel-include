@@ -218,6 +218,8 @@ Patch904: openssh-6.1p1-change-max-startups.patch
 Patch905: openssh-6.2p1-modpipe-cflags.patch
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2084
 Patch906: openssh-6.2p1-track-IdentifyFile.patch
+# add latest config.{sub,guess} to support aarch64 (#926284)
+Patch907: openssh-6.2p1-aarch64.patch
 
 #---
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1604
@@ -468,6 +470,7 @@ popd
 # %patch904 -p1 -b .max-startups
 %patch905 -p1 -b .modpipe-cflags
 %patch906 -p1 -b .identityfile
+%patch907 -p1 -b .aarch64
 
 %if 0
 # Nothing here yet
