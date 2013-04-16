@@ -77,19 +77,14 @@ Version: %{openssh_ver}
 Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
-#Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
+Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
-# This package differs from the upstream OpenSSH tarball in that
-# the ACSS cipher is removed by running openssh-nukeacss.sh in
-# the unpacked source directory.
-Source0: openssh-%{version}.tar.gz
 Source2: sshd.pam
 Source3: sshd.init
 Source4: http://prdownloads.sourceforge.net/pamsshagentauth/pam_ssh_agent_auth/pam_ssh_agent_auth-%{pam_ssh_agent_ver}.tar.bz2
 Source5: pam_ssh_agent-rmheaders
 Source6: ssh-keycat.pam
 Source7: sshd.sysconfig
-Source8: sshd-keygen.service
 Source9: sshd@.service
 Source10: sshd.socket
 Source11: sshd.service
@@ -107,22 +102,9 @@ Patch101: openssh-6.2p1-fingerprint.patch
 Patch102: openssh-5.8p1-getaddrinfo.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch103: openssh-5.8p1-packet.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=983
-Patch104: openssh-6.1p1-authenticationmethods.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-6.2p1-audit.patch
-# Patch200: openssh-5.8p1-audit0.patch
-# # -"-
-# Patch201: openssh-6.2p1-audit1.patch
-# # -"-
-# Patch202: openssh-5.9p1-audit2.patch
-# # -"-
-# Patch203: openssh-6.2p1-audit3.patch
-# # -"-
-# Patch204: openssh-6.2p1-audit4.patch
-# # -"-
-# Patch205: openssh-6.2p1-audit5.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -133,22 +115,14 @@ Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.2p1-role-mls.patch
-#?
-#Patch402: openssh-5.9p1-sftp-chroot.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1940
-#Patch403: openssh-5.9p1-sesandbox.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
 Patch404: openssh-6.1p1-privsep-selinux.patch
 
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1663
-Patch500: openssh-6.1p1-akc.patch
 #?-- unwanted child :(
 Patch501: openssh-6.2p1-ldap.patch
 #?
 Patch502: openssh-6.2p1-keycat.patch
 
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1668
-#Patch600: openssh-5.9p1-keygen.patch
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-5.2p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
@@ -188,8 +162,6 @@ Patch707: openssh-6.1p1-redhat.patch
 Patch708: openssh-6.2p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch709: openssh-6.2p1-vendor.patch
-#?
-Patch710: openssh-5.9p1-copy-id-restorecon.patch
 # warn users for unsupported UsePAM=no (#757545)
 Patch711: openssh-6.1p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
@@ -206,12 +178,6 @@ Patch801: openssh-6.2p1-force_krb.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.2p1-kuserok.patch
-#https://bugzilla.redhat.com/show_bug.cgi?id=841065
-Patch902: openssh-6.1p1-man-moduli.patch
-# obsolete RequiredAuthentications options
-Patch903: openssh-6.1p1-required-authentications.patch
-# change default value of MaxStartups - CVE-2010-5107 - #908707
-Patch904: openssh-6.1p1-change-max-startups.patch
 
 # build regress/modpipe tests with $(CFLAGS), based on
 # http://lists.mindrot.org/pipermail/openssh-unix-dev/2013-March/031167.html
@@ -221,10 +187,6 @@ Patch906: openssh-6.2p1-track-IdentifyFile.patch
 # add latest config.{sub,guess} to support aarch64 (#926284)
 Patch907: openssh-6.2p1-aarch64.patch
 
-#---
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1604
-# sctp
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1873 => https://bugzilla.redhat.com/show_bug.cgi?id=668993
 
 License: BSD
 Group: Applications/Internet
@@ -287,10 +249,6 @@ Requires: fipscheck-lib%{_isa} >= 1.3.0
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
-# This is actually needed for the %triggerun script but Requires(triggerun)
-# is not valid.  We can use %post because this particular %triggerun script
-# should fire just after this package is installed.
-Requires(post): systemd-sysv
 
 # Not yet ready
 # %package server-ondemand
@@ -401,15 +359,8 @@ The module is most useful for su and sudo service stacks.
 %patch101 -p1 -b .fingerprint
 %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
-# %patch104 -p1 -b .authenticationmethods
 
 %patch200 -p1 -b .audit
-# %patch200 -p1 -b .audit0
-# %patch201 -p1 -b .audit1
-# %patch202 -p1 -b .audit2
-# %patch203 -p1 -b .audit3
-# %patch204 -p1 -b .audit4
-# %patch205 -p1 -b .audit5
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -423,18 +374,14 @@ popd
 
 %if %{WITH_SELINUX}
 %patch400 -p1 -b .role-mls
-# %patch402 -p1 -b .sftp-chroot
-# %patch403 -p1 -b .sesandbox
 %patch404 -p1 -b .privsep-selinux
 %endif
 
-# %patch500 -p1 -b .akc
 %if %{ldap}
 %patch501 -p1 -b .ldap
 %endif
 %patch502 -p1 -b .keycat
 
-# %patch600 -p1 -b .keygen
 %patch601 -p1 -b .ip-opts
 %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
@@ -455,7 +402,6 @@ popd
 %patch707 -p1 -b .redhat
 %patch708 -p1 -b .entropy
 %patch709 -p1 -b .vendor
-# %patch710 -p1 -b .restorecon
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
@@ -465,9 +411,6 @@ popd
 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
-# %patch902 -p1 -b .man-moduli
-# %patch903 -p1 -b .required-authentication
-# %patch904 -p1 -b .max-startups
 %patch905 -p1 -b .modpipe-cflags
 %patch906 -p1 -b .identityfile
 %patch907 -p1 -b .aarch64
@@ -625,7 +568,6 @@ install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
 install -m755 %{SOURCE13} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
-# install -m644 %{SOURCE8} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
 # install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
 # install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
