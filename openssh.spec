@@ -67,7 +67,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -735,6 +735,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Apr 17 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-4 + 0.9.3-4
+- don't use export in sysconfig file (#953111)
+
 * Tue Apr 16 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-3 + 0.9.3-4
 - sshd.service: use KillMode=process (#890376)
 - add latest config.{sub,guess} to support aarch64 (#926284)
