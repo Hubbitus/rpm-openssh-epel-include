@@ -30,9 +30,6 @@
 # Do we want LDAP support
 %define ldap 1
 
-# Whether or not /sbin/nologin exists.
-%define nologin 1
-
 # Whether to build pam_ssh_agent_auth
 %if 0%{?!nopam:1}
 %define pam_ssh_agent 1
@@ -191,9 +188,7 @@ Patch907: openssh-6.2p1-aarch64.patch
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%if %{nologin}
 Requires: /sbin/nologin
-%endif
 
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
@@ -604,15 +599,9 @@ getent group ssh_keys >/dev/null || groupadd -r ssh_keys || :
 
 %pre server
 getent group sshd >/dev/null || groupadd -g %{sshd_uid} -r sshd || :
-%if %{nologin}
 getent passwd sshd >/dev/null || \
-  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd  -s /sbin/nologin \
+  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
   -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
-%else
-getent passwd sshd >/dev/null || \
-  useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd  -s /sbin/nologin \
-  -s /dev/null -r -d /var/empty/sshd sshd 2> /dev/null || :
-%endif
 
 %post server
 %systemd_post sshd.service
