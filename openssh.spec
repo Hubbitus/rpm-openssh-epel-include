@@ -63,10 +63,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.2p1
-%define openssh_rel 4
+%define openssh_ver 6.2p2
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 4
+%define pam_ssh_agent_rel 5
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -179,8 +179,6 @@ Patch901: openssh-6.2p1-kuserok.patch
 # build regress/modpipe tests with $(CFLAGS), based on
 # http://lists.mindrot.org/pipermail/openssh-unix-dev/2013-March/031167.html
 Patch905: openssh-6.2p1-modpipe-cflags.patch
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2084
-Patch906: openssh-6.2p1-track-IdentifyFile.patch
 # add latest config.{sub,guess} to support aarch64 (#926284)
 Patch907: openssh-6.2p1-aarch64.patch
 
@@ -407,7 +405,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch905 -p1 -b .modpipe-cflags
-%patch906 -p1 -b .identityfile
 %patch907 -p1 -b .aarch64
 
 %if 0
@@ -724,6 +721,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon May 20 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-1 + 0.9.3-5
+- new upstream release (#963582)
+
 * Wed Apr 17 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p1-4 + 0.9.3-4
 - don't use export in sysconfig file (#953111)
 
