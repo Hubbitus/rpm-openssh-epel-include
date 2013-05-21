@@ -85,6 +85,7 @@ Source7: sshd.sysconfig
 Source9: sshd@.service
 Source10: sshd.socket
 Source11: sshd.service
+Source12: sshd-keygen.service
 Source13: sshd-keygen
 
 # Internal debug
@@ -304,11 +305,6 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server.
-
-# %description server-ondemand
-# OpenSSH is a free version of SSH (Secure SHell), a program for logging
-# into and executing commands on a remote machine. This package contains
-# the systemd unit files to run an ondemand (socket activated) SSH server.
 
 %description server-sysvinit
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -560,9 +556,10 @@ install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
 install -m755 %{SOURCE13} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
-# install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
-# install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
+install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
+install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
+install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 
@@ -601,10 +598,10 @@ getent passwd sshd >/dev/null || \
   -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
 
 %post server
-%systemd_post sshd.service
+%systemd_post sshd.service sshd.socket
 
 %preun server
-%systemd_preun sshd.service
+%systemd_preun sshd.service sshd.socket
 
 %postun server
 %systemd_postun_with_restart sshd.service
@@ -677,11 +674,9 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/sshd
 %attr(0640,root,root) %config(noreplace) /etc/sysconfig/sshd
 %attr(0644,root,root) %{_unitdir}/sshd.service
-
-# %files server-ondemand
-# %defattr(-,root,root)
-# %attr(0644,root,root) %{_unitdir}/sshd@.service
-# %attr(0644,root,root) %{_unitdir}/sshd.socket
+%attr(0644,root,root) %{_unitdir}/sshd@.service
+%attr(0644,root,root) %{_unitdir}/sshd.socket
+%attr(0644,root,root) %{_unitdir}/sshd-keygen.service
 
 %files server-sysvinit
 %defattr(-,root,root)
