@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p2
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -716,6 +716,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Jun 17 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-3 + 0.9.3-5
+- move default gssapi cache to /run/user/<uid> (#848228)
+
 * Tue May 21 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-2 + 0.9.3-5
 - add socket activated sshd units to the package (#963268)
 - fix the example in the HOWTO.ldap-keys
