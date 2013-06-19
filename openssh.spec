@@ -182,6 +182,8 @@ Patch901: openssh-6.2p1-kuserok.patch
 Patch905: openssh-6.2p1-modpipe-cflags.patch
 # add latest config.{sub,guess} to support aarch64 (#926284)
 Patch907: openssh-6.2p1-aarch64.patch
+# make sftp's libedit interface marginally multibyte aware (#841771)
+Patch908: openssh-6.2p2-sftp-multibyte.patch
 
 
 License: BSD
@@ -402,6 +404,7 @@ popd
 %patch901 -p1 -b .kuserok
 %patch905 -p1 -b .modpipe-cflags
 %patch907 -p1 -b .aarch64
+%patch908 -p1 -b .sftp-multibyte
 
 %if 0
 # Nothing here yet
