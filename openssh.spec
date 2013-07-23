@@ -184,6 +184,8 @@ Patch905: openssh-6.2p1-modpipe-cflags.patch
 Patch907: openssh-6.2p1-aarch64.patch
 # make sftp's libedit interface marginally multibyte aware (#841771)
 Patch908: openssh-6.2p2-sftp-multibyte.patch
+# don't show Success for EAI_SYSTEM (#985964)
+Patch909: openssh-6.2p2-ssh_gai_strerror.patch
 
 
 License: BSD
@@ -405,6 +407,7 @@ popd
 %patch905 -p1 -b .modpipe-cflags
 %patch907 -p1 -b .aarch64
 %patch908 -p1 -b .sftp-multibyte
+%patch909 -p1 -b .ssh_gai_strerror
 
 %if 0
 # Nothing here yet
