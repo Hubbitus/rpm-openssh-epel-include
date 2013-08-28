@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p2
-%define openssh_rel 5
+%define openssh_rel 6
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -771,6 +771,9 @@ prelink -u %{_sbindir}/sshd 2>/dev/null || :
 %endif
 
 %changelog
+* Wed Aug 28 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-6 + 0.9.3-5
+- add -fips subpackages that contains the FIPS module files
+
 * Wed Jul 31 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-5 + 0.9.3-5
 - gssapi credentials need to be stored before a pam session opened (#987792)
 
