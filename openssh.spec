@@ -87,6 +87,8 @@ Source10: sshd.socket
 Source11: sshd.service
 Source12: sshd-keygen.service
 Source13: sshd-keygen
+Source14: openssh-clients-fips.conf
+Source15: openssh-server-fips.conf
 
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
@@ -235,6 +237,11 @@ BuildRequires: xauth
 Summary: An open source SSH client applications
 Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
+
+%package clients-fips
+Summary: The FIPS module package for SSH client
+Group: Applications/Internet
+Requires: openssh-clients = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
 
 %package server
@@ -243,10 +250,15 @@ Group: System Environment/Daemons
 Requires: openssh = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 Requires: pam >= 1.0.1-3
-Requires: fipscheck-lib%{_isa} >= 1.3.0
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+
+%package server-fips
+Summary: The FIPS module package for SSH server daemon
+Group: System Environment/Daemons
+Requires: openssh-server = %{version}-%{release}
+Requires: fipscheck-lib%{_isa} >= 1.3.0
 
 # Not yet ready
 # %package server-ondemand
@@ -304,11 +316,23 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package includes
 the clients necessary to make encrypted connections to SSH servers.
 
+%description clients-fips
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package includes
+the files that complete the installation of the OpenSSH client FIPS
+module.
+
 %description server
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server.
+
+%description server-fips
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package contains
+the files that complete the installation of the OpenSSH server FIPS
+module.
 
 %description server-sysvinit
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -591,6 +615,13 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 %endif
+
+#install prelink blacklists
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/prelink.conf.d
+install -m644 %{SOURCE14} %{SOURCE15} \
+       $RPM_BUILD_ROOT/%{_sysconfdir}/prelink.conf.d/
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -603,8 +634,14 @@ getent passwd sshd >/dev/null || \
   useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
   -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
 
+%post clients-fips
+prelink -u %{_bindir}/ssh 2>/dev/null || :
+
 %post server
 %systemd_post sshd.service sshd.socket
+
+%post server-fips
+prelink -u %{_sbindir}/sshd 2>/dev/null || :
 
 %preun server
 %systemd_preun sshd.service sshd.socket
@@ -641,7 +678,6 @@ getent passwd sshd >/dev/null || \
 %files clients
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
-%attr(0644,root,root) %{_libdir}/fipscheck/ssh.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
@@ -664,13 +700,19 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_mandir}/man8/ssh-pkcs11-helper.8*
 %endif
 
+%files clients-fips
+%defattr(-,root,root)
+%attr(0644,root,root) %{_libdir}/fipscheck/ssh.hmac
+# We don't want to depend on prelink for this directory
+%dir %{_sysconfdir}/prelink.conf.d
+%{_sysconfdir}/prelink.conf.d/openssh-clients-fips.conf
+
 %if ! %{rescue}
 %files server
 %defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_sbindir}/sshd-keygen
-%attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0644,root,root) %{_mandir}/man5/sshd_config.5*
 %attr(0644,root,root) %{_mandir}/man5/moduli.5*
@@ -683,6 +725,13 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_unitdir}/sshd@.service
 %attr(0644,root,root) %{_unitdir}/sshd.socket
 %attr(0644,root,root) %{_unitdir}/sshd-keygen.service
+
+%files server-fips
+%defattr(-,root,root)
+%attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
+# We don't want to depend on prelink for this directory
+%dir %{_sysconfdir}/prelink.conf.d
+%{_sysconfdir}/prelink.conf.d/openssh-server-fips.conf
 
 %files server-sysvinit
 %defattr(-,root,root)
