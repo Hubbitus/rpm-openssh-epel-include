@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p2
-%define openssh_rel 6
+%define openssh_rel 6.1
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -243,6 +243,7 @@ Summary: The FIPS module package for SSH client
 Group: Applications/Internet
 Requires: openssh-clients = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
+Requires: openssl-fips
 
 %package server
 Summary: An open source SSH server daemon
@@ -259,6 +260,7 @@ Summary: The FIPS module package for SSH server daemon
 Group: System Environment/Daemons
 Requires: openssh-server = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
+Requires: openssl-fips
 
 # Not yet ready
 # %package server-ondemand
@@ -771,7 +773,7 @@ prelink -u %{_sbindir}/sshd 2>/dev/null || :
 %endif
 
 %changelog
-* Wed Aug 28 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-6 + 0.9.3-5
+* Thu Aug 29 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-6.1 + 0.9.3-5
 - add -fips subpackages that contains the FIPS module files
 
 * Wed Jul 31 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-5 + 0.9.3-5
