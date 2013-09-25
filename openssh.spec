@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p2
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -778,6 +778,10 @@ prelink -u %{_sbindir}/sshd 2>/dev/null || :
 %endif
 
 %changelog
+* Wed Sep 25 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-8 + 0.9.3-5
+- sshd-keygen: generate only RSA keys by default (#1010092)
+- use dist tag in suffixes for hmac checksum files
+
 * Wed Sep 11 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-7 + 0.9.3-5
 - use hmac_suffix for ssh{,d} hmac checksums
 - bump the minimum value of SSH_USE_STRONG_RNG to 14 according to SP800-131A
