@@ -68,7 +68,7 @@
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
-%define hmac_suffix .%{openssh_ver}-%{openssh_rel}%{?dist}.hmac
+%define hmac_suffix .%{openssh_ver}-%{openssh_rel}.hmac
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
