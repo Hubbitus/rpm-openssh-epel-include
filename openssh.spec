@@ -68,8 +68,6 @@
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
-%define hmac_suffix .%{openssh_ver}-%{openssh_rel}.hmac
-
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
@@ -214,7 +212,7 @@ BuildRequires: audit-libs-devel >= 2.0.5
 BuildRequires: util-linux, groff
 BuildRequires: pam-devel
 BuildRequires: tcp_wrappers-devel
-BuildRequires: fipscheck-devel >= 1.4.1
+BuildRequires: fipscheck-devel >= 1.3.0
 BuildRequires: openssl-devel >= 0.9.8j
 BuildRequires: perl-podlators
 
@@ -244,7 +242,7 @@ Requires: openssh = %{version}-%{release}
 Summary: The FIPS module package for SSH client
 Group: Applications/Internet
 Requires: openssh-clients = %{version}-%{release}
-Requires: fipscheck-lib%{_isa} >= 1.4.1
+Requires: fipscheck-lib%{_isa} >= 1.3.0
 Requires: openssl-fips
 
 %package server
@@ -518,11 +516,10 @@ fi
 	--without-kerberos5 \
 %endif
 %if %{libedit}
-	--with-libedit \
+	--with-libedit
 %else
-	--without-libedit \
+	--without-libedit
 %endif
-	--enable-hmac-suffix=%{hmac_suffix}
 
 %if %{static_libcrypto}
 perl -pi -e "s|-lcrypto|%{_libdir}/libcrypto.a|g" Makefile
@@ -564,8 +561,6 @@ popd
     %{__arch_install_post} \
     %{__os_install_post} \
     fipshmac -d $RPM_BUILD_ROOT%{_libdir}/fipscheck $RPM_BUILD_ROOT%{_bindir}/ssh $RPM_BUILD_ROOT%{_sbindir}/sshd \
-    mv $RPM_BUILD_ROOT%{_libdir}/fipscheck/ssh.hmac $RPM_BUILD_ROOT%{_libdir}/fipscheck/ssh%{hmac_suffix} \
-    mv $RPM_BUILD_ROOT%{_libdir}/fipscheck/sshd.hmac $RPM_BUILD_ROOT%{_libdir}/fipscheck/sshd%{hmac_suffix}
 %{nil}
 
 %check
@@ -641,13 +636,13 @@ getent passwd sshd >/dev/null || \
   useradd -c "Privilege-separated SSH" -u %{sshd_uid} -g sshd \
   -s /sbin/nologin -r -d /var/empty/sshd sshd 2> /dev/null || :
 
-%pre clients-fips
+%post clients-fips
 prelink -u %{_bindir}/ssh 2>/dev/null || :
 
 %post server
 %systemd_post sshd.service sshd.socket
 
-%pre server-fips
+%post server-fips
 prelink -u %{_sbindir}/sshd 2>/dev/null || :
 
 %preun server
@@ -709,7 +704,7 @@ prelink -u %{_sbindir}/sshd 2>/dev/null || :
 
 %files clients-fips
 %defattr(-,root,root)
-%attr(0644,root,root) %{_libdir}/fipscheck/ssh%{hmac_suffix}
+%attr(0644,root,root) %{_libdir}/fipscheck/ssh.hmac
 # We don't want to depend on prelink for this directory
 %dir %{_sysconfdir}/prelink.conf.d
 %{_sysconfdir}/prelink.conf.d/openssh-clients-fips.conf
@@ -735,7 +730,7 @@ prelink -u %{_sbindir}/sshd 2>/dev/null || :
 
 %files server-fips
 %defattr(-,root,root)
-%attr(0644,root,root) %{_libdir}/fipscheck/sshd%{hmac_suffix}
+%attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
 # We don't want to depend on prelink for this directory
 %dir %{_sysconfdir}/prelink.conf.d
 %{_sysconfdir}/prelink.conf.d/openssh-server-fips.conf
