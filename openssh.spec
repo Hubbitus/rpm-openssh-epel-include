@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.2p2
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -722,6 +722,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Oct 08 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-9 + 0.9.3-5
+- use dracut-fips package to determine if a FIPS module is installed
+- revert -fips subpackages and hmac files suffixes
+
 * Wed Sep 25 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-8 + 0.9.3-5
 - sshd-keygen: generate only RSA keys by default (#1010092)
 - use dist tag in suffixes for hmac checksum files
