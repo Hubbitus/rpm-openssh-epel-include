@@ -243,7 +243,6 @@ Summary: The FIPS module package for SSH client
 Group: Applications/Internet
 Requires: openssh-clients = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
-Requires: openssl-fips
 
 %package server
 Summary: An open source SSH server daemon
@@ -260,7 +259,6 @@ Summary: The FIPS module package for SSH server daemon
 Group: System Environment/Daemons
 Requires: openssh-server = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
-Requires: openssl-fips
 
 # Not yet ready
 # %package server-ondemand
