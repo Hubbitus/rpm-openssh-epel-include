@@ -363,9 +363,9 @@ diff -up openssh-6.2p1/openbsd-compat/bsd-arc4random.c.fips openssh-6.2p1/openbs
  }
  #endif /* !HAVE_ARC4RANDOM */
  
-diff -up openssh-6.2p1/ssh.c.fips openssh-6.2p1/ssh.c
---- openssh-6.2p1/ssh.c.fips	2012-07-06 05:45:01.000000000 +0200
-+++ openssh-6.2p1/ssh.c	2013-03-27 13:14:49.179683423 +0100
+diff -up openssh-6.2p2/ssh.c.fips openssh-6.2p2/ssh.c
+--- openssh-6.2p2/ssh.c.fips	2013-04-05 02:22:36.000000000 +0200
++++ openssh-6.2p2/ssh.c	2013-10-08 17:21:26.894761211 +0200
 @@ -73,6 +73,8 @@
  
  #include <openssl/evp.h>
@@ -375,18 +375,21 @@ diff -up openssh-6.2p1/ssh.c.fips openssh-6.2p1/ssh.c
  #include "openbsd-compat/openssl-compat.h"
  #include "openbsd-compat/sys-queue.h"
  
-@@ -253,6 +255,10 @@ main(int ac, char **av)
+@@ -253,6 +255,13 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
  	__progname = ssh_get_progname(av[0]);
 +        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fatal("FIPS integrity verification test failed.");
-+        }
++	if (access("/etc/system-fips", F_OK) == 0)
++		if (! FIPSCHECK_verify(NULL, NULL))
++			if (FIPS_mode())
++				fatal("FIPS integrity verification test failed.");
++			else
++				logit("FIPS integrity verification test failed.");
  
  #ifndef HAVE_SETPROCTITLE
  	/* Prepare for later setproctitle emulation */
-@@ -329,6 +335,9 @@ main(int ac, char **av)
+@@ -329,6 +338,9 @@ main(int ac, char **av)
  	    "ACD:F:I:KL:MNO:PR:S:TVw:W:XYy")) != -1) {
  		switch (opt) {
  		case '1':
@@ -396,7 +399,7 @@ diff -up openssh-6.2p1/ssh.c.fips openssh-6.2p1/ssh.c
  			options.protocol = SSH_PROTO_1;
  			break;
  		case '2':
-@@ -632,7 +641,6 @@ main(int ac, char **av)
+@@ -628,7 +640,6 @@ main(int ac, char **av)
  	if (!host)
  		usage();
  
@@ -404,7 +407,7 @@ diff -up openssh-6.2p1/ssh.c.fips openssh-6.2p1/ssh.c
  	ERR_load_crypto_strings();
  
  	/* Initialize the command to execute on remote host. */
-@@ -722,6 +730,10 @@ main(int ac, char **av)
+@@ -719,6 +730,10 @@ main(int ac, char **av)
  
  	seed_rng();
  
@@ -415,7 +418,7 @@ diff -up openssh-6.2p1/ssh.c.fips openssh-6.2p1/ssh.c
  	if (options.user == NULL)
  		options.user = xstrdup(pw->pw_name);
  
-@@ -790,6 +802,12 @@ main(int ac, char **av)
+@@ -787,6 +802,12 @@ main(int ac, char **av)
  
  	timeout_ms = options.connection_timeout * 1000;
  
@@ -463,9 +466,9 @@ diff -up openssh-6.2p1/sshconnect2.c.fips openssh-6.2p1/sshconnect2.c
  	if (options.hostkeyalgorithms != NULL)
  		myproposal[PROPOSAL_SERVER_HOST_KEY_ALGS] =
  		    options.hostkeyalgorithms;
-diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
---- openssh-6.2p1/sshd.c.fips	2013-03-27 13:14:49.146683554 +0100
-+++ openssh-6.2p1/sshd.c	2013-03-27 13:14:49.180683419 +0100
+diff -up openssh-6.2p2/sshd.c.fips openssh-6.2p2/sshd.c
+--- openssh-6.2p2/sshd.c.fips	2013-10-08 17:14:05.455864248 +0200
++++ openssh-6.2p2/sshd.c	2013-10-08 17:22:15.897527827 +0200
 @@ -76,6 +76,8 @@
  #include <openssl/bn.h>
  #include <openssl/md5.h>
@@ -475,19 +478,22 @@ diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
  #include "openbsd-compat/openssl-compat.h"
  
  #ifdef HAVE_SECUREWARE
-@@ -1423,6 +1425,11 @@ main(int ac, char **av)
+@@ -1423,6 +1425,14 @@ main(int ac, char **av)
  #endif
  	__progname = ssh_get_progname(av[0]);
  
 +        SSLeay_add_all_algorithms();
-+        if (FIPS_mode() && !FIPSCHECK_verify(NULL, NULL)) {
-+                fatal("FIPS integrity verification test failed.");
-+        }
++	if (access("/etc/system-fips", F_OK) == 0)
++		if (! FIPSCHECK_verify(NULL, NULL))
++			if (FIPS_mode())
++				fatal("FIPS integrity verification test failed.");
++			else
++				logit("FIPS integrity verification test failed.");
 +
  	/* Save argv. Duplicate so setproctitle emulation doesn't clobber it */
  	saved_argc = ac;
  	rexec_argc = ac;
-@@ -1571,8 +1578,6 @@ main(int ac, char **av)
+@@ -1571,8 +1581,6 @@ main(int ac, char **av)
  	else
  		closefrom(REEXEC_DEVCRYPTO_RESERVED_FD);
  
@@ -496,7 +502,7 @@ diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
  	/*
  	 * Force logging to stderr until we have loaded the private host
  	 * key (unless started from inetd)
-@@ -1715,6 +1720,10 @@ main(int ac, char **av)
+@@ -1715,6 +1723,10 @@ main(int ac, char **av)
  		debug("private host key: #%d type %d %s", i, key->type,
  		    key_type(key));
  	}
@@ -507,7 +513,7 @@ diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
  	if ((options.protocol & SSH_PROTO_1) && !sensitive_data.have_ssh1_key) {
  		logit("Disabling protocol version 1. Could not load host key");
  		options.protocol &= ~SSH_PROTO_1;
-@@ -1878,6 +1887,10 @@ main(int ac, char **av)
+@@ -1878,6 +1890,10 @@ main(int ac, char **av)
  	/* Initialize the random number generator. */
  	arc4random_stir();
  
@@ -518,7 +524,7 @@ diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
  	/* Chdir to the root directory so that the current disk can be
  	   unmounted if desired. */
  	(void) chdir("/");
-@@ -2420,6 +2433,9 @@ do_ssh2_kex(void)
+@@ -2420,6 +2436,9 @@ do_ssh2_kex(void)
  	if (options.ciphers != NULL) {
  		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  		myproposal[PROPOSAL_ENC_ALGS_STOC] = options.ciphers;
@@ -528,7 +534,7 @@ diff -up openssh-6.2p1/sshd.c.fips openssh-6.2p1/sshd.c
  	}
  	myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  	    compat_cipher_proposal(myproposal[PROPOSAL_ENC_ALGS_CTOS]);
-@@ -2429,6 +2445,9 @@ do_ssh2_kex(void)
+@@ -2429,6 +2448,9 @@ do_ssh2_kex(void)
  	if (options.macs != NULL) {
  		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
  		myproposal[PROPOSAL_MAC_ALGS_STOC] = options.macs;
