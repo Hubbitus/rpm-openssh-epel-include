@@ -63,10 +63,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.2p2
-%define openssh_rel 9
+%define openssh_ver 6.3p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 5
+%define pam_ssh_agent_rel 6
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -708,6 +708,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Oct 10 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-1 + 0.9.3-6
+- new upstream release (#1007769)
+
 * Tue Oct 08 2013 Petr Lautrbach <plautrba@redhat.com> 6.2p2-9 + 0.9.3-5
 - use dracut-fips package to determine if a FIPS module is installed
 - revert -fips subpackages and hmac files suffixes
