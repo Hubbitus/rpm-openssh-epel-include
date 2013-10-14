@@ -92,9 +92,9 @@ Source13: sshd-keygen
 Patch0: openssh-5.9p1-wIm.patch
 
 #?
-Patch100: openssh-6.2p1-coverity.patch
+Patch100: openssh-6.3p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch101: openssh-6.2p1-fingerprint.patch
+Patch101: openssh-6.3p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
 Patch102: openssh-5.8p1-getaddrinfo.patch
@@ -102,7 +102,7 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 Patch103: openssh-5.8p1-packet.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch200: openssh-6.2p1-audit.patch
+Patch200: openssh-6.3p1-audit.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -112,14 +112,14 @@ Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch400: openssh-6.2p1-role-mls.patch
+Patch400: openssh-6.3p1-role-mls.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
-Patch404: openssh-6.1p1-privsep-selinux.patch
+Patch404: openssh-6.3p1-privsep-selinux.patch
 
 #?-- unwanted child :(
-Patch501: openssh-6.2p1-ldap.patch
+Patch501: openssh-6.3p1-ldap.patch
 #?
-Patch502: openssh-6.2p1-keycat.patch
+Patch502: openssh-6.3p1-keycat.patch
 
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-5.2p1-allow-ip-opts.patch
@@ -141,7 +141,7 @@ Patch608: openssh-6.1p1-askpass-ld.patch
 Patch609: openssh-5.5p1-x11.patch
 
 #?
-Patch700: openssh-6.2p1-fips.patch
+Patch700: openssh-6.3p1-fips.patch
 #?
 Patch701: openssh-5.6p1-exit-deadlock.patch
 #?
@@ -155,7 +155,7 @@ Patch705: openssh-5.1p1-scp-manpage.patch
 #?
 Patch706: openssh-5.8p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
-Patch707: openssh-6.1p1-redhat.patch
+Patch707: openssh-6.3p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
 Patch708: openssh-6.2p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
@@ -163,29 +163,19 @@ Patch709: openssh-6.2p1-vendor.patch
 # warn users for unsupported UsePAM=no (#757545)
 Patch711: openssh-6.1p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
-Patch712: openssh-5.9p1-ctr-evp-fast.patch
+Patch712: openssh-6.3p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
-Patch713: openssh-6.2p1-ctr-cavstest.patch
+Patch713: openssh-6.3p1-ctr-cavstest.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 #changed cache storage type - #848228
-Patch800: openssh-6.2p1-gsskex.patch
+Patch800: openssh-6.3p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
-Patch801: openssh-6.2p1-force_krb.patch
+Patch801: openssh-6.3p1-force_krb.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch901: openssh-6.2p1-kuserok.patch
-
-# build regress/modpipe tests with $(CFLAGS), based on
-# http://lists.mindrot.org/pipermail/openssh-unix-dev/2013-March/031167.html
-Patch905: openssh-6.2p1-modpipe-cflags.patch
-# add latest config.{sub,guess} to support aarch64 (#926284)
-Patch907: openssh-6.2p1-aarch64.patch
-# make sftp's libedit interface marginally multibyte aware (#841771)
-Patch908: openssh-6.2p2-sftp-multibyte.patch
-# don't show Success for EAI_SYSTEM (#985964)
-Patch909: openssh-6.2p2-ssh_gai_strerror.patch
+Patch901: openssh-6.3p1-kuserok.patch
 
 
 License: BSD
@@ -404,10 +394,6 @@ popd
 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
-%patch905 -p1 -b .modpipe-cflags
-%patch907 -p1 -b .aarch64
-%patch908 -p1 -b .sftp-multibyte
-%patch909 -p1 -b .ssh_gai_strerror
 
 %if 0
 # Nothing here yet
