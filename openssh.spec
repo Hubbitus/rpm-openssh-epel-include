@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.3p1
-%define openssh_rel 1.1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 6
 
@@ -715,6 +715,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Oct 23 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-2 + 0.9.3-6
+- use default_ccache_name from /etc/krb5.conf for a kerberos cache (#991186)
+- increase the size of the Diffie-Hellman groups (#1010607)
+- sshd-keygen to generate ECDSA keys <i.grok@comcast.net> (#1019222)
+
 * Tue Oct 15 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-1.1 + 0.9.3-6
 - new upstream release (#1007769)
 
