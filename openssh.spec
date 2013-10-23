@@ -178,6 +178,8 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.3p1-kuserok.patch
 # use default_ccache_name from /etc/krb5.conf (#991186)
 Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
+# increase the size of the Diffie-Hellman groups (#1010607)
+Patch903: openssh-6.3p1-increase-size-of-DF-groups.patch
 
 
 License: BSD
@@ -398,6 +400,7 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .ccache_name
+%patch903 -p1 -b .dh
 
 %if 0
 # Nothing here yet
