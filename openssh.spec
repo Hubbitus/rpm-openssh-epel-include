@@ -64,14 +64,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.3p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 6
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}%{?rescue_rel}.1
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -277,7 +277,7 @@ Provides: openssh-askpass-gnome
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}.1
+Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}
 License: BSD
 
 %description
@@ -715,6 +715,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Oct 25 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-4 + 0.9.3-6
+- rebuild with the openssl with the ECC support
+
 * Thu Oct 24 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-3 + 0.9.3-6
 - don't use SSH_FP_MD5 for fingerprints in FIPS mode
 
