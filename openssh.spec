@@ -111,6 +111,8 @@ Patch300: pam_ssh_agent_auth-0.9.3-build.patch
 Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
+# don't use xfree (#1024965)
+Patch303: pam_ssh_agent_auth-0.9.3-no-xfree.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.3p1-role-mls.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
@@ -355,6 +357,7 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch300 -p1 -b .psaa-build
 %patch301 -p1 -b .psaa-seteuid
 %patch302 -p1 -b .psaa-visibility
+%patch303 -p1 -b .psaa-xfree
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
