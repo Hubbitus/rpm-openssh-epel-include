@@ -64,9 +64,9 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.3p1
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 6
+%define pam_ssh_agent_rel 7
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -718,6 +718,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Nov 01 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-5 + 0.9.3-7
+- adjust gss kex mechanism to the upstream changes (#1024004)
+- don't use xfree in pam_ssh_agent_auth sources <geertj@gmail.com> (#1024965)
+
 * Fri Oct 25 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-4 + 0.9.3-6
 - rebuild with the openssl with the ECC support
 
