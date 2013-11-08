@@ -63,10 +63,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.3p1
-%define openssh_rel 5
+%define openssh_ver 6.4p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 7
+%define pam_ssh_agent_rel 1
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -102,7 +102,7 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 Patch103: openssh-5.8p1-packet.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch200: openssh-6.3p1-audit.patch
+Patch200: openssh-6.4p1-audit.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -718,6 +718,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Nov 08 2013 Petr Lautrbach <plautrba@redhat.com> 6.4p1-1 + 0.9.3-1
+- new upstream release
+
 * Fri Nov 01 2013 Petr Lautrbach <plautrba@redhat.com> 6.3p1-5 + 0.9.3-7
 - adjust gss kex mechanism to the upstream changes (#1024004)
 - don't use xfree in pam_ssh_agent_auth sources <geertj@gmail.com> (#1024965)
