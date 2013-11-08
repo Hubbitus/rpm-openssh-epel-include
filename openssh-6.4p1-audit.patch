@@ -1440,9 +1440,9 @@ diff -up openssh-6.3p1/monitor.h.audit openssh-6.3p1/monitor.h
  
  };
  
-diff -up openssh-6.3p1/monitor_wrap.c.audit openssh-6.3p1/monitor_wrap.c
---- openssh-6.3p1/monitor_wrap.c.audit	2013-10-07 15:53:34.217717411 +0200
-+++ openssh-6.3p1/monitor_wrap.c	2013-10-07 16:03:16.190993304 +0200
+diff -up openssh-6.4p1/monitor_wrap.c.audit openssh-6.4p1/monitor_wrap.c
+--- openssh-6.4p1/monitor_wrap.c.audit	2013-11-08 13:26:47.062595006 +0100
++++ openssh-6.4p1/monitor_wrap.c	2013-11-08 13:26:47.089594877 +0100
 @@ -433,7 +433,7 @@ mm_key_allowed(enum mm_keytype type, cha
   */
  
@@ -1480,15 +1480,6 @@ diff -up openssh-6.3p1/monitor_wrap.c.audit openssh-6.3p1/monitor_wrap.c
  /* Export key state after authentication */
  Newkeys *
  mm_newkeys_from_blob(u_char *blob, int blen)
-@@ -482,7 +496,7 @@ mm_newkeys_from_blob(u_char *blob, int b
- 	buffer_init(&b);
- 	buffer_append(&b, blob, blen);
- 
--	newkey = xmalloc(sizeof(*newkey));
-+	newkey = xcalloc(1, sizeof(*newkey));
- 	enc = &newkey->enc;
- 	mac = &newkey->mac;
- 	comp = &newkey->comp;
 @@ -642,12 +656,14 @@ mm_send_keystate(struct monitor *monitor
  		fatal("%s: conversion of newkeys failed", __func__);
  
