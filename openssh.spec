@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.4p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 1
 
@@ -718,6 +718,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Nov 26 2013 Petr Lautrbach <plautrba@redhat.com> 6.4p1-2 + 0.9.3-1
+- fix fatal() cleanup in the audit patch (#1029074)
+- fix parsing logic of ldap.conf file (#1033662)
+
 * Fri Nov 08 2013 Petr Lautrbach <plautrba@redhat.com> 6.4p1-1 + 0.9.3-1
 - new upstream release
 
