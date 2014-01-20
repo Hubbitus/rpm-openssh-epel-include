@@ -186,6 +186,8 @@ Patch903: openssh-6.3p1-increase-size-of-DF-groups.patch
 Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
 # Run ssh-copy-id in the legacy mode when SSH_COPY_ID_LEGACY variable is set (#969375
 Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
+# Use tty allocation for a remote scp (#985650)
+Patch906: openssh-6.4p1-fromto-remote.patch
 
 
 License: BSD
@@ -410,6 +412,7 @@ popd
 %patch903 -p1 -b .dh
 %patch904 -p1 -b .SP800-131A
 %patch905 -p1 -b .legacy-ssh-copy-id
+%patch906 -p1 -b .fromto-remote
 
 %if 0
 # Nothing here yet
