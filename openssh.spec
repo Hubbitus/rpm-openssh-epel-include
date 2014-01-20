@@ -184,6 +184,8 @@ Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
 Patch903: openssh-6.3p1-increase-size-of-DF-groups.patch
 # FIPS mode - adjust the key echange DH groups and ssh-keygen according to SP800-131A (#1001748)
 Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
+# Run ssh-copy-id in the legacy mode when SSH_COPY_ID_LEGACY variable is set (#969375
+Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 
 
 License: BSD
@@ -407,6 +409,7 @@ popd
 %patch902 -p1 -b .ccache_name
 %patch903 -p1 -b .dh
 %patch904 -p1 -b .SP800-131A
+%patch905 -p1 -b .legacy-ssh-copy-id
 
 %if 0
 # Nothing here yet
