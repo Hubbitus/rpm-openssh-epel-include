@@ -633,7 +633,7 @@ getent passwd sshd >/dev/null || \
 %defattr(-,root,root)
 %doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
-%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
