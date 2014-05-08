@@ -201,6 +201,7 @@ Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: /sbin/nologin
 Obsoletes: openssh-clients-fips, openssh-server-fips
+Obsoletes: openssh-server-sysvinit
 
 %if ! %{no_gnome_askpass}
 %if %{gtk2}
@@ -257,17 +258,6 @@ Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 
-# Not yet ready
-# %package server-ondemand
-# Summary: Systemd unit file to run an ondemand OpenSSH server
-# Group: System Environment/Daemons
-# Requires: %{name}-server%{?_isa} = %{version}-%{release}
-
-%package server-sysvinit
-Summary: The SysV initscript to manage the OpenSSH server.
-Group: System Environment/Daemons
-Requires: %{name}-server%{?_isa} = %{version}-%{release}
-
 %if %{ldap}
 %package ldap
 Summary: A LDAP support for open source SSH server daemon
@@ -318,14 +308,6 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server.
-
-%description server-sysvinit
-OpenSSH is a free version of SSH (Secure SHell), a program for logging
-into and executing commands on a remote machine. This package contains
-the SysV init script to manage the OpenSSH server when running a legacy
-SysV-compatible init system.
-
-It is not required when the init system used is systemd.
 
 %if %{ldap}
 %description ldap
@@ -568,12 +550,10 @@ rm -f $RPM_BUILD_ROOT%{_sysconfdir}/ssh/ldap.conf
 
 install -d $RPM_BUILD_ROOT/etc/pam.d/
 install -d $RPM_BUILD_ROOT/etc/sysconfig/
-install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -d $RPM_BUILD_ROOT%{_libexecdir}/openssh
 install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
-install -m755 %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/sshd
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
 install -m755 %{SOURCE13} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
@@ -636,9 +616,6 @@ getent passwd sshd >/dev/null || \
 %triggerun -n openssh-server -- openssh-server < 5.9p1-22
 /bin/systemctl --no-reload disable sshd-keygen.service >/dev/null 2>&1 || :
 
-%triggerpostun -n openssh-server-sysvinit -- openssh-server < 5.8p2-12
-/sbin/chkconfig --add sshd >/dev/null 2>&1 || :
-
 %files
 %defattr(-,root,root)
 %doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
@@ -698,10 +675,6 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_unitdir}/sshd@.service
 %attr(0644,root,root) %{_unitdir}/sshd.socket
 %attr(0644,root,root) %{_unitdir}/sshd-keygen.service
-
-%files server-sysvinit
-%defattr(-,root,root)
-%attr(0755,root,root) /etc/rc.d/init.d/sshd
 %endif
 
 %if %{ldap}
