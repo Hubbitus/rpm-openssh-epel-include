@@ -190,6 +190,9 @@ Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 Patch906: openssh-6.4p1-fromto-remote.patch
 # Try CLOCK_BOOTTIME with fallback (#1091992)
 Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
+# Prevents a server from skipping SSHFP lookup and forcing a new-hostkey
+# dialog by offering only certificate keys. (#1081338)
+Patch908: openssh-6.4p1-CVE-2014-2653.patch
 
 
 License: BSD
@@ -416,6 +419,7 @@ popd
 %patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
 %patch907 -p1 -b .CLOCK_BOOTTIME
+%patch908 -p1 -b .CVE-2014-2653
 
 %if 0
 # Nothing here yet
