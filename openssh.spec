@@ -188,6 +188,8 @@ Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
 Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
+# Try CLOCK_BOOTTIME with fallback (#1091992)
+Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
 
 
 License: BSD
@@ -413,6 +415,7 @@ popd
 %patch904 -p1 -b .SP800-131A
 %patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
+%patch907 -p1 -b .CLOCK_BOOTTIME
 
 %if 0
 # Nothing here yet
