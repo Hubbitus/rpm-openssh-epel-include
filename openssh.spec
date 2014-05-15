@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.4p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 1
 
@@ -737,6 +737,16 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu May 15 2014 Petr Lautrbach <plautrba@redhat.com> 6.4p1-4 + 0.9.3-1
+- use SSH_COPY_ID_LEGACY variable to run ssh-copy-id in the legacy mode
+- make /etc/ssh/moduli file public (#1043661)
+- test existence of /etc/ssh/ssh_host_ecdsa_key in sshd-keygen.service
+- don't clean up gssapi credentials by default (#1055016)
+- ssh-agent - try CLOCK_BOOTTIME with fallback (#1091992)
+- prevent a server from skipping SSHFP lookup - CVE-2014-2653 (#1081338)
+- ignore environment variables with embedded '=' or '\0' characters - CVE-2014-2532
+  (#1077843)
+
 * Wed Dec 11 2013 Petr Lautrbach <plautrba@redhat.com> 6.4p1-3 + 0.9.3-1
 - sshd-keygen - use correct permissions on ecdsa host key (#1023945)
 - use only rsa and ecdsa host keys by default
