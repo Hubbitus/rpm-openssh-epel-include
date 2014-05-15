@@ -193,6 +193,8 @@ Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
 # Prevents a server from skipping SSHFP lookup and forcing a new-hostkey
 # dialog by offering only certificate keys. (#1081338)
 Patch908: openssh-6.4p1-CVE-2014-2653.patch
+# ignore environment variables with embedded '=' or '\0' characters (#1077843)
+Patch909: openssh-6.4p1-ignore-bad-env-var.patch
 
 
 License: BSD
@@ -420,6 +422,7 @@ popd
 %patch906 -p1 -b .fromto-remote
 %patch907 -p1 -b .CLOCK_BOOTTIME
 %patch908 -p1 -b .CVE-2014-2653
+%patch909 -p1 -b .bad-env-var
 
 %if 0
 # Nothing here yet
