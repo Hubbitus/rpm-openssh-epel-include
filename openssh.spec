@@ -710,6 +710,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Jun 03 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-1 + 0.9.3-2
+- disable the curve25519 KEX when speaking to OpenSSH 6.5 or 6.6
+- add support for ED25519 keys to sshd-keygen and sshd.sysconfig
+- drop openssh-server-sysvinit subpackage
+- slightly change systemd units logic - use sshd-keygen.service (#1066615)
+
 * Tue Jun 03 2014 Petr Lautrbach <plautrba@redhat.com> 6.6p1-1 + 0.9.3-2
 - new upstream release openssh-6.6p1
 
