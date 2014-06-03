@@ -63,10 +63,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.4p1
-%define openssh_rel 4
+%define openssh_ver 6.6p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 1
+%define pam_ssh_agent_rel 2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -94,7 +94,7 @@ Patch0: openssh-5.9p1-wIm.patch
 #?
 Patch100: openssh-6.3p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch101: openssh-6.3p1-fingerprint.patch
+Patch101: openssh-6.6p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
 Patch102: openssh-5.8p1-getaddrinfo.patch
@@ -114,76 +114,74 @@ Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 # don't use xfree (#1024965)
 Patch303: pam_ssh_agent_auth-0.9.3-no-xfree.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
-Patch400: openssh-6.3p1-role-mls.patch
+Patch400: openssh-6.6p1-role-mls.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
-Patch404: openssh-6.3p1-privsep-selinux.patch
+Patch404: openssh-6.6p1-privsep-selinux.patch
 
 #?-- unwanted child :(
-Patch501: openssh-6.3p1-ldap.patch
+Patch501: openssh-6.6p1-ldap.patch
 #?
-Patch502: openssh-6.3p1-keycat.patch
+Patch502: openssh-6.6p1-keycat.patch
 
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
-Patch601: openssh-5.2p1-allow-ip-opts.patch
+Patch601: openssh-6.6p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
 Patch602: openssh-5.9p1-randclean.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
-Patch604: openssh-5.8p1-keyperm.patch
+Patch604: openssh-6.6p1-keyperm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
-Patch605: openssh-5.8p2-remove-stale-control-socket.patch
+# drop: Patch605: openssh-5.8p2-remove-stale-control-socket.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1925
 Patch606: openssh-5.9p1-ipv6man.patch
 #?
-Patch607: openssh-5.8p2-sigpipe.patch
+# drop? Patch607: openssh-5.8p2-sigpipe.patch
 #?
 Patch608: openssh-6.1p1-askpass-ld.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
-Patch609: openssh-5.5p1-x11.patch
+# drop? Patch609: openssh-5.5p1-x11.patch
 
 #?
 Patch700: openssh-6.3p1-fips.patch
 #?
-Patch701: openssh-5.6p1-exit-deadlock.patch
+# drop? Patch701: openssh-5.6p1-exit-deadlock.patch
 #?
 Patch702: openssh-5.1p1-askpass-progress.patch
 #?
 Patch703: openssh-4.3p2-askpass-grab-info.patch
-#?
-Patch704: openssh-5.9p1-edns.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=205842
+# drop? Patch704: openssh-5.9p1-edns.patch
 #?
 Patch705: openssh-5.1p1-scp-manpage.patch
 #?
 Patch706: openssh-5.8p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
-Patch707: openssh-6.3p1-redhat.patch
+Patch707: openssh-6.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
-Patch708: openssh-6.2p1-entropy.patch
+Patch708: openssh-6.6p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch709: openssh-6.2p1-vendor.patch
 # warn users for unsupported UsePAM=no (#757545)
-Patch711: openssh-6.1p1-log-usepam-no.patch
+Patch711: openssh-6.6p1-log-usepam-no.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
 Patch712: openssh-6.3p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
-Patch713: openssh-6.3p1-ctr-cavstest.patch
+Patch713: openssh-6.6p1-ctr-cavstest.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 #changed cache storage type - #848228
-Patch800: openssh-6.3p1-gsskex.patch
+Patch800: openssh-6.6p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
-Patch801: openssh-6.3p1-force_krb.patch
+Patch801: openssh-6.6p1-force_krb.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
-Patch901: openssh-6.3p1-kuserok.patch
+Patch901: openssh-6.6p1-kuserok.patch
 # use default_ccache_name from /etc/krb5.conf (#991186)
 Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
-# increase the size of the Diffie-Hellman groups (#1010607)
-Patch903: openssh-6.3p1-increase-size-of-DF-groups.patch
 # FIPS mode - adjust the key echange DH groups and ssh-keygen according to SP800-131A (#1001748)
-Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
+# merge: Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
 # Run ssh-copy-id in the legacy mode when SSH_COPY_ID_LEGACY variable is set (#969375
 Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 # Use tty allocation for a remote scp (#985650)
@@ -192,9 +190,7 @@ Patch906: openssh-6.4p1-fromto-remote.patch
 Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
 # Prevents a server from skipping SSHFP lookup and forcing a new-hostkey
 # dialog by offering only certificate keys. (#1081338)
-Patch908: openssh-6.4p1-CVE-2014-2653.patch
-# ignore environment variables with embedded '=' or '\0' characters (#1077843)
-Patch909: openssh-6.4p1-ignore-bad-env-var.patch
+Patch908: openssh-6.6p1-CVE-2014-2653.patch
 
 
 License: BSD
@@ -358,12 +354,12 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .wIm
 %endif
 
-%patch100 -p1 -b .coverity
+# rework %patch100 -p1 -b .coverity
 %patch101 -p1 -b .fingerprint
-%patch102 -p1 -b .getaddrinfo
+# investigate %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
 
-%patch200 -p1 -b .audit
+# rework %patch200 -p1 -b .audit
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
@@ -387,21 +383,23 @@ popd
 %patch502 -p1 -b .keycat
 
 %patch601 -p1 -b .ip-opts
-%patch602 -p1 -b .randclean
+# merge to fips
+# %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
 %patch604 -p1 -b .keyperm
-%patch605 -p1 -b .remove_stale
+# drop %patch605 -p1 -b .remove_stale
 %patch606 -p1 -b .ipv6man
-%patch607 -p1 -b .sigpipe
+# drop? %patch607 -p1 -b .sigpipe
 %patch608 -p1 -b .askpass-ld
-%patch609 -p1 -b .x11
-
-%patch700 -p1 -b .fips
-%patch701 -p1 -b .exit-deadlock
+# drop? %patch609 -p1 -b .x11
+# 
+# move to the end %patch700 -p1 -b .fips
+# drop? %patch701 -p1 -b .exit-deadlock
 %patch702 -p1 -b .progress
 %patch703 -p1 -b .grab-info
-%patch704 -p1 -b .edns
-%patch705 -p1 -b .manpage
+# investigate - https://bugzilla.redhat.com/show_bug.cgi?id=205842
+# probably not needed anymore %patch704 -p1 -b .edns
+# drop it %patch705 -p1 -b .manpage
 %patch706 -p1 -b .localdomain
 %patch707 -p1 -b .redhat
 %patch708 -p1 -b .entropy
@@ -409,20 +407,18 @@ popd
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
-
+# 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
-
+# 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .ccache_name
-%patch903 -p1 -b .dh
-%patch904 -p1 -b .SP800-131A
+# merge with fips %patch904 -p1 -b .SP800-131A
 %patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
 %patch907 -p1 -b .CLOCK_BOOTTIME
 %patch908 -p1 -b .CVE-2014-2653
-%patch909 -p1 -b .bad-env-var
 
 %if 0
 # Nothing here yet
@@ -737,6 +733,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Jun 03 2014 Petr Lautrbach <plautrba@redhat.com> 6.6p1-1 + 0.9.3-2
+- new upstream release openssh-6.6p1
+
 * Thu May 15 2014 Petr Lautrbach <plautrba@redhat.com> 6.4p1-4 + 0.9.3-1
 - use SSH_COPY_ID_LEGACY variable to run ssh-copy-id in the legacy mode
 - make /etc/ssh/moduli file public (#1043661)
