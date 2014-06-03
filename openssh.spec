@@ -63,7 +63,7 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.6p1
+%define openssh_ver 6.6.1p1
 %define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 2
@@ -74,7 +74,8 @@ Version: %{openssh_ver}
 Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
-Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
+# Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
+Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-6.6p1.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
 Source2: sshd.pam
 Source3: sshd.init
@@ -191,7 +192,9 @@ Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
 # Prevents a server from skipping SSHFP lookup and forcing a new-hostkey
 # dialog by offering only certificate keys. (#1081338)
 Patch908: openssh-6.6p1-CVE-2014-2653.patch
-
+# OpenSSH 6.5 and 6.6 sometimes encode a value used in the curve25519 key exchange incorrectly
+# Disable the curve25519 KEX when speaking to OpenSSH 6.5 or 6.6
+Patch909: openssh-5618210618256bbf5f4f71b2887ff186fd451736.patch
 
 License: BSD
 Group: Applications/Internet
@@ -348,7 +351,7 @@ remote ssh-agent instance.
 The module is most useful for su and sudo service stacks.
 
 %prep
-%setup -q -a 4
+%setup -q -a 4 -n openssh-6.6p1
 #Do not enable by default
 %if 0
 %patch0 -p1 -b .wIm
@@ -419,6 +422,7 @@ popd
 %patch906 -p1 -b .fromto-remote
 %patch907 -p1 -b .CLOCK_BOOTTIME
 %patch908 -p1 -b .CVE-2014-2653
+%patch909 -p1 -b .6.6.1
 
 %if 0
 # Nothing here yet
