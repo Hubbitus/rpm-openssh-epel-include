@@ -137,7 +137,7 @@ Patch604: openssh-6.6p1-keyperm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1925
 Patch606: openssh-5.9p1-ipv6man.patch
 #?
-# drop? Patch607: openssh-5.8p2-sigpipe.patch
+Patch607: openssh-5.8p2-sigpipe.patch
 #?
 Patch608: openssh-6.1p1-askpass-ld.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
@@ -374,7 +374,7 @@ popd
 %patch604 -p1 -b .keyperm
 # drop %patch605 -p1 -b .remove_stale
 %patch606 -p1 -b .ipv6man
-# drop? %patch607 -p1 -b .sigpipe
+%patch607 -p1 -b .sigpipe
 %patch608 -p1 -b .askpass-ld
 # drop? %patch609 -p1 -b .x11
 # 
