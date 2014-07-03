@@ -132,8 +132,6 @@ Patch602: openssh-5.9p1-randclean.patch
 Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
 Patch604: openssh-6.6p1-keyperm.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1329 (WONTFIX)
-# drop: Patch605: openssh-5.8p2-remove-stale-control-socket.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1925
 Patch606: openssh-5.9p1-ipv6man.patch
 #?
@@ -372,7 +370,6 @@ popd
 # %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
 %patch604 -p1 -b .keyperm
-# drop %patch605 -p1 -b .remove_stale
 %patch606 -p1 -b .ipv6man
 %patch607 -p1 -b .sigpipe
 %patch608 -p1 -b .askpass-ld
