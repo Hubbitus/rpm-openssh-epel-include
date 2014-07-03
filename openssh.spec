@@ -139,7 +139,7 @@ Patch607: openssh-5.8p2-sigpipe.patch
 #?
 Patch608: openssh-6.1p1-askpass-ld.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
-# drop? Patch609: openssh-5.5p1-x11.patch
+Patch609: openssh-5.5p1-x11.patch
 
 #?
 Patch700: openssh-6.3p1-fips.patch
@@ -373,7 +373,7 @@ popd
 %patch606 -p1 -b .ipv6man
 %patch607 -p1 -b .sigpipe
 %patch608 -p1 -b .askpass-ld
-# drop? %patch609 -p1 -b .x11
+%patch609 -p1 -b .x11
 # 
 # move to the end %patch700 -p1 -b .fips
 # drop? %patch701 -p1 -b .exit-deadlock
