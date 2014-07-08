@@ -103,7 +103,7 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 Patch103: openssh-5.8p1-packet.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch200: openssh-6.4p1-audit.patch
+Patch200: openssh-6.6p1-audit.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -342,8 +342,6 @@ The module is most useful for su and sudo service stacks.
 # investigate %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
 
-# rework %patch200 -p1 -b .audit
-
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch300 -p1 -b .psaa-build
@@ -402,6 +400,8 @@ popd
 %patch907 -p1 -b .CLOCK_BOOTTIME
 %patch908 -p1 -b .CVE-2014-2653
 %patch909 -p1 -b .6.6.1
+
+%patch200 -p1 -b .audit
 
 %if 0
 # Nothing here yet
