@@ -127,7 +127,7 @@ Patch502: openssh-6.6p1-keycat.patch
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-6.6p1-allow-ip-opts.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1701
-Patch602: openssh-5.9p1-randclean.patch
+# merged Patch602: openssh-5.9p1-randclean.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
@@ -142,7 +142,7 @@ Patch608: openssh-6.1p1-askpass-ld.patch
 Patch609: openssh-5.5p1-x11.patch
 
 #?
-Patch700: openssh-6.3p1-fips.patch
+Patch700: openssh-6.6p1-fips.patch
 #?
 # drop? Patch701: openssh-5.6p1-exit-deadlock.patch
 #?
@@ -179,8 +179,6 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.6p1-kuserok.patch
 # use default_ccache_name from /etc/krb5.conf (#991186)
 Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
-# FIPS mode - adjust the key echange DH groups and ssh-keygen according to SP800-131A (#1001748)
-# merge: Patch904: openssh-6.4p1-FIPS-mode-SP800-131A.patch
 # Run ssh-copy-id in the legacy mode when SSH_COPY_ID_LEGACY variable is set (#969375
 Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 # Use tty allocation for a remote scp (#985650)
@@ -364,8 +362,6 @@ popd
 %patch502 -p1 -b .keycat
 
 %patch601 -p1 -b .ip-opts
-# merge to fips
-# %patch602 -p1 -b .randclean
 %patch603 -p1 -b .glob
 %patch604 -p1 -b .keyperm
 %patch606 -p1 -b .ipv6man
@@ -373,7 +369,6 @@ popd
 %patch608 -p1 -b .askpass-ld
 %patch609 -p1 -b .x11
 # 
-# move to the end %patch700 -p1 -b .fips
 # drop? %patch701 -p1 -b .exit-deadlock
 %patch702 -p1 -b .progress
 %patch703 -p1 -b .grab-info
@@ -402,6 +397,7 @@ popd
 %patch909 -p1 -b .6.6.1
 
 %patch200 -p1 -b .audit
+%patch700 -p1 -b .fips
 
 %if 0
 # Nothing here yet
