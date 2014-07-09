@@ -894,25 +894,30 @@ index 0f52b68..472a5b2 100644
  #ifdef USE_PAM
  		if (options.use_pam)
 diff --git a/cipher.c b/cipher.c
-index 53d9b4f..87317ab 100644
+index 53d9b4f..226e56d 100644
 --- a/cipher.c
 +++ b/cipher.c
-@@ -57,6 +57,7 @@ extern const EVP_CIPHER *evp_ssh1_bf(void);
+@@ -57,20 +57,6 @@ extern const EVP_CIPHER *evp_ssh1_bf(void);
  extern const EVP_CIPHER *evp_ssh1_3des(void);
  extern void ssh1_3des_iv(EVP_CIPHER_CTX *, int, u_char *, int);
  
-+#if 0
- struct Cipher {
- 	char	*name;
- 	int	number;		/* for ssh1 only */
-@@ -70,6 +71,7 @@ struct Cipher {
- #define CFLAG_CHACHAPOLY	(1<<1)
- 	const EVP_CIPHER	*(*evptype)(void);
- };
-+#endif
- 
+-struct Cipher {
+-	char	*name;
+-	int	number;		/* for ssh1 only */
+-	u_int	block_size;
+-	u_int	key_len;
+-	u_int	iv_len;		/* defaults to block_size */
+-	u_int	auth_len;
+-	u_int	discard_len;
+-	u_int	flags;
+-#define CFLAG_CBC		(1<<0)
+-#define CFLAG_CHACHAPOLY	(1<<1)
+-	const EVP_CIPHER	*(*evptype)(void);
+-};
+-
  static const struct Cipher ciphers[] = {
  	{ "none",	SSH_CIPHER_NONE, 8, 0, 0, 0, 0, 0, EVP_enc_null },
+ 	{ "des",	SSH_CIPHER_DES, 8, 8, 0, 0, 0, 1, EVP_des_cbc },
 diff --git a/cipher.h b/cipher.h
 index 133d2e7..d41758e 100644
 --- a/cipher.h
@@ -2038,7 +2043,7 @@ index 6a2f35e..e9b312e 100644
  void	 session_close(Session *);
  void	 do_setusercontext(struct passwd *);
 diff --git a/sshd.c b/sshd.c
-index 512c7ed..be1171b 100644
+index 512c7ed..b561ec8 100644
 --- a/sshd.c
 +++ b/sshd.c
 @@ -119,6 +119,7 @@
@@ -2074,7 +2079,7 @@ index 512c7ed..be1171b 100644
  static void
  close_startup_pipes(void)
  {
-@@ -562,22 +572,47 @@ sshd_exchange_identification(int sock_in, int sock_out)
+@@ -562,22 +572,45 @@ sshd_exchange_identification(int sock_in, int sock_out)
  	}
  }
  
@@ -2102,9 +2107,7 @@ index 512c7ed..be1171b 100644
 +			char *fp;
 +
 +			if (key_is_private(sensitive_data.host_keys[i]))
-+				fp = key_fingerprint(sensitive_data.host_keys[i],
-+					FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5,
-+					SSH_FP_HEX);
++				fp = key_selected_fingerprint(sensitive_data.host_keys[i], SSH_FP_HEX);
 +			else
 +				fp = NULL;
  			key_free(sensitive_data.host_keys[i]);
@@ -2125,7 +2128,7 @@ index 512c7ed..be1171b 100644
  			key_free(sensitive_data.host_certificates[i]);
  			sensitive_data.host_certificates[i] = NULL;
  		}
-@@ -591,6 +626,8 @@ void
+@@ -591,6 +624,8 @@ void
  demote_sensitive_data(void)
  {
  	Key *tmp;
@@ -2134,7 +2137,7 @@ index 512c7ed..be1171b 100644
  	int i;
  
  	if (sensitive_data.server_key) {
-@@ -599,13 +636,27 @@ demote_sensitive_data(void)
+@@ -599,13 +634,25 @@ demote_sensitive_data(void)
  		sensitive_data.server_key = tmp;
  	}
  
@@ -2145,9 +2148,7 @@ index 512c7ed..be1171b 100644
 +			char *fp;
 +
 +			if (key_is_private(sensitive_data.host_keys[i]))
-+				fp = key_fingerprint(sensitive_data.host_keys[i],
-+					FIPS_mode() ? SSH_FP_SHA1 : SSH_FP_MD5,
-+					SSH_FP_HEX);
++				fp = key_selected_fingerprint(sensitive_data.host_keys[i], SSH_FP_HEX);
 +			else
 +				fp = NULL;
  			tmp = key_demote(sensitive_data.host_keys[i]);
@@ -2162,7 +2163,7 @@ index 512c7ed..be1171b 100644
  		}
  		/* Certs do not need demotion */
  	}
-@@ -675,7 +726,7 @@ privsep_preauth(Authctxt *authctxt)
+@@ -675,7 +722,7 @@ privsep_preauth(Authctxt *authctxt)
  
  	if (use_privsep == PRIVSEP_ON)
  		box = ssh_sandbox_init(pmonitor);
@@ -2171,7 +2172,7 @@ index 512c7ed..be1171b 100644
  	if (pid == -1) {
  		fatal("fork of unprivileged child failed");
  	} else if (pid != 0) {
-@@ -729,6 +780,8 @@ privsep_preauth(Authctxt *authctxt)
+@@ -729,6 +776,8 @@ privsep_preauth(Authctxt *authctxt)
  	}
  }
  
@@ -2180,7 +2181,7 @@ index 512c7ed..be1171b 100644
  static void
  privsep_postauth(Authctxt *authctxt)
  {
-@@ -753,6 +806,10 @@ privsep_postauth(Authctxt *authctxt)
+@@ -753,6 +802,10 @@ privsep_postauth(Authctxt *authctxt)
  	else if (pmonitor->m_pid != 0) {
  		verbose("User child is on pid %ld", (long)pmonitor->m_pid);
  		buffer_clear(&loginmsg);
@@ -2191,7 +2192,7 @@ index 512c7ed..be1171b 100644
  		monitor_child_postauth(pmonitor);
  
  		/* NEVERREACHED */
-@@ -1211,6 +1268,7 @@ server_accept_loop(int *sock_in, int *sock_out, int *newsock, int *config_s)
+@@ -1211,6 +1264,7 @@ server_accept_loop(int *sock_in, int *sock_out, int *newsock, int *config_s)
  		if (received_sigterm) {
  			logit("Received signal %d; terminating.",
  			    (int) received_sigterm);
@@ -2199,7 +2200,7 @@ index 512c7ed..be1171b 100644
  			close_listen_socks();
  			unlink(options.pid_file);
  			exit(received_sigterm == SIGTERM ? 0 : 255);
-@@ -2134,6 +2192,7 @@ main(int ac, char **av)
+@@ -2134,6 +2188,7 @@ main(int ac, char **av)
  	 */
  	if (use_privsep) {
  		mm_send_keystate(pmonitor);
@@ -2207,7 +2208,7 @@ index 512c7ed..be1171b 100644
  		exit(0);
  	}
  
-@@ -2179,7 +2238,7 @@ main(int ac, char **av)
+@@ -2179,7 +2234,7 @@ main(int ac, char **av)
  		privsep_postauth(authctxt);
  		/* the monitor process [priv] will not return */
  		if (!compat20)
@@ -2216,7 +2217,7 @@ index 512c7ed..be1171b 100644
  	}
  
  	packet_set_timeout(options.client_alive_interval,
-@@ -2189,6 +2248,9 @@ main(int ac, char **av)
+@@ -2189,6 +2244,9 @@ main(int ac, char **av)
  	do_authenticated(authctxt);
  
  	/* The connection has been terminated. */
@@ -2226,7 +2227,7 @@ index 512c7ed..be1171b 100644
  	packet_get_state(MODE_IN, NULL, NULL, NULL, &ibytes);
  	packet_get_state(MODE_OUT, NULL, NULL, NULL, &obytes);
  	verbose("Transferred: sent %llu, received %llu bytes",
-@@ -2346,6 +2408,10 @@ do_ssh1_kex(void)
+@@ -2346,6 +2404,10 @@ do_ssh1_kex(void)
  		if (cookie[i] != packet_get_char())
  			packet_disconnect("IP Spoofing check bytes do not match.");
  
@@ -2237,7 +2238,7 @@ index 512c7ed..be1171b 100644
  	debug("Encryption type: %.200s", cipher_name(cipher_type));
  
  	/* Get the encrypted integer. */
-@@ -2418,7 +2484,7 @@ do_ssh1_kex(void)
+@@ -2418,7 +2480,7 @@ do_ssh1_kex(void)
  			session_id[i] = session_key[i] ^ session_key[i + 16];
  	}
  	/* Destroy the private and public keys. No longer. */
@@ -2246,7 +2247,7 @@ index 512c7ed..be1171b 100644
  
  	if (use_privsep)
  		mm_ssh1_session_id(session_id);
-@@ -2584,6 +2650,16 @@ do_ssh2_kex(void)
+@@ -2584,6 +2646,16 @@ do_ssh2_kex(void)
  void
  cleanup_exit(int i)
  {
@@ -2263,7 +2264,7 @@ index 512c7ed..be1171b 100644
  	if (the_authctxt) {
  		do_cleanup(the_authctxt);
  		if (use_privsep && privsep_is_preauth && pmonitor->m_pid > 1) {
-@@ -2594,9 +2670,14 @@ cleanup_exit(int i)
+@@ -2594,9 +2666,14 @@ cleanup_exit(int i)
  				    pmonitor->m_pid, strerror(errno));
  		}
  	}
