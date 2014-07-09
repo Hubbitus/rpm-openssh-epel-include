@@ -126,8 +126,6 @@ Patch502: openssh-6.6p1-keycat.patch
 
 #http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-6.6p1-allow-ip-opts.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1701
-# merged Patch602: openssh-5.9p1-randclean.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
@@ -389,7 +387,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .ccache_name
-# merge with fips %patch904 -p1 -b .SP800-131A
 %patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
 %patch907 -p1 -b .CLOCK_BOOTTIME
