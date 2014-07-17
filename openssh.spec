@@ -189,6 +189,8 @@ Patch908: openssh-6.6p1-CVE-2014-2653.patch
 # OpenSSH 6.5 and 6.6 sometimes encode a value used in the curve25519 key exchange incorrectly
 # Disable the curve25519 KEX when speaking to OpenSSH 6.5 or 6.6
 Patch909: openssh-5618210618256bbf5f4f71b2887ff186fd451736.patch
+# standardise on NI_MAXHOST for gethostname() string lengths (#1051490)
+Patch910: openssh-6.6.1p1-NI_MAXHOST.patch
 
 License: BSD
 Group: Applications/Internet
@@ -392,6 +394,7 @@ popd
 %patch907 -p1 -b .CLOCK_BOOTTIME
 %patch908 -p1 -b .CVE-2014-2653
 %patch909 -p1 -b .6.6.1
+%patch910 -p1 -b .NI_MAXHOST
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
