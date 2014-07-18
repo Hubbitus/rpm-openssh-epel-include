@@ -64,9 +64,9 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.6.1p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 2
+%define pam_ssh_agent_rel 3
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -611,7 +611,9 @@ getent passwd sshd >/dev/null || \
 
 %files
 %defattr(-,root,root)
-%doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
+%{!?_licensedir:%global license %%doc}
+%license LICENCE
+%doc CREDITS ChangeLog INSTALL OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -697,12 +699,16 @@ getent passwd sshd >/dev/null || \
 %if %{pam_ssh_agent}
 %files -n pam_ssh_agent_auth
 %defattr(-,root,root)
-%doc pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
+%{!?_licensedir:%global license %%doc}
+%license pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
 %attr(0755,root,root) %{_libdir}/security/pam_ssh_agent_auth.so
 %attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
 %endif
 
 %changelog
+* Fri Jul 18 2014 Tom Callaway <spot@fedoraproject.org> 6.6.1p1-4 + 0.9.3-3
+- fix license handling (both)
+
 * Fri Jul 18 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-3 + 0.9.3-2
 - standardise on NI_MAXHOST for gethostname() string lengths (#1051490)
 
