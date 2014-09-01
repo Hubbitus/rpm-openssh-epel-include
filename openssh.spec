@@ -191,6 +191,9 @@ Patch908: openssh-6.6p1-CVE-2014-2653.patch
 Patch909: openssh-5618210618256bbf5f4f71b2887ff186fd451736.patch
 # standardise on NI_MAXHOST for gethostname() string lengths (#1051490)
 Patch910: openssh-6.6.1p1-NI_MAXHOST.patch
+# set a client's address right after a connection is set
+# http://bugzilla.mindrot.org/show_bug.cgi?id=2257
+Patch911: openssh-6.6p1-set_remote_ipaddr.patch
 
 License: BSD
 Group: Applications/Internet
@@ -395,6 +398,7 @@ popd
 %patch908 -p1 -b .CVE-2014-2653
 %patch909 -p1 -b .6.6.1
 %patch910 -p1 -b .NI_MAXHOST
+%patch911 -p1 -b .set_remote_ipaddr
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
