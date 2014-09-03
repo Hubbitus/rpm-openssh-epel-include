@@ -194,6 +194,11 @@ Patch910: openssh-6.6.1p1-NI_MAXHOST.patch
 # set a client's address right after a connection is set
 # http://bugzilla.mindrot.org/show_bug.cgi?id=2257
 Patch911: openssh-6.6p1-set_remote_ipaddr.patch
+# apply RFC3454 stringprep to banners when possible
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2058
+# slightly changed patch from comment 10
+Patch912: openssh-6.6.1p1-utf8-banner.patch
+
 
 License: BSD
 Group: Applications/Internet
@@ -399,9 +404,11 @@ popd
 %patch909 -p1 -b .6.6.1
 %patch910 -p1 -b .NI_MAXHOST
 %patch911 -p1 -b .set_remote_ipaddr
+%patch912 -p1 -b .utf8-banner
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
+
 
 %if 0
 # Nothing here yet
