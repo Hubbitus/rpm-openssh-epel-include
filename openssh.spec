@@ -198,6 +198,9 @@ Patch911: openssh-6.6p1-set_remote_ipaddr.patch
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2058
 # slightly changed patch from comment 10
 Patch912: openssh-6.6.1p1-utf8-banner.patch
+# don't consider a partial success as a failure
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2270
+Patch913: openssh-6.6.1p1-partial-success.patch
 
 
 License: BSD
@@ -405,6 +408,7 @@ popd
 %patch910 -p1 -b .NI_MAXHOST
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
+%patch913 -p1 -b .partial-success
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
