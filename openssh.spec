@@ -201,6 +201,9 @@ Patch912: openssh-6.6.1p1-utf8-banner.patch
 # don't consider a partial success as a failure
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2270
 Patch913: openssh-6.6.1p1-partial-success.patch
+# fix parsing of empty options in sshd_conf
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2281
+Patch914: openssh-6.6.1p1-servconf-parser.patch
 
 
 License: BSD
@@ -409,6 +412,7 @@ popd
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
 %patch913 -p1 -b .partial-success
+%patch914 -p1 -b .servconf
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
