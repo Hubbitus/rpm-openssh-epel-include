@@ -204,6 +204,9 @@ Patch913: openssh-6.6.1p1-partial-success.patch
 # fix parsing of empty options in sshd_conf
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2281
 Patch914: openssh-6.6.1p1-servconf-parser.patch
+# Ignore SIGXFSZ in postauth monitor
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2263
+Patch915: openssh-6.6.1p1-ignore-SIGXFSZ-in-postauth.patch
 
 
 License: BSD
@@ -413,6 +416,7 @@ popd
 %patch912 -p1 -b .utf8-banner
 %patch913 -p1 -b .partial-success
 %patch914 -p1 -b .servconf
+%patch915 -p1 -b .SIGXFSZ
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
