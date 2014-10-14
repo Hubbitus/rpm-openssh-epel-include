@@ -207,6 +207,8 @@ Patch914: openssh-6.6.1p1-servconf-parser.patch
 # Ignore SIGXFSZ in postauth monitor
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2263
 Patch915: openssh-6.6.1p1-ignore-SIGXFSZ-in-postauth.patch
+# privsep_preauth: use SELinux context from selinux-policy (#1008580)
+Patch916: openssh-6.6.1p1-selinux-contexts.patch
 
 
 License: BSD
@@ -246,8 +248,8 @@ BuildRequires: libedit-devel ncurses-devel
 %endif
 
 %if %{WITH_SELINUX}
-Requires: libselinux >= 1.27.7
-BuildRequires: libselinux-devel >= 1.27.7
+Requires: libselinux >= 2.3-5
+BuildRequires: libselinux-devel >= 2.3-5
 Requires: audit-libs >= 1.0.8
 BuildRequires: audit-libs >= 1.0.8
 %endif
@@ -417,6 +419,7 @@ popd
 %patch913 -p1 -b .partial-success
 %patch914 -p1 -b .servconf
 %patch915 -p1 -b .SIGXFSZ
+%patch916 -p1 -b .contexts
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
