@@ -52,10 +52,11 @@ diff -up openssh-6.6p1/gss-serv-krb5.c.kuserok openssh-6.6p1/gss-serv-krb5.c
  		retval = 1;
  		logit("Authorized to %s, krb5 principal %s (krb5_kuserok)",
  		    name, (char *)client->displayname.value);
-diff -up openssh-6.6p1/servconf.c.kuserok openssh-6.6p1/servconf.c
---- openssh-6.6p1/servconf.c.kuserok	2014-05-07 10:35:30.783053881 +0200
-+++ openssh-6.6p1/servconf.c	2014-05-07 10:39:13.133189061 +0200
-@@ -157,6 +157,7 @@ initialize_server_options(ServerOptions
+diff --git a/servconf.c b/servconf.c
+index 68fb9ef..904c869 100644
+--- a/servconf.c
++++ b/servconf.c
+@@ -157,6 +157,7 @@ initialize_server_options(ServerOptions *options)
  	options->ip_qos_interactive = -1;
  	options->ip_qos_bulk = -1;
  	options->version_addendum = NULL;
@@ -63,12 +64,12 @@ diff -up openssh-6.6p1/servconf.c.kuserok openssh-6.6p1/servconf.c
  }
  
  void
-@@ -312,6 +313,8 @@ fill_default_server_options(ServerOption
+@@ -312,6 +313,8 @@ fill_default_server_options(ServerOptions *options)
  		options->version_addendum = xstrdup("");
  	if (options->show_patchlevel == -1)
  		options->show_patchlevel = 0;
 +	if (options->use_kuserok == -1)
-+		options->use_kuserok = 0;
++		options->use_kuserok = 1;
  
  	/* Turn privilege separation on by default */
  	if (use_privsep == -1)
@@ -95,7 +96,7 @@ diff -up openssh-6.6p1/servconf.c.kuserok openssh-6.6p1/servconf.c
  #endif
  	{ "kerberostgtpassing", sUnsupported, SSHCFG_GLOBAL },
  	{ "afstokenpassing", sUnsupported, SSHCFG_GLOBAL },
-@@ -1526,6 +1531,10 @@ process_server_config_line(ServerOptions
+@@ -1526,6 +1531,10 @@ process_server_config_line(ServerOptions *options, char *line,
  		*activep = value;
  		break;
  
@@ -106,7 +107,7 @@ diff -up openssh-6.6p1/servconf.c.kuserok openssh-6.6p1/servconf.c
  	case sPermitOpen:
  		arg = strdelim(&cp);
  		if (!arg || *arg == '\0')
-@@ -1811,6 +1820,7 @@ copy_set_server_options(ServerOptions *d
+@@ -1811,6 +1820,7 @@ copy_set_server_options(ServerOptions *dst, ServerOptions *src, int preauth)
  	M_CP_INTOPT(max_authtries);
  	M_CP_INTOPT(ip_qos_interactive);
  	M_CP_INTOPT(ip_qos_bulk);
@@ -122,9 +123,10 @@ diff -up openssh-6.6p1/servconf.c.kuserok openssh-6.6p1/servconf.c
  
  	/* string arguments */
  	dump_cfg_string(sPidFile, o->pid_file);
-diff -up openssh-6.6p1/servconf.h.kuserok openssh-6.6p1/servconf.h
---- openssh-6.6p1/servconf.h.kuserok	2014-05-07 10:35:30.783053881 +0200
-+++ openssh-6.6p1/servconf.h	2014-05-07 10:35:30.802053808 +0200
+diff --git a/servconf.h b/servconf.h
+index 37cfa9b..5117dfa 100644
+--- a/servconf.h
++++ b/servconf.h
 @@ -173,6 +173,7 @@ typedef struct {
  
  	int	num_permitted_opens;
@@ -133,17 +135,30 @@ diff -up openssh-6.6p1/servconf.h.kuserok openssh-6.6p1/servconf.h
  	char   *chroot_directory;
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
-diff -up openssh-6.6p1/sshd_config.5.kuserok openssh-6.6p1/sshd_config.5
---- openssh-6.6p1/sshd_config.5.kuserok	2014-05-07 10:35:30.786053870 +0200
-+++ openssh-6.6p1/sshd_config.5	2014-05-07 10:43:04.784285016 +0200
-@@ -697,6 +697,10 @@ Specifies whether to automatically destr
+diff --git a/sshd_config b/sshd_config
+index adfd7b1..e772ed5 100644
+--- a/sshd_config
++++ b/sshd_config
+@@ -87,6 +87,7 @@ ChallengeResponseAuthentication no
+ #KerberosOrLocalPasswd yes
+ #KerberosTicketCleanup yes
+ #KerberosGetAFSToken no
++#KerberosUseKuserok yes
+ 
+ # GSSAPI options
+ GSSAPIAuthentication yes
+diff --git a/sshd_config.5 b/sshd_config.5
+index 1fb002d..e0e5fff 100644
+--- a/sshd_config.5
++++ b/sshd_config.5
+@@ -697,6 +697,10 @@ Specifies whether to automatically destroy the user's ticket cache
  file on logout.
  The default is
  .Dq yes .
 +.It Cm KerberosUseKuserok
 +Specifies whether to look at .k5login file for user's aliases.
 +The default is
-+.Dq no .
++.Dq yes .
  .It Cm KexAlgorithms
  Specifies the available KEX (Key Exchange) algorithms.
  Multiple algorithms must be comma-separated.
@@ -155,14 +170,3 @@ diff -up openssh-6.6p1/sshd_config.5.kuserok openssh-6.6p1/sshd_config.5
  .Cm MaxAuthTries ,
  .Cm MaxSessions ,
  .Cm PasswordAuthentication ,
-diff -up openssh-6.6p1/sshd_config.kuserok openssh-6.6p1/sshd_config
---- openssh-6.6p1/sshd_config.kuserok	2014-05-07 10:35:30.803053804 +0200
-+++ openssh-6.6p1/sshd_config	2014-05-07 10:38:30.735354431 +0200
-@@ -87,6 +87,7 @@ ChallengeResponseAuthentication no
- #KerberosOrLocalPasswd yes
- #KerberosTicketCleanup yes
- #KerberosGetAFSToken no
-+#KerberosUseKuserok no
- 
- # GSSAPI options
- GSSAPIAuthentication yes
