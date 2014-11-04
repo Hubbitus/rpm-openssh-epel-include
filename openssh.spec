@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.6.1p1
-%define openssh_rel 5
+%define openssh_rel 6
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -732,6 +732,15 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Nov 04 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-6 + 0.9.3-3
+- privsep_preauth: use SELinux context from selinux-policy (#1008580)
+- change audit trail for unknown users (mindrot#2245)
+- fix kuserok patch which checked for the existence of .k5login
+  unconditionally and hence prevented other mechanisms to be used properly
+- revert the default of KerberosUseKuserok back to yes (#1153076)
+- ignore SIGXFSZ in postauth monitor (mindrot#2263)
+- sshd-keygen - don't generate DSA and ED25519 host keys in FIPS mode
+
 * Mon Sep 08 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-5 + 0.9.3-3
 - set a client's address right after a connection is set (mindrot#2257)
 - apply RFC3454 stringprep to banners when possible (mindrot#2058)
