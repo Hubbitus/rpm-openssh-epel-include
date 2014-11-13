@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.6.1p1
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -732,6 +732,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Nov 13 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-8 + 0.9.3-3
+- fix gsskex patch to correctly handle MONITOR_REQ_GSSSIGN request (#1118005)
+
 * Fri Nov 07 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-7 + 0.9.3-3
 - correct the calculation of bytes for authctxt->krb5_ccname <ams@corefiling.com> (#1161073)
 
