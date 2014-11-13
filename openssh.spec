@@ -93,7 +93,7 @@ Source13: sshd-keygen
 Patch0: openssh-5.9p1-wIm.patch
 
 #?
-Patch100: openssh-6.3p1-coverity.patch
+Patch100: openssh-6.6.1p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch101: openssh-6.6p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
@@ -354,7 +354,6 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .wIm
 %endif
 
-# rework %patch100 -p1 -b .coverity
 %patch101 -p1 -b .fingerprint
 # investigate %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
@@ -424,6 +423,7 @@ popd
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
 
+%patch100 -p1 -b .coverity
 
 %if 0
 # Nothing here yet
