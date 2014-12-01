@@ -209,7 +209,8 @@ Patch914: openssh-6.6.1p1-servconf-parser.patch
 Patch915: openssh-6.6.1p1-ignore-SIGXFSZ-in-postauth.patch
 # privsep_preauth: use SELinux context from selinux-policy (#1008580)
 Patch916: openssh-6.6.1p1-selinux-contexts.patch
-
+# use different values for DH for Cisco servers (#1026430)
+Patch917: openssh-6.6.1p1-cisco-dh-keys.patch
 
 License: BSD
 Group: Applications/Internet
@@ -419,6 +420,7 @@ popd
 %patch914 -p1 -b .servconf
 %patch915 -p1 -b .SIGXFSZ
 %patch916 -p1 -b .contexts
+%patch917 -p1 -b .cisco-dh
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
