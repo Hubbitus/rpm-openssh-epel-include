@@ -152,7 +152,7 @@ Patch703: openssh-4.3p2-askpass-grab-info.patch
 #?
 Patch705: openssh-5.1p1-scp-manpage.patch
 #?
-Patch706: openssh-5.8p1-localdomain.patch
+Patch706: openssh-6.6.1p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch707: openssh-6.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
