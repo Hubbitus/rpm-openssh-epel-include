@@ -104,6 +104,9 @@ Patch103: openssh-5.8p1-packet.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 Patch200: openssh-6.6p1-audit.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1171248
+# record pfs= field in CRYPTO_SESSION audit event
+Patch201: openssh-6.6.1p1-audit-pfs.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -423,6 +426,7 @@ popd
 %patch917 -p1 -b .cisco-dh
 
 %patch200 -p1 -b .audit
+%patch201 -p1 -b .audit-fps
 %patch700 -p1 -b .fips
 
 %patch100 -p1 -b .coverity
