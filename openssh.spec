@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.6.1p1
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -741,6 +741,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Dec 19 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-10 + 0.9.3-3
+- log via monitor in chroots without /dev/log
+
 * Wed Dec 03 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-9 + 0.9.3-3
 - the .local domain example should be in ssh_config, not in sshd_config
 - use different values for DH for Cisco servers (#1026430)
