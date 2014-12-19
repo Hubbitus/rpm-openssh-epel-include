@@ -214,6 +214,8 @@ Patch915: openssh-6.6.1p1-ignore-SIGXFSZ-in-postauth.patch
 Patch916: openssh-6.6.1p1-selinux-contexts.patch
 # use different values for DH for Cisco servers (#1026430)
 Patch917: openssh-6.6.1p1-cisco-dh-keys.patch
+# log via monitor in chroots without /dev/log
+Patch918: openssh-6.6.1p1-log-in-chroot.patch
 
 License: BSD
 Group: Applications/Internet
@@ -424,6 +426,7 @@ popd
 %patch915 -p1 -b .SIGXFSZ
 %patch916 -p1 -b .contexts
 %patch917 -p1 -b .cisco-dh
+%patch918 -p1 -b .log-in-chroot
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-fps
