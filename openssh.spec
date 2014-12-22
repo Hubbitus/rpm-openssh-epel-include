@@ -95,7 +95,7 @@ Patch0: openssh-5.9p1-wIm.patch
 #?
 Patch100: openssh-6.6.1p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch101: openssh-6.6p1-fingerprint.patch
+Patch101: openssh-6.7p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
 Patch102: openssh-5.8p1-getaddrinfo.patch
