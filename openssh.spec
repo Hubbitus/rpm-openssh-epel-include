@@ -218,6 +218,8 @@ Patch917: openssh-6.6.1p1-cisco-dh-keys.patch
 Patch918: openssh-6.6.1p1-log-in-chroot.patch
 # scp file into non-existing directory (#1142223)
 Patch919: openssh-6.6.1p1-scp-non-existing-directory.patch
+# Config parser shouldn't accept ip/port syntax (#1130733)
+Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 
 License: BSD
 Group: Applications/Internet
@@ -430,6 +432,7 @@ popd
 %patch917 -p1 -b .cisco-dh
 %patch918 -p1 -b .log-in-chroot
 %patch919 -p1 -b .scp
+%patch920 -p1 -b .config
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-fps
