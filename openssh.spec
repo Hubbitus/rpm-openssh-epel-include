@@ -216,6 +216,8 @@ Patch916: openssh-6.6.1p1-selinux-contexts.patch
 Patch917: openssh-6.6.1p1-cisco-dh-keys.patch
 # log via monitor in chroots without /dev/log
 Patch918: openssh-6.6.1p1-log-in-chroot.patch
+# scp file into non-existing directory (#1142223)
+Patch919: openssh-6.6.1p1-scp-non-existing-directory.patch
 
 License: BSD
 Group: Applications/Internet
@@ -427,6 +429,7 @@ popd
 %patch916 -p1 -b .contexts
 %patch917 -p1 -b .cisco-dh
 %patch918 -p1 -b .log-in-chroot
+%patch919 -p1 -b .scp
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-fps
