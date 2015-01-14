@@ -64,7 +64,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.6.1p1
-%define openssh_rel 10
+%define openssh_rel 11
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 3
 
@@ -751,6 +751,14 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Dec 19 2014 Jakub Jelen <jjelen@redhat.com> 6.6.1p1-11 + 0.9.3-3
+- error message if scp when directory doesn't exist (#1142223)
+- parsing configuration file values (#1130733)
+- documentation in service and socket files for systemd (#1181593)
+- updated ldap patch (#981058)
+- fixed vendor-patchlevel
+- add new option GSSAPIEnablek5users and disable using ~/.k5users by default CVE-2014-9278 (#1170745)
+
 * Fri Dec 19 2014 Petr Lautrbach <plautrba@redhat.com> 6.6.1p1-10 + 0.9.3-3
 - log via monitor in chroots without /dev/log
 
