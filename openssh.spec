@@ -175,6 +175,9 @@ Patch713: openssh-6.6p1-ctr-cavstest.patch
 Patch800: openssh-6.6p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
 Patch801: openssh-6.6p1-force_krb.patch
+# add new option GSSAPIEnablek5users and disable using ~/.k5users by default (#1169843)
+# CVE-2014-9278
+Patch802: openssh-6.6p1-GSSAPIEnablek5users.patch
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.6p1-kuserok.patch
@@ -433,6 +436,7 @@ popd
 %patch918 -p1 -b .log-in-chroot
 %patch919 -p1 -b .scp
 %patch920 -p1 -b .config
+%patch802 -p1 -b .GSSAPIEnablek5users
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-fps
