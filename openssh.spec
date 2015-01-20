@@ -219,6 +219,10 @@ Patch918: openssh-6.6.1p1-log-in-chroot.patch
 Patch919: openssh-6.6.1p1-scp-non-existing-directory.patch
 # Config parser shouldn't accept ip/port syntax (#1130733)
 Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
+# restore tcp wrappers support, based on Debian patch
+# https://lists.mindrot.org/pipermail/openssh-unix-dev/2014-April/032497.html
+Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
+
 
 License: BSD
 Group: Applications/Internet
@@ -424,6 +428,7 @@ popd
 %patch919 -p1 -b .scp
 %patch920 -p1 -b .config
 %patch802 -p1 -b .GSSAPIEnablek5users
+%patch921 -p1 -b .tcp_wrappers
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
