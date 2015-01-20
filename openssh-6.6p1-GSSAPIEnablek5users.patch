@@ -1,5 +1,5 @@
 diff --git a/gss-serv-krb5.c b/gss-serv-krb5.c
-index 0a4930e..a7c0c5f 100644
+index 961c564..0fcfd7b 100644
 --- a/gss-serv-krb5.c
 +++ b/gss-serv-krb5.c
 @@ -260,7 +260,6 @@ ssh_gssapi_krb5_cmdok(krb5_principal principal, const char *name,
@@ -20,27 +20,27 @@ index 0a4930e..a7c0c5f 100644
                                          k5login_exists);
  	}
 diff --git a/servconf.c b/servconf.c
-index d482e79..ad5869b 100644
+index e4164b1..87a311b 100644
 --- a/servconf.c
 +++ b/servconf.c
-@@ -158,6 +158,7 @@ initialize_server_options(ServerOptions *options)
- 	options->ip_qos_bulk = -1;
+@@ -164,6 +164,7 @@ initialize_server_options(ServerOptions *options)
  	options->version_addendum = NULL;
+ 	options->fingerprint_hash = -1;
  	options->use_kuserok = -1;
 +	options->enable_k5users = -1;
  }
  
  void
-@@ -315,6 +316,8 @@ fill_default_server_options(ServerOptions *options)
- 		options->show_patchlevel = 0;
+@@ -331,6 +332,8 @@ fill_default_server_options(ServerOptions *options)
+ 		options->fingerprint_hash = SSH_FP_HASH_DEFAULT;
  	if (options->use_kuserok == -1)
  		options->use_kuserok = 1;
 +	if (options->enable_k5users == -1)
 +		options->enable_k5users = 0;
- 
  	/* Turn privilege separation on by default */
  	if (use_privsep == -1)
-@@ -356,7 +359,7 @@ typedef enum {
+ 		use_privsep = PRIVSEP_NOSANDBOX;
+@@ -371,7 +374,7 @@ typedef enum {
  	sBanner, sShowPatchLevel, sUseDNS, sHostbasedAuthentication,
  	sHostbasedUsesNameFromPacketOnly, sClientAliveInterval,
  	sClientAliveCountMax, sAuthorizedKeysFile,
@@ -49,7 +49,7 @@ index d482e79..ad5869b 100644
  	sGssKeyEx, sGssStoreRekey, sAcceptEnv, sPermitTunnel,
  	sMatch, sPermitOpen, sForceCommand, sChrootDirectory,
  	sUsePrivilegeSeparation, sAllowAgentForwarding,
-@@ -430,6 +433,7 @@ static struct {
+@@ -447,6 +450,7 @@ static struct {
  	{ "gssapistrictacceptorcheck", sGssStrictAcceptor, SSHCFG_GLOBAL },
  	{ "gssapikeyexchange", sGssKeyEx, SSHCFG_GLOBAL },
  	{ "gssapistorecredentialsonrekey", sGssStoreRekey, SSHCFG_GLOBAL },
@@ -57,7 +57,7 @@ index d482e79..ad5869b 100644
  #else
  	{ "gssapiauthentication", sUnsupported, SSHCFG_ALL },
  	{ "gssapicleanupcredentials", sUnsupported, SSHCFG_GLOBAL },
-@@ -437,6 +441,7 @@ static struct {
+@@ -454,6 +458,7 @@ static struct {
  	{ "gssapistrictacceptorcheck", sUnsupported, SSHCFG_GLOBAL },
  	{ "gssapikeyexchange", sUnsupported, SSHCFG_GLOBAL },
  	{ "gssapistorecredentialsonrekey", sUnsupported, SSHCFG_GLOBAL },
@@ -65,7 +65,7 @@ index d482e79..ad5869b 100644
  #endif
  	{ "gssusesessionccache", sUnsupported, SSHCFG_GLOBAL },
  	{ "gssapiusesessioncredcache", sUnsupported, SSHCFG_GLOBAL },
-@@ -1536,6 +1541,10 @@ process_server_config_line(ServerOptions *options, char *line,
+@@ -1566,6 +1571,10 @@ process_server_config_line(ServerOptions *options, char *line,
  		intptr = &options->use_kuserok;
  		goto parse_flag;
  
@@ -76,7 +76,7 @@ index d482e79..ad5869b 100644
  	case sPermitOpen:
  		arg = strdelim(&cp);
  		if (!arg || *arg == '\0')
-@@ -1824,6 +1833,7 @@ copy_set_server_options(ServerOptions *dst, ServerOptions *src, int preauth)
+@@ -1884,6 +1893,7 @@ copy_set_server_options(ServerOptions *dst, ServerOptions *src, int preauth)
  	M_CP_INTOPT(ip_qos_interactive);
  	M_CP_INTOPT(ip_qos_bulk);
  	M_CP_INTOPT(use_kuserok);
@@ -84,19 +84,19 @@ index d482e79..ad5869b 100644
  	M_CP_INTOPT(rekey_limit);
  	M_CP_INTOPT(rekey_interval);
  
-@@ -2076,6 +2086,7 @@ dump_config(ServerOptions *o)
- 	dump_cfg_fmtint(sAllowTcpForwarding, o->allow_tcp_forwarding);
+@@ -2143,6 +2153,7 @@ dump_config(ServerOptions *o)
  	dump_cfg_fmtint(sUsePrivilegeSeparation, use_privsep);
+ 	dump_cfg_fmtint(sFingerprintHash, o->fingerprint_hash);
  	dump_cfg_fmtint(sKerberosUseKuserok, o->use_kuserok);
 +	dump_cfg_fmtint(sGssEnablek5users, o->enable_k5users);
  
  	/* string arguments */
  	dump_cfg_string(sPidFile, o->pid_file);
 diff --git a/servconf.h b/servconf.h
-index 5117dfa..d63cb71 100644
+index cf2a505..070a8ed 100644
 --- a/servconf.h
 +++ b/servconf.h
-@@ -173,7 +173,8 @@ typedef struct {
+@@ -175,7 +175,8 @@ typedef struct {
  
  	int	num_permitted_opens;
  
@@ -107,7 +107,7 @@ index 5117dfa..d63cb71 100644
  	char   *revoked_keys_file;
  	char   *trusted_user_ca_keys;
 diff --git a/sshd_config b/sshd_config
-index 43671f6..6ab00ed 100644
+index 0d9454d..e731de1 100644
 --- a/sshd_config
 +++ b/sshd_config
 @@ -94,6 +94,7 @@ GSSAPIAuthentication yes
@@ -119,10 +119,10 @@ index 43671f6..6ab00ed 100644
  # Set this to 'yes' to enable PAM authentication, account processing,
  # and session processing. If this is enabled, PAM authentication will
 diff --git a/sshd_config.5 b/sshd_config.5
-index e0e5fff..aa9525d 100644
+index eb4dd9e..ce1229b 100644
 --- a/sshd_config.5
 +++ b/sshd_config.5
-@@ -505,6 +505,12 @@ on logout.
+@@ -548,6 +548,12 @@ on logout.
  The default is
  .Dq yes .
  Note that this option applies to protocol version 2 only.

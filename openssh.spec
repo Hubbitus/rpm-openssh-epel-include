@@ -63,10 +63,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.6.1p1
-%define openssh_rel 11.1
+%define openssh_ver 6.7p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 3
+%define pam_ssh_agent_rel 4
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -74,8 +74,7 @@ Version: %{openssh_ver}
 Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
-# Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
-Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-6.6p1.tar.gz
+Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
 #Source1: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz.asc
 Source2: sshd.pam
 Source3: sshd.init
@@ -103,10 +102,9 @@ Patch102: openssh-5.8p1-getaddrinfo.patch
 Patch103: openssh-5.8p1-packet.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
-Patch200: openssh-6.6p1-audit.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1171248
 # record pfs= field in CRYPTO_SESSION audit event
-Patch201: openssh-6.6.1p1-audit-pfs.patch
+Patch200: openssh-6.7p1-audit.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -117,13 +115,15 @@ Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 # don't use xfree (#1024965)
 Patch303: pam_ssh_agent_auth-0.9.3-no-xfree.patch
+# use SSH_DIGEST_* for fingerprint hashes
+Patch304: pam_ssh_agent_auth-0.9.3-fingerprint-hash.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.6p1-role-mls.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
 Patch404: openssh-6.6p1-privsep-selinux.patch
 
 #?-- unwanted child :(
-Patch501: openssh-6.6p1-ldap.patch
+Patch501: openssh-6.7p1-ldap.patch
 #?
 Patch502: openssh-6.6p1-keycat.patch
 
@@ -143,15 +143,11 @@ Patch608: openssh-6.1p1-askpass-ld.patch
 Patch609: openssh-5.5p1-x11.patch
 
 #?
-Patch700: openssh-6.6p1-fips.patch
-#?
-# drop? Patch701: openssh-5.6p1-exit-deadlock.patch
+Patch700: openssh-6.7p1-fips.patch
 #?
 Patch702: openssh-5.1p1-askpass-progress.patch
 #?
 Patch703: openssh-4.3p2-askpass-grab-info.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=205842
-# drop? Patch704: openssh-5.9p1-edns.patch
 #?
 Patch705: openssh-5.1p1-scp-manpage.patch
 #?
@@ -361,7 +357,7 @@ remote ssh-agent instance.
 The module is most useful for su and sudo service stacks.
 
 %prep
-%setup -q -a 4 -n openssh-6.6p1
+%setup -q -a 4
 #Do not enable by default
 %if 0
 %patch0 -p1 -b .wIm
@@ -377,6 +373,7 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch301 -p1 -b .psaa-seteuid
 %patch302 -p1 -b .psaa-visibility
 %patch303 -p1 -b .psaa-xfree
+%patch304 -p2 -b .psaa-fingerprint
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
@@ -399,13 +396,8 @@ popd
 %patch607 -p1 -b .sigpipe
 %patch608 -p1 -b .askpass-ld
 %patch609 -p1 -b .x11
-# 
-# drop? %patch701 -p1 -b .exit-deadlock
 %patch702 -p1 -b .progress
 %patch703 -p1 -b .grab-info
-# investigate - https://bugzilla.redhat.com/show_bug.cgi?id=205842
-# probably not needed anymore %patch704 -p1 -b .edns
-# drop it %patch705 -p1 -b .manpage
 %patch706 -p1 -b .localdomain
 %patch707 -p1 -b .redhat
 %patch708 -p1 -b .entropy
@@ -422,15 +414,10 @@ popd
 %patch902 -p1 -b .ccache_name
 %patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
-%patch907 -p1 -b .CLOCK_BOOTTIME
-%patch908 -p1 -b .CVE-2014-2653
-%patch909 -p1 -b .6.6.1
-%patch910 -p1 -b .NI_MAXHOST
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
 %patch913 -p1 -b .partial-success
 %patch914 -p1 -b .servconf
-%patch915 -p1 -b .SIGXFSZ
 %patch916 -p1 -b .contexts
 %patch917 -p1 -b .cisco-dh
 %patch918 -p1 -b .log-in-chroot
@@ -439,10 +426,10 @@ popd
 %patch802 -p1 -b .GSSAPIEnablek5users
 
 %patch200 -p1 -b .audit
-%patch201 -p1 -b .audit-fps
 %patch700 -p1 -b .fips
 
-%patch100 -p1 -b .coverity
+# FIXME rebase 6.7p1
+# %patch100 -p1 -b .coverity
 
 %if 0
 # Nothing here yet
@@ -751,6 +738,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Jan 20 2015 Petr Lautrbach <plautrba@redhat.com> 6.7p1-1 + 0.9.3-4
+- new upstream release openssh-6.7p1
+
 * Thu Jan 15 2015 Jakub Jelen <jjelen@redhat.com> 6.6.1p1-11.1 + 0.9.3-3
 - error message if scp when directory doesn't exist (#1142223)
 - parsing configuration file values (#1130733)

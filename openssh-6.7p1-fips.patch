@@ -1,8 +1,8 @@
 diff --git a/Makefile.in b/Makefile.in
-index 3bb7f00..294bef5 100644
+index 9311e16..1eb2b45 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -154,25 +154,25 @@ libssh.a: $(LIBSSH_OBJS)
+@@ -164,25 +164,25 @@ libssh.a: $(LIBSSH_OBJS)
  	$(RANLIB) $@
  
  ssh$(EXEEXT): $(LIBCOMPAT) libssh.a $(SSHOBJS)
@@ -34,7 +34,7 @@ index 3bb7f00..294bef5 100644
  
  ssh-pkcs11-helper$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-pkcs11-helper.o ssh-pkcs11.o
  	$(LD) -o $@ ssh-pkcs11-helper.o ssh-pkcs11.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lopenbsd-compat $(LIBS)
-@@ -187,7 +187,7 @@ ctr-cavstest$(EXEEXT): $(LIBCOMPAT) libssh.a ctr-cavstest.o
+@@ -197,7 +197,7 @@ ctr-cavstest$(EXEEXT): $(LIBCOMPAT) libssh.a ctr-cavstest.o
  	$(LD) -o $@ ctr-cavstest.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lfipscheck $(LIBS)
  
  ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
@@ -43,77 +43,6 @@ index 3bb7f00..294bef5 100644
  
  sftp-server$(EXEEXT): $(LIBCOMPAT) libssh.a sftp.o sftp-common.o sftp-server.o sftp-server-main.o
  	$(LD) -o $@ sftp-server.o sftp-common.o sftp-server-main.o $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS)
-diff --git a/auth-rsa.c b/auth-rsa.c
-index f225b0b..8bafcd6 100644
---- a/auth-rsa.c
-+++ b/auth-rsa.c
-@@ -244,7 +244,7 @@ rsa_key_allowed_in_file(struct passwd *pw, char *file,
- 			    "actual %d vs. announced %d.",
- 			    file, linenum, BN_num_bits(key->rsa->n), bits);
- 
--		fp = key_fingerprint(key, SSH_FP_MD5, SSH_FP_HEX);
-+		fp = key_selected_fingerprint(key, SSH_FP_HEX);
- 		debug("matching key found: file %s, line %lu %s %s",
- 		    file, linenum, key_type(key), fp);
- 		free(fp);
-diff --git a/auth2-pubkey.c b/auth2-pubkey.c
-index 6d1c872..3808ec8 100644
---- a/auth2-pubkey.c
-+++ b/auth2-pubkey.c
-@@ -214,8 +214,7 @@ pubkey_auth_info(Authctxt *authctxt, const Key *key, const char *fmt, ...)
- 	}
- 
- 	if (key_is_cert(key)) {
--		fp = key_fingerprint(key->cert->signature_key,
--		    SSH_FP_MD5, SSH_FP_HEX);
-+		fp = key_selected_fingerprint(key->cert->signature_key, SSH_FP_HEX);
- 		auth_info(authctxt, "%s ID %s (serial %llu) CA %s %s%s%s", 
- 		    key_type(key), key->cert->key_id,
- 		    (unsigned long long)key->cert->serial,
-@@ -223,7 +222,7 @@ pubkey_auth_info(Authctxt *authctxt, const Key *key, const char *fmt, ...)
- 		    extra == NULL ? "" : ", ", extra == NULL ? "" : extra);
- 		free(fp);
- 	} else {
--		fp = key_fingerprint(key, SSH_FP_MD5, SSH_FP_HEX);
-+		fp = key_selected_fingerprint(key, SSH_FP_HEX);
- 		auth_info(authctxt, "%s %s%s%s", key_type(key), fp,
- 		    extra == NULL ? "" : ", ", extra == NULL ? "" : extra);
- 		free(fp);
-diff --git a/authfile.c b/authfile.c
-index ec4f4ff..2b3d650 100644
---- a/authfile.c
-+++ b/authfile.c
-@@ -46,6 +46,7 @@
- #include <openssl/err.h>
- #include <openssl/evp.h>
- #include <openssl/pem.h>
-+#include <openssl/fips.h>
- 
- /* compatibility with old or broken OpenSSL versions */
- #include "openbsd-compat/openssl-compat.h"
-@@ -1068,7 +1069,7 @@ Key *
- key_parse_private(Buffer *buffer, const char *filename,
-     const char *passphrase, char **commentp)
- {
--	Key *pub, *prv;
-+	Key *pub, *prv = NULL;
- 
- 	/* it's a SSH v1 key if the public key part is readable */
- 	pub = key_parse_public_rsa1(buffer, commentp);
-@@ -1080,9 +1081,10 @@ key_parse_private(Buffer *buffer, const char *filename,
- 			*commentp = xstrdup(filename);
- 	} else {
- 		key_free(pub);
--		/* key_parse_public_rsa1() has already loaded the comment */
--		prv = key_parse_private_type(buffer, KEY_RSA1, passphrase,
--		    NULL);
-+		if (! FIPS_mode())
-+			/* key_parse_public_rsa1() has already loaded the comment */
-+			prv = key_parse_private_type(buffer, KEY_RSA1, passphrase,
-+			    NULL);
- 	}
- 	return prv;
- }
 diff --git a/cipher-ctr.c b/cipher-ctr.c
 index 73e9c7c..40ee395 100644
 --- a/cipher-ctr.c
@@ -129,7 +58,7 @@ index 73e9c7c..40ee395 100644
  	return (&aes_ctr);
  }
 diff --git a/cipher.c b/cipher.c
-index 226e56d..b19443c 100644
+index 9cc7cf8..5ebfa84 100644
 --- a/cipher.c
 +++ b/cipher.c
 @@ -39,6 +39,8 @@
@@ -141,11 +70,11 @@ index 226e56d..b19443c 100644
  #include <string.h>
  #include <stdarg.h>
  #include <stdio.h>
-@@ -90,6 +92,25 @@ static const struct Cipher ciphers[] = {
+@@ -99,6 +101,26 @@ static const struct sshcipher ciphers[] = {
  	{ NULL,		SSH_CIPHER_INVALID, 0, 0, 0, 0, 0, 0, NULL }
  };
  
-+static const struct Cipher fips_ciphers[] = {
++static const struct sshcipher fips_ciphers[] = {
 +	{ "none",	SSH_CIPHER_NONE, 8, 0, 0, 0, 0, 0, EVP_enc_null },
 +	{ "3des-cbc",	SSH_CIPHER_SSH2, 8, 24, 0, 0, 0, 1, EVP_des_ede3_cbc },
 +	{ "aes128-cbc",	SSH_CIPHER_SSH2, 16, 16, 0, 0, 0, 1, EVP_aes_128_cbc },
@@ -164,38 +93,39 @@ index 226e56d..b19443c 100644
 +#endif
 +	{ NULL,		SSH_CIPHER_INVALID, 0, 0, 0, 0, 0, 0, NULL }
 +};
++
  /*--*/
  
- /* Returns a list of supported ciphers separated by the specified char. */
-@@ -100,7 +121,7 @@ cipher_alg_list(char sep, int auth_only)
+ /* Returns a comma-separated list of supported ciphers. */
+@@ -109,7 +131,7 @@ cipher_alg_list(char sep, int auth_only)
  	size_t nlen, rlen = 0;
- 	const Cipher *c;
+ 	const struct sshcipher *c;
  
 -	for (c = ciphers; c->name != NULL; c++) {
 +	for (c = FIPS_mode() ? fips_ciphers : ciphers; c->name != NULL; c++) {
  		if (c->number != SSH_CIPHER_SSH2)
  			continue;
  		if (auth_only && c->auth_len == 0)
-@@ -180,7 +201,7 @@ const Cipher *
+@@ -193,7 +215,7 @@ const struct sshcipher *
  cipher_by_name(const char *name)
  {
- 	const Cipher *c;
+ 	const struct sshcipher *c;
 -	for (c = ciphers; c->name != NULL; c++)
 +	for (c = FIPS_mode() ? fips_ciphers : ciphers; c->name != NULL; c++)
  		if (strcmp(c->name, name) == 0)
  			return c;
  	return NULL;
-@@ -190,7 +211,7 @@ const Cipher *
+@@ -203,7 +225,7 @@ const struct sshcipher *
  cipher_by_number(int id)
  {
- 	const Cipher *c;
+ 	const struct sshcipher *c;
 -	for (c = ciphers; c->name != NULL; c++)
 +	for (c = FIPS_mode() ? fips_ciphers : ciphers; c->name != NULL; c++)
  		if (c->number == id)
  			return c;
  	return NULL;
-@@ -232,7 +253,7 @@ cipher_number(const char *name)
- 	const Cipher *c;
+@@ -244,7 +266,7 @@ cipher_number(const char *name)
+ 	const struct sshcipher *c;
  	if (name == NULL)
  		return -1;
 -	for (c = ciphers; c->name != NULL; c++)
@@ -216,10 +146,10 @@ index 48f7b68..9ff39f4 100644
  
  /*
 diff --git a/entropy.c b/entropy.c
-index b361a04..5616643 100644
+index d24e724..06b0095 100644
 --- a/entropy.c
 +++ b/entropy.c
-@@ -222,6 +222,9 @@ seed_rng(void)
+@@ -215,6 +215,9 @@ seed_rng(void)
  		fatal("OpenSSL version mismatch. Built against %lx, you "
  		    "have %lx", (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
  
@@ -230,18 +160,18 @@ index b361a04..5616643 100644
  	if (RAND_status() == 1) {
  		debug3("RNG is ready, skipping seeding");
 diff --git a/kex.c b/kex.c
-index bc3e53e..ede7b67 100644
+index e0cf3de..e11198f 100644
 --- a/kex.c
 +++ b/kex.c
-@@ -34,6 +34,7 @@
- #include <string.h>
+@@ -35,6 +35,7 @@
  
+ #ifdef WITH_OPENSSL
  #include <openssl/crypto.h>
 +#include <openssl/fips.h>
+ #endif
  
  #include "xmalloc.h"
- #include "ssh2.h"
-@@ -103,6 +104,25 @@ static const struct kexalg kexalgs[] = {
+@@ -107,6 +108,25 @@ static const struct kexalg kexalgs[] = {
  	{ NULL, -1, -1, -1},
  };
  
@@ -267,7 +197,7 @@ index bc3e53e..ede7b67 100644
  char *
  kex_alg_list(char sep)
  {
-@@ -126,7 +146,7 @@ kex_alg_by_name(const char *name)
+@@ -130,7 +150,7 @@ kex_alg_by_name(const char *name)
  {
  	const struct kexalg *k;
  
@@ -276,7 +206,7 @@ index bc3e53e..ede7b67 100644
  		if (strcmp(k->name, name) == 0)
  			return k;
  #ifdef GSSAPI
-@@ -151,7 +171,10 @@ kex_names_valid(const char *names)
+@@ -155,7 +175,10 @@ kex_names_valid(const char *names)
  	for ((p = strsep(&cp, ",")); p && *p != '\0';
  	    (p = strsep(&cp, ","))) {
  		if (kex_alg_by_name(p) == NULL) {
@@ -313,7 +243,7 @@ index 2700b72..0820894 100644
  }
  #else /* OPENSSL_HAS_ECC */
 diff --git a/kexgexc.c b/kexgexc.c
-index 355b7ba..427e11f 100644
+index 0a91bdd..b75930b 100644
 --- a/kexgexc.c
 +++ b/kexgexc.c
 @@ -26,6 +26,8 @@
@@ -358,50 +288,8 @@ index 770ad28..9d4fc6d 100644
  		omax = max = DH_GRP_MAX;
  		break;
  	default:
-diff --git a/key.c b/key.c
-index 62f3edb..a2050f6 100644
---- a/key.c
-+++ b/key.c
-@@ -42,6 +42,7 @@
- #include "crypto_api.h"
- 
- #include <openssl/evp.h>
-+#include <openssl/fips.h>
- #include <openbsd-compat/openssl-compat.h>
- 
- #include <stdarg.h>
-@@ -636,9 +637,13 @@ key_fingerprint_selection(void)
- 	char *env;
- 
- 	if (!rv_defined) {
--		env = getenv("SSH_FINGERPRINT_TYPE");
--		rv = (env && !strcmp (env, "sha")) ?
--			SSH_FP_SHA1 : SSH_FP_MD5;
-+		if (FIPS_mode())
-+			rv = SSH_FP_SHA1;
-+		else {
-+			env = getenv("SSH_FINGERPRINT_TYPE");
-+			rv = (env && !strcmp (env, "sha")) ?
-+				SSH_FP_SHA1 : SSH_FP_MD5;
-+		}
- 		rv_defined = 1;
- 	}
- 	return rv;
-@@ -1168,8 +1173,11 @@ rsa_generate_private_key(u_int bits)
- 		fatal("%s: BN_new failed", __func__);
- 	if (!BN_set_word(f4, RSA_F4))
- 		fatal("%s: BN_new failed", __func__);
--	if (!RSA_generate_key_ex(private, bits, f4, NULL))
-+	if (!RSA_generate_key_ex(private, bits, f4, NULL)) {
-+		if (FIPS_mode())
-+			logit("%s: the key length might be unsupported by FIPS mode approved key generation method", __func__);
- 		fatal("%s: key generation failed.", __func__);
-+	}
- 	BN_free(f4);
- 	return private;
- }
 diff --git a/mac.c b/mac.c
-index 9388af4..cd7b034 100644
+index fd07bf2..fedfbb2 100644
 --- a/mac.c
 +++ b/mac.c
 @@ -27,6 +27,8 @@
@@ -466,26 +354,18 @@ index 9388af4..cd7b034 100644
  			continue;
  		if (mac != NULL) {
 diff --git a/myproposal.h b/myproposal.h
-index 3a0f5ae..4f35a44 100644
+index b35b2b8..a608d27 100644
 --- a/myproposal.h
 +++ b/myproposal.h
-@@ -88,6 +88,12 @@
- 	"diffie-hellman-group14-sha1," \
- 	"diffie-hellman-group1-sha1"
+@@ -140,6 +140,28 @@
+ 	"hmac-sha1-96," \
+ 	"hmac-md5-96"
  
 +#define KEX_DEFAULT_KEX_FIPS		\
 +	KEX_ECDH_METHODS \
 +	KEX_SHA256_METHODS \
 +	"diffie-hellman-group-exchange-sha1," \
 +	"diffie-hellman-group14-sha1"
-+
- #define	KEX_DEFAULT_PK_ALG	\
- 	HOSTKEY_ECDSA_CERT_METHODS \
- 	"ssh-ed25519-cert-v01@openssh.com," \
-@@ -133,6 +139,22 @@
- #define	KEX_DEFAULT_COMP	"none,zlib@openssh.com,zlib"
- #define	KEX_DEFAULT_LANG	""
- 
 +#define	KEX_FIPS_ENCRYPT \
 +	"aes128-ctr,aes192-ctr,aes256-ctr," \
 +	"aes128-cbc,3des-cbc," \
@@ -502,59 +382,24 @@ index 3a0f5ae..4f35a44 100644
 +#define        KEX_FIPS_MAC \
 +       "hmac-sha1"
 +#endif
++
+ #else
  
- static char *myproposal[PROPOSAL_MAX] = {
- 	KEX_DEFAULT_KEX,
-diff --git a/ssh-keygen.c b/ssh-keygen.c
-index 66198e6..ccf22c8 100644
---- a/ssh-keygen.c
-+++ b/ssh-keygen.c
-@@ -195,6 +195,12 @@ type_bits_valid(int type, u_int32_t *bitsp)
- 		fprintf(stderr, "key bits exceeds maximum %d\n", maxbits);
- 		exit(1);
- 	}
-+	if (FIPS_mode()) {
-+		if (type == KEY_DSA)
-+			fatal("DSA keys are not allowed in FIPS mode");
-+		if (type == KEY_ED25519)
-+			fatal("ED25519 keys are not allowed in FIPS mode");
-+	}
- 	if (type == KEY_DSA && *bitsp != 1024)
- 		fatal("DSA keys must be 1024 bits");
- 	else if (type != KEY_ECDSA && type != KEY_ED25519 && *bitsp < 768)
-@@ -746,7 +752,7 @@ do_download(struct passwd *pw)
- 	enum fp_type fptype;
- 	char *fp, *ra;
- 
--	fptype = print_bubblebabble ? SSH_FP_SHA1 : SSH_FP_MD5;
-+	fptype = print_bubblebabble ? SSH_FP_SHA1 : key_fingerprint_selection();
- 	rep =    print_bubblebabble ? SSH_FP_BUBBLEBABBLE : SSH_FP_HEX;
- 
- 	pkcs11_init(0);
-@@ -756,8 +762,7 @@ do_download(struct passwd *pw)
- 	for (i = 0; i < nkeys; i++) {
- 		if (print_fingerprint) {
- 			fp = key_fingerprint(keys[i], fptype, rep);
--			ra = key_fingerprint(keys[i], SSH_FP_MD5,
--			    SSH_FP_RANDOMART);
-+			ra = key_selected_fingerprint(keys[i], SSH_FP_RANDOMART);
- 			printf("%u %s %s (PKCS11 key)\n", key_size(keys[i]),
- 			    fp, key_type(keys[i]));
- 			if (log_level >= SYSLOG_LEVEL_VERBOSE)
+ #define KEX_SERVER_KEX		\
 diff --git a/ssh.c b/ssh.c
-index 1e6cb90..ea9193f 100644
+index 26e9681..a0a7c29 100644
 --- a/ssh.c
 +++ b/ssh.c
-@@ -73,6 +73,8 @@
- 
+@@ -75,6 +75,8 @@
  #include <openssl/evp.h>
  #include <openssl/err.h>
+ #endif
 +#include <openssl/fips.h>
 +#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
  #include "openbsd-compat/sys-queue.h"
  
-@@ -427,6 +429,13 @@ main(int ac, char **av)
+@@ -433,6 +435,13 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
  	__progname = ssh_get_progname(av[0]);
@@ -568,7 +413,7 @@ index 1e6cb90..ea9193f 100644
  
  #ifndef HAVE_SETPROCTITLE
  	/* Prepare for later setproctitle emulation */
-@@ -504,6 +513,9 @@ main(int ac, char **av)
+@@ -510,6 +519,9 @@ main(int ac, char **av)
  	    "ACD:E:F:I:KL:MNO:PQ:R:S:TVw:W:XYy")) != -1) {
  		switch (opt) {
  		case '1':
@@ -578,15 +423,15 @@ index 1e6cb90..ea9193f 100644
  			options.protocol = SSH_PROTO_1;
  			break;
  		case '2':
-@@ -828,7 +840,6 @@ main(int ac, char **av)
- 
+@@ -841,7 +853,6 @@ main(int ac, char **av)
  	host_arg = xstrdup(host);
  
+ #ifdef WITH_OPENSSL
 -	OpenSSL_add_all_algorithms();
  	ERR_load_crypto_strings();
+ #endif
  
- 	/* Initialize the command to execute on remote host. */
-@@ -973,6 +984,10 @@ main(int ac, char **av)
+@@ -997,6 +1008,10 @@ main(int ac, char **av)
  
  	seed_rng();
  
@@ -597,7 +442,7 @@ index 1e6cb90..ea9193f 100644
  	if (options.user == NULL)
  		options.user = xstrdup(pw->pw_name);
  
-@@ -1020,6 +1035,12 @@ main(int ac, char **av)
+@@ -1069,6 +1084,12 @@ main(int ac, char **av)
  
  	timeout_ms = options.connection_timeout * 1000;
  
@@ -611,10 +456,10 @@ index 1e6cb90..ea9193f 100644
  	if (ssh_connect(host, addrs, &hostaddr, options.port,
  	    options.address_family, options.connection_attempts,
 diff --git a/sshconnect2.c b/sshconnect2.c
-index b00658b..6a1562c 100644
+index efe6158..5631f39 100644
 --- a/sshconnect2.c
 +++ b/sshconnect2.c
-@@ -44,6 +44,8 @@
+@@ -46,6 +46,8 @@
  #include <vis.h>
  #endif
  
@@ -623,24 +468,13 @@ index b00658b..6a1562c 100644
  #include "openbsd-compat/sys-queue.h"
  
  #include "xmalloc.h"
-@@ -168,20 +170,25 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
+@@ -171,20 +173,25 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
  
  #ifdef GSSAPI
  	if (options.gss_keyex) {
 -		/* Add the GSSAPI mechanisms currently supported on this 
 -		 * client to the key exchange algorithm proposal */
 -		orig = myproposal[PROPOSAL_KEX_ALGS];
--
--		if (options.gss_trust_dns)
--			gss_host = (char *)get_canonical_hostname(1);
--		else
--			gss_host = host;
--
--		gss = ssh_gssapi_client_mechanisms(gss_host, options.gss_client_identity);
--		if (gss) {
--			debug("Offering GSSAPI proposal: %s", gss);
--			xasprintf(&myproposal[PROPOSAL_KEX_ALGS],
--			    "%s,%s", gss, orig);
 +		if (FIPS_mode()) {
 +			logit("Disabling GSSAPIKeyExchange. Not usable in FIPS mode");
 +			options.gss_keyex = 0;
@@ -648,12 +482,21 @@ index b00658b..6a1562c 100644
 +			/* Add the GSSAPI mechanisms currently supported on this
 +			 * client to the key exchange algorithm proposal */
 +			orig = myproposal[PROPOSAL_KEX_ALGS];
-+
+ 
+-		if (options.gss_trust_dns)
+-			gss_host = (char *)get_canonical_hostname(1);
+-		else
+-			gss_host = host;
 +			if (options.gss_trust_dns)
 +				gss_host = (char *)get_canonical_hostname(1);
 +			else
 +				gss_host = host;
-+
+ 
+-		gss = ssh_gssapi_client_mechanisms(gss_host, options.gss_client_identity);
+-		if (gss) {
+-			debug("Offering GSSAPI proposal: %s", gss);
+-			xasprintf(&myproposal[PROPOSAL_KEX_ALGS],
+-			    "%s,%s", gss, orig);
 +			gss = ssh_gssapi_client_mechanisms(gss_host, options.gss_client_identity);
 +			if (gss) {
 +				debug("Offering GSSAPI proposal: %s", gss);
@@ -663,7 +506,7 @@ index b00658b..6a1562c 100644
  		}
  	}
  #endif
-@@ -193,6 +200,10 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
+@@ -196,6 +203,10 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
  	if (options.ciphers != NULL) {
  		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  		myproposal[PROPOSAL_ENC_ALGS_STOC] = options.ciphers;
@@ -674,7 +517,7 @@ index b00658b..6a1562c 100644
  	}
  	myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  	    compat_cipher_proposal(myproposal[PROPOSAL_ENC_ALGS_CTOS]);
-@@ -208,7 +219,11 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
+@@ -211,7 +222,11 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
  	if (options.macs != NULL) {
  		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
  		myproposal[PROPOSAL_MAC_ALGS_STOC] = options.macs;
@@ -686,7 +529,7 @@ index b00658b..6a1562c 100644
  	if (options.hostkeyalgorithms != NULL)
  		myproposal[PROPOSAL_SERVER_HOST_KEY_ALGS] =
  		    compat_pkalg_proposal(options.hostkeyalgorithms);
-@@ -220,9 +235,11 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
+@@ -223,9 +238,11 @@ ssh_kex2(char *host, struct sockaddr *hostaddr, u_short port)
  	}
  	if (options.kex_algorithms != NULL)
  		myproposal[PROPOSAL_KEX_ALGS] = options.kex_algorithms;
@@ -700,19 +543,27 @@ index b00658b..6a1562c 100644
  	/* If we've got GSSAPI algorithms, then we also support the
  	 * 'null' hostkey, as a last resort */
 diff --git a/sshd.c b/sshd.c
-index b561ec8..e977de3 100644
+index db23ce2..3ce59f0 100644
 --- a/sshd.c
 +++ b/sshd.c
-@@ -75,6 +75,8 @@
+@@ -66,6 +66,7 @@
+ #include <grp.h>
+ #include <pwd.h>
+ #include <signal.h>
++#include <syslog.h>
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -76,6 +77,8 @@
  #include <openssl/dh.h>
  #include <openssl/bn.h>
  #include <openssl/rand.h>
 +#include <openssl/fips.h>
 +#include <fipscheck.h>
  #include "openbsd-compat/openssl-compat.h"
+ #endif
  
- #ifdef HAVE_SECUREWARE
-@@ -1468,6 +1470,18 @@ main(int ac, char **av)
+@@ -1479,6 +1482,18 @@ main(int ac, char **av)
  #endif
  	__progname = ssh_get_progname(av[0]);
  
@@ -731,16 +582,16 @@ index b561ec8..e977de3 100644
  	/* Save argv. Duplicate so setproctitle emulation doesn't clobber it */
  	saved_argc = ac;
  	rexec_argc = ac;
-@@ -1619,8 +1633,6 @@ main(int ac, char **av)
+@@ -1630,7 +1645,7 @@ main(int ac, char **av)
  	else
  		closefrom(REEXEC_DEVCRYPTO_RESERVED_FD);
  
--	OpenSSL_add_all_algorithms();
--
- 	/* If requested, redirect the logs to the specified logfile. */
- 	if (logfile != NULL) {
- 		log_redirect_stderr_to(logfile);
-@@ -1798,6 +1810,10 @@ main(int ac, char **av)
+-#ifdef WITH_OPENSSL
++#if 0 /* FIPS */
+ 	OpenSSL_add_all_algorithms();
+ #endif
+ 
+@@ -1816,6 +1831,10 @@ main(int ac, char **av)
  		debug("private host key: #%d type %d %s", i, keytype,
  		    key_type(key ? key : pubkey));
  	}
@@ -751,7 +602,7 @@ index b561ec8..e977de3 100644
  	if ((options.protocol & SSH_PROTO_1) && !sensitive_data.have_ssh1_key) {
  		logit("Disabling protocol version 1. Could not load host key");
  		options.protocol &= ~SSH_PROTO_1;
-@@ -1961,6 +1977,10 @@ main(int ac, char **av)
+@@ -1982,6 +2001,10 @@ main(int ac, char **av)
  	/* Reinitialize the log (because of the fork above). */
  	log_init(__progname, options.log_level, options.log_facility, log_stderr);
  
@@ -762,7 +613,7 @@ index b561ec8..e977de3 100644
  	/* Chdir to the root directory so that the current disk can be
  	   unmounted if desired. */
  	if (chdir("/") == -1)
-@@ -2530,6 +2550,9 @@ do_ssh2_kex(void)
+@@ -2541,6 +2564,9 @@ do_ssh2_kex(void)
  	if (options.ciphers != NULL) {
  		myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  		myproposal[PROPOSAL_ENC_ALGS_STOC] = options.ciphers;
@@ -772,7 +623,7 @@ index b561ec8..e977de3 100644
  	}
  	myproposal[PROPOSAL_ENC_ALGS_CTOS] =
  	    compat_cipher_proposal(myproposal[PROPOSAL_ENC_ALGS_CTOS]);
-@@ -2539,6 +2562,9 @@ do_ssh2_kex(void)
+@@ -2550,6 +2576,9 @@ do_ssh2_kex(void)
  	if (options.macs != NULL) {
  		myproposal[PROPOSAL_MAC_ALGS_CTOS] =
  		myproposal[PROPOSAL_MAC_ALGS_STOC] = options.macs;
@@ -782,7 +633,7 @@ index b561ec8..e977de3 100644
  	}
  	if (options.compression == COMP_NONE) {
  		myproposal[PROPOSAL_COMP_ALGS_CTOS] =
-@@ -2549,6 +2575,8 @@ do_ssh2_kex(void)
+@@ -2560,6 +2589,8 @@ do_ssh2_kex(void)
  	}
  	if (options.kex_algorithms != NULL)
  		myproposal[PROPOSAL_KEX_ALGS] = options.kex_algorithms;
@@ -791,7 +642,7 @@ index b561ec8..e977de3 100644
  
  	myproposal[PROPOSAL_KEX_ALGS] = compat_kex_proposal(
  	    myproposal[PROPOSAL_KEX_ALGS]);
-@@ -2575,10 +2603,14 @@ do_ssh2_kex(void)
+@@ -2586,10 +2617,14 @@ do_ssh2_kex(void)
  	if (strlen(myproposal[PROPOSAL_SERVER_HOST_KEY_ALGS]) == 0)
  		orig = NULL;
  
@@ -810,3 +661,24 @@ index b561ec8..e977de3 100644
  
  	if (gss && orig)
  		xasprintf(&newstr, "%s,%s", gss, orig);
+diff --git a/sshkey.c b/sshkey.c
+index f078e11..5e3d97f 100644
+--- a/sshkey.c
++++ b/sshkey.c
+@@ -34,6 +34,7 @@
+ #include <openssl/evp.h>
+ #include <openssl/err.h>
+ #include <openssl/pem.h>
++#include <openssl/fips.h>
+ 
+ #include "crypto_api.h"
+ 
+@@ -1523,6 +1524,8 @@ rsa_generate_private_key(u_int bits, RSA **rsap)
+ 	}
+ 	if (!BN_set_word(f4, RSA_F4) ||
+ 	    !RSA_generate_key_ex(private, bits, f4, NULL)) {
++			if (FIPS_mode())
++				logit("%s: the key length might be unsupported by FIPS mode approved key generation method", __func__);
+ 		ret = SSH_ERR_LIBCRYPTO_ERROR;
+ 		goto out;
+ 	}
