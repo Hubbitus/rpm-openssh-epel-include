@@ -430,8 +430,7 @@ popd
 %patch802 -p1 -b .GSSAPIEnablek5users
 %patch921 -p1 -b .tcp_wrappers
 
-# FIXME: audit patch needs more love
-# %patch200 -p1 -b .audit
+%patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
 
 # FIXME rebase 6.7p1

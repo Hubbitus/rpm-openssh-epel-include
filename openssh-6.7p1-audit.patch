@@ -1801,7 +1801,7 @@ index 9b7abd1..f1e00f7 100644
  		cipher_cleanup(cc);
  		enc  = &active_state->newkeys[mode]->enc;
  		mac  = &active_state->newkeys[mode]->mac;
-@@ -2025,6 +2056,47 @@ packet_get_newkeys(int mode)
+@@ -2025,6 +2056,48 @@ packet_get_newkeys(int mode)
  	return (void *)active_state->newkeys[mode];
  }
  
@@ -1818,7 +1818,8 @@ index 9b7abd1..f1e00f7 100644
 +	buffer_free(&state->output);
 +	buffer_free(&state->outgoing_packet);
 +	buffer_free(&state->incoming_packet);
-+	buffer_free(&state->compression_buffer);
++	if( state->compression_buffer_ready )
++		buffer_free(&state->compression_buffer);
 +	newkeys_destroy_and_free(state->newkeys[MODE_IN]);
 +	state->newkeys[MODE_IN] = NULL;
 +	newkeys_destroy_and_free(state->newkeys[MODE_OUT]);
