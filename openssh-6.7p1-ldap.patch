@@ -1162,7 +1162,7 @@ new file mode 100644
 index 0000000..b49cae6
 --- /dev/null
 +++ b/ldapconf.c
-@@ -0,0 +1,722 @@
+@@ -0,0 +1,721 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
 + * Copyright (c) 2009 Jan F. Chadima.  All rights reserved.
@@ -1620,7 +1620,7 @@ index 0000000..b49cae6
 +{
 +	FILE *f;
 +	char line[1024];
-+	int active, linenum;
++	int linenum;
 +	int bad_options = 0;
 +	struct stat sb;
 +
@@ -1639,7 +1639,6 @@ index 0000000..b49cae6
 +	 * Mark that we are now processing the options.  This flag is turned
 +	 * on/off by Host specifications.
 +	 */
-+	active = 1;
 +	linenum = 0;
 +	while (fgets(line, sizeof(line), f)) {
 +		/* Update line number counter. */

@@ -191,7 +191,7 @@ index e0cf3de..e11198f 100644
 +	    SSH_DIGEST_SHA512 },
 +# endif
 +#endif
-+	{ NULL, -1, -1, NULL},
++	{ NULL, -1, -1, -1},
 +};
 +
  char *
@@ -399,17 +399,18 @@ index 26e9681..a0a7c29 100644
  #include "openbsd-compat/openssl-compat.h"
  #include "openbsd-compat/sys-queue.h"
  
-@@ -433,6 +435,13 @@ main(int ac, char **av)
+@@ -433,6 +435,14 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
  	__progname = ssh_get_progname(av[0]);
 +        SSLeay_add_all_algorithms();
 +	if (access("/etc/system-fips", F_OK) == 0)
-+		if (! FIPSCHECK_verify(NULL, NULL))
++		if (! FIPSCHECK_verify(NULL, NULL)){
 +			if (FIPS_mode())
 +				fatal("FIPS integrity verification test failed.");
 +			else
 +				logit("FIPS integrity verification test failed.");
++	}
  
  #ifndef HAVE_SETPROCTITLE
  	/* Prepare for later setproctitle emulation */

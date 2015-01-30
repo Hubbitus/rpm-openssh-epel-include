@@ -23,6 +23,14 @@ diff --git a/auth2-gss.c b/auth2-gss.c
 index 4803e7e..222e3e0 100644
 --- a/auth2-gss.c
 +++ b/auth2-gss.c
+@@ -31,6 +31,7 @@
+ #include <sys/types.h>
+ 
+ #include <stdarg.h>
++#include <string.h>
+ 
+ #include "xmalloc.h"
+ #include "key.h"
 @@ -53,6 +53,40 @@ static void input_gssapi_mic(int type, u_int32_t plen, void *ctxt);
  static void input_gssapi_exchange_complete(int type, u_int32_t plen, void *ctxt);
  static void input_gssapi_errtok(int, u_int32_t, void *);
@@ -456,7 +464,7 @@ index b39281b..a3a2289 100644
  	if (!GSS_ERROR(major)) {
  		major = ssh_gssapi_init_ctx(*ctx, 0, GSS_C_NO_BUFFER, &token, 
  		    NULL);
-@@ -272,10 +483,67 @@ ssh_gssapi_check_mechanism(Gssctxt **ctx, gss_OID oid, const char *host)
+@@ -272,10 +483,66 @@ ssh_gssapi_check_mechanism(Gssctxt **ctx, gss_OID oid, const char *host)
  			    GSS_C_NO_BUFFER);
  	}
  
@@ -476,7 +484,6 @@ index b39281b..a3a2289 100644
 +	static OM_uint32 last_call = 0;
 +	OM_uint32 lifetime, now, major, minor;
 +	int equal;
-+	gss_cred_usage_t usage = GSS_C_INITIATE;
 +	
 +	now = time(NULL);
 +
@@ -1415,7 +1422,7 @@ new file mode 100644
 index 0000000..b880998
 --- /dev/null
 +++ b/kexgsss.c
-@@ -0,0 +1,289 @@
+@@ -0,0 +1,290 @@
 +/*
 + * Copyright (c) 2001-2009 Simon Wilkinson. All rights reserved.
 + *
@@ -1462,6 +1469,7 @@ index 0000000..b880998
 +#include "monitor_wrap.h"
 +#include "misc.h"      /* servconf.h needs misc.h for struct ForwardOptions */
 +#include "servconf.h"
++#include "ssh-gss.h"
 +
 +extern ServerOptions options;
 +
@@ -2341,7 +2349,7 @@ index a99d7f0..0374c88 100644
  
  int  ssh_gssapi_check_oid(Gssctxt *, void *, size_t);
  void ssh_gssapi_set_oid_data(Gssctxt *, void *, size_t);
-@@ -119,16 +136,30 @@ void ssh_gssapi_build_ctx(Gssctxt **);
+@@ -119,16 +136,32 @@ void ssh_gssapi_build_ctx(Gssctxt **);
  void ssh_gssapi_delete_ctx(Gssctxt **);
  OM_uint32 ssh_gssapi_sign(Gssctxt *, gss_buffer_t, gss_buffer_t);
  void ssh_gssapi_buildmic(Buffer *, const char *, const char *, const char *);
@@ -2371,6 +2379,8 @@ index a99d7f0..0374c88 100644
 +int ssh_gssapi_oid_table_ok();
 +
 +int ssh_gssapi_update_creds(ssh_gssapi_ccache *store);
++
++void ssh_gssapi_rekey_creds(void);
  #endif /* GSSAPI */
  
  #endif /* _SSH_GSS_H */

@@ -1,5 +1,5 @@
 diff --git a/auth-pam.c b/auth-pam.c
-index cd1a775..690711e 100644
+index cd1a775..2fff267 100644
 --- a/auth-pam.c
 +++ b/auth-pam.c
 @@ -216,7 +216,12 @@ pthread_join(sp_pthread_t thread, void **value)
@@ -7,20 +7,20 @@ index cd1a775..690711e 100644
  		return (sshpam_thread_status);
  	signal(SIGCHLD, sshpam_oldsig);
 -	waitpid(thread, &status, 0);
-+	while (waitpid(thread, &status, 0) < 0) {                     
-+		if (errno == EINTR)                                
++	while (waitpid(thread, &status, 0) < 0) {
++		if (errno == EINTR)
 +			continue;
-+		fatal("%s: waitpid: %s", __func__,         
-+				strerror(errno));                      
++		fatal("%s: waitpid: %s", __func__,
++				strerror(errno));
 +	}
  	return (status);
  }
  #endif
 diff --git a/channels.c b/channels.c
-index af3fdc2..39c9f89 100644
+index 51a221d..0ef1d90 100644
 --- a/channels.c
 +++ b/channels.c
-@@ -233,11 +233,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
+@@ -239,11 +239,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
  	channel_max_fd = MAX(channel_max_fd, wfd);
  	channel_max_fd = MAX(channel_max_fd, efd);
  
@@ -35,7 +35,7 @@ index af3fdc2..39c9f89 100644
  		fcntl(efd, F_SETFD, FD_CLOEXEC);
  
  	c->rfd = rfd;
-@@ -255,11 +255,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
+@@ -261,11 +261,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
  
  	/* enable nonblocking mode */
  	if (nonblock) {
@@ -50,15 +50,33 @@ index af3fdc2..39c9f89 100644
  			set_nonblock(efd);
  	}
  }
+@@ -3959,13 +3959,13 @@ connect_local_xsocket_path(const char *pathname, int len)
+ 	int sock;
+ 	struct sockaddr_un addr;
+ 
++	if (len <= 0)
++		return -1;
+ 	sock = socket(AF_UNIX, SOCK_STREAM, 0);
+ 	if (sock < 0)
+ 		error("socket: %.100s", strerror(errno));
+ 	memset(&addr, 0, sizeof(addr));
+ 	addr.sun_family = AF_UNIX;
+-	if (len <= 0)
+-		return -1;
+ 	if (len > sizeof addr.sun_path)
+ 		len = sizeof addr.sun_path;
+ 	memcpy(addr.sun_path, pathname, len);
 diff --git a/clientloop.c b/clientloop.c
-index 9c60108..d372b53 100644
+index 20ce0b5..65cb26a 100644
 --- a/clientloop.c
 +++ b/clientloop.c
-@@ -2081,14 +2081,15 @@ client_input_global_request(int type, u_int32_t seq, void *ctxt)
+@@ -2090,15 +2090,16 @@ client_input_global_request(int type, u_int32_t seq, void *ctxt)
+ {
  	char *rtype;
  	int want_reply;
- 	int success = 0;
-+/* success is still 0 the packet is allways SSH2_MSG_REQUEST_FAILURE, isn't it? */
+-	int success = 0;
++/*	int success = 0;
++ success is still 0 the packet is allways SSH2_MSG_REQUEST_FAILURE, isn't it? */
  
  	rtype = packet_get_string(NULL);
  	want_reply = packet_get_char();
@@ -72,26 +90,23 @@ index 9c60108..d372b53 100644
  		packet_send();
  		packet_write_wait();
  	}
-diff --git a/key.c b/key.c
-index a2050f6..6487d81 100644
---- a/key.c
-+++ b/key.c
-@@ -880,8 +880,10 @@ key_read(Key *ret, char **cpp)
- 		success = 1;
- /*XXXX*/
- 		key_free(k);
-+/*XXXX
- 		if (success != 1)
- 			break;
-+XXXX*/
- 		/* advance cp: skip whitespace and data */
- 		while (*cp == ' ' || *cp == '\t')
- 			cp++;
+diff --git a/entropy.c b/entropy.c
+index 06b0095..a4097da 100644
+--- a/entropy.c
++++ b/entropy.c
+@@ -44,6 +44,7 @@
+ #include <openssl/err.h>
+ 
+ #include "openbsd-compat/openssl-compat.h"
++#include "openbsd-compat/port-linux.h"
+ 
+ #include "ssh.h"
+ #include "misc.h"
 diff --git a/monitor.c b/monitor.c
-index 3ff62b0..70b9b4c 100644
+index 07fa655..b8e6e06 100644
 --- a/monitor.c
 +++ b/monitor.c
-@@ -472,7 +472,7 @@ monitor_child_preauth(Authctxt *_authctxt, struct monitor *pmonitor)
+@@ -488,7 +488,7 @@ monitor_child_preauth(Authctxt *_authctxt, struct monitor *pmonitor)
  	mm_get_keystate(pmonitor);
  
  	/* Drain any buffered messages from the child */
@@ -100,7 +115,7 @@ index 3ff62b0..70b9b4c 100644
  		;
  
  	close(pmonitor->m_sendfd);
-@@ -1254,6 +1254,10 @@ mm_answer_keyallowed(int sock, Buffer *m)
+@@ -1276,6 +1276,10 @@ mm_answer_keyallowed(int sock, Buffer *m)
  			break;
  		}
  	}
@@ -111,7 +126,7 @@ index 3ff62b0..70b9b4c 100644
  	if (key != NULL)
  		key_free(key);
  
-@@ -1275,9 +1279,6 @@ mm_answer_keyallowed(int sock, Buffer *m)
+@@ -1297,9 +1301,6 @@ mm_answer_keyallowed(int sock, Buffer *m)
  		free(chost);
  	}
  
@@ -122,10 +137,10 @@ index 3ff62b0..70b9b4c 100644
  	buffer_put_int(m, allowed);
  	buffer_put_int(m, forced_command != NULL);
 diff --git a/monitor_wrap.c b/monitor_wrap.c
-index 6df236a..93f6535 100644
+index ba4ecd7..b3e4ca1 100644
 --- a/monitor_wrap.c
 +++ b/monitor_wrap.c
-@@ -743,10 +743,10 @@ mm_pty_allocate(int *ptyfd, int *ttyfd, char *namebuf, size_t namebuflen)
+@@ -749,10 +749,10 @@ mm_pty_allocate(int *ptyfd, int *ttyfd, char *namebuf, size_t namebuflen)
  	if ((tmp1 = dup(pmonitor->m_recvfd)) == -1 ||
  	    (tmp2 = dup(pmonitor->m_recvfd)) == -1) {
  		error("%s: cannot allocate fds for pty", __func__);
@@ -152,11 +167,22 @@ index c89f214..80115c2 100644
  	int i;
  
  	if (sa == NULL) {
+diff --git a/openbsd-compat/port-linux.h b/openbsd-compat/port-linux.h
+index 8b7cda2..e2ca8a1 100644
+--- a/openbsd-compat/port-linux.h
++++ b/openbsd-compat/port-linux.h
+@@ -37,4 +37,6 @@ void oom_adjust_restore(void);
+ void oom_adjust_setup(void);
+ #endif
+ 
++void linux_seed(void);
++
+ #endif /* ! _PORT_LINUX_H */
 diff --git a/packet.c b/packet.c
-index f5b122b..1305e87 100644
+index 8ec353e..dbc2c33 100644
 --- a/packet.c
 +++ b/packet.c
-@@ -1234,6 +1234,7 @@ packet_read_poll1(void)
+@@ -1246,6 +1246,7 @@ packet_read_poll1(void)
  		case DEATTACK_DETECTED:
  			packet_disconnect("crc32 compensation attack: "
  			    "network attack detected");
@@ -164,6 +190,41 @@ index f5b122b..1305e87 100644
  		case DEATTACK_DOS_DETECTED:
  			packet_disconnect("deattack denial of "
  			    "service detected");
+diff --git a/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c b/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
+index 8ba6d87..a7808c7 100644
+--- a/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
++++ b/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
+@@ -87,7 +87,7 @@ pam_user_key_allowed2(struct passwd *pw, Key *key, char *file)
+ 	found = key_new(key->type);
+ 
+ 	while (read_keyfile_line(f, file, line, sizeof(line), &linenum) != -1) {
+-		char *cp, *key_options = NULL;
++		char *cp = NULL;
+ 
+ 		/* Skip leading whitespace, empty and comment lines. */
+ 		for (cp = line; *cp == ' ' || *cp == '\t'; cp++)
+@@ -99,7 +99,6 @@ pam_user_key_allowed2(struct passwd *pw, Key *key, char *file)
+ 			/* no key?  check if there are options for this key */
+ 			int quoted = 0;
+ 			verbose("user_key_allowed: check options: '%s'", cp);
+-			key_options = cp;
+ 			for (; *cp && (quoted || (*cp != ' ' && *cp != '\t')); cp++) {
+ 				if (*cp == '\\' && cp[1] == '"')
+ 					cp++;	/* Skip both */
+diff --git a/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c b/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
+index e14eb27..323817a 100644
+--- a/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
++++ b/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
+@@ -89,8 +89,7 @@ userauth_pubkey_from_id(Identity * id)
+         authenticated = 1;
+ 
+   user_auth_clean_exit:
+-    if(&b != NULL)
+-        buffer_free(&b);
++    buffer_free(&b);
+     if(sig != NULL)
+         free(sig);
+     if(pkblob != NULL)
 diff --git a/progressmeter.c b/progressmeter.c
 index bbbc706..ae6d1aa 100644
 --- a/progressmeter.c
@@ -198,7 +259,7 @@ index 10bab99..e9ca8f0 100644
 +void	start_progress_meter(const char *, off_t, off_t *);
  void	stop_progress_meter(void);
 diff --git a/scp.c b/scp.c
-index 1178a07..d9bc016 100644
+index cbd904d..e4e9fa1 100644
 --- a/scp.c
 +++ b/scp.c
 @@ -155,7 +155,7 @@ killchild(int signo)
@@ -211,10 +272,10 @@ index 1178a07..d9bc016 100644
  
  	if (signo)
 diff --git a/servconf.c b/servconf.c
-index 3839928..d482e79 100644
+index 87a311b..895cdca 100644
 --- a/servconf.c
 +++ b/servconf.c
-@@ -1382,7 +1382,7 @@ process_server_config_line(ServerOptions *options, char *line,
+@@ -1418,7 +1418,7 @@ process_server_config_line(ServerOptions *options, char *line,
  			fatal("%s line %d: Missing subsystem name.",
  			    filename, linenum);
  		if (!*activep) {
@@ -223,7 +284,7 @@ index 3839928..d482e79 100644
  			break;
  		}
  		for (i = 0; i < options->num_subsystems; i++)
-@@ -1473,8 +1473,9 @@ process_server_config_line(ServerOptions *options, char *line,
+@@ -1509,8 +1509,9 @@ process_server_config_line(ServerOptions *options, char *line,
  		if (*activep && *charptr == NULL) {
  			*charptr = tilde_expand_filename(arg, getuid());
  			/* increase optional counter */
@@ -236,7 +297,7 @@ index 3839928..d482e79 100644
  		break;
  
 diff --git a/serverloop.c b/serverloop.c
-index 2f8e3a0..e03bc6c 100644
+index e92f9e2..3cad041 100644
 --- a/serverloop.c
 +++ b/serverloop.c
 @@ -147,13 +147,13 @@ notify_setup(void)
@@ -339,7 +400,7 @@ index 2f8e3a0..e03bc6c 100644
  		pty_change_window_size(fdin, row, col, xpixel, ypixel);
  }
  
-@@ -1007,7 +1007,7 @@ server_request_tun(void)
+@@ -1039,7 +1039,7 @@ server_request_tun(void)
  	}
  
  	tun = packet_get_int();
@@ -349,7 +410,7 @@ index 2f8e3a0..e03bc6c 100644
  			goto done;
  		tun = forced_tun_device;
 diff --git a/sftp-client.c b/sftp-client.c
-index 2f5907c..3a2affd 100644
+index 990b58d..3d0f22b 100644
 --- a/sftp-client.c
 +++ b/sftp-client.c
 @@ -151,7 +151,7 @@ get_msg(struct sftp_conn *conn, Buffer *m)
@@ -565,28 +626,28 @@ index 2f5907c..3a2affd 100644
  int
 -do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
 +do_upload(struct sftp_conn *conn, const char *local_path, const char *remote_path,
-     int preserve_flag, int fsync_flag)
+     int preserve_flag, int resume, int fsync_flag)
  {
  	int local_fd;
-@@ -1607,7 +1607,7 @@ do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
+@@ -1628,7 +1628,7 @@ do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
  }
  
  static int
 -upload_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
 +upload_dir_internal(struct sftp_conn *conn, const char *src, const char *dst, int depth,
-     int preserve_flag, int print_flag, int fsync_flag)
+     int preserve_flag, int print_flag, int resume, int fsync_flag)
  {
  	int ret = 0, status;
-@@ -1700,7 +1700,7 @@ upload_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
+@@ -1721,7 +1721,7 @@ upload_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
  }
  
  int
 -upload_dir(struct sftp_conn *conn, char *src, char *dst, int preserve_flag,
 +upload_dir(struct sftp_conn *conn, const char *src, const char *dst, int preserve_flag,
-     int print_flag, int fsync_flag)
+     int print_flag, int resume, int fsync_flag)
  {
  	char *dst_canon;
-@@ -1719,7 +1719,7 @@ upload_dir(struct sftp_conn *conn, char *src, char *dst, int preserve_flag,
+@@ -1740,7 +1740,7 @@ upload_dir(struct sftp_conn *conn, char *src, char *dst, int preserve_flag,
  }
  
  char *
@@ -596,7 +657,7 @@ index 2f5907c..3a2affd 100644
  	char *ret;
  	size_t len = strlen(p1) + strlen(p2) + 2;
 diff --git a/sftp-client.h b/sftp-client.h
-index ba92ad0..c085423 100644
+index 967840b..ffbcade 100644
 --- a/sftp-client.h
 +++ b/sftp-client.h
 @@ -56,79 +56,79 @@ struct sftp_conn *do_init(int, int, u_int, u_int, u_int64_t);
@@ -683,15 +744,15 @@ index ba92ad0..c085423 100644
   * Upload 'local_path' to 'remote_path'. Preserve permissions and times
   * if 'pflag' is set
   */
--int do_upload(struct sftp_conn *, char *, char *, int, int);
-+int do_upload(struct sftp_conn *, const char *, const char *, int, int);
+-int do_upload(struct sftp_conn *, char *, char *, int, int, int);
++int do_upload(struct sftp_conn *, const char *, const char *, int, int, int);
  
  /*
   * Recursively upload 'local_directory' to 'remote_directory'. Preserve 
   * times if 'pflag' is set
   */
--int upload_dir(struct sftp_conn *, char *, char *, int, int, int);
-+int upload_dir(struct sftp_conn *, const char *, const char *, int, int, int);
+-int upload_dir(struct sftp_conn *, char *, char *, int, int, int, int);
++int upload_dir(struct sftp_conn *, const char *, const char *, int, int, int, int);
  
  /* Concatenate paths, taking care of slashes. Caller must free result. */
 -char *path_append(char *, char *);
@@ -699,10 +760,10 @@ index ba92ad0..c085423 100644
  
  #endif
 diff --git a/sftp.c b/sftp.c
-index ad1f8c8..3987117 100644
+index ff4d63d..4439100 100644
 --- a/sftp.c
 +++ b/sftp.c
-@@ -218,7 +218,7 @@ killchild(int signo)
+@@ -220,7 +220,7 @@ killchild(int signo)
  {
  	if (sshpid > 1) {
  		kill(sshpid, SIGTERM);
@@ -711,7 +772,7 @@ index ad1f8c8..3987117 100644
  	}
  
  	_exit(1);
-@@ -329,7 +329,7 @@ local_do_ls(const char *args)
+@@ -332,7 +332,7 @@ local_do_ls(const char *args)
  
  /* Strip one path (usually the pwd) from the start of another */
  static char *
@@ -720,7 +781,7 @@ index ad1f8c8..3987117 100644
  {
  	size_t len;
  
-@@ -347,7 +347,7 @@ path_strip(char *path, char *strip)
+@@ -350,7 +350,7 @@ path_strip(char *path, char *strip)
  }
  
  static char *
@@ -729,7 +790,7 @@ index ad1f8c8..3987117 100644
  {
  	char *abs_str;
  
-@@ -545,7 +545,7 @@ parse_no_flags(const char *cmd, char **argv, int argc)
+@@ -548,7 +548,7 @@ parse_no_flags(const char *cmd, char **argv, int argc)
  }
  
  static int
@@ -738,7 +799,7 @@ index ad1f8c8..3987117 100644
  {
  	struct stat sb;
  
-@@ -557,7 +557,7 @@ is_dir(char *path)
+@@ -560,7 +560,7 @@ is_dir(char *path)
  }
  
  static int
@@ -747,7 +808,7 @@ index ad1f8c8..3987117 100644
  {
  	Attrib *a;
  
-@@ -571,7 +571,7 @@ remote_is_dir(struct sftp_conn *conn, char *path)
+@@ -574,7 +574,7 @@ remote_is_dir(struct sftp_conn *conn, char *path)
  
  /* Check whether path returned from glob(..., GLOB_MARK, ...) is a directory */
  static int
@@ -756,7 +817,7 @@ index ad1f8c8..3987117 100644
  {
  	size_t l = strlen(pathname);
  
-@@ -579,7 +579,7 @@ pathname_is_dir(char *pathname)
+@@ -582,7 +582,7 @@ pathname_is_dir(char *pathname)
  }
  
  static int
@@ -765,16 +826,16 @@ index ad1f8c8..3987117 100644
      int pflag, int rflag, int resume, int fflag)
  {
  	char *abs_src = NULL;
-@@ -659,7 +659,7 @@ out:
+@@ -666,7 +666,7 @@ out:
  }
  
  static int
 -process_put(struct sftp_conn *conn, char *src, char *dst, char *pwd,
 +process_put(struct sftp_conn *conn, const char *src, const char *dst, const char *pwd,
-     int pflag, int rflag, int fflag)
+     int pflag, int rflag, int resume, int fflag)
  {
  	char *tmp_dst = NULL;
-@@ -765,7 +765,7 @@ sdirent_comp(const void *aa, const void *bb)
+@@ -776,7 +776,7 @@ sdirent_comp(const void *aa, const void *bb)
  
  /* sftp ls.1 replacement for directories */
  static int
@@ -783,7 +844,7 @@ index ad1f8c8..3987117 100644
  {
  	int n;
  	u_int c = 1, colspace = 0, columns = 1;
-@@ -850,7 +850,7 @@ do_ls_dir(struct sftp_conn *conn, char *path, char *strip_path, int lflag)
+@@ -861,7 +861,7 @@ do_ls_dir(struct sftp_conn *conn, char *path, char *strip_path, int lflag)
  
  /* sftp ls.1 replacement which handles path globs */
  static int
@@ -792,7 +853,7 @@ index ad1f8c8..3987117 100644
      int lflag)
  {
  	char *fname, *lname;
-@@ -931,7 +931,7 @@ do_globbed_ls(struct sftp_conn *conn, char *path, char *strip_path,
+@@ -946,7 +946,7 @@ do_globbed_ls(struct sftp_conn *conn, char *path, char *strip_path,
  }
  
  static int
@@ -802,10 +863,10 @@ index ad1f8c8..3987117 100644
  	struct sftp_statvfs st;
  	char s_used[FMT_SCALED_STRSIZE];
 diff --git a/ssh-agent.c b/ssh-agent.c
-index 117fdde..2b50132 100644
+index c8036c8..4da3bb6 100644
 --- a/ssh-agent.c
 +++ b/ssh-agent.c
-@@ -1037,8 +1037,8 @@ main(int ac, char **av)
+@@ -1056,8 +1056,8 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
  	/* drop */
@@ -816,8 +877,26 @@ index 117fdde..2b50132 100644
  
  #if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE)
  	/* Disable ptrace on Linux without sgid bit */
+diff --git a/ssh-keygen.c b/ssh-keygen.c
+index 64fa217..635e8fd 100644
+--- a/ssh-keygen.c
++++ b/ssh-keygen.c
+@@ -687,11 +687,11 @@ do_convert_from(struct passwd *pw)
+ 		fatal("%s: unknown key format %d", __func__, convert_format);
+ 	}
+ 
+-	if (!private)
++	if (!private) {
+ 		ok = key_write(k, stdout);
+ 		if (ok)
+ 			fprintf(stdout, "\n");
+-	else {
++	} else {
+ 		switch (k->type) {
+ 		case KEY_DSA:
+ 			ok = PEM_write_DSAPrivateKey(stdout, k->dsa, NULL,
 diff --git a/sshd.c b/sshd.c
-index 773bb02..1eaa9f7 100644
+index 783abe3..eaade2a 100644
 --- a/sshd.c
 +++ b/sshd.c
 @@ -771,8 +771,10 @@ privsep_preauth(Authctxt *authctxt)
@@ -832,7 +911,7 @@ index 773bb02..1eaa9f7 100644
  
  		return 0;
  	}
-@@ -1439,6 +1441,9 @@ server_accept_loop(int *sock_in, int *sock_out, int *newsock, int *config_s)
+@@ -1458,6 +1460,9 @@ server_accept_loop(int *sock_in, int *sock_out, int *newsock, int *config_s)
  		if (num_listen_socks < 0)
  			break;
  	}
@@ -842,3 +921,15 @@ index 773bb02..1eaa9f7 100644
  }
  
  
+diff --git a/sshkey.c b/sshkey.c
+index 5e3d97f..dae8270 100644
+--- a/sshkey.c
++++ b/sshkey.c
+@@ -54,6 +54,7 @@
+ #include "digest.h"
+ #define SSHKEY_INTERNAL
+ #include "sshkey.h"
++#include "log.h"
+ 
+ /* openssh private key file format */
+ #define MARK_BEGIN		"-----BEGIN OPENSSH PRIVATE KEY-----\n"

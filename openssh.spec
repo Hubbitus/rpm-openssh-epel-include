@@ -92,7 +92,7 @@ Source13: sshd-keygen
 Patch0: openssh-5.9p1-wIm.patch
 
 #?
-Patch100: openssh-6.6.1p1-coverity.patch
+Patch100: openssh-6.7p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1872
 Patch101: openssh-6.7p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
@@ -222,7 +222,6 @@ Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 # restore tcp wrappers support, based on Debian patch
 # https://lists.mindrot.org/pipermail/openssh-unix-dev/2014-April/032497.html
 Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
-
 
 License: BSD
 Group: Applications/Internet
@@ -433,8 +432,7 @@ popd
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
 
-# FIXME rebase 6.7p1
-# %patch100 -p1 -b .coverity
+%patch100 -p1 -b .coverity
 
 %if 0
 # Nothing here yet

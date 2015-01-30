@@ -97,7 +97,7 @@ index 413b845..54dd383 100644
 +{
 +	FILE *fp;
 +	char file[MAXPATHLEN];
-+	char line[BUFSIZ];
++	char line[BUFSIZ] = "";
 +	char kuser[65]; /* match krb5_kuserok() */
 +	struct stat st;
 +	struct passwd *pw = the_authctxt->pw;

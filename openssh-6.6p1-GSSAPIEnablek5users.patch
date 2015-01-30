@@ -5,7 +5,7 @@ index 961c564..0fcfd7b 100644
 @@ -260,7 +260,6 @@ ssh_gssapi_krb5_cmdok(krb5_principal principal, const char *name,
  	FILE *fp;
  	char file[MAXPATHLEN];
- 	char line[BUFSIZ];
+ 	char line[BUFSIZ] = "";
 -	char kuser[65]; /* match krb5_kuserok() */
  	struct stat st;
  	struct passwd *pw = the_authctxt->pw;
