@@ -1,0 +1,82 @@
+--- a/servconf.c	2015-01-30 12:24:12.388337643 +0100
++++ b/servconf.c	2015-01-30 12:26:36.229229751 +0100
+@@ -55,6 +55,7 @@
+ #include "hostfile.h"
+ #include "auth.h"
+ #include "digest.h"
++#include "myproposal.h"
+ 
+ static void add_listen_addr(ServerOptions *, char *, int);
+ static void add_one_listen_addr(ServerOptions *, char *, int);
+@@ -1974,6 +1974,8 @@ dump_cfg_strarray_oneline(ServerOpCodes code, u_int count, char **vals)
+ {
+ 	u_int i;
+ 
++	if (count <= 0)
++		return;
+ 	printf("%s", lookup_opcode_name(code));
+ 	for (i = 0; i < count; i++)
+ 		printf(" %s",  vals[i]);
+@@ -2093,7 +2094,7 @@
+ 
+ 	/* integer arguments */
+ #ifdef USE_PAM
+-	dump_cfg_int(sUsePAM, o->use_pam);
++	dump_cfg_fmtint(sUsePAM, o->use_pam);
+ #endif
+ 	dump_cfg_int(sServerKeyBits, o->server_key_bits);
+ 	dump_cfg_int(sLoginGraceTime, o->login_grace_time);
+@@ -2103,6 +2104,7 @@
+ 	dump_cfg_int(sMaxSessions, o->max_sessions);
+ 	dump_cfg_int(sClientAliveInterval, o->client_alive_interval);
+ 	dump_cfg_int(sClientAliveCountMax, o->client_alive_count_max);
++	dump_cfg_int(sStreamLocalBindMask, o->fwd_opts.streamlocal_bind_mask);
+ 
+ 	/* formatted integer arguments */
+ 	dump_cfg_fmtint(sPermitRootLogin, o->permit_root_login);
+@@ -2150,6 +2152,7 @@
+ 	dump_cfg_fmtint(sShowPatchLevel, o->show_patchlevel);
+ 	dump_cfg_fmtint(sUseDNS, o->use_dns);
+ 	dump_cfg_fmtint(sAllowTcpForwarding, o->allow_tcp_forwarding);
++	dump_cfg_fmtint(sAllowAgentForwarding, o->allow_agent_forwarding);
+ 	dump_cfg_fmtint(sAllowStreamLocalForwarding, o->allow_streamlocal_forwarding);
+ 	dump_cfg_fmtint(sUsePrivilegeSeparation, use_privsep);
+ 	dump_cfg_fmtint(sFingerprintHash, o->fingerprint_hash);
+@@ -2159,9 +2162,8 @@
+ 	/* string arguments */
+ 	dump_cfg_string(sPidFile, o->pid_file);
+ 	dump_cfg_string(sXAuthLocation, o->xauth_location);
+-	dump_cfg_string(sCiphers, o->ciphers ? o->ciphers :
+-	    cipher_alg_list(',', 0));
+-	dump_cfg_string(sMacs, o->macs ? o->macs : mac_alg_list(','));
++	dump_cfg_string(sCiphers, o->ciphers ? o->ciphers : KEX_SERVER_ENCRYPT);
++	dump_cfg_string(sMacs, o->macs ? o->macs : KEX_SERVER_MAC);
+ 	dump_cfg_string(sBanner, o->banner);
+ 	dump_cfg_string(sForceCommand, o->adm_forced_command);
+ 	dump_cfg_string(sChrootDirectory, o->chroot_directory);
+@@ -2169,12 +2171,13 @@
+ 	dump_cfg_string(sRevokedKeys, o->revoked_keys_file);
+ 	dump_cfg_string(sAuthorizedPrincipalsFile,
+ 	    o->authorized_principals_file);
+-	dump_cfg_string(sVersionAddendum, o->version_addendum);
++	dump_cfg_string(sVersionAddendum, *o->version_addendum == '\0'
++	    ? "none" : o->version_addendum);
+ 	dump_cfg_string(sAuthorizedKeysCommand, o->authorized_keys_command);
+ 	dump_cfg_string(sAuthorizedKeysCommandUser, o->authorized_keys_command_user);
+ 	dump_cfg_string(sHostKeyAgent, o->host_key_agent);
+-	dump_cfg_string(sKexAlgorithms, o->kex_algorithms ? o->kex_algorithms :
+-	    kex_alg_list(','));
++	dump_cfg_string(sKexAlgorithms, o->kex_algorithms ? o->kex_algorithms :
++  	    KEX_SERVER_KEX);
+ 
+ 	/* string arguments requiring a lookup */
+ 	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
+@@ -2096,7 +2101,7 @@ dump_config(ServerOptions *o)
+ 	    o->authorized_keys_files);
+ 	dump_cfg_strarray(sHostKeyFile, o->num_host_key_files,
+ 	     o->host_key_files);
+-	dump_cfg_strarray(sHostKeyFile, o->num_host_cert_files,
++	dump_cfg_strarray(sHostCertificate, o->num_host_cert_files,
+ 	     o->host_cert_files);
+ 	dump_cfg_strarray(sAllowUsers, o->num_allow_users, o->allow_users);
+ 	dump_cfg_strarray(sDenyUsers, o->num_deny_users, o->deny_users);

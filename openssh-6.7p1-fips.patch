@@ -683,3 +683,27 @@ index f078e11..5e3d97f 100644
  		ret = SSH_ERR_LIBCRYPTO_ERROR;
  		goto out;
  	}
+--- a/servconf.c    2015-01-30 12:24:12.388337643 +0100
++++ b/servconf.c    2015-01-30 12:26:36.229229751 +0100
+@@ -2159,8 +2162,10 @@
+ 	/* string arguments */
+ 	dump_cfg_string(sPidFile, o->pid_file);
+ 	dump_cfg_string(sXAuthLocation, o->xauth_location);
+-	dump_cfg_string(sCiphers, o->ciphers ? o->ciphers : KEX_SERVER_ENCRYPT);
+-	dump_cfg_string(sMacs, o->macs ? o->macs : KEX_SERVER_MAC);
++	dump_cfg_string(sCiphers, o->ciphers ? o->ciphers : FIPS_mode()
++		? KEX_FIPS_ENCRYPT : KEX_SERVER_ENCRYPT);
++	dump_cfg_string(sMacs, o->macs ? o->macs : FIPS_mode()
++		? KEX_FIPS_MAC : KEX_SERVER_MAC);
+ 	dump_cfg_string(sBanner, o->banner);
+ 	dump_cfg_string(sForceCommand, o->adm_forced_command);
+ 	dump_cfg_string(sChrootDirectory, o->chroot_directory);
+@@ -2180,7 +2180,7 @@
+ 	dump_cfg_string(sAuthorizedKeysCommandUser, o->authorized_keys_command_user);
+ 	dump_cfg_string(sHostKeyAgent, o->host_key_agent);
+ 	dump_cfg_string(sKexAlgorithms, o->kex_algorithms ? o->kex_algorithms :
+-  	    KEX_SERVER_KEX);
++		FIPS_mode() ? KEX_DEFAULT_KEX_FIPS : KEX_SERVER_KEX);
+ 
+ 	/* string arguments requiring a lookup */
+ 	dump_cfg_string(sLogLevel, log_level_name(o->log_level));
