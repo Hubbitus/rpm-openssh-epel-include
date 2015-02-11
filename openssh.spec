@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -751,6 +751,14 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Feb 18 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-3 + 0.9.3-4
+- update coverity patch
+- make output of sshd -T more consistent (#1187521)
+- enable seccomp for sandboxing instead of rlimit (#1062953)
+- update hardening to compile on gcc5
+- Add SSH KDF CAVS test driver (#1193045)
+- Fix ssh-copy-id on non-sh remote shells (#1045191)
+
 * Tue Jan 27 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-2 + 0.9.3-4
 - fixed audit patch after rebase
 
