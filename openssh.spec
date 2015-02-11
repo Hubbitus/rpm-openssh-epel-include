@@ -506,12 +506,7 @@ fi
 %endif
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
-%if 0
-#seccomp_filter cannot be build right now
 	--with-sandbox=seccomp_filter \
-%else
-	--with-sandbox=rlimit \
-%endif
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
