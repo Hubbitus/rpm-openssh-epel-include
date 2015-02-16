@@ -5,6 +5,8 @@
 %define WITH_SELINUX 0
 %endif
 
+%global _hardened_build 1
+
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
 %define sshd_gid    74
@@ -496,6 +498,7 @@ fi
 	--without-zlib-version-check \
 	--with-ssl-engine \
 	--with-ipaddr-display \
+	--with-pie=no \
 %if %{ldap}
 	--with-ldap \
 %endif
