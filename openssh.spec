@@ -166,6 +166,8 @@ Patch711: openssh-6.6p1-log-usepam-no.patch
 Patch712: openssh-6.3p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
 Patch713: openssh-6.6p1-ctr-cavstest.patch
+# add SSH KDF CAVS test driver
+Patch714: openssh-6.7p1-kdf-cavs.patch
 
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
@@ -413,6 +415,7 @@ popd
 %patch711 -p1 -b .log-usepam-no
 %patch712 -p1 -b .evp-ctr
 %patch713 -p1 -b .ctr-cavs
+%patch714 -p1 -b .kdf-cavs
 # 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
@@ -659,6 +662,8 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
 %attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
 %attr(0755,root,root) %{_libexecdir}/openssh/ctr-cavstest
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs_driver.pl
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 
