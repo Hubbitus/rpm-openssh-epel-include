@@ -228,6 +228,8 @@ Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 # apply upstream patch and make sshd -T more consistent (#1187521)
 Patch922: openssh-6.7p1-sshdT-output.patch
+# fix ssh-copy-id on non-sh shells (#1045191)
+Patch923: openssh-6.7p1-fix-ssh-copy-id-on-non-sh-shell.patch
 
 
 License: BSD
@@ -437,6 +439,7 @@ popd
 %patch802 -p1 -b .GSSAPIEnablek5users
 %patch921 -p1 -b .tcp_wrappers
 %patch922 -p1 -b .sshdt
+%patch923 -p1 -b .ssh-copy-id
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
