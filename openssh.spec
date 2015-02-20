@@ -313,6 +313,11 @@ Requires: openssh = %{version}-%{release}
 Obsoletes: openssh-askpass-gnome
 Provides: openssh-askpass-gnome
 
+%package cavs
+Summary: CAVS tests for FIPS validation
+Group: Applications/Internet
+Requires: openssh = %{version}-%{release}
+
 %package -n pam_ssh_agent_auth
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
@@ -359,6 +364,10 @@ openssh in the mls mode.
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package contains
 an X11 passphrase dialog for OpenSSH.
+
+%description cavs
+This package contains test binaries and scripts to make FIPS validation
+easier. Now contains CTR and KDF CAVS test driver.
 
 %description -n pam_ssh_agent_auth
 This package contains a PAM module which can be used to authenticate
@@ -664,9 +673,6 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
 %attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
-%attr(0755,root,root) %{_libexecdir}/openssh/ctr-cavstest
-%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs
-%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs_driver.pl
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 
@@ -740,6 +746,11 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_libexecdir}/openssh/gnome-ssh-askpass
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
 %endif
+
+%files cavs
+%attr(0755,root,root) %{_libexecdir}/openssh/ctr-cavstest
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs
+%attr(0755,root,root) %{_libexecdir}/openssh/ssh-cavs_driver.pl
 
 %if %{pam_ssh_agent}
 %files -n pam_ssh_agent_auth
