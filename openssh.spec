@@ -151,8 +151,6 @@ Patch702: openssh-5.1p1-askpass-progress.patch
 #?
 Patch703: openssh-4.3p2-askpass-grab-info.patch
 #?
-Patch705: openssh-5.1p1-scp-manpage.patch
-#?
 Patch706: openssh-6.6.1p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch707: openssh-6.6p1-redhat.patch
@@ -187,16 +185,6 @@ Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
 Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
-# Try CLOCK_BOOTTIME with fallback (#1091992)
-Patch907: openssh-6.4p1-CLOCK_BOOTTIME.patch
-# Prevents a server from skipping SSHFP lookup and forcing a new-hostkey
-# dialog by offering only certificate keys. (#1081338)
-Patch908: openssh-6.6p1-CVE-2014-2653.patch
-# OpenSSH 6.5 and 6.6 sometimes encode a value used in the curve25519 key exchange incorrectly
-# Disable the curve25519 KEX when speaking to OpenSSH 6.5 or 6.6
-Patch909: openssh-5618210618256bbf5f4f71b2887ff186fd451736.patch
-# standardise on NI_MAXHOST for gethostname() string lengths (#1051490)
-Patch910: openssh-6.6.1p1-NI_MAXHOST.patch
 # set a client's address right after a connection is set
 # http://bugzilla.mindrot.org/show_bug.cgi?id=2257
 Patch911: openssh-6.6p1-set_remote_ipaddr.patch
@@ -210,9 +198,6 @@ Patch913: openssh-6.6.1p1-partial-success.patch
 # fix parsing of empty options in sshd_conf
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2281
 Patch914: openssh-6.6.1p1-servconf-parser.patch
-# Ignore SIGXFSZ in postauth monitor
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2263
-Patch915: openssh-6.6.1p1-ignore-SIGXFSZ-in-postauth.patch
 # privsep_preauth: use SELinux context from selinux-policy (#1008580)
 Patch916: openssh-6.6.1p1-selinux-contexts.patch
 # use different values for DH for Cisco servers (#1026430)
@@ -486,7 +471,7 @@ export LDFLAGS
 %endif
 %if %{kerberos5}
 if test -r /etc/profile.d/krb5-devel.sh ; then
-        source /etc/profile.d/krb5-devel.sh
+	source /etc/profile.d/krb5-devel.sh
 fi
 krb5_prefix=`krb5-config --prefix`
 if test "$krb5_prefix" != "%{_prefix}" ; then
