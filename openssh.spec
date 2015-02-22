@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -510,6 +510,14 @@ fi
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
 	--with-sandbox=seccomp_filter \
+%ifarch %{ix86} x86_64 %{arm}
+# seccomp_filter cannot be build right now on aarch64/ppc64*/s390*
+# being tracked in RHBZ 1195065
+        --with-sandbox=seccomp_filter \
+%else
+        --with-sandbox=rlimit \
+%endif
+
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
@@ -747,6 +755,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Sun Feb 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 6.7p1-5 + 0.9.3-4
+- Only use seccomp for sandboxing on supported platforms
+
 * Fri Feb 20 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-4 + 0.9.3-4
 - Move cavs tests into subpackage -cavs (#1194320)
 
