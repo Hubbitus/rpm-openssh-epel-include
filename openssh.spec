@@ -509,15 +509,13 @@ fi
 %endif
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
-	--with-sandbox=seccomp_filter \
 %ifarch %{ix86} x86_64 %{arm}
 # seccomp_filter cannot be build right now on aarch64/ppc64*/s390*
 # being tracked in RHBZ 1195065
-        --with-sandbox=seccomp_filter \
+	--with-sandbox=seccomp_filter \
 %else
         --with-sandbox=rlimit \
 %endif
-
 %endif
 %if %{kerberos5}
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
