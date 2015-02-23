@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -751,6 +751,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Feb 23 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-7 + 0.9.3-4
+- Fix seccomp filter on architectures without getuid32
+
 * Mon Feb 23 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-6 + 0.9.3-4
 - Update seccomp filter to work on i686 architectures (#1194401)
 - Fix previous failing build (#1195065)
