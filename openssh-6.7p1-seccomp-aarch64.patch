@@ -1,0 +1,50 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -764,9 +764,12 @@ main() { if (NSVersionOfRunTimeLibrary("
+ 	i*86-*)
+ 		seccomp_audit_arch=AUDIT_ARCH_I386
+ 		;;
+-        arm*-*)
++	aarch64*-*)
++		seccomp_audit_arch=AUDIT_ARCH_AARCH64
++		;;
++	arm*-*)
+ 		seccomp_audit_arch=AUDIT_ARCH_ARM
+-                ;;
++		;;
+ 	esac
+ 	if test "x$seccomp_audit_arch" != "x" ; then
+ 		AC_MSG_RESULT(["$seccomp_audit_arch"])
+diff --git a/sandbox-seccomp-filter.c b/sandbox-seccomp-filter.c
+index 095b04a..59c3682 100644
+--- a/sandbox-seccomp-filter.c
++++ b/sandbox-seccomp-filter.c
+@@ -90,8 +90,10 @@ static const struct sock_filter preauth_insns[] = {
+ 	/* Load the syscall number for checking. */
+ 	BPF_STMT(BPF_LD+BPF_W+BPF_ABS,
+ 		offsetof(struct seccomp_data, nr)),
+-	SC_DENY(open, EACCES),
++	SC_DENY(openat, EACCES), /* no open() on AArch64 */
++#ifdef __NR_stat
+ 	SC_DENY(stat, EACCES),
++#endif
+ 	SC_ALLOW(getpid),
+ 	SC_ALLOW(gettimeofday),
+ 	SC_ALLOW(clock_gettime),
+@@ -111,12 +113,16 @@ static const struct sock_filter preauth_insns[] = {
+ 	SC_ALLOW(shutdown),
+ #endif
+ 	SC_ALLOW(brk),
++#ifdef __NR_poll /* Not available on AArch64 */
+ 	SC_ALLOW(poll),
++#endif
+ #ifdef __NR__newselect
+ 	SC_ALLOW(_newselect),
+ #else
++#ifdef __NR_select /* Not available on AArch64 */
+ 	SC_ALLOW(select),
+ #endif
++#endif
+ 	SC_ALLOW(madvise),
+ #ifdef __NR_mmap2 /* EABI ARM only has mmap2() */
+ 	SC_ALLOW(mmap2),

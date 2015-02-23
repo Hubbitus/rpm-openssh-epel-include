@@ -215,6 +215,8 @@ Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 Patch922: openssh-6.7p1-sshdT-output.patch
 # fix ssh-copy-id on non-sh shells (#1045191)
 Patch923: openssh-6.7p1-fix-ssh-copy-id-on-non-sh-shell.patch
+# AArch64 has seccomp support since 3.19 kernel (#1195065)
+Patch924: openssh-6.7p1-seccomp-aarch64.patch
 
 
 License: BSD
@@ -434,6 +436,7 @@ popd
 %patch921 -p1 -b .tcp_wrappers
 %patch922 -p1 -b .sshdt
 %patch923 -p1 -b .ssh-copy-id
+%patch924 -p1 -b .seccomp
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
@@ -509,7 +512,7 @@ fi
 %endif
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
-%ifarch %{ix86} x86_64 %{arm}
+%ifarch %{ix86} x86_64 %{arm} aarch64
 	--with-sandbox=seccomp_filter \
 %else
 	--with-sandbox=rlimit \
