@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -754,6 +754,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Feb 24 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-8 + 0.9.3-4
+- Add AArch64 support for seccomp_filter sandbox (#1195065)
+
 * Mon Feb 23 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-7 + 0.9.3-4
 - Fix seccomp filter on architectures without getuid32
 
