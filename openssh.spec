@@ -217,6 +217,8 @@ Patch922: openssh-6.7p1-sshdT-output.patch
 Patch923: openssh-6.7p1-fix-ssh-copy-id-on-non-sh-shell.patch
 # AArch64 has seccomp support since 3.19 kernel (#1195065)
 Patch924: openssh-6.7p1-seccomp-aarch64.patch
+# Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
+Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 
 
 License: BSD
@@ -437,6 +439,7 @@ popd
 %patch922 -p1 -b .sshdt
 %patch923 -p1 -b .ssh-copy-id
 %patch924 -p1 -b .seccomp
+%patch925 -p1 -b .newline
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
