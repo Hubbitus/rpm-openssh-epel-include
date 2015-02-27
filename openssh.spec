@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -757,6 +757,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Feb 27 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-9 + 0.9.3-4
+- Adjust seccomp filter for primary architectures and solve aarch64 issue (#1197051)
+- Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
+
 * Tue Feb 24 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-8 + 0.9.3-4
 - Add AArch64 support for seccomp_filter sandbox (#1195065)
 
