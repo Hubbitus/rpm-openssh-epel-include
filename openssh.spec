@@ -89,6 +89,7 @@ Source10: sshd.socket
 Source11: sshd.service
 Source12: sshd-keygen.service
 Source13: sshd-keygen
+Source14: openssh-tmpfiles.conf
 
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
@@ -603,6 +604,7 @@ install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
 install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.service
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
+install -m644 -D %{SOURCE14} $RPM_BUILD_ROOT%{_tmpfilesdir}/%{name}.conf
 
 %if ! %{no_gnome_askpass}
 install contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
@@ -716,6 +718,7 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_unitdir}/sshd@.service
 %attr(0644,root,root) %{_unitdir}/sshd.socket
 %attr(0644,root,root) %{_unitdir}/sshd-keygen.service
+%attr(0644,root,root) %{_tmpfilesdir}/openssh.conf
 %endif
 
 %if %{ldap}
