@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 9
+%define openssh_rel 10
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -760,6 +760,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Mar 02 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-10 + 0.9.3-4
+- Add tmpfiles.d entries (#1196807)
+
 * Fri Feb 27 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-9 + 0.9.3-4
 - Adjust seccomp filter for primary architectures and solve aarch64 issue (#1197051)
 - Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
