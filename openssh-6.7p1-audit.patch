@@ -1947,7 +1947,7 @@ index 40a681e..acd87d5 100644
 -		PRIVSEP(audit_run_command(shell));
 +		s->command = xstrdup(shell);
  	}
-+	if (s->command != NULL)
++	if (s->command != NULL && s->ttyfd == -1)
 +		s->command_handle = PRIVSEP(audit_run_command(s->command));
  #endif
  	if (s->ttyfd != -1)
@@ -2000,7 +2000,7 @@ index 40a681e..acd87d5 100644
 +void
 +session_end_command2(Session *s)
 +{
-+	if (s->command != NULL) {
++	if (s->command != NULL && s->ttyfd == -1) {
 +		audit_end_command(s->command_handle, s->command);
 +		free(s->command);
 +		s->command = NULL;
