@@ -3,7 +3,7 @@ new file mode 100644
 index 0000000..dd5f5cc
 --- /dev/null
 +++ b/HOWTO.ldap-keys
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,119 @@
 +
 +HOW TO START
 +
@@ -65,6 +65,17 @@ index 0000000..dd5f5cc
 +2) use debug in ssh-ldap-helper
 +  * ssh-ldap-helper -d -d -d -d -s <username>
 +3) use tcpdump ... other ldap client etc.
++
++HOW TO CONFIGURE SSH FOR OTHER LDAP CONFIGURATION / SERVER /SCHEMA
++
++You can adjust search format string in /etc/ldap.conf using
++ 1) SSH_Filter option to limit results for only specified users
++    (this appends search condition after original query)
++ 2) Search_Format option to define your own search string using expansion
++    characters %u for username, %c for objectclass and %f for above mentioned filter.
++
++Example:
++Search_Format (&(objectclass=posixAccount)(objectclass=ldapPublicKey)(uid=%u)%f)
 +
 +ADVANTAGES
 +
@@ -525,7 +536,7 @@ new file mode 100644
 index 0000000..42e38d3
 --- /dev/null
 +++ b/ldap.conf
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,95 @@
 +# $Id: openssh-5.5p1-ldap.patch,v 1.3 2010/07/07 13:48:36 jfch2222 Exp $
 +#
 +# This is the example configuration file for the OpenSSH
@@ -614,12 +625,19 @@ index 0000000..42e38d3
 +#tls_cert
 +#tls_key
 +
++# OpenLDAP search_format
++# format used to search for users in LDAP directory using substitution
++# for %u for user name and %f for SSH_Filter option (optional, empty by default)
++#search_format (&(objectclass=%c)(objectclass=ldapPublicKey)(uid=%u)%f)
++
++#AccountClass posixAccount
++
 diff --git a/ldapbody.c b/ldapbody.c
 new file mode 100644
 index 0000000..3029108
 --- /dev/null
 +++ b/ldapbody.c
-@@ -0,0 +1,494 @@
+@@ -0,0 +1,493 @@
 +/* $OpenBSD: ldapbody.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
 + * Copyright (c) 2009 Jan F. Chadima.  All rights reserved.
@@ -653,8 +671,9 @@ index 0000000..3029108
 +#include "ldapbody.h"
 +#include <stdio.h>
 +#include <unistd.h>
++#include "misc.h"
 +
-+#define LDAPSEARCH_FORMAT "(&(objectclass=%s)(objectclass=ldapPublicKey)(uid=%s)%s)"
++#define LDAPSEARCH_FORMAT "(&(objectclass=%c)(objectclass=ldapPublicKey)(uid=%u)%f)"
 +#define PUBKEYATTR "sshPublicKey"
 +#define LDAP_LOGFILE	"%s/ldap.%d"
 +
@@ -1041,8 +1060,8 @@ index 0000000..3029108
 +process_user (const char *user, FILE *output)
 +{
 +	LDAPMessage *res, *e;
-+	char *buffer;
-+	int bufflen, rc, i;
++	char *buffer, *format;
++	int rc, i;
 +	struct timeval timeout;
 +
 +	debug ("LDAP process user");
@@ -1055,12 +1074,10 @@ index 0000000..3029108
 +	}
 +
 +	/* build  filter for LDAP request */
-+	bufflen = strlen (LDAPSEARCH_FORMAT) + strlen(options.account_class) + strlen (user);
-+	if (options.ssh_filter != NULL)
-+	    bufflen += strlen (options.ssh_filter);
-+	buffer = xmalloc (bufflen);
-+	snprintf(buffer, bufflen, LDAPSEARCH_FORMAT, options.account_class, user, (options.ssh_filter != NULL) ? options.ssh_filter : NULL);
-+	buffer[bufflen - 1] = 0;
++	format = LDAPSEARCH_FORMAT;
++	if (options.search_format != NULL)
++		format = options.search_format;
++	buffer = percent_expand(format, "c", options.account_class, "u", user, "f", options.ssh_filter, (char *)NULL);
 +
 +	debug3 ("LDAP search scope = %d %s", options.scope, buffer);
 +
@@ -1162,7 +1179,7 @@ new file mode 100644
 index 0000000..b49cae6
 --- /dev/null
 +++ b/ldapconf.c
-@@ -0,0 +1,721 @@
+@@ -0,0 +1,728 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
 + * Copyright (c) 2009 Jan F. Chadima.  All rights reserved.
@@ -1206,7 +1223,7 @@ index 0000000..b49cae6
 +	lLdap_Version, lBind_Policy, lSSLPath, lSSL, lReferrals,
 +	lRestart, lTLS_CheckPeer, lTLS_CaCertFile,
 +	lTLS_CaCertDir, lTLS_Ciphers, lTLS_Cert, lTLS_Key,
-+	lTLS_RandFile, lLogDir, lDebug, lSSH_Filter,
++	lTLS_RandFile, lLogDir, lDebug, lSSH_Filter, lSearch_Format,
 +	lAccountClass, lDeprecated, lUnsupported
 +} OpCodes;
 +
@@ -1259,6 +1276,7 @@ index 0000000..b49cae6
 +	{ "LogDir", lLogDir },
 +	{ "Debug", lDebug },
 +	{ "SSH_Filter", lSSH_Filter },
++	{ "search_format", lSearch_Format },
 +	{ "AccountClass", lAccountClass },
 +	{ NULL, lBadOption }
 +};
@@ -1583,6 +1601,10 @@ index 0000000..b49cae6
 +		xstringptr = &options.ssh_filter;
 +		goto parse_xstring;
 +
++	case lSearch_Format:
++		charptr = &options.search_format;
++		goto parse_string;
++
 +	case lAccountClass:
 +		charptr = &options.account_class;
 +		goto parse_string;
@@ -1689,6 +1711,7 @@ index 0000000..b49cae6
 +	options.logdir = NULL;
 +	options.debug = -1;
 +	options.ssh_filter = NULL;
++	options.search_format = NULL;
 +	options.account_class = NULL;
 +}
 +
@@ -1881,7 +1904,8 @@ index 0000000..b49cae6
 +	dump_cfg_string(lLogDir, options.logdir);
 +	dump_cfg_int(lDebug, options.debug);
 +	dump_cfg_string(lSSH_Filter, options.ssh_filter);
-+	dump_cfg_string(lAccountClass, options.logdir);
++	dump_cfg_string(lSearch_Format, options.search_format);
++	dump_cfg_string(lAccountClass, options.account_class);
 +}
 +
 diff --git a/ldapconf.h b/ldapconf.h
@@ -1889,7 +1913,7 @@ new file mode 100644
 index 0000000..2cb550c
 --- /dev/null
 +++ b/ldapconf.h
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,73 @@
 +/* $OpenBSD: ldapconf.c,v 1.1 2009/12/03 03:34:42 jfch Exp $ */
 +/*
 + * Copyright (c) 2009 Jan F. Chadima.  All rights reserved.
@@ -1951,6 +1975,7 @@ index 0000000..2cb550c
 +	char *logdir;
 +	int debug;
 +	char *ssh_filter;
++	char *search_format;
 +	char *account_class;
 +}       Options;
 +
@@ -2291,7 +2316,7 @@ new file mode 100644
 index 0000000..f7081b8
 --- /dev/null
 +++ b/ssh-ldap.conf.5
-@@ -0,0 +1,379 @@
+@@ -0,0 +1,385 @@
 +.\" $OpenBSD: ssh-ldap.conf.5,v 1.1 2010/02/10 23:20:38 markus Exp $
 +.\"
 +.\" Copyright (c) 2010 Jan F. Chadima.  All rights reserved.
@@ -2650,11 +2675,17 @@ index 0000000..f7081b8
 +Specifies the debug level used for logging by the LDAP client library.
 +There is no default.
 +.It Cm SSH_Filter
-+Specifies the user filter applied on the LDAP serch.
++Specifies the user filter applied on the LDAP search.
 +The default is no filter.
 +.It Cm AccountClass
 +Specifies the LDAP class used to find user accounts.
 +The default is posixAccount.
++.It Cm search_format
++Specifies the user format of search string in LDAP substituting %u for user name
++and %f for additional ssh filter
++.Cm SSH_Filter
++(optional).
++The default value is (&(objectclass=%c)(objectclass=ldapPublicKey)(uid=%u)%f)
 +.El
 +.Sh FILES
 +.Bl -tag -width Ds
