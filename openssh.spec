@@ -220,6 +220,9 @@ Patch923: openssh-6.7p1-fix-ssh-copy-id-on-non-sh-shell.patch
 Patch924: openssh-6.7p1-seccomp-aarch64.patch
 # Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
 Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
+# Add sftp option to force mode of created files (#1191055)
+Patch926: openssh-6.7p1-sftp-force-permission.patch
+
 
 
 License: BSD
@@ -441,6 +444,7 @@ popd
 %patch923 -p1 -b .ssh-copy-id
 %patch924 -p1 -b .seccomp
 %patch925 -p1 -b .newline
+%patch926 -p1 -b .sftp-force-mode
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
