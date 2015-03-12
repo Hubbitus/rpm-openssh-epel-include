@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.7p1
-%define openssh_rel 10
+%define openssh_rel 11
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 4
 
@@ -764,6 +764,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Mar 12 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-11 + 0.9.3-4
+- Ability to specify LDAP filter in ldap.conf for ssh-ldap-helper
+- Fix auditing when using combination of ForceCommand and PTY
+- Add sftp option to force mode of created files (from rhel)
+- Fix tmpfiles.d entries to be more consistent (#1196807)
+
 * Mon Mar 02 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-10 + 0.9.3-4
 - Add tmpfiles.d entries (#1196807)
 
