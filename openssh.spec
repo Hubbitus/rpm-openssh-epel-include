@@ -89,7 +89,7 @@ Source10: sshd.socket
 Source11: sshd.service
 Source12: sshd-keygen.service
 Source13: sshd-keygen
-Source14: openssh-tmpfiles.conf
+Source14: sshd.tmpfiles
 
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
