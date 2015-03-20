@@ -1,8 +1,7 @@
-diff --git a/auth-pam.c b/auth-pam.c
-index cd1a775..2fff267 100644
---- a/auth-pam.c
-+++ b/auth-pam.c
-@@ -216,7 +216,12 @@ pthread_join(sp_pthread_t thread, void **value)
+diff -up openssh-6.8p1/auth-pam.c.coverity openssh-6.8p1/auth-pam.c
+--- openssh-6.8p1/auth-pam.c.coverity	2015-03-18 17:21:51.792265051 +0100
++++ openssh-6.8p1/auth-pam.c	2015-03-18 17:21:51.895264835 +0100
+@@ -216,7 +216,12 @@ pthread_join(sp_pthread_t thread, void *
  	if (sshpam_thread_status != -1)
  		return (sshpam_thread_status);
  	signal(SIGCHLD, sshpam_oldsig);
@@ -16,11 +15,10 @@ index cd1a775..2fff267 100644
  	return (status);
  }
  #endif
-diff --git a/channels.c b/channels.c
-index 51a221d..0ef1d90 100644
---- a/channels.c
-+++ b/channels.c
-@@ -239,11 +239,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
+diff -up openssh-6.8p1/channels.c.coverity openssh-6.8p1/channels.c
+--- openssh-6.8p1/channels.c.coverity	2015-03-18 17:21:51.815265002 +0100
++++ openssh-6.8p1/channels.c	2015-03-18 17:21:51.896264833 +0100
+@@ -243,11 +243,11 @@ channel_register_fds(Channel *c, int rfd
  	channel_max_fd = MAX(channel_max_fd, wfd);
  	channel_max_fd = MAX(channel_max_fd, efd);
  
@@ -35,7 +33,7 @@ index 51a221d..0ef1d90 100644
  		fcntl(efd, F_SETFD, FD_CLOEXEC);
  
  	c->rfd = rfd;
-@@ -261,11 +261,11 @@ channel_register_fds(Channel *c, int rfd, int wfd, int efd,
+@@ -265,11 +265,11 @@ channel_register_fds(Channel *c, int rfd
  
  	/* enable nonblocking mode */
  	if (nonblock) {
@@ -50,7 +48,7 @@ index 51a221d..0ef1d90 100644
  			set_nonblock(efd);
  	}
  }
-@@ -3959,13 +3959,13 @@ connect_local_xsocket_path(const char *pathname, int len)
+@@ -3972,13 +3972,13 @@ connect_local_xsocket_path(const char *p
  	int sock;
  	struct sockaddr_un addr;
  
@@ -66,35 +64,10 @@ index 51a221d..0ef1d90 100644
  	if (len > sizeof addr.sun_path)
  		len = sizeof addr.sun_path;
  	memcpy(addr.sun_path, pathname, len);
-diff --git a/clientloop.c b/clientloop.c
-index 20ce0b5..65cb26a 100644
---- a/clientloop.c
-+++ b/clientloop.c
-@@ -2090,15 +2090,16 @@ client_input_global_request(int type, u_int32_t seq, void *ctxt)
- {
- 	char *rtype;
- 	int want_reply;
--	int success = 0;
-+/*	int success = 0;
-+ success is still 0 the packet is allways SSH2_MSG_REQUEST_FAILURE, isn't it? */
- 
- 	rtype = packet_get_string(NULL);
- 	want_reply = packet_get_char();
- 	debug("client_input_global_request: rtype %s want_reply %d",
- 	    rtype, want_reply);
- 	if (want_reply) {
--		packet_start(success ?
--		    SSH2_MSG_REQUEST_SUCCESS : SSH2_MSG_REQUEST_FAILURE);
-+		packet_start(/*success ?
-+		    SSH2_MSG_REQUEST_SUCCESS :*/ SSH2_MSG_REQUEST_FAILURE);
- 		packet_send();
- 		packet_write_wait();
- 	}
-diff --git a/entropy.c b/entropy.c
-index 06b0095..a4097da 100644
---- a/entropy.c
-+++ b/entropy.c
-@@ -44,6 +44,7 @@
+diff -up openssh-6.8p1/entropy.c.coverity openssh-6.8p1/entropy.c
+--- openssh-6.8p1/entropy.c.coverity	2015-03-18 17:21:51.891264843 +0100
++++ openssh-6.8p1/entropy.c	2015-03-18 17:21:51.897264831 +0100
+@@ -46,6 +46,7 @@
  #include <openssl/err.h>
  
  #include "openbsd-compat/openssl-compat.h"
@@ -102,11 +75,10 @@ index 06b0095..a4097da 100644
  
  #include "ssh.h"
  #include "misc.h"
-diff --git a/monitor.c b/monitor.c
-index 07fa655..b8e6e06 100644
---- a/monitor.c
-+++ b/monitor.c
-@@ -488,7 +488,7 @@ monitor_child_preauth(Authctxt *_authctxt, struct monitor *pmonitor)
+diff -up openssh-6.8p1/monitor.c.coverity openssh-6.8p1/monitor.c
+--- openssh-6.8p1/monitor.c.coverity	2015-03-18 17:21:51.887264852 +0100
++++ openssh-6.8p1/monitor.c	2015-03-18 17:21:51.897264831 +0100
+@@ -444,7 +444,7 @@ monitor_child_preauth(Authctxt *_authctx
  	mm_get_keystate(pmonitor);
  
  	/* Drain any buffered messages from the child */
@@ -115,7 +87,7 @@ index 07fa655..b8e6e06 100644
  		;
  
  	close(pmonitor->m_sendfd);
-@@ -1276,6 +1276,10 @@ mm_answer_keyallowed(int sock, Buffer *m)
+@@ -1303,6 +1303,10 @@ mm_answer_keyallowed(int sock, Buffer *m
  			break;
  		}
  	}
@@ -126,7 +98,7 @@ index 07fa655..b8e6e06 100644
  	if (key != NULL)
  		key_free(key);
  
-@@ -1297,9 +1301,6 @@ mm_answer_keyallowed(int sock, Buffer *m)
+@@ -1324,9 +1328,6 @@ mm_answer_keyallowed(int sock, Buffer *m
  		free(chost);
  	}
  
@@ -136,11 +108,10 @@ index 07fa655..b8e6e06 100644
  	buffer_clear(m);
  	buffer_put_int(m, allowed);
  	buffer_put_int(m, forced_command != NULL);
-diff --git a/monitor_wrap.c b/monitor_wrap.c
-index ba4ecd7..b3e4ca1 100644
---- a/monitor_wrap.c
-+++ b/monitor_wrap.c
-@@ -749,10 +749,10 @@ mm_pty_allocate(int *ptyfd, int *ttyfd, char *namebuf, size_t namebuflen)
+diff -up openssh-6.8p1/monitor_wrap.c.coverity openssh-6.8p1/monitor_wrap.c
+--- openssh-6.8p1/monitor_wrap.c.coverity	2015-03-18 17:21:51.888264849 +0100
++++ openssh-6.8p1/monitor_wrap.c	2015-03-18 17:21:51.897264831 +0100
+@@ -533,10 +533,10 @@ mm_pty_allocate(int *ptyfd, int *ttyfd,
  	if ((tmp1 = dup(pmonitor->m_recvfd)) == -1 ||
  	    (tmp2 = dup(pmonitor->m_recvfd)) == -1) {
  		error("%s: cannot allocate fds for pty", __func__);
@@ -154,11 +125,10 @@ index ba4ecd7..b3e4ca1 100644
  		return 0;
  	}
  	close(tmp1);
-diff --git a/openbsd-compat/bindresvport.c b/openbsd-compat/bindresvport.c
-index c89f214..80115c2 100644
---- a/openbsd-compat/bindresvport.c
-+++ b/openbsd-compat/bindresvport.c
-@@ -58,7 +58,7 @@ bindresvport_sa(int sd, struct sockaddr *sa)
+diff -up openssh-6.8p1/openbsd-compat/bindresvport.c.coverity openssh-6.8p1/openbsd-compat/bindresvport.c
+--- openssh-6.8p1/openbsd-compat/bindresvport.c.coverity	2015-03-17 06:49:20.000000000 +0100
++++ openssh-6.8p1/openbsd-compat/bindresvport.c	2015-03-18 17:21:51.897264831 +0100
+@@ -58,7 +58,7 @@ bindresvport_sa(int sd, struct sockaddr
  	struct sockaddr_in6 *in6;
  	u_int16_t *portp;
  	u_int16_t port;
@@ -167,10 +137,9 @@ index c89f214..80115c2 100644
  	int i;
  
  	if (sa == NULL) {
-diff --git a/openbsd-compat/port-linux.h b/openbsd-compat/port-linux.h
-index 8b7cda2..e2ca8a1 100644
---- a/openbsd-compat/port-linux.h
-+++ b/openbsd-compat/port-linux.h
+diff -up openssh-6.8p1/openbsd-compat/port-linux.h.coverity openssh-6.8p1/openbsd-compat/port-linux.h
+--- openssh-6.8p1/openbsd-compat/port-linux.h.coverity	2015-03-18 17:21:51.861264906 +0100
++++ openssh-6.8p1/openbsd-compat/port-linux.h	2015-03-18 17:21:51.897264831 +0100
 @@ -37,4 +37,6 @@ void oom_adjust_restore(void);
  void oom_adjust_setup(void);
  #endif
@@ -178,23 +147,10 @@ index 8b7cda2..e2ca8a1 100644
 +void linux_seed(void);
 +
  #endif /* ! _PORT_LINUX_H */
-diff --git a/packet.c b/packet.c
-index 8ec353e..dbc2c33 100644
---- a/packet.c
-+++ b/packet.c
-@@ -1246,6 +1246,7 @@ packet_read_poll1(void)
- 		case DEATTACK_DETECTED:
- 			packet_disconnect("crc32 compensation attack: "
- 			    "network attack detected");
-+			break;
- 		case DEATTACK_DOS_DETECTED:
- 			packet_disconnect("deattack denial of "
- 			    "service detected");
-diff --git a/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c b/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
-index 8ba6d87..a7808c7 100644
---- a/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
-+++ b/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
-@@ -87,7 +87,7 @@ pam_user_key_allowed2(struct passwd *pw, Key *key, char *file)
+diff -up openssh-6.8p1/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c.coverity openssh-6.8p1/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c
+--- openssh-6.8p1/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c.coverity	2015-03-18 17:21:51.788265059 +0100
++++ openssh-6.8p1/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c	2015-03-18 17:21:51.898264829 +0100
+@@ -87,7 +87,7 @@ pam_user_key_allowed2(struct passwd *pw,
  	found = key_new(key->type);
  
  	while (read_keyfile_line(f, file, line, sizeof(line), &linenum) != -1) {
@@ -203,7 +159,7 @@ index 8ba6d87..a7808c7 100644
  
  		/* Skip leading whitespace, empty and comment lines. */
  		for (cp = line; *cp == ' ' || *cp == '\t'; cp++)
-@@ -99,7 +99,6 @@ pam_user_key_allowed2(struct passwd *pw, Key *key, char *file)
+@@ -99,7 +99,6 @@ pam_user_key_allowed2(struct passwd *pw,
  			/* no key?  check if there are options for this key */
  			int quoted = 0;
  			verbose("user_key_allowed: check options: '%s'", cp);
@@ -211,10 +167,9 @@ index 8ba6d87..a7808c7 100644
  			for (; *cp && (quoted || (*cp != ' ' && *cp != '\t')); cp++) {
  				if (*cp == '\\' && cp[1] == '"')
  					cp++;	/* Skip both */
-diff --git a/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c b/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
-index e14eb27..323817a 100644
---- a/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
-+++ b/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
+diff -up openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c.coverity openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
+--- openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c.coverity	2015-03-18 17:21:51.786265063 +0100
++++ openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c	2015-03-18 17:21:51.898264829 +0100
 @@ -89,8 +89,7 @@ userauth_pubkey_from_id(Identity * id)
          authenticated = 1;
  
@@ -225,44 +180,10 @@ index e14eb27..323817a 100644
      if(sig != NULL)
          free(sig);
      if(pkblob != NULL)
-diff --git a/progressmeter.c b/progressmeter.c
-index bbbc706..ae6d1aa 100644
---- a/progressmeter.c
-+++ b/progressmeter.c
-@@ -65,7 +65,7 @@ static void update_progress_meter(int);
- 
- static time_t start;		/* start progress */
- static time_t last_update;	/* last progress update */
--static char *file;		/* name of the file being transferred */
-+static const char *file;	/* name of the file being transferred */
- static off_t start_pos;		/* initial position of transfer */
- static off_t end_pos;		/* ending position of transfer */
- static off_t cur_pos;		/* transfer position as of last refresh */
-@@ -248,7 +248,7 @@ update_progress_meter(int ignore)
- }
- 
- void
--start_progress_meter(char *f, off_t filesize, off_t *ctr)
-+start_progress_meter(const char *f, off_t filesize, off_t *ctr)
- {
- 	start = last_update = monotime();
- 	file = f;
-diff --git a/progressmeter.h b/progressmeter.h
-index 10bab99..e9ca8f0 100644
---- a/progressmeter.h
-+++ b/progressmeter.h
-@@ -23,5 +23,5 @@
-  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  */
- 
--void	start_progress_meter(char *, off_t, off_t *);
-+void	start_progress_meter(const char *, off_t, off_t *);
- void	stop_progress_meter(void);
-diff --git a/scp.c b/scp.c
-index cbd904d..e4e9fa1 100644
---- a/scp.c
-+++ b/scp.c
-@@ -155,7 +155,7 @@ killchild(int signo)
+diff -up openssh-6.8p1/scp.c.coverity openssh-6.8p1/scp.c
+--- openssh-6.8p1/scp.c.coverity	2015-03-18 17:21:51.868264891 +0100
++++ openssh-6.8p1/scp.c	2015-03-18 17:21:58.281251460 +0100
+@@ -156,7 +156,7 @@ killchild(int signo)
  {
  	if (do_cmd_pid > 1) {
  		kill(do_cmd_pid, signo ? signo : SIGTERM);
@@ -271,11 +192,10 @@ index cbd904d..e4e9fa1 100644
  	}
  
  	if (signo)
-diff --git a/servconf.c b/servconf.c
-index 87a311b..895cdca 100644
---- a/servconf.c
-+++ b/servconf.c
-@@ -1418,7 +1418,7 @@ process_server_config_line(ServerOptions *options, char *line,
+diff -up openssh-6.8p1/servconf.c.coverity openssh-6.8p1/servconf.c
+--- openssh-6.8p1/servconf.c.coverity	2015-03-18 17:21:51.893264839 +0100
++++ openssh-6.8p1/servconf.c	2015-03-18 17:21:58.281251460 +0100
+@@ -1475,7 +1475,7 @@ process_server_config_line(ServerOptions
  			fatal("%s line %d: Missing subsystem name.",
  			    filename, linenum);
  		if (!*activep) {
@@ -284,7 +204,7 @@ index 87a311b..895cdca 100644
  			break;
  		}
  		for (i = 0; i < options->num_subsystems; i++)
-@@ -1509,8 +1509,9 @@ process_server_config_line(ServerOptions *options, char *line,
+@@ -1566,8 +1566,9 @@ process_server_config_line(ServerOptions
  		if (*activep && *charptr == NULL) {
  			*charptr = tilde_expand_filename(arg, getuid());
  			/* increase optional counter */
@@ -296,10 +216,9 @@ index 87a311b..895cdca 100644
  		}
  		break;
  
-diff --git a/serverloop.c b/serverloop.c
-index e92f9e2..3cad041 100644
---- a/serverloop.c
-+++ b/serverloop.c
+diff -up openssh-6.8p1/serverloop.c.coverity openssh-6.8p1/serverloop.c
+--- openssh-6.8p1/serverloop.c.coverity	2015-03-17 06:49:20.000000000 +0100
++++ openssh-6.8p1/serverloop.c	2015-03-18 17:28:45.616436080 +0100
 @@ -147,13 +147,13 @@ notify_setup(void)
  static void
  notify_parent(void)
@@ -327,7 +246,7 @@ index e92f9e2..3cad041 100644
  			debug2("notify_done: reading");
  }
  
-@@ -337,7 +337,7 @@ wait_until_can_do_something(fd_set **readsetp, fd_set **writesetp, int *maxfdp,
+@@ -337,7 +337,7 @@ wait_until_can_do_something(fd_set **rea
  		 * If we have buffered data, try to write some of that data
  		 * to the program.
  		 */
@@ -345,7 +264,7 @@ index e92f9e2..3cad041 100644
  		data = buffer_ptr(&stdin_buffer);
  		dlen = buffer_len(&stdin_buffer);
  		len = write(fdin, data, dlen);
-@@ -590,7 +590,7 @@ server_loop(pid_t pid, int fdin_arg, int fdout_arg, int fderr_arg)
+@@ -590,7 +590,7 @@ server_loop(pid_t pid, int fdin_arg, int
  	set_nonblock(fdin);
  	set_nonblock(fdout);
  	/* we don't have stderr for interactive terminal sessions, see below */
@@ -354,7 +273,7 @@ index e92f9e2..3cad041 100644
  		set_nonblock(fderr);
  
  	if (!(datafellows & SSH_BUG_IGNOREMSG) && isatty(fdin))
-@@ -614,7 +614,7 @@ server_loop(pid_t pid, int fdin_arg, int fdout_arg, int fderr_arg)
+@@ -614,7 +614,7 @@ server_loop(pid_t pid, int fdin_arg, int
  	max_fd = MAX(connection_in, connection_out);
  	max_fd = MAX(max_fd, fdin);
  	max_fd = MAX(max_fd, fdout);
@@ -363,7 +282,7 @@ index e92f9e2..3cad041 100644
  		max_fd = MAX(max_fd, fderr);
  #endif
  
-@@ -644,7 +644,7 @@ server_loop(pid_t pid, int fdin_arg, int fdout_arg, int fderr_arg)
+@@ -644,7 +644,7 @@ server_loop(pid_t pid, int fdin_arg, int
  		 * If we have received eof, and there is no more pending
  		 * input data, cause a real eof by closing fdin.
  		 */
@@ -372,7 +291,7 @@ index e92f9e2..3cad041 100644
  			if (fdin != fdout)
  				close(fdin);
  			else
-@@ -740,15 +740,15 @@ server_loop(pid_t pid, int fdin_arg, int fdout_arg, int fderr_arg)
+@@ -740,15 +740,15 @@ server_loop(pid_t pid, int fdin_arg, int
  	buffer_free(&stderr_buffer);
  
  	/* Close the file descriptors. */
@@ -391,16 +310,16 @@ index e92f9e2..3cad041 100644
  		close(fdin);
  	fdin = -1;
  
-@@ -947,7 +947,7 @@ server_input_window_size(int type, u_int32_t seq, void *ctxt)
+@@ -950,7 +950,7 @@ server_input_window_size(int type, u_int
  
  	debug("Window change received.");
  	packet_check_eom();
 -	if (fdin != -1)
 +	if (fdin >= 0)
  		pty_change_window_size(fdin, row, col, xpixel, ypixel);
+ 	return 0;
  }
- 
-@@ -1039,7 +1039,7 @@ server_request_tun(void)
+@@ -1043,7 +1043,7 @@ server_request_tun(void)
  	}
  
  	tun = packet_get_int();
@@ -409,361 +328,10 @@ index e92f9e2..3cad041 100644
  		if (tun != SSH_TUNID_ANY && forced_tun_device != tun)
  			goto done;
  		tun = forced_tun_device;
-diff --git a/sftp-client.c b/sftp-client.c
-index 990b58d..3d0f22b 100644
---- a/sftp-client.c
-+++ b/sftp-client.c
-@@ -151,7 +151,7 @@ get_msg(struct sftp_conn *conn, Buffer *m)
- }
- 
- static void
--send_string_request(struct sftp_conn *conn, u_int id, u_int code, char *s,
-+send_string_request(struct sftp_conn *conn, u_int id, u_int code, const char *s,
-     u_int len)
- {
- 	Buffer msg;
-@@ -167,7 +167,7 @@ send_string_request(struct sftp_conn *conn, u_int id, u_int code, char *s,
- 
- static void
- send_string_attrs_request(struct sftp_conn *conn, u_int id, u_int code,
--    char *s, u_int len, Attrib *a)
-+    const char *s, u_int len, Attrib *a)
- {
- 	Buffer msg;
- 
-@@ -429,7 +429,7 @@ sftp_proto_version(struct sftp_conn *conn)
- }
- 
- int
--do_close(struct sftp_conn *conn, char *handle, u_int handle_len)
-+do_close(struct sftp_conn *conn, const char *handle, u_int handle_len)
- {
- 	u_int id, status;
- 	Buffer msg;
-@@ -454,7 +454,7 @@ do_close(struct sftp_conn *conn, char *handle, u_int handle_len)
- 
- 
- static int
--do_lsreaddir(struct sftp_conn *conn, char *path, int print_flag,
-+do_lsreaddir(struct sftp_conn *conn, const char *path, int print_flag,
-     SFTP_DIRENT ***dir)
- {
- 	Buffer msg;
-@@ -577,7 +577,7 @@ do_lsreaddir(struct sftp_conn *conn, char *path, int print_flag,
- }
- 
- int
--do_readdir(struct sftp_conn *conn, char *path, SFTP_DIRENT ***dir)
-+do_readdir(struct sftp_conn *conn, const char *path, SFTP_DIRENT ***dir)
- {
- 	return(do_lsreaddir(conn, path, 0, dir));
- }
-@@ -597,7 +597,7 @@ void free_sftp_dirents(SFTP_DIRENT **s)
- }
- 
- int
--do_rm(struct sftp_conn *conn, char *path)
-+do_rm(struct sftp_conn *conn, const char *path)
- {
- 	u_int status, id;
- 
-@@ -612,7 +612,7 @@ do_rm(struct sftp_conn *conn, char *path)
- }
- 
- int
--do_mkdir(struct sftp_conn *conn, char *path, Attrib *a, int print_flag)
-+do_mkdir(struct sftp_conn *conn, const char *path, Attrib *a, int print_flag)
- {
- 	u_int status, id;
- 
-@@ -628,7 +628,7 @@ do_mkdir(struct sftp_conn *conn, char *path, Attrib *a, int print_flag)
- }
- 
- int
--do_rmdir(struct sftp_conn *conn, char *path)
-+do_rmdir(struct sftp_conn *conn, const char *path)
- {
- 	u_int status, id;
- 
-@@ -644,7 +644,7 @@ do_rmdir(struct sftp_conn *conn, char *path)
- }
- 
- Attrib *
--do_stat(struct sftp_conn *conn, char *path, int quiet)
-+do_stat(struct sftp_conn *conn, const char *path, int quiet)
- {
- 	u_int id;
- 
-@@ -658,7 +658,7 @@ do_stat(struct sftp_conn *conn, char *path, int quiet)
- }
- 
- Attrib *
--do_lstat(struct sftp_conn *conn, char *path, int quiet)
-+do_lstat(struct sftp_conn *conn, const char *path, int quiet)
- {
- 	u_int id;
- 
-@@ -679,7 +679,7 @@ do_lstat(struct sftp_conn *conn, char *path, int quiet)
- 
- #ifdef notyet
- Attrib *
--do_fstat(struct sftp_conn *conn, char *handle, u_int handle_len, int quiet)
-+do_fstat(struct sftp_conn *conn, const char *handle, u_int handle_len, int quiet)
- {
- 	u_int id;
- 
-@@ -692,7 +692,7 @@ do_fstat(struct sftp_conn *conn, char *handle, u_int handle_len, int quiet)
- #endif
- 
- int
--do_setstat(struct sftp_conn *conn, char *path, Attrib *a)
-+do_setstat(struct sftp_conn *conn, const char *path, Attrib *a)
- {
- 	u_int status, id;
- 
-@@ -709,7 +709,7 @@ do_setstat(struct sftp_conn *conn, char *path, Attrib *a)
- }
- 
- int
--do_fsetstat(struct sftp_conn *conn, char *handle, u_int handle_len,
-+do_fsetstat(struct sftp_conn *conn, const char *handle, u_int handle_len,
-     Attrib *a)
- {
- 	u_int status, id;
-@@ -726,7 +726,7 @@ do_fsetstat(struct sftp_conn *conn, char *handle, u_int handle_len,
- }
- 
- char *
--do_realpath(struct sftp_conn *conn, char *path)
-+do_realpath(struct sftp_conn *conn, const char *path)
- {
- 	Buffer msg;
- 	u_int type, expected_id, count, id;
-@@ -775,7 +775,7 @@ do_realpath(struct sftp_conn *conn, char *path)
- }
- 
- int
--do_rename(struct sftp_conn *conn, char *oldpath, char *newpath,
-+do_rename(struct sftp_conn *conn, const char *oldpath, const char *newpath,
-     int force_legacy)
- {
- 	Buffer msg;
-@@ -811,7 +811,7 @@ do_rename(struct sftp_conn *conn, char *oldpath, char *newpath,
- }
- 
- int
--do_hardlink(struct sftp_conn *conn, char *oldpath, char *newpath)
-+do_hardlink(struct sftp_conn *conn, const char *oldpath, const char *newpath)
- {
- 	Buffer msg;
- 	u_int status, id;
-@@ -844,7 +844,7 @@ do_hardlink(struct sftp_conn *conn, char *oldpath, char *newpath)
- }
- 
- int
--do_symlink(struct sftp_conn *conn, char *oldpath, char *newpath)
-+do_symlink(struct sftp_conn *conn, const char *oldpath, const char *newpath)
- {
- 	Buffer msg;
- 	u_int status, id;
-@@ -876,7 +876,7 @@ do_symlink(struct sftp_conn *conn, char *oldpath, char *newpath)
- }
- 
- int
--do_fsync(struct sftp_conn *conn, char *handle, u_int handle_len)
-+do_fsync(struct sftp_conn *conn, const char *handle, u_int handle_len)
- {
- 	Buffer msg;
- 	u_int status, id;
-@@ -907,7 +907,7 @@ do_fsync(struct sftp_conn *conn, char *handle, u_int handle_len)
- 
- #ifdef notyet
- char *
--do_readlink(struct sftp_conn *conn, char *path)
-+do_readlink(struct sftp_conn *conn, const char *path)
- {
- 	Buffer msg;
- 	u_int type, expected_id, count, id;
-@@ -1010,7 +1010,7 @@ do_fstatvfs(struct sftp_conn *conn, const char *handle, u_int handle_len,
- 
- static void
- send_read_request(struct sftp_conn *conn, u_int id, u_int64_t offset,
--    u_int len, char *handle, u_int handle_len)
-+    u_int len, const char *handle, u_int handle_len)
- {
- 	Buffer msg;
- 
-@@ -1026,7 +1026,7 @@ send_read_request(struct sftp_conn *conn, u_int id, u_int64_t offset,
- }
- 
- int
--do_download(struct sftp_conn *conn, char *remote_path, char *local_path,
-+do_download(struct sftp_conn *conn, const char *remote_path, const char *local_path,
-     Attrib *a, int preserve_flag, int resume_flag, int fsync_flag)
- {
- 	Attrib junk;
-@@ -1308,7 +1308,7 @@ do_download(struct sftp_conn *conn, char *remote_path, char *local_path,
- }
- 
- static int
--download_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
-+download_dir_internal(struct sftp_conn *conn, const char *src, const char *dst, int depth,
-     Attrib *dirattrib, int preserve_flag, int print_flag, int resume_flag,
-     int fsync_flag)
- {
-@@ -1400,7 +1400,7 @@ download_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
- }
- 
- int
--download_dir(struct sftp_conn *conn, char *src, char *dst,
-+download_dir(struct sftp_conn *conn, const char *src, const char *dst,
-     Attrib *dirattrib, int preserve_flag, int print_flag,
-     int resume_flag, int fsync_flag)
- {
-@@ -1419,7 +1419,7 @@ download_dir(struct sftp_conn *conn, char *src, char *dst,
- }
- 
- int
--do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
-+do_upload(struct sftp_conn *conn, const char *local_path, const char *remote_path,
-     int preserve_flag, int resume, int fsync_flag)
- {
- 	int local_fd;
-@@ -1628,7 +1628,7 @@ do_upload(struct sftp_conn *conn, char *local_path, char *remote_path,
- }
- 
- static int
--upload_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
-+upload_dir_internal(struct sftp_conn *conn, const char *src, const char *dst, int depth,
-     int preserve_flag, int print_flag, int resume, int fsync_flag)
- {
- 	int ret = 0, status;
-@@ -1721,7 +1721,7 @@ upload_dir_internal(struct sftp_conn *conn, char *src, char *dst, int depth,
- }
- 
- int
--upload_dir(struct sftp_conn *conn, char *src, char *dst, int preserve_flag,
-+upload_dir(struct sftp_conn *conn, const char *src, const char *dst, int preserve_flag,
-     int print_flag, int resume, int fsync_flag)
- {
- 	char *dst_canon;
-@@ -1740,7 +1740,7 @@ upload_dir(struct sftp_conn *conn, char *src, char *dst, int preserve_flag,
- }
- 
- char *
--path_append(char *p1, char *p2)
-+path_append(const char *p1, const char *p2)
- {
- 	char *ret;
- 	size_t len = strlen(p1) + strlen(p2) + 2;
-diff --git a/sftp-client.h b/sftp-client.h
-index 967840b..ffbcade 100644
---- a/sftp-client.h
-+++ b/sftp-client.h
-@@ -56,79 +56,79 @@ struct sftp_conn *do_init(int, int, u_int, u_int, u_int64_t);
- u_int sftp_proto_version(struct sftp_conn *);
- 
- /* Close file referred to by 'handle' */
--int do_close(struct sftp_conn *, char *, u_int);
-+int do_close(struct sftp_conn *, const char *, u_int);
- 
- /* Read contents of 'path' to NULL-terminated array 'dir' */
--int do_readdir(struct sftp_conn *, char *, SFTP_DIRENT ***);
-+int do_readdir(struct sftp_conn *, const char *, SFTP_DIRENT ***);
- 
- /* Frees a NULL-terminated array of SFTP_DIRENTs (eg. from do_readdir) */
- void free_sftp_dirents(SFTP_DIRENT **);
- 
- /* Delete file 'path' */
--int do_rm(struct sftp_conn *, char *);
-+int do_rm(struct sftp_conn *, const char *);
- 
- /* Create directory 'path' */
--int do_mkdir(struct sftp_conn *, char *, Attrib *, int);
-+int do_mkdir(struct sftp_conn *, const char *, Attrib *, int);
- 
- /* Remove directory 'path' */
--int do_rmdir(struct sftp_conn *, char *);
-+int do_rmdir(struct sftp_conn *, const char *);
- 
- /* Get file attributes of 'path' (follows symlinks) */
--Attrib *do_stat(struct sftp_conn *, char *, int);
-+Attrib *do_stat(struct sftp_conn *, const char *, int);
- 
- /* Get file attributes of 'path' (does not follow symlinks) */
--Attrib *do_lstat(struct sftp_conn *, char *, int);
-+Attrib *do_lstat(struct sftp_conn *, const char *, int);
- 
- /* Set file attributes of 'path' */
--int do_setstat(struct sftp_conn *, char *, Attrib *);
-+int do_setstat(struct sftp_conn *, const char *, Attrib *);
- 
- /* Set file attributes of open file 'handle' */
--int do_fsetstat(struct sftp_conn *, char *, u_int, Attrib *);
-+int do_fsetstat(struct sftp_conn *, const char *, u_int, Attrib *);
- 
- /* Canonicalise 'path' - caller must free result */
--char *do_realpath(struct sftp_conn *, char *);
-+char *do_realpath(struct sftp_conn *, const char *);
- 
- /* Get statistics for filesystem hosting file at "path" */
- int do_statvfs(struct sftp_conn *, const char *, struct sftp_statvfs *, int);
- 
- /* Rename 'oldpath' to 'newpath' */
--int do_rename(struct sftp_conn *, char *, char *m, int force_legacy);
-+int do_rename(struct sftp_conn *, const char *, const char *m, int force_legacy);
- 
- /* Link 'oldpath' to 'newpath' */
--int do_hardlink(struct sftp_conn *, char *, char *);
-+int do_hardlink(struct sftp_conn *, const char *, const char *);
- 
- /* Rename 'oldpath' to 'newpath' */
--int do_symlink(struct sftp_conn *, char *, char *);
-+int do_symlink(struct sftp_conn *, const char *, const char *);
- 
- /* Call fsync() on open file 'handle' */
--int do_fsync(struct sftp_conn *conn, char *, u_int);
-+int do_fsync(struct sftp_conn *conn, const char *, u_int);
- 
- /*
-  * Download 'remote_path' to 'local_path'. Preserve permissions and times
-  * if 'pflag' is set
-  */
--int do_download(struct sftp_conn *, char *, char *, Attrib *, int, int, int);
-+int do_download(struct sftp_conn *, const char *, const char *, Attrib *, int, int, int);
- 
- /*
-  * Recursively download 'remote_directory' to 'local_directory'. Preserve 
-  * times if 'pflag' is set
-  */
--int download_dir(struct sftp_conn *, char *, char *, Attrib *, int,
-+int download_dir(struct sftp_conn *, const char *, const char *, Attrib *, int,
-     int, int, int);
- 
- /*
-  * Upload 'local_path' to 'remote_path'. Preserve permissions and times
-  * if 'pflag' is set
-  */
--int do_upload(struct sftp_conn *, char *, char *, int, int, int);
-+int do_upload(struct sftp_conn *, const char *, const char *, int, int, int);
- 
- /*
-  * Recursively upload 'local_directory' to 'remote_directory'. Preserve 
-  * times if 'pflag' is set
-  */
--int upload_dir(struct sftp_conn *, char *, char *, int, int, int, int);
-+int upload_dir(struct sftp_conn *, const char *, const char *, int, int, int, int);
- 
- /* Concatenate paths, taking care of slashes. Caller must free result. */
--char *path_append(char *, char *);
-+char *path_append(const char *, const char *);
- 
- #endif
-diff --git a/sftp.c b/sftp.c
-index ff4d63d..4439100 100644
---- a/sftp.c
-+++ b/sftp.c
-@@ -220,7 +220,7 @@ killchild(int signo)
+diff -up openssh-6.8p1/sftp.c.coverity openssh-6.8p1/sftp.c
+--- openssh-6.8p1/sftp.c.coverity	2015-03-17 06:49:20.000000000 +0100
++++ openssh-6.8p1/sftp.c	2015-03-18 17:21:58.283251456 +0100
+@@ -223,7 +223,7 @@ killchild(int signo)
  {
  	if (sshpid > 1) {
  		kill(sshpid, SIGTERM);
@@ -772,7 +340,7 @@ index ff4d63d..4439100 100644
  	}
  
  	_exit(1);
-@@ -332,7 +332,7 @@ local_do_ls(const char *args)
+@@ -335,7 +335,7 @@ local_do_ls(const char *args)
  
  /* Strip one path (usually the pwd) from the start of another */
  static char *
@@ -781,7 +349,7 @@ index ff4d63d..4439100 100644
  {
  	size_t len;
  
-@@ -350,7 +350,7 @@ path_strip(char *path, char *strip)
+@@ -353,7 +353,7 @@ path_strip(char *path, char *strip)
  }
  
  static char *
@@ -790,7 +358,7 @@ index ff4d63d..4439100 100644
  {
  	char *abs_str;
  
-@@ -548,7 +548,7 @@ parse_no_flags(const char *cmd, char **argv, int argc)
+@@ -551,7 +551,7 @@ parse_no_flags(const char *cmd, char **a
  }
  
  static int
@@ -799,7 +367,7 @@ index ff4d63d..4439100 100644
  {
  	struct stat sb;
  
-@@ -560,7 +560,7 @@ is_dir(char *path)
+@@ -563,7 +563,7 @@ is_dir(char *path)
  }
  
  static int
@@ -808,7 +376,7 @@ index ff4d63d..4439100 100644
  {
  	Attrib *a;
  
-@@ -574,7 +574,7 @@ remote_is_dir(struct sftp_conn *conn, char *path)
+@@ -577,7 +577,7 @@ remote_is_dir(struct sftp_conn *conn, ch
  
  /* Check whether path returned from glob(..., GLOB_MARK, ...) is a directory */
  static int
@@ -817,7 +385,7 @@ index ff4d63d..4439100 100644
  {
  	size_t l = strlen(pathname);
  
-@@ -582,7 +582,7 @@ pathname_is_dir(char *pathname)
+@@ -585,7 +585,7 @@ pathname_is_dir(char *pathname)
  }
  
  static int
@@ -826,7 +394,7 @@ index ff4d63d..4439100 100644
      int pflag, int rflag, int resume, int fflag)
  {
  	char *abs_src = NULL;
-@@ -666,7 +666,7 @@ out:
+@@ -669,7 +669,7 @@ out:
  }
  
  static int
@@ -835,7 +403,7 @@ index ff4d63d..4439100 100644
      int pflag, int rflag, int resume, int fflag)
  {
  	char *tmp_dst = NULL;
-@@ -776,7 +776,7 @@ sdirent_comp(const void *aa, const void *bb)
+@@ -779,7 +779,7 @@ sdirent_comp(const void *aa, const void
  
  /* sftp ls.1 replacement for directories */
  static int
@@ -844,7 +412,7 @@ index ff4d63d..4439100 100644
  {
  	int n;
  	u_int c = 1, colspace = 0, columns = 1;
-@@ -861,7 +861,7 @@ do_ls_dir(struct sftp_conn *conn, char *path, char *strip_path, int lflag)
+@@ -864,7 +864,7 @@ do_ls_dir(struct sftp_conn *conn, char *
  
  /* sftp ls.1 replacement which handles path globs */
  static int
@@ -853,7 +421,7 @@ index ff4d63d..4439100 100644
      int lflag)
  {
  	char *fname, *lname;
-@@ -946,7 +946,7 @@ do_globbed_ls(struct sftp_conn *conn, char *path, char *strip_path,
+@@ -949,7 +949,7 @@ do_globbed_ls(struct sftp_conn *conn, ch
  }
  
  static int
@@ -862,11 +430,10 @@ index ff4d63d..4439100 100644
  {
  	struct sftp_statvfs st;
  	char s_used[FMT_SCALED_STRSIZE];
-diff --git a/ssh-agent.c b/ssh-agent.c
-index c8036c8..4da3bb6 100644
---- a/ssh-agent.c
-+++ b/ssh-agent.c
-@@ -1056,8 +1056,8 @@ main(int ac, char **av)
+diff -up openssh-6.8p1/ssh-agent.c.coverity openssh-6.8p1/ssh-agent.c
+--- openssh-6.8p1/ssh-agent.c.coverity	2015-03-17 06:49:20.000000000 +0100
++++ openssh-6.8p1/ssh-agent.c	2015-03-18 17:21:58.284251454 +0100
+@@ -1166,8 +1166,8 @@ main(int ac, char **av)
  	sanitise_stdfd();
  
  	/* drop */
@@ -877,29 +444,10 @@ index c8036c8..4da3bb6 100644
  
  #if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE)
  	/* Disable ptrace on Linux without sgid bit */
-diff --git a/ssh-keygen.c b/ssh-keygen.c
-index 64fa217..635e8fd 100644
---- a/ssh-keygen.c
-+++ b/ssh-keygen.c
-@@ -687,11 +687,11 @@ do_convert_from(struct passwd *pw)
- 		fatal("%s: unknown key format %d", __func__, convert_format);
- 	}
- 
--	if (!private)
-+	if (!private) {
- 		ok = key_write(k, stdout);
- 		if (ok)
- 			fprintf(stdout, "\n");
--	else {
-+	} else {
- 		switch (k->type) {
- 		case KEY_DSA:
- 			ok = PEM_write_DSAPrivateKey(stdout, k->dsa, NULL,
-diff --git a/sshd.c b/sshd.c
-index 783abe3..eaade2a 100644
---- a/sshd.c
-+++ b/sshd.c
-@@ -771,8 +771,10 @@ privsep_preauth(Authctxt *authctxt)
+diff -up openssh-6.8p1/sshd.c.coverity openssh-6.8p1/sshd.c
+--- openssh-6.8p1/sshd.c.coverity	2015-03-18 17:21:51.893264839 +0100
++++ openssh-6.8p1/sshd.c	2015-03-18 17:21:58.284251454 +0100
+@@ -778,8 +778,10 @@ privsep_preauth(Authctxt *authctxt)
  		if (getuid() == 0 || geteuid() == 0)
  			privsep_preauth_child();
  		setproctitle("%s", "[net]");
@@ -911,7 +459,7 @@ index 783abe3..eaade2a 100644
  
  		return 0;
  	}
-@@ -1458,6 +1460,9 @@ server_accept_loop(int *sock_in, int *sock_out, int *newsock, int *config_s)
+@@ -1518,6 +1520,9 @@ server_accept_loop(int *sock_in, int *so
  		if (num_listen_socks < 0)
  			break;
  	}
@@ -921,15 +469,14 @@ index 783abe3..eaade2a 100644
  }
  
  
-diff --git a/sshkey.c b/sshkey.c
-index 5e3d97f..dae8270 100644
---- a/sshkey.c
-+++ b/sshkey.c
-@@ -54,6 +54,7 @@
+diff -up openssh-6.8p1/sshkey.c.coverity openssh-6.8p1/sshkey.c
+--- openssh-6.8p1/sshkey.c.coverity	2015-03-18 17:21:58.285251452 +0100
++++ openssh-6.8p1/sshkey.c	2015-03-18 17:45:32.232705363 +0100
+@@ -58,6 +58,7 @@
  #include "digest.h"
  #define SSHKEY_INTERNAL
  #include "sshkey.h"
 +#include "log.h"
+ #include "match.h"
  
  /* openssh private key file format */
- #define MARK_BEGIN		"-----BEGIN OPENSSH PRIVATE KEY-----\n"

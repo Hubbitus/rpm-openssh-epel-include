@@ -1,8 +1,7 @@
-diff --git a/Makefile.in b/Makefile.in
-index 1eb2b45..cfa89a1 100644
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -29,6 +29,7 @@ SSH_LDAP_HELPER=$(libexecdir)/ssh-ldap-helper
+diff -up openssh-6.8p1/Makefile.in.kdf-cavs openssh-6.8p1/Makefile.in
+--- openssh-6.8p1/Makefile.in.kdf-cavs	2015-03-18 11:23:46.346049359 +0100
++++ openssh-6.8p1/Makefile.in	2015-03-18 11:24:20.395968445 +0100
+@@ -29,6 +29,7 @@ SSH_LDAP_HELPER=$(libexecdir)/ssh-ldap-h
  SSH_LDAP_WRAPPER=$(libexecdir)/ssh-ldap-wrapper
  SSH_KEYCAT=$(libexecdir)/ssh-keycat
  CTR_CAVSTEST=$(libexecdir)/ctr-cavstest
@@ -18,8 +17,8 @@ index 1eb2b45..cfa89a1 100644
 +TARGETS=ssh$(EXEEXT) sshd$(EXEEXT) ssh-add$(EXEEXT) ssh-keygen$(EXEEXT) ssh-keyscan${EXEEXT} ssh-keysign${EXEEXT} ssh-pkcs11-helper$(EXEEXT) ssh-agent$(EXEEXT) scp$(EXEEXT) sftp-server$(EXEEXT) sftp$(EXEEXT) ssh-ldap-helper$(EXEEXT) ssh-keycat$(EXEEXT) ctr-cavstest$(EXEEXT) ssh-cavs$(EXEEXT)
  
  LIBOPENSSH_OBJS=\
- 	ssherr.o \
-@@ -196,6 +196,9 @@ ssh-keycat$(EXEEXT): $(LIBCOMPAT) $(SSHDOBJS) libssh.a ssh-keycat.o
+ 	ssh_api.o \
+@@ -198,6 +199,9 @@ ssh-keycat$(EXEEXT): $(LIBCOMPAT) $(SSHD
  ctr-cavstest$(EXEEXT): $(LIBCOMPAT) libssh.a ctr-cavstest.o
  	$(LD) -o $@ ctr-cavstest.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh -lfipscheck $(LIBS)
  
@@ -29,7 +28,7 @@ index 1eb2b45..cfa89a1 100644
  ssh-keyscan$(EXEEXT): $(LIBCOMPAT) libssh.a ssh-keyscan.o roaming_dummy.o
  	$(LD) -o $@ ssh-keyscan.o roaming_dummy.o $(LDFLAGS) -lssh -lopenbsd-compat -lssh $(LIBS)
  
-@@ -320,6 +321,8 @@ install-files:
+@@ -331,6 +335,8 @@ install-files:
  	fi
  	$(INSTALL) -m 0755 $(STRIP_OPT) ssh-keycat$(EXEEXT) $(DESTDIR)$(libexecdir)/ssh-keycat$(EXEEXT)
  	$(INSTALL) -m 0755 $(STRIP_OPT) ctr-cavstest$(EXEEXT) $(DESTDIR)$(libexecdir)/ctr-cavstest$(EXEEXT)
@@ -38,12 +37,10 @@ index 1eb2b45..cfa89a1 100644
  	$(INSTALL) -m 0755 $(STRIP_OPT) sftp$(EXEEXT) $(DESTDIR)$(bindir)/sftp$(EXEEXT)
  	$(INSTALL) -m 0755 $(STRIP_OPT) sftp-server$(EXEEXT) $(DESTDIR)$(SFTP_SERVER)$(EXEEXT)
  	$(INSTALL) -m 644 ssh.1.out $(DESTDIR)$(mandir)/$(mansubdir)1/ssh.1
-diff --git a/ssh-cavs.c b/ssh-cavs.c
-new file mode 100644
-index 0000000..928ff80
---- /dev/null
-+++ b/ssh-cavs.c
-@@ -0,0 +1,374 @@
+diff -up openssh-6.8p1/ssh-cavs.c.kdf-cavs openssh-6.8p1/ssh-cavs.c
+--- openssh-6.8p1/ssh-cavs.c.kdf-cavs	2015-03-18 11:23:46.348049354 +0100
++++ openssh-6.8p1/ssh-cavs.c	2015-03-18 11:23:46.348049354 +0100
+@@ -0,0 +1,383 @@
 +/*
 + * Copyright (C) 2015, Stephan Mueller <smueller@chronox.de>
 + *
@@ -95,6 +92,7 @@ index 0000000..928ff80
 +#include "key.h"
 +#include "cipher.h"
 +#include "kex.h"
++#include "packet.h"
 +
 +static int bin_char(unsigned char hex)
 +{
@@ -208,16 +206,17 @@ index 0000000..928ff80
 +static int sshkdf_cavs(struct kdf_cavs *test)
 +{
 +	int ret = 0;
-+	Kex kex;
++	struct kex kex;
 +	BIGNUM *Kbn = NULL;
 +	int mode = 0;
-+	Newkeys *ctoskeys;
-+	Newkeys *stockeys;
++	struct newkeys *ctoskeys;
++	struct newkeys *stockeys;
++	struct ssh *ssh = NULL;
 +
 +#define HEXOUTLEN 500
 +	char hex[HEXOUTLEN];
 +
-+	memset(&kex, 0, sizeof(Kex));
++	memset(&kex, 0, sizeof(struct kex));
 +
 +	Kbn = BN_new();
 +	BN_bin2bn(test->K, test->Klen, Kbn);
@@ -254,7 +253,7 @@ index 0000000..928ff80
 +
 +	/* implement choose_enc */
 +	for (mode = 0; mode < 2; mode++) {
-+		kex.newkeys[mode] = calloc(1, sizeof(Newkeys));
++		kex.newkeys[mode] = calloc(1, sizeof(struct newkeys));
 +		if (!kex.newkeys[mode]) {
 +			printf("allocation of newkeys failed\n");
 +			ret = 1;
@@ -280,10 +279,15 @@ index 0000000..928ff80
 +	kex.server = 1;
 +
 +	/* do it */
-+	kex_derive_keys_bn(&kex, test->H, test->Hlen, Kbn);
++	if ((ssh = ssh_packet_set_connection(NULL, -1, -1)) == NULL){
++		printf("Allocation error\n");
++		goto out;
++	}
++	ssh->kex = &kex;
++	kex_derive_keys_bn(ssh, test->H, test->Hlen, Kbn);
 +
-+	ctoskeys = kex_get_newkeys(0);
-+	stockeys = kex_get_newkeys(1);
++	ctoskeys = kex.newkeys[0];
++	stockeys = kex.newkeys[1];
 +
 +	/* get data */
 +	memset(hex, 0, HEXOUTLEN);
@@ -323,6 +327,8 @@ index 0000000..928ff80
 +		free(kex.newkeys[0]);
 +	if (kex.newkeys[1])
 +		free(kex.newkeys[1]);
++	if (ssh)
++		ssh_packet_close(ssh);
 +	return ret;
 +}
 +
@@ -418,11 +424,9 @@ index 0000000..928ff80
 +	return ret;
 +
 +}
-diff --git a/ssh-cavs_driver.pl b/ssh-cavs_driver.pl
-new file mode 100644
-index 0000000..6ed8f26
---- /dev/null
-+++ b/ssh-cavs_driver.pl
+diff -up openssh-6.8p1/ssh-cavs_driver.pl.kdf-cavs openssh-6.8p1/ssh-cavs_driver.pl
+--- openssh-6.8p1/ssh-cavs_driver.pl.kdf-cavs	2015-03-18 11:23:46.348049354 +0100
++++ openssh-6.8p1/ssh-cavs_driver.pl	2015-03-18 11:23:46.348049354 +0100
 @@ -0,0 +1,184 @@
 +#!/usr/bin/env perl
 +#

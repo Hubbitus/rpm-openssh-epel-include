@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.7p1
-%define openssh_rel 11
+%define openssh_ver 6.8p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 4
+%define pam_ssh_agent_rel 5
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -96,8 +96,6 @@ Patch0: openssh-5.9p1-wIm.patch
 
 #?
 Patch100: openssh-6.7p1-coverity.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1872
-Patch101: openssh-6.7p1-fingerprint.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
 Patch102: openssh-5.8p1-getaddrinfo.patch
@@ -140,8 +138,6 @@ Patch604: openssh-6.6p1-keyperm.patch
 Patch606: openssh-5.9p1-ipv6man.patch
 #?
 Patch607: openssh-5.8p2-sigpipe.patch
-#?
-Patch608: openssh-6.1p1-askpass-ld.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
 Patch609: openssh-5.5p1-x11.patch
 
@@ -193,9 +189,6 @@ Patch911: openssh-6.6p1-set_remote_ipaddr.patch
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2058
 # slightly changed patch from comment 10
 Patch912: openssh-6.6.1p1-utf8-banner.patch
-# don't consider a partial success as a failure
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2270
-Patch913: openssh-6.6.1p1-partial-success.patch
 # fix parsing of empty options in sshd_conf
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2281
 Patch914: openssh-6.6.1p1-servconf-parser.patch
@@ -377,7 +370,6 @@ The module is most useful for su and sudo service stacks.
 %patch0 -p1 -b .wIm
 %endif
 
-%patch101 -p1 -b .fingerprint
 # investigate %patch102 -p1 -b .getaddrinfo
 %patch103 -p1 -b .packet
 
@@ -408,7 +400,6 @@ popd
 %patch604 -p1 -b .keyperm
 %patch606 -p1 -b .ipv6man
 %patch607 -p1 -b .sigpipe
-%patch608 -p1 -b .askpass-ld
 %patch609 -p1 -b .x11
 %patch702 -p1 -b .progress
 %patch703 -p1 -b .grab-info
@@ -431,7 +422,6 @@ popd
 %patch906 -p1 -b .fromto-remote
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
-%patch913 -p1 -b .partial-success
 %patch914 -p1 -b .servconf
 %patch916 -p1 -b .contexts
 %patch917 -p1 -b .cisco-dh
@@ -764,6 +754,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Mar 20 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-1 + 0.9.3.5
+- new upstream release openssh-6.8p1
+
 * Thu Mar 12 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-11 + 0.9.3-4
 - Ability to specify LDAP filter in ldap.conf for ssh-ldap-helper
 - Fix auditing when using combination of ForceCommand and PTY
