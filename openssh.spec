@@ -439,7 +439,8 @@ popd
 %patch926 -p1 -b .sftp-force-mode
 %patch927 -p1 -b .bz1204646
 
-%patch200 -p1 -b .audit
+# audit patch needs more care
+#%patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
 
 %patch100 -p1 -b .coverity
@@ -757,8 +758,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
-* Fri Mar 20 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-1 + 0.9.3.5
-- new upstream release openssh-6.8p1
+* Tue Mar 24 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-1 + 0.9.3-5
+- new upstream release openssh-6.8p1 (#1203245)
+- Resolve segfault with auditing commands (#1203900)
+- Workaround krb5-config bug (#1204646)
 
 * Thu Mar 12 2015 Jakub Jelen <jjelen@redhat.com> 6.7p1-11 + 0.9.3-4
 - Ability to specify LDAP filter in ldap.conf for ssh-ldap-helper
