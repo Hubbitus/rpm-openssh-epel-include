@@ -1,0 +1,22 @@
+diff --git a/configure.ac b/configure.ac
+index 4e6abce..af08091 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4173,7 +4173,7 @@ AC_ARG_WITH([kerberos5],
+ 			     [$KRB5ROOT/bin:$PATH])
+ 		if test -x $KRB5CONF ; then
+ 			K5CFLAGS="`$KRB5CONF --cflags`"
+-			K5LIBS="`$KRB5CONF --libs`"
++			K5LIBS="-lkrb5 -lk5crypto -lcom_err"
+ 			CPPFLAGS="$CPPFLAGS $K5CFLAGS"
+ 
+ 			AC_MSG_CHECKING([for gssapi support])
+@@ -4183,7 +4183,7 @@ AC_ARG_WITH([kerberos5],
+ 					[Define this if you want GSSAPI
+ 					support in the version 2 protocol])
+ 				GSSCFLAGS="`$KRB5CONF --cflags gssapi`"
+-				GSSLIBS="`$KRB5CONF --libs gssapi`"
++				GSSLIBS="-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
+ 				CPPFLAGS="$CPPFLAGS $GSSCFLAGS"
+ 			else
+ 				AC_MSG_RESULT([no])

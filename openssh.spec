@@ -215,6 +215,8 @@ Patch924: openssh-6.7p1-seccomp-aarch64.patch
 Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 # Add sftp option to force mode of created files (#1191055)
 Patch926: openssh-6.7p1-sftp-force-permission.patch
+# Workaround krb5-config bug #1204646
+Patch927: openssh-6.8p1-workaround-krb5-config-bug.patch
 
 
 
@@ -435,6 +437,7 @@ popd
 %patch924 -p1 -b .seccomp
 %patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
+%patch927 -p1 -b .bz1204646
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
