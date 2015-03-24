@@ -72,7 +72,7 @@
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
-Version: %{openssh_ver}
+Version: %{openssh_ver}.1
 Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
