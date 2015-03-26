@@ -66,14 +66,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}.1%{?dist}%{?rescue_rel}
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -760,6 +760,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Mar 26 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-2 + 0.9.3-5
+- Update audit and gss patches after rebase
+- Fix reintroduced upstrem bug #1878
+
 * Tue Mar 24 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-1 + 0.9.3-5
 - new upstream release openssh-6.8p1 (#1203245)
 - Resolve segfault with auditing commands (#1203900)
