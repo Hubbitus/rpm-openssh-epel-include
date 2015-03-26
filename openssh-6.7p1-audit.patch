@@ -1717,7 +1717,7 @@ diff -up openssh-6.8p1/packet.c.audit openssh-6.8p1/packet.c
  		if ((r = cipher_cleanup(cc)) != 0)
  			return r;
  		enc  = &state->newkeys[mode]->enc;
-@@ -2263,6 +2275,73 @@ ssh_packet_get_output(struct ssh *ssh)
+@@ -2263,6 +2275,75 @@ ssh_packet_get_output(struct ssh *ssh)
  	return (void *)ssh->state->output;
  }
  
@@ -1774,10 +1774,12 @@ diff -up openssh-6.8p1/packet.c.audit openssh-6.8p1/packet.c
 +packet_destroy_all(int audit_it, int privsep)
 +{
 +	if (audit_it)
-+		audit_it = packet_state_has_keys (active_state->state) ||
-+			packet_state_has_keys (backup_state->state);
-+	packet_destroy_state(active_state->state);
-+	packet_destroy_state(backup_state->state);
++		audit_it = (active_state != NULL && packet_state_has_keys(active_state->state))
++			|| (backup_state != NULL && packet_state_has_keys(backup_state->state));
++	if (active_state != NULL)
++		packet_destroy_state(active_state->state);
++	if (backup_state != NULL)
++		packet_destroy_state(backup_state->state);
 +	if (audit_it) {
 +#ifdef SSH_AUDIT_EVENTS
 +		if (privsep)
@@ -2162,14 +2164,16 @@ diff -up openssh-6.8p1/sshd.c.audit openssh-6.8p1/sshd.c
  	if (pid == -1) {
  		fatal("fork of unprivileged child failed");
  	} else if (pid != 0) {
-@@ -759,6 +811,10 @@ privsep_postauth(Authctxt *authctxt)
+@@ -759,6 +811,12 @@ privsep_postauth(Authctxt *authctxt)
  	else if (pmonitor->m_pid != 0) {
  		verbose("User child is on pid %ld", (long)pmonitor->m_pid);
  		buffer_clear(&loginmsg);
-+		newkeys_destroy((*pmonitor->m_pkex)->newkeys[MODE_OUT]);
-+		newkeys_destroy((*pmonitor->m_pkex)->newkeys[MODE_IN]);
-+		audit_session_key_free_body(2, getpid(), getuid());
-+		packet_destroy_all(0, 0);
++		if (*pmonitor->m_pkex != NULL ){
++			newkeys_destroy((*pmonitor->m_pkex)->newkeys[MODE_OUT]);
++			newkeys_destroy((*pmonitor->m_pkex)->newkeys[MODE_IN]);
++			audit_session_key_free_body(2, getpid(), getuid());
++			packet_destroy_all(0, 0);
++		}
  		monitor_child_postauth(pmonitor);
  
  		/* NEVERREACHED */
@@ -2224,7 +2228,7 @@ diff -up openssh-6.8p1/sshd.c.audit openssh-6.8p1/sshd.c
  
  	/* Destroy the private and public keys. No longer. */
 -	destroy_sensitive_data();
-+	destroy_sensitive_data(0);
++	destroy_sensitive_data(1);
  
  	if (use_privsep)
  		mm_ssh1_session_id(session_id);

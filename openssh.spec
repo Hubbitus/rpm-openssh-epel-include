@@ -439,8 +439,7 @@ popd
 %patch926 -p1 -b .sftp-force-mode
 %patch927 -p1 -b .bz1204646
 
-# audit patch needs more care
-#%patch200 -p1 -b .audit
+%patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
 
 %patch100 -p1 -b .coverity
