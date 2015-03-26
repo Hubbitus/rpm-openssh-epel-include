@@ -217,6 +217,8 @@ Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 Patch926: openssh-6.7p1-sftp-force-permission.patch
 # Workaround krb5-config bug #1204646
 Patch927: openssh-6.8p1-workaround-krb5-config-bug.patch
+# Upstream bug #1878 reintroduced in openssh6.7p1
+Patch928: openssh-6.8p1-880575.patch
 
 
 
@@ -438,6 +440,7 @@ popd
 %patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
 %patch927 -p1 -b .bz1204646
+%patch928 -p1 -b .bz880575
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
