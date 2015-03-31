@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -757,6 +757,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Mar 31 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-3 + 0.9.3-5
+- Fixed issue with GSSAPI key exchange (#1207719)
+- Add pam_namespace to sshd pam stack (based on #1125110)
+- Remove krb5-config workaround for #1203900
+- Fix handling SELinux context in MLS systems
+- Regression: solve sshd segfaults if other instance already running
+
 * Thu Mar 26 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-2 + 0.9.3-5
 - Update audit and gss patches after rebase
 - Fix reintroduced upstrem bug #1878
