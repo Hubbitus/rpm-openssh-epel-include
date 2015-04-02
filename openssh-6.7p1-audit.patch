@@ -1942,7 +1942,7 @@ diff -up openssh-6.8p1/session.c.audit openssh-6.8p1/session.c
  session_by_tty(char *tty)
  {
  	int i;
-@@ -2532,6 +2561,31 @@ session_exit_message(Session *s, int sta
+@@ -2532,6 +2561,32 @@ session_exit_message(Session *s, int sta
  		chan_write_failed(c);
  }
  
@@ -1951,7 +1951,7 @@ diff -up openssh-6.8p1/session.c.audit openssh-6.8p1/session.c
 +session_end_command2(Session *s)
 +{
 +	if (s->command != NULL) {
-+		if (s->ptyfd == -1)
++		if (s->command_handle != -1)
 +			audit_end_command(s->command_handle, s->command);
 +		free(s->command);
 +		s->command = NULL;
@@ -1963,7 +1963,8 @@ diff -up openssh-6.8p1/session.c.audit openssh-6.8p1/session.c
 +session_end_command(Session *s)
 +{
 +	if (s->command != NULL) {
-+		PRIVSEP(audit_end_command(s->command_handle, s->command));
++		if (s->command_handle != -1)
++			PRIVSEP(audit_end_command(s->command_handle, s->command));
 +		free(s->command);
 +		s->command = NULL;
 +		s->command_handle = -1;
