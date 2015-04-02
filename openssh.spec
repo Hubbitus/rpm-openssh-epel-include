@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -757,6 +757,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Apr 02 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-4 + 0.9.3-5
+- Fix audit_end_command to restore ControlPersist function (#1203900)
+
 * Tue Mar 31 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-3 + 0.9.3-5
 - Fixed issue with GSSAPI key exchange (#1207719)
 - Add pam_namespace to sshd pam stack (based on #1125110)
