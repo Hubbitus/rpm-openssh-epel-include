@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -757,6 +757,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Apr 20 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-5 + 0.9.3-5
+- Fix segfault on daemon exit caused by API change (#1213423)
+
 * Thu Apr 02 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-4 + 0.9.3-5
 - Fix audit_end_command to restore ControlPersist function (#1203900)
 
