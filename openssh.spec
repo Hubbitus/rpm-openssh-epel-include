@@ -208,7 +208,7 @@ Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 # apply upstream patch and make sshd -T more consistent (#1187521)
 Patch922: openssh-6.7p1-sshdT-output.patch
 # fix ssh-copy-id on non-sh shells (#1045191)
-Patch923: openssh-6.7p1-fix-ssh-copy-id-on-non-sh-shell.patch
+Patch923: openssh-6.8p1-fix-ssh-copy-id-on-non-sh-shell.patch
 # AArch64 has seccomp support since 3.19 kernel (#1195065)
 Patch924: openssh-6.7p1-seccomp-aarch64.patch
 # Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
