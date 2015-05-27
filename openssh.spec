@@ -220,6 +220,9 @@ Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 Patch926: openssh-6.7p1-sftp-force-permission.patch
 # Upstream bug #1878 reintroduced in openssh6.7p1
 Patch927: openssh-6.8p1-880575.patch
+# Memory problems
+# https://bugzilla.mindrot.org/show_bug.cgi?id=2401
+Patch928: openssh-6.8p1-memory-problems.patch
 
 
 
@@ -442,6 +445,7 @@ popd
 %patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
 %patch927 -p1 -b .bz880575
+%patch928 -p1 -b .memory
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
