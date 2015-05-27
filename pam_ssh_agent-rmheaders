@@ -1,3 +1,4 @@
+authfd.h
 atomicio.h
 buffer.h
 cipher.h

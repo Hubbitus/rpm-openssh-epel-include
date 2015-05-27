@@ -118,6 +118,9 @@ Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 Patch303: pam_ssh_agent_auth-0.9.3-no-xfree.patch
 # use SSH_DIGEST_* for fingerprint hashes
 Patch304: pam_ssh_agent_auth-0.9.3-fingerprint-hash.patch
+# update to current version of agent structure
+Patch305: pam_ssh_agent_auth-0.9.3-agent_structure.patch
+
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.6p1-role-mls.patch
 #https://bugzilla.redhat.com/show_bug.cgi?id=781634
@@ -382,6 +385,7 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch302 -p1 -b .psaa-visibility
 %patch303 -p1 -b .psaa-xfree
 %patch304 -p2 -b .psaa-fingerprint
+%patch305 -p2 -b .psaa-agent
 # Remove duplicate headers
 rm -f $(cat %{SOURCE5})
 popd
