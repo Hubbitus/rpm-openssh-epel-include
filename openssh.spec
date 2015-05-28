@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 5
+%define openssh_rel 6
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -766,6 +766,14 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu May 28 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-6 + 0.9.3-5
+- Resolve problem with pam_ssh_agent_auth after rebase (#1225106)
+- ssh-copy-id: tcsh doesnt work with multiline strings
+- Fix upstream memory problems
+- Add missing options in testmode output and manual pages
+- Provide LDIF version of LPK schema
+- Document required selinux boolean for working ssh-ldap-helper
+
 * Mon Apr 20 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-5 + 0.9.3-5
 - Fix segfault on daemon exit caused by API change (#1213423)
 
