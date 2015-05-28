@@ -1,7 +1,7 @@
 diff -up openssh-6.8p1/HOWTO.ldap-keys.ldap openssh-6.8p1/HOWTO.ldap-keys
 --- openssh-6.8p1/HOWTO.ldap-keys.ldap	2015-03-18 11:11:29.029801467 +0100
 +++ openssh-6.8p1/HOWTO.ldap-keys	2015-03-18 11:11:29.029801467 +0100
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,122 @@
 +
 +HOW TO START
 +
@@ -49,6 +49,9 @@ diff -up openssh-6.8p1/HOWTO.ldap-keys.ldap openssh-6.8p1/HOWTO.ldap-keys
 +  * There are some debug options
 +  * Example
 +	/usr/libexec/openssh -s -f /etc/ldap.conf -w -d >> /tmp/ldapdebuglog.txt
++7) Configure SELinux boolean which allows ldap-helper to bind ldap server
++  Run this command
++  # setsebool -P authlogin_nsswitch_use_ldap on
 +
 +HOW TO MIGRATE FROM LPK
 +
