@@ -62,3 +62,19 @@ diff -up openssh-6.8p1/servconf.c.sshdt openssh-6.8p1/servconf.c
  	     o->host_cert_files);
  	dump_cfg_strarray(sAllowUsers, o->num_allow_users, o->allow_users);
  	dump_cfg_strarray(sDenyUsers, o->num_deny_users, o->deny_users);
+diff --git a/ssh.1 b/ssh.1
+index cf02526..7fddf46 100644
+--- a/ssh.1
++++ b/ssh.1
+@@ -441,7 +441,11 @@ For full details of the options listed below, and their possible values, see
+ .It GatewayPorts
+ .It GlobalKnownHostsFile
+ .It GSSAPIAuthentication
++.It GSSAPIKeyExchange
++.It GSSAPIClientIdentity
+ .It GSSAPIDelegateCredentials
++.It GSSAPIRenewalForcesRekey
++.It GSSAPITrustDNS
+ .It HashKnownHosts
+ .It Host
+ .It HostbasedAuthentication
