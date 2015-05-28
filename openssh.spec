@@ -730,6 +730,7 @@ getent passwd sshd >/dev/null || \
 %files ldap
 %defattr(-,root,root)
 %doc HOWTO.ldap-keys openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
+%doc openssh-lpk-openldap.ldif openssh-lpk-sun.ldif
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-wrapper
 %attr(0644,root,root) %{_mandir}/man8/ssh-ldap-helper.8*
