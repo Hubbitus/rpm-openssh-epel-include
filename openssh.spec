@@ -209,7 +209,7 @@ Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 # https://lists.mindrot.org/pipermail/openssh-unix-dev/2014-April/032497.html
 Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 # apply upstream patch and make sshd -T more consistent (#1187521)
-Patch922: openssh-6.7p1-sshdT-output.patch
+Patch922: openssh-6.8p1-sshdT-output.patch
 # fix ssh-copy-id on non-sh shells (#1045191)
 Patch923: openssh-6.8p1-fix-ssh-copy-id-on-non-sh-shell.patch
 # AArch64 has seccomp support since 3.19 kernel (#1195065)

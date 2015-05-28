@@ -661,7 +661,7 @@ diff -up openssh-6.8p1/servconf.c.fips openssh-6.8p1/servconf.c
 +		? KEX_FIPS_ENCRYPT : KEX_SERVER_ENCRYPT);
 +	dump_cfg_string(sMacs, o->macs ? o->macs : FIPS_mode()
 +		? KEX_FIPS_MAC : KEX_SERVER_MAC);
- 	dump_cfg_string(sBanner, o->banner);
+ 	dump_cfg_string(sBanner, o->banner != NULL ? o->banner : "none");
  	dump_cfg_string(sForceCommand, o->adm_forced_command);
  	dump_cfg_string(sChrootDirectory, o->chroot_directory);
 @@ -2240,8 +2242,8 @@ dump_config(ServerOptions *o)

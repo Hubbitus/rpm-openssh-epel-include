@@ -1,6 +1,6 @@
 diff -up openssh-6.8p1/servconf.c.sshdt openssh-6.8p1/servconf.c
---- openssh-6.8p1/servconf.c.sshdt	2015-03-18 13:07:24.457858235 +0100
-+++ openssh-6.8p1/servconf.c	2015-03-18 13:09:27.253557396 +0100
+--- openssh-6.8p1/servconf.c.sshdt	2015-05-28 13:32:55.728821389 +0200
++++ openssh-6.8p1/servconf.c	2015-05-28 13:34:01.937750270 +0200
 @@ -2118,6 +2118,8 @@ dump_cfg_strarray_oneline(ServerOpCodes
  {
  	u_int i;
@@ -35,7 +35,15 @@ diff -up openssh-6.8p1/servconf.c.sshdt openssh-6.8p1/servconf.c
  	dump_cfg_fmtint(sAllowStreamLocalForwarding, o->allow_streamlocal_forwarding);
  	dump_cfg_fmtint(sUsePrivilegeSeparation, use_privsep);
  	dump_cfg_fmtint(sFingerprintHash, o->fingerprint_hash);
-@@ -2231,7 +2235,8 @@ dump_config(ServerOptions *o)
+@@ -2224,14 +2228,15 @@ dump_config(ServerOptions *o)
+ 	dump_cfg_string(sXAuthLocation, o->xauth_location);
+ 	dump_cfg_string(sCiphers, o->ciphers ? o->ciphers : KEX_SERVER_ENCRYPT);
+ 	dump_cfg_string(sMacs, o->macs ? o->macs : KEX_SERVER_MAC);
+-	dump_cfg_string(sBanner, o->banner);
++	dump_cfg_string(sBanner, o->banner != NULL ? o->banner : "none");
+ 	dump_cfg_string(sForceCommand, o->adm_forced_command);
+ 	dump_cfg_string(sChrootDirectory, o->chroot_directory);
+ 	dump_cfg_string(sTrustedUserCAKeys, o->trusted_user_ca_keys);
  	dump_cfg_string(sRevokedKeys, o->revoked_keys_file);
  	dump_cfg_string(sAuthorizedPrincipalsFile,
  	    o->authorized_principals_file);
