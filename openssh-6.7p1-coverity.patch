@@ -167,19 +167,6 @@ diff -up openssh-6.8p1/pam_ssh_agent_auth-0.9.3/pam_user_key_allowed2.c.coverity
  			for (; *cp && (quoted || (*cp != ' ' && *cp != '\t')); cp++) {
  				if (*cp == '\\' && cp[1] == '"')
  					cp++;	/* Skip both */
-diff -up openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c.coverity openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c
---- openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c.coverity	2015-03-18 17:21:51.786265063 +0100
-+++ openssh-6.8p1/pam_ssh_agent_auth-0.9.3/userauth_pubkey_from_id.c	2015-03-18 17:21:51.898264829 +0100
-@@ -89,8 +89,7 @@ userauth_pubkey_from_id(Identity * id)
-         authenticated = 1;
- 
-   user_auth_clean_exit:
--    if(&b != NULL)
--        buffer_free(&b);
-+    buffer_free(&b);
-     if(sig != NULL)
-         free(sig);
-     if(pkblob != NULL)
 diff -up openssh-6.8p1/scp.c.coverity openssh-6.8p1/scp.c
 --- openssh-6.8p1/scp.c.coverity	2015-03-18 17:21:51.868264891 +0100
 +++ openssh-6.8p1/scp.c	2015-03-18 17:21:58.281251460 +0100
