@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 6
+%define openssh_rel 7
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -766,6 +766,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Jun 03 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-7 + 0.9.3-5
+- Handle pam_ssh_agent_auth memory, buffers and variable sizes (#1225106)
+
 * Thu May 28 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-6 + 0.9.3-5
 - Resolve problem with pam_ssh_agent_auth after rebase (#1225106)
 - ssh-copy-id: tcsh doesnt work with multiline strings
