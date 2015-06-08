@@ -21,12 +21,14 @@ diff --git a/sandbox-seccomp-filter.c b/sandbox-seccomp-filter.c
 index 095b04a..52f6810 100644
 --- a/sandbox-seccomp-filter.c
 +++ b/sandbox-seccomp-filter.c
-@@ -90,8 +90,20 @@ static const struct sock_filter preauth_insns[] = {
+@@ -90,8 +90,23 @@ static const struct sock_filter preauth_insns[] = {
  	/* Load the syscall number for checking. */
  	BPF_STMT(BPF_LD+BPF_W+BPF_ABS,
  		offsetof(struct seccomp_data, nr)),
 -	SC_DENY(open, EACCES),
--	SC_DENY(stat, EACCES),
++#ifdef __NR_stat
+ 	SC_DENY(stat, EACCES),
++#endif
 +	SC_DENY(openat, EACCES),
 +#ifdef __NR_open
 +	SC_DENY(open, EACCES), /* not on AArch64 */
