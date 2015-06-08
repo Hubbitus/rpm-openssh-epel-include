@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 7
+%define openssh_rel 8
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
@@ -766,6 +766,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Jun 08 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-8 + 0.9.3-5
+- Return stat syscall to seccomp filter (#1228323)
+
 * Wed Jun 03 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-7 + 0.9.3-5
 - Handle pam_ssh_agent_auth memory, buffers and variable sizes (#1225106)
 
