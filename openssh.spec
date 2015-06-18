@@ -73,7 +73,7 @@
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}%{?rescue_rel}
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}.1
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -316,7 +316,7 @@ Requires: openssh = %{version}-%{release}
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}.1
+Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}.2
 License: BSD
 
 %description
@@ -766,6 +766,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.8p1-8.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Mon Jun 08 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-8 + 0.9.3-5
 - Return stat syscall to seccomp filter (#1228323)
 
