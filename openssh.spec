@@ -66,14 +66,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.8p1
-%define openssh_rel 8
+%define openssh_rel 9
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 5
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}%{?rescue_rel}.1
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -766,6 +766,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Jun 24 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-9 + 0.9.3-5
+- Allow socketcall(SYS_SHUTDOWN) for net_child on ix86 architecture
+
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.8p1-8.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
