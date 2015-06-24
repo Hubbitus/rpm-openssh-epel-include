@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.8p1
-%define openssh_rel 9
+%define openssh_ver 6.9p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 5
+%define pam_ssh_agent_rel 6
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -218,8 +218,6 @@ Patch924: openssh-6.7p1-seccomp-aarch64.patch
 Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 # Add sftp option to force mode of created files (#1191055)
 Patch926: openssh-6.7p1-sftp-force-permission.patch
-# Upstream bug #1878 reintroduced in openssh6.7p1
-Patch927: openssh-6.8p1-880575.patch
 # Memory problems
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2401
 Patch928: openssh-6.8p1-memory-problems.patch
@@ -316,7 +314,7 @@ Requires: openssh = %{version}-%{release}
 Summary: PAM module for authentication with ssh-agent
 Group: System Environment/Base
 Version: %{pam_ssh_agent_ver}
-Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}.2
+Release: %{pam_ssh_agent_rel}.%{openssh_rel}%{?dist}%{?rescue_rel}
 License: BSD
 
 %description
@@ -433,7 +431,7 @@ popd
 %patch912 -p1 -b .utf8-banner
 %patch914 -p1 -b .servconf
 %patch916 -p1 -b .contexts
-%patch917 -p1 -b .cisco-dh
+#%patch917 -p1 -b .cisco-dh # investigate
 %patch918 -p1 -b .log-in-chroot
 %patch919 -p1 -b .scp
 %patch920 -p1 -b .config
@@ -444,7 +442,6 @@ popd
 %patch924 -p1 -b .seccomp
 %patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
-%patch927 -p1 -b .bz880575
 %patch928 -p1 -b .memory
 
 %patch200 -p1 -b .audit
