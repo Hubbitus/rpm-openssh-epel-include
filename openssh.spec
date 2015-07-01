@@ -221,6 +221,8 @@ Patch926: openssh-6.7p1-sftp-force-permission.patch
 # Memory problems
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2401
 Patch928: openssh-6.8p1-memory-problems.patch
+# Restore compatible default (#89216)
+Patch929: openssh-6.9p1-permit-root-login.patch
 
 
 
@@ -443,6 +445,7 @@ popd
 %patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
+%patch929 -p1 -b .root-login
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
