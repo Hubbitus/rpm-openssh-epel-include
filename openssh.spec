@@ -766,6 +766,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Jul 01 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-1 + 0.9.3-6
+- New upstream release (#1238253)
+- Increase limitation number of files which can be listed using glob in sftp
+- Correctly revert "PermitRootLogin no" option from upstream sources (#89216)
+
 * Wed Jun 24 2015 Jakub Jelen <jjelen@redhat.com> 6.8p1-9 + 0.9.3-5
 - Allow socketcall(SYS_SHUTDOWN) for net_child on ix86 architecture
 
