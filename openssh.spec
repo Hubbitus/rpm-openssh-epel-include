@@ -521,7 +521,7 @@ fi
 %endif
 %if %{WITH_SELINUX}
 	--with-selinux --with-audit=linux \
-%ifarch %{ix86} x86_64 %{arm} aarch64
+%ifarch %{ix86} x86_64 %{arm} aarch64 s390x x390
 	--with-sandbox=seccomp_filter \
 %else
 	--with-sandbox=rlimit \
