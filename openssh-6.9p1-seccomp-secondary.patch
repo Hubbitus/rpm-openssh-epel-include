@@ -20,12 +20,12 @@ index 24378a7..0bed910 100644
  	aarch64*-*)
  		seccomp_audit_arch=AUDIT_ARCH_AARCH64
  		;;
-+        s390x-*)
-+                seccomp_audit_arch=AUDIT_ARCH_S390X
-+                ;;
-+        s390-*)
-+                seccomp_audit_arch=AUDIT_ARCH_S390
-+                ;;
++	s390x-*)
++		seccomp_audit_arch=AUDIT_ARCH_S390X
++		;;
++	s390-*)
++		seccomp_audit_arch=AUDIT_ARCH_S390
++		;;
  	esac
  	if test "x$seccomp_audit_arch" != "x" ; then
  		AC_MSG_RESULT(["$seccomp_audit_arch"])

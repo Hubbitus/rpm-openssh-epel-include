@@ -212,8 +212,8 @@ Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 Patch922: openssh-6.8p1-sshdT-output.patch
 # fix ssh-copy-id on non-sh shells (#1045191)
 Patch923: openssh-6.8p1-fix-ssh-copy-id-on-non-sh-shell.patch
-# AArch64 has seccomp support since 3.19 kernel (#1195065)
-Patch924: openssh-6.7p1-seccomp-aarch64.patch
+# Seccomp support for secondary architectures (#1195065)
+Patch924: openssh-6.9p1-seccomp-secondary.patch
 # Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
 Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 # Add sftp option to force mode of created files (#1191055)
