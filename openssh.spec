@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.9p1
-%define openssh_rel 1
+%define openssh_rel 2
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 6
 
@@ -766,6 +766,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Jul 15 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-2 + 0.9.3-6
+- Enable SECCOMP filter for s390* architecture (#1195065)
+- Fix race condition when multiplexing connection (#1242682)
+
 * Wed Jul 01 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-1 + 0.9.3-6
 - New upstream release (#1238253)
 - Increase limitation number of files which can be listed using glob in sftp
