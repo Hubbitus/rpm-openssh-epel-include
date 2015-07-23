@@ -223,6 +223,8 @@ Patch926: openssh-6.7p1-sftp-force-permission.patch
 Patch928: openssh-6.8p1-memory-problems.patch
 # Restore compatible default (#89216)
 Patch929: openssh-6.9p1-permit-root-login.patch
+# authentication limits (MaxAuthTries) bypass [security] (#1245971)
+Patch930: openssh-6.9p1-authentication-limits-bypass.patch
 
 
 
@@ -446,6 +448,7 @@ popd
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
+%patch930 -p1 -b .kbd
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
