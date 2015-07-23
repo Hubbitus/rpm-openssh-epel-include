@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 6.9p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 6
 
@@ -769,6 +769,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Jul 23 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-3 + 0.9.3-6
+- CVE-2015-5600: only query each keyboard-interactive device once (#1245971)
+
 * Wed Jul 15 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-2 + 0.9.3-6
 - Enable SECCOMP filter for s390* architecture (#1195065)
 - Fix race condition when multiplexing connection (#1242682)
