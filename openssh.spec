@@ -225,6 +225,8 @@ Patch928: openssh-6.8p1-memory-problems.patch
 Patch929: openssh-6.9p1-permit-root-login.patch
 # authentication limits (MaxAuthTries) bypass [security] (#1245971)
 Patch930: openssh-6.9p1-authentication-limits-bypass.patch
+# Handle terminal control characters in scp progressmeter (#1247204)
+Patch931: openssh-6.9p1-scp-progressmeter.patch
 
 
 
@@ -449,6 +451,7 @@ popd
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
 %patch930 -p1 -b .kbd
+%patch931 -p1 -b .progressmeter
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
