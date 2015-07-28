@@ -660,15 +660,6 @@ getent passwd sshd >/dev/null || \
 %postun server
 %systemd_postun_with_restart sshd.service
 
-%triggerun -n openssh-server -- openssh-server < 5.8p2-12
-/usr/bin/systemd-sysv-convert --save sshd >/dev/null 2>&1 || :
-/bin/systemctl enable sshd.service >/dev/null 2>&1
-/sbin/chkconfig --del sshd >/dev/null 2>&1 || :
-/bin/systemctl try-restart sshd.service >/dev/null 2>&1 || :
-
-%triggerun -n openssh-server -- openssh-server < 5.9p1-22
-/bin/systemctl --no-reload disable sshd-keygen.service >/dev/null 2>&1 || :
-
 %files
 %defattr(-,root,root)
 %{!?_licensedir:%global license %%doc}
