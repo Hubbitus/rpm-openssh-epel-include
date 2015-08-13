@@ -281,6 +281,12 @@ Group: Applications/Internet
 Requires: openssh = %{version}-%{release}
 Requires: fipscheck-lib%{_isa} >= 1.3.0
 
+%package clients-ssh1
+Summary: An open source SSH client applications for legacy SSH1 protocol
+Group: Applications/Internet
+Requires: openssh = %{version}-%{release}
+Requires: fipscheck-lib%{_isa} >= 1.3.0
+
 %package server
 Summary: An open source SSH server daemon
 Group: System Environment/Daemons
@@ -341,6 +347,12 @@ install openssh-clients, openssh-server, or both.
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package includes
 the clients necessary to make encrypted connections to SSH servers.
+
+%description clients-ssh1
+OpenSSH is a free version of SSH (Secure SHell), a program for logging
+into and executing commands on a remote machine. This package includes
+the clients necessary to make encrypted connections to SSH servers
+which support only legacy SSH1 protocol.
 
 %description server
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -503,6 +515,30 @@ else
 fi
 %endif
 
+# do ssh1 clients
+%configure  \
+	--sysconfdir=%{_sysconfdir}/ssh \
+	--libexecdir=%{_libexecdir}/openssh \
+	--datadir=%{_datadir}/openssh \
+	--with-default-path=/usr/local/bin:/usr/bin \
+	--with-superuser-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin \
+	--disable-strip \
+	--without-zlib-version-check \
+	--with-ssl-engine \
+	--with-ipaddr-display \
+	--with-pie=no \
+	--with-selinux --with-audit=linux \
+	--with-pam \
+	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
+	--with-ssh1
+sed -i.back -e 's|^SSH_PROGRAM=.*|SSH_PROGRAM=/usr/bin/ssh1|' Makefile
+make scp ssh ssh-keygen
+cp ssh{,1}
+cp scp{,1}
+cp ssh-keygen{,1}
+cp Makefile{.back,}
+make clean
+
 %configure \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
@@ -617,6 +653,11 @@ install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
 install -m644 -D %{SOURCE14} $RPM_BUILD_ROOT%{_tmpfilesdir}/%{name}.conf
 
+# clients-ssh1
+install -m755 ssh1 $RPM_BUILD_ROOT/%{_bindir}/ssh1
+install -m755 scp1 $RPM_BUILD_ROOT/%{_bindir}/scp1
+install -m755 ssh-keygen1 $RPM_BUILD_ROOT/%{_bindir}/ssh-keygen1
+
 %if ! %{no_gnome_askpass}
 install contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
@@ -700,6 +741,12 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_mandir}/man1/ssh-copy-id.1*
 %attr(0644,root,root) %{_mandir}/man8/ssh-pkcs11-helper.8*
 %endif
+
+%files clients-ssh1
+%defattr(-,root,root)
+%attr(0755,root,root) %{_bindir}/ssh1
+%attr(0755,root,root) %{_bindir}/scp1
+%attr(0755,root,root) %{_bindir}/ssh-keygen1
 
 %if ! %{rescue}
 %files server
