@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 6.9p1
-%define openssh_rel 4
+%define openssh_ver 7.0p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 6
+%define pam_ssh_agent_rel 7
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -223,8 +223,6 @@ Patch926: openssh-6.7p1-sftp-force-permission.patch
 Patch928: openssh-6.8p1-memory-problems.patch
 # Restore compatible default (#89216)
 Patch929: openssh-6.9p1-permit-root-login.patch
-# authentication limits (MaxAuthTries) bypass [security] (#1245971)
-Patch930: openssh-6.9p1-authentication-limits-bypass.patch
 # Handle terminal control characters in scp progressmeter (#1247204)
 Patch931: openssh-6.9p1-scp-progressmeter.patch
 
@@ -462,7 +460,6 @@ popd
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
-%patch930 -p1 -b .kbd
 %patch931 -p1 -b .progressmeter
 
 %patch200 -p1 -b .audit
@@ -810,6 +807,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Aug 12 2015 Jakub Jelen <jjelen@redhat.com> 7.0p1-1 + 0.9.3.7
+- New upstream release (#1252639)
+- Fix pam_ssh_agent_auth package (#1251777)
+- Security: Use-after-free bug related to PAM support (#1252853)
+- Security: Privilege separation weakness related to PAM support (#1252854)
+- Security: Incorrectly set TTYs to be world-writable (#1252862)
+
 * Tue Jul 28 2015 Jakub Jelen <jjelen@redhat.com> 6.9p1-4 + 0.9.3-6
 - Handle terminal control characters in scp progressmeter (#1247204)
 
