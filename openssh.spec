@@ -812,7 +812,7 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
-* Wed Aug 12 2015 Jakub Jelen <jjelen@redhat.com> 7.0p1-1 + 0.9.3.7
+* Wed Aug 12 2015 Jakub Jelen <jjelen@redhat.com> 7.0p1-1 + 0.9.3-7
 - New upstream release (#1252639)
 - Fix pam_ssh_agent_auth package (#1251777)
 - Security: Use-after-free bug related to PAM support (#1252853)
