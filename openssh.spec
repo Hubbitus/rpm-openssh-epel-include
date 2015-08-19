@@ -227,7 +227,8 @@ Patch929: openssh-6.9p1-permit-root-login.patch
 Patch931: openssh-6.9p1-scp-progressmeter.patch
 # Add GSSAPIKexAlgorithms option for server and client application
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
-
+# Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
+Patch933: openssh-7.0p1-show-more-fingerprints.patch
 
 
 License: BSD
@@ -464,6 +465,7 @@ popd
 %patch929 -p1 -b .root-login
 %patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
+%patch933 -p1 -b .fingerprint
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips

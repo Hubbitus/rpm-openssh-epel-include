@@ -350,7 +350,7 @@ diff -up openssh-7.0p1/readconf.c.fips openssh-7.0p1/readconf.c
 --- openssh-7.0p1/readconf.c.fips	2015-08-19 12:36:51.138412921 +0200
 +++ openssh-7.0p1/readconf.c	2015-08-19 12:36:51.152412889 +0200
 @@ -1915,9 +1915,12 @@ fill_default_options(Options * options)
- 		options->fingerprint_hash = SSH_FP_HASH_DEFAULT;
+ 	}
  	if (options->update_hostkeys == -1)
  		options->update_hostkeys = 0;
 -	if (kex_assemble_names(KEX_CLIENT_ENCRYPT, &options->ciphers) != 0 ||
