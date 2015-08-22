@@ -229,6 +229,9 @@ Patch931: openssh-6.9p1-scp-progressmeter.patch
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
 # Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
 Patch933: openssh-7.0p1-show-more-fingerprints.patch
+# Brokend HostKeyAlgorthms on server using + sign
+# from http://lists.mindrot.org/pipermail/openssh-unix-dev/2015-August/034324.html
+Patch934: openssh-7.1p1-hostkeyalgorithms.patch
 
 
 License: BSD
@@ -466,6 +469,7 @@ popd
 %patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
+%patch934 -p1 -b .hostkey
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
