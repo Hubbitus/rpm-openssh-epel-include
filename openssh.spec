@@ -536,6 +536,7 @@ fi
 	--with-selinux --with-audit=linux \
 	--with-pam \
 	--with-kerberos5${krb5_prefix:+=${krb5_prefix}} \
+	--with-ldap \
 	--with-ssh1
 sed -i.back -e 's|^SSH_PROGRAM=.*|SSH_PROGRAM=/usr/bin/ssh1|' Makefile
 make scp ssh ssh-keygen
