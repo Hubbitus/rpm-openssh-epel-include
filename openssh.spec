@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 7.0p1
-%define openssh_rel 2
+%define openssh_ver 7.1p1
+%define openssh_rel 1
 %define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 7
+%define pam_ssh_agent_rel 8
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -817,6 +817,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Sat Aug 22 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-1 + 0.9.2-8
+- New upstream release
+
 * Wed Aug 19 2015 Jakub Jelen <jjelen@redhat.com> 7.0p1-2 + 0.9.3-7
 - Fix problem with DSA keys using pam_ssh_agent_auth (#1251777)
 - Add GSSAPIKexAlgorithms option for server and client application
