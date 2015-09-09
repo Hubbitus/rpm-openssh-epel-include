@@ -94,6 +94,14 @@ diff -up openssh-7.0p1/gss-serv.c.gsskexalg openssh-7.0p1/gss-serv.c
 diff -up openssh-7.0p1/kex.c.gsskexalg openssh-7.0p1/kex.c
 --- openssh-7.0p1/kex.c.gsskexalg	2015-08-19 12:28:38.078518839 +0200
 +++ openssh-7.0p1/kex.c	2015-08-19 12:30:13.249306371 +0200
+@@ -50,6 +50,7 @@
+ #include "dispatch.h"
+ #include "monitor.h"
+ #include "roaming.h"
++#include "xmalloc.h"
+ 
+ #include "ssherr.h"
+ #include "sshbuf.h"
 @@ -232,6 +232,29 @@ kex_assemble_names(const char *def, char
  	return 0;
  }
