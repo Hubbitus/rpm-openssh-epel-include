@@ -604,10 +604,12 @@ make
 %if ! %{no_gnome_askpass}
 pushd contrib
 if [ $gtk2 = yes ] ; then
-	make gnome-ssh-askpass2
+	CFLAGS="$CFLAGS %{?__global_ldflags}" \
+	    make gnome-ssh-askpass2
 	mv gnome-ssh-askpass2 gnome-ssh-askpass
 else
-	make gnome-ssh-askpass1
+	CFLAGS="$CFLAGS %{?__global_ldflags}"
+	    make gnome-ssh-askpass1
 	mv gnome-ssh-askpass1 gnome-ssh-askpass
 fi
 popd
