@@ -2476,6 +2476,18 @@ diff -up openssh-7.0p1/sshconnect2.c.gsskex openssh-7.0p1/sshconnect2.c
 diff -up openssh-7.0p1/sshd.c.gsskex openssh-7.0p1/sshd.c
 --- openssh-7.0p1/sshd.c.gsskex	2015-08-12 11:15:43.679548913 +0200
 +++ openssh-7.0p1/sshd.c	2015-08-12 11:15:43.702548876 +0200
+@@ -1043,8 +1043,9 @@ notify_hostkeys(struct ssh *ssh)
+ 	}
+ 	debug3("%s: sent %d hostkeys", __func__, nkeys);
+ 	if (nkeys == 0)
+-		fatal("%s: no hostkeys", __func__);
+-	packet_send();
++		debug3("%s: no hostkeys", __func__);
++	else
++		packet_send();
+ 	sshbuf_free(buf);
+ }
+ 
 @@ -1843,10 +1843,13 @@ main(int ac, char **av)
  		logit("Disabling protocol version 1. Could not load host key");
  		options.protocol &= ~SSH_PROTO_1;
