@@ -2730,3 +2730,15 @@ diff -up openssh-7.1p1/sshkey.h.gsskex openssh-7.1p1/sshkey.h
  	KEY_UNSPEC
  };
  
+diff --git a/auth.c b/auth.c
+index 4d1fbbe..5db39c4 100644
+--- a/auth.c
++++ b/auth.c
+@@ -354,6 +354,7 @@ auth_root_allowed(const char *method)
+ 	case PERMIT_NO_PASSWD:
+ 		if (strcmp(method, "publickey") == 0 ||
+ 		    strcmp(method, "hostbased") == 0 ||
++		    strcmp(method, "gssapi-keyex") == 0 ||
+ 		    strcmp(method, "gssapi-with-mic") == 0)
+ 			return 1;
+ 		break;
