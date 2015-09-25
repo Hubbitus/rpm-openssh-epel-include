@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 7.1p1
-%define openssh_rel 2
+%define openssh_rel 3
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 8
 
@@ -819,6 +819,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Sep 25 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-3 + 0.9.2-8
+- Fix FIPS mode for DH kex (#1260253)
+- Provide full RELRO and PIE form askpass helper (#1264036)
+- Fix gssapi key exchange on server and client (#1261414)
+- Allow gss-keyex root login when without-password is set (upstream #2456)
+- Fix obsolete usage of SELinux constants (#1261496)
+
 * Wed Sep 09 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-2 + 0.9.2-8
 - Fix warnings reported by gcc related to keysign and keyAlgorithms
 
