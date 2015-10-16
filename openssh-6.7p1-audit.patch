@@ -1569,7 +1569,7 @@ diff -up openssh-7.0p1/monitor_wrap.c.audit openssh-7.0p1/monitor_wrap.c
 +	buffer_init(&m);
 +	buffer_put_int(&m, ctos);
 +	buffer_put_cstring(&m, cipher);
-+	buffer_put_cstring(&m, (mac ? mac : ""));
++	buffer_put_cstring(&m, (mac ? mac : "<implicit>"));
 +	buffer_put_cstring(&m, compress);
 +	buffer_put_cstring(&m, fps);
 +	buffer_put_int64(&m, pid);
