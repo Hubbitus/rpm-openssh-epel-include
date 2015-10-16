@@ -122,17 +122,13 @@ index 07f9926..a97f8b7 100644
  	/* Change our root directory */
  	if (chroot(_PATH_PRIVSEP_CHROOT_DIR) == -1)
  		fatal("chroot(\"%s\"): %s", _PATH_PRIVSEP_CHROOT_DIR,
-@@ -768,6 +772,13 @@ privsep_postauth(Authctxt *authctxt)
- 	do_setusercontext(authctxt->pw);
+@@ -755,6 +755,9 @@ privsep_postauth(Authctxt *authctxt)
  
-  skip:
-+#ifdef WITH_SELINUX
-+	/* switch SELinux content for root too */
-+	if (authctxt->pw->pw_uid == 0) {
-+		sshd_selinux_copy_context();
-+	}
-+#endif
-+
- 	/* It is safe now to apply the key state */
- 	monitor_apply_keystate(pmonitor);
- 
+ #ifdef DISABLE_FD_PASSING
+ 	if (1) {
++#elif defined(WITH_SELINUX)
++	if (options.use_login) {
++		/* even root user can be confined by SELinux */
+ #else
+ 	if (authctxt->pw->pw_uid == 0 || options.use_login) {
+ #endif
