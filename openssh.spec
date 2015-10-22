@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 7.1p1
-%define openssh_rel 3
+%define openssh_rel 4
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 8
 
@@ -819,6 +819,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Oct 22 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-4 + 0.9.2-8
+- Review SELinux user context handling after authentication (#1269072)
+- Handle root logins the same way as other users (#1269072)
+- Audit implicit mac, if mac is covered in cipher (#1271694)
+- Increase size limit for remote glob over sftp
+
 * Fri Sep 25 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-3 + 0.9.2-8
 - Fix FIPS mode for DH kex (#1260253)
 - Provide full RELRO and PIE form askpass helper (#1264036)
