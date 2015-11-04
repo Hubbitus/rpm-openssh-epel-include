@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 7.1p1
-%define openssh_rel 4
+%define openssh_rel 5
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 8
 
@@ -819,6 +819,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Nov 04 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-5 + 0.9.2-8
+- Do not set user context too many times for root logins (#1269072)
+
 * Thu Oct 22 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-4 + 0.9.2-8
 - Review SELinux user context handling after authentication (#1269072)
 - Handle root logins the same way as other users (#1269072)
