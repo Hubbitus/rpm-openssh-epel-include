@@ -132,3 +132,16 @@ index 07f9926..a97f8b7 100644
  #else
  	if (authctxt->pw->pw_uid == 0 || options.use_login) {
  #endif
+diff --git a/session.c b/session.c
+index 684f867..09048bc 100644
+--- a/session.c
++++ b/session.c
+@@ -1538,7 +1538,7 @@ do_setusercontext(struct passwd *pw)
+ 
+ 	platform_setusercontext(pw);
+ 
+-	if (platform_privileged_uidswap()) {
++	if (platform_privileged_uidswap() && !is_child) {
+ #ifdef HAVE_LOGIN_CAP
+ 		if (setusercontext(lc, pw, pw->pw_uid,
+ 		    (LOGIN_SETALL & ~(LOGIN_SETPATH|LOGIN_SETUSER))) < 0) {
