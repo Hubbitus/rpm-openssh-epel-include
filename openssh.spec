@@ -176,6 +176,10 @@ Patch801: openssh-6.6p1-force_krb.patch
 # add new option GSSAPIEnablek5users and disable using ~/.k5users by default (#1169843)
 # CVE-2014-9278
 Patch802: openssh-6.6p1-GSSAPIEnablek5users.patch
+# Documentation about GSSAPI
+# from https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765655
+Patch803: openssh-7.1p1-gssapi-documentation.patch
+
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.6p1-kuserok.patch
@@ -443,6 +447,7 @@ popd
 # 
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
+%patch803 -p1 -b .gss-docs
 # 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
