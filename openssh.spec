@@ -185,8 +185,6 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.6p1-kuserok.patch
 # use default_ccache_name from /etc/krb5.conf (#991186)
 Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
-# Run ssh-copy-id in the legacy mode when SSH_COPY_ID_LEGACY variable is set (#969375
-Patch905: openssh-6.4p1-legacy-ssh-copy-id.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
 # set a client's address right after a connection is set
@@ -214,12 +212,8 @@ Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 # apply upstream patch and make sshd -T more consistent (#1187521)
 Patch922: openssh-6.8p1-sshdT-output.patch
-# fix ssh-copy-id on non-sh shells (#1045191)
-Patch923: openssh-6.8p1-fix-ssh-copy-id-on-non-sh-shell.patch
 # Seccomp support for secondary architectures (#1195065)
 Patch924: openssh-6.9p1-seccomp-secondary.patch
-# Solve issue with ssh-copy-id and keys without trailing newline (#1093168)
-Patch925: openssh-6.7p1-ssh-copy-id-truncated-keys.patch
 # Add sftp option to force mode of created files (#1191055)
 Patch926: openssh-6.7p1-sftp-force-permission.patch
 # Memory problems
@@ -236,6 +230,9 @@ Patch933: openssh-7.0p1-show-more-fingerprints.patch
 # Brokend HostKeyAlgorthms on server using + sign
 # from http://lists.mindrot.org/pipermail/openssh-unix-dev/2015-August/034324.html
 Patch934: openssh-7.1p1-hostkeyalgorithms.patch
+# Updated version of ssh-copy-id
+# http://git.hands.com/ssh-copy-id
+Patch935: openssh-7.1p1-ssh-copy-id.patch
 
 
 License: BSD
@@ -452,7 +449,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch902 -p1 -b .ccache_name
-%patch905 -p1 -b .legacy-ssh-copy-id
 %patch906 -p1 -b .fromto-remote
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
@@ -465,9 +461,7 @@ popd
 %patch802 -p1 -b .GSSAPIEnablek5users
 %patch921 -p1 -b .tcp_wrappers
 %patch922 -p1 -b .sshdt
-%patch923 -p1 -b .ssh-copy-id
 %patch924 -p1 -b .seccomp
-%patch925 -p1 -b .newline
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
@@ -475,6 +469,7 @@ popd
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
 %patch934 -p1 -b .hostkey
+%patch935 -p1 -b .ssh-copy-id
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
