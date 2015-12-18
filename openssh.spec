@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %define openssh_ver 7.1p1
-%define openssh_rel 5
+%define openssh_rel 6
 %define pam_ssh_agent_ver 0.9.3
 %define pam_ssh_agent_rel 8
 
@@ -823,6 +823,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Dec 18 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-6 + 0.9.2-8
+- Preserve IUTF8 tty mode flag over ssh connections (#1270248)
+- Do not require sysconfig file to start service (#1279521)
+- Update ssh-copy-id to upstream version
+- GSSAPI Key Exchange documentation improvements
+- Remove unused patches
+
 * Wed Nov 04 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-5 + 0.9.2-8
 - Do not set user context too many times for root logins (#1269072)
 
