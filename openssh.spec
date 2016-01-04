@@ -1,42 +1,42 @@
 # Do we want SELinux & Audit
 %if 0%{?!noselinux:1}
-%define WITH_SELINUX 1
+%global WITH_SELINUX 1
 %else
-%define WITH_SELINUX 0
+%global WITH_SELINUX 0
 %endif
 
 %global _hardened_build 1
 
 # OpenSSH privilege separation requires a user & group ID
-%define sshd_uid    74
-%define sshd_gid    74
+%global sshd_uid    74
+%global sshd_gid    74
 
 # Do we want to disable building of gnome-askpass? (1=yes 0=no)
-%define no_gnome_askpass 0
+%global no_gnome_askpass 0
 
 # Do we want to link against a static libcrypto? (1=yes 0=no)
-%define static_libcrypto 0
+%global static_libcrypto 0
 
 # Use GTK2 instead of GNOME in gnome-ssh-askpass
-%define gtk2 1
+%global gtk2 1
 
 # Build position-independent executables (requires toolchain support)?
-%define pie 1
+%global pie 1
 
 # Do we want kerberos5 support (1=yes 0=no)
-%define kerberos5 1
+%global kerberos5 1
 
 # Do we want libedit support
-%define libedit 1
+%global libedit 1
 
 # Do we want LDAP support
-%define ldap 1
+%global ldap 1
 
 # Whether to build pam_ssh_agent_auth
 %if 0%{?!nopam:1}
-%define pam_ssh_agent 1
+%global pam_ssh_agent 1
 %else
-%define pam_ssh_agent 0
+%global pam_ssh_agent 0
 %endif
 
 # Reserve options to override askpass settings with:
@@ -53,22 +53,22 @@
 %{?static_openssl:%global static_libcrypto 1}
 
 # Is this a build for the rescue CD (without PAM, with MD5)? (1=yes 0=no)
-%define rescue 0
+%global rescue 0
 %{?build_rescue:%global rescue 1}
 %{?build_rescue:%global rescue_rel rescue}
 
 # Turn off some stuff for resuce builds
 %if %{rescue}
-%define kerberos5 0
-%define libedit 0
-%define pam_ssh_agent 0
+%global kerberos5 0
+%global libedit 0
+%global pam_ssh_agent 0
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%define openssh_ver 7.1p1
-%define openssh_rel 6
-%define pam_ssh_agent_ver 0.9.3
-%define pam_ssh_agent_rel 8
+%global openssh_ver 7.1p1
+%global openssh_rel 6
+%global pam_ssh_agent_ver 0.9.3
+%global pam_ssh_agent_rel 8
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -628,8 +628,8 @@ popd
 %endif
 
 # Add generation of HMAC checksums of the final stripped binaries
-%define __spec_install_post \
-    %{?__debug_package:%{__debug_install_post}} \
+%global __spec_install_post \
+    %%{?__debug_package:%%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
     fipshmac -d $RPM_BUILD_ROOT%{_libdir}/fipscheck $RPM_BUILD_ROOT%{_bindir}/ssh $RPM_BUILD_ROOT%{_sbindir}/sshd \
@@ -716,7 +716,6 @@ getent passwd sshd >/dev/null || \
 
 %files
 %defattr(-,root,root)
-%{!?_licensedir:%global license %%doc}
 %license LICENCE
 %doc CREDITS ChangeLog INSTALL OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
@@ -816,7 +815,6 @@ getent passwd sshd >/dev/null || \
 %if %{pam_ssh_agent}
 %files -n pam_ssh_agent_auth
 %defattr(-,root,root)
-%{!?_licensedir:%global license %%doc}
 %license pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
 %attr(0755,root,root) %{_libdir}/security/pam_ssh_agent_auth.so
 %attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
