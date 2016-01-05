@@ -494,15 +494,15 @@ diff --git a/contrib/ssh-copy-id b/contrib/ssh-copy-id
 index afde8b1..cd52764 100644
 --- a/contrib/ssh-copy-id
 +++ b/contrib/ssh-copy-id
-@@ -170,6 +170,8 @@ do
-       usage
-       ;;
-   esac
-+
-+  [ "x$SSH_COPY_ID_LEGACY" != "x" ] && FORCED=1
- done 
+@@ -99,6 +99,8 @@ if [ -n "$SSH_AUTH_SOCK" ] && ssh-add -L >/dev/null 2>&1 ; then
+   GET_ID="ssh-add -L"
+ fi
  
- eval set -- "$SAVEARGS"
++[ "x$SSH_COPY_ID_LEGACY" != "x" ] && FORCED=1
++
+ while test "$#" -gt 0
+ do
+   [ "${SEEN_OPT_I}" ] && expr "$1" : "[-]i" >/dev/null && {
 diff --git a/contrib/ssh-copy-id.1 b/contrib/ssh-copy-id.1
 index 8850cce..62f112d 100644
 --- a/contrib/ssh-copy-id.1
