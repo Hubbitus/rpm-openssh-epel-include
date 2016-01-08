@@ -724,7 +724,7 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_bindir}/ssh-keygen
 %attr(0644,root,root) %{_mandir}/man1/ssh-keygen.1*
 %attr(0755,root,root) %dir %{_libexecdir}/openssh
-%attr(2111,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
+%attr(2555,root,ssh_keys) %{_libexecdir}/openssh/ssh-keysign
 %attr(0644,root,root) %{_mandir}/man8/ssh-keysign.8*
 %endif
 
