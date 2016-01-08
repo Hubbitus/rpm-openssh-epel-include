@@ -630,8 +630,8 @@ popd
 # Add generation of HMAC checksums of the final stripped binaries
 %global __spec_install_post \
     %%{?__debug_package:%%{__debug_install_post}} \
-    %{__arch_install_post} \
-    %{__os_install_post} \
+    %%{__arch_install_post} \
+    %%{__os_install_post} \
     fipshmac -d $RPM_BUILD_ROOT%{_libdir}/fipscheck $RPM_BUILD_ROOT%{_bindir}/ssh $RPM_BUILD_ROOT%{_sbindir}/sshd \
 %{nil}
 
