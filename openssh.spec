@@ -740,7 +740,7 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
-%attr(2111,root,nobody) %{_bindir}/ssh-agent
+%attr(0755,root,root) %{_bindir}/ssh-agent
 %attr(0755,root,root) %{_bindir}/ssh-add
 %attr(0755,root,root) %{_bindir}/ssh-keyscan
 %attr(0755,root,root) %{_bindir}/sftp
