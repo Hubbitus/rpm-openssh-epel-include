@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.1p1
-%global openssh_rel 6
+%global openssh_rel 7
 %global pam_ssh_agent_ver 0.9.3
 %global pam_ssh_agent_rel 8
 
@@ -821,6 +821,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Jan 12 2016 Jakub Jelen <jjelen@redhat.com> 7.1p1-7 + 0.9.2-8
+- Change RPM define macros to global according to packaging guidelines
+- Fix wrong handling of SSH_COPY_ID_LEGACY environment variable
+- Update ssh-agent and ssh-keysign permissions (#1296724)
+- Fix few problems with alternative builds without GSSAPI or openSSL
+- Fix condition to run sshd-keygen
+
 * Fri Dec 18 2015 Jakub Jelen <jjelen@redhat.com> 7.1p1-6 + 0.9.2-8
 - Preserve IUTF8 tty mode flag over ssh connections (#1270248)
 - Do not require sysconfig file to start service (#1279521)
