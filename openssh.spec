@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%global openssh_ver 7.1p1
-%global openssh_rel 7
+%global openssh_ver 7.1p2
+%global openssh_rel 1
 %global pam_ssh_agent_ver 0.9.3
-%global pam_ssh_agent_rel 8
+%global pam_ssh_agent_rel 9
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -821,6 +821,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Jan 14 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-1 + 0.9.2-9
+- New security upstream release for CVE-2016-0777
+
 * Tue Jan 12 2016 Jakub Jelen <jjelen@redhat.com> 7.1p1-7 + 0.9.2-8
 - Change RPM define macros to global according to packaging guidelines
 - Fix wrong handling of SSH_COPY_ID_LEGACY environment variable
