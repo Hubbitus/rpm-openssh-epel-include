@@ -67,8 +67,8 @@
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.1p2
 %global openssh_rel 1
-%global pam_ssh_agent_ver 0.9.3
-%global pam_ssh_agent_rel 9
+%global pam_ssh_agent_ver 0.10.2
+%global pam_ssh_agent_rel 1
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -114,12 +114,10 @@ Patch300: pam_ssh_agent_auth-0.9.3-build.patch
 Patch301: pam_ssh_agent_auth-0.9.2-seteuid.patch
 # explicitly make pam callbacks visible
 Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
-# don't use xfree (#1024965)
-Patch303: pam_ssh_agent_auth-0.9.3-no-xfree.patch
-# use SSH_DIGEST_* for fingerprint hashes
-Patch304: pam_ssh_agent_auth-0.9.3-fingerprint-hash.patch
 # update to current version of agent structure
 Patch305: pam_ssh_agent_auth-0.9.3-agent_structure.patch
+# remove prefixes to be able to build against current openssh library
+Patch306: pam_ssh_agent_auth-0.10.2-compat.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.6p1-role-mls.patch
@@ -131,7 +129,7 @@ Patch501: openssh-6.7p1-ldap.patch
 #?
 Patch502: openssh-6.6p1-keycat.patch
 
-#http6://bugzilla.mindrot.org/show_bug.cgi?id=1644
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-6.6p1-allow-ip-opts.patch
 #http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
 Patch603: openssh-5.8p1-glob.patch
@@ -407,13 +405,12 @@ The module is most useful for su and sudo service stacks.
 
 %if %{pam_ssh_agent}
 pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
-%patch300 -p1 -b .psaa-build
+%patch300 -p2 -b .psaa-build
 %patch301 -p1 -b .psaa-seteuid
-%patch302 -p1 -b .psaa-visibility
-%patch303 -p1 -b .psaa-xfree
-%patch304 -p2 -b .psaa-fingerprint
+%patch302 -p2 -b .psaa-visibility
+%patch306 -p2 -b .psaa-compat
 %patch305 -p2 -b .psaa-agent
-# Remove duplicate headers
+# Remove duplicate headers and library files
 rm -f $(cat %{SOURCE5})
 popd
 %endif

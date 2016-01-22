@@ -1,12 +1,11 @@
-diff -up pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c
---- pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build	2010-01-13 03:17:01.000000000 +0100
-+++ pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c	2012-06-21 20:14:56.432527764 +0200
-@@ -37,7 +37,16 @@
- #include "buffer.h"
- #include "key.h"
- #include "authfd.h"
+diff -up openssh-7.1p2/pam_ssh_agent_auth-0.10.2/iterate_ssh_agent_keys.c.psaa-build openssh-7.1p2/pam_ssh_agent_auth-0.10.2/iterate_ssh_agent_keys.c
+--- openssh-7.1p2/pam_ssh_agent_auth-0.10.2/iterate_ssh_agent_keys.c.psaa-build	2016-01-22 14:59:18.943919791 +0100
++++ openssh-7.1p2/pam_ssh_agent_auth-0.10.2/iterate_ssh_agent_keys.c	2016-01-22 15:16:12.534599318 +0100
+@@ -43,12 +43,31 @@
+ #include <openssl/evp.h>
+ #include "ssh2.h"
+ #include "misc.h"
 +#include "ssh.h"
- #include <stdio.h>
 +#include <sys/types.h>
 +#include <sys/stat.h>
 +#include <sys/socket.h>
@@ -15,12 +14,11 @@ diff -up pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_ag
 +#include <stdlib.h>
 +#include <errno.h>
 +#include <fcntl.h>
- #include <openssl/evp.h>
  
  #include "userauth_pubkey_from_id.h"
-@@ -69,6 +78,96 @@ session_id2_gen()
-     return cookie;
- }
+ #include "identity.h"
+ #include "get_command_line.h"
+ extern char **environ;
  
 +/* 
 + * Added by Jamie Beverly, ensure socket fd points to a socket owned by the user 
@@ -32,7 +30,31 @@ diff -up pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_ag
 + * race condition; so a more "direct" log message is generated.
 + */
 +
-+int
+ static char *
+ log_action(char ** action, size_t count)
+ {
+@@ -85,7 +104,7 @@ void
+ pamsshagentauth_session_id2_gen(Buffer * session_id2, const char * user,
+                                 const char * ruser, const char * servicename)
+ {
+-    char *cookie = NULL;
++    u_char *cookie = NULL;
+     uint8_t i = 0;
+     uint32_t rnd = 0;
+     uint8_t cookie_len;
+@@ -110,7 +129,7 @@ pamsshagentauth_session_id2_gen(Buffer *
+         if (i % 4 == 0) {
+             rnd = pamsshagentauth_arc4random();
+         }
+-        cookie[i] = (char) rnd;
++        cookie[i] = (u_char) rnd;
+         rnd >>= 8;
+     }
+ 
+@@ -142,6 +161,86 @@ pamsshagentauth_session_id2_gen(Buffer *
+ }
+ 
+ int
 +ssh_get_authentication_socket_for_uid(uid_t uid)
 +{
 +	const char *authsocket;
@@ -112,27 +134,23 @@ diff -up pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_ag
 +	return auth;
 +}
 +
- int
- find_authorized_keys(uid_t uid)
++int
+ pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, const char * servicename)
  {
-@@ -81,7 +180,7 @@ find_authorized_keys(uid_t uid)
+     Buffer session_id2 = { 0 };
+@@ -190,7 +289,7 @@ pamsshagentauth_find_authorized_keys(con
      OpenSSL_add_all_digests();
-     session_id2 = session_id2_gen();
+     pamsshagentauth_session_id2_gen(&session_id2, user, ruser, servicename);
  
 -    if ((ac = ssh_get_authentication_connection(uid))) {
 +    if ((ac = ssh_get_authentication_connection_for_uid(uid))) {
-         verbose("Contacted ssh-agent of user %s (%u)", getpwuid(uid)->pw_name, uid);
+         pamsshagentauth_verbose("Contacted ssh-agent of user %s (%u)", ruser, uid);
          for (key = ssh_get_first_identity(ac, &comment, 2); key != NULL; key = ssh_get_next_identity(ac, &comment, 2)) 
          {
-@@ -109,3 +208,4 @@ find_authorized_keys(uid_t uid)
-     EVP_cleanup();
-     return retval;
- }
-+
-diff -up pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build pam_ssh_agent_auth-0.9.3/Makefile.in
---- pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build	2009-10-27 21:19:41.000000000 +0100
-+++ pam_ssh_agent_auth-0.9.3/Makefile.in	2012-06-21 20:14:56.432527764 +0200
-@@ -28,7 +28,7 @@ PATHS=
+diff -up openssh-7.1p2/pam_ssh_agent_auth-0.10.2/Makefile.in.psaa-build openssh-7.1p2/pam_ssh_agent_auth-0.10.2/Makefile.in
+--- openssh-7.1p2/pam_ssh_agent_auth-0.10.2/Makefile.in.psaa-build	2014-03-31 19:35:17.000000000 +0200
++++ openssh-7.1p2/pam_ssh_agent_auth-0.10.2/Makefile.in	2016-01-22 15:20:16.479521651 +0100
+@@ -52,7 +52,7 @@ PATHS=
  CC=@CC@
  LD=@LD@
  CFLAGS=@CFLAGS@
@@ -141,7 +159,7 @@ diff -up pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build pam_ssh_agent_auth-0.9.
  LIBS=@LIBS@
  AR=@AR@
  AWK=@AWK@
-@@ -37,7 +37,7 @@ INSTALL=@INSTALL@
+@@ -61,7 +61,7 @@ INSTALL=@INSTALL@
  PERL=@PERL@
  SED=@SED@
  ENT=@ENT@
@@ -150,16 +168,16 @@ diff -up pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build pam_ssh_agent_auth-0.9.
  LDFLAGS_SHARED = @LDFLAGS_SHARED@
  EXEEXT=@EXEEXT@
  
-@@ -48,7 +48,7 @@ PAM_MODULES=pam_ssh_agent_auth.so
+@@ -72,7 +72,7 @@ PAM_MODULES=pam_ssh_agent_auth.so
  
- SSHOBJS=xmalloc.o atomicio.o authfd.o bufaux.o bufbn.o buffer.o cleanup.o entropy.o fatal.o key.o log.o misc.o secure_filename.o ssh-dss.o ssh-rsa.o uuencode.o compat.o
+ SSHOBJS=xmalloc.o atomicio.o authfd.o bufaux.o bufbn.o buffer.o cleanup.o entropy.o fatal.o key.o log.o misc.o secure_filename.o ssh-dss.o ssh-rsa.o uuencode.o compat.o uidswap.o 
  
--PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o
-+PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o secure_filename.o
+-PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o get_command_line.o
++PAM_SSH_AGENT_AUTH_OBJS=pam_user_key_allowed2.o iterate_ssh_agent_keys.o userauth_pubkey_from_id.o pam_user_authorized_keys.o get_command_line.o secure_filename.o
  
  
  MANPAGES_IN	= pam_ssh_agent_auth.pod
-@@ -67,13 +67,13 @@ $(PAM_MODULES): Makefile.in config.h
+@@ -91,13 +91,13 @@ $(PAM_MODULES): Makefile.in config.h
  .c.o:
  	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
  
@@ -170,31 +188,9 @@ diff -up pam_ssh_agent_auth-0.9.3/Makefile.in.psaa-build pam_ssh_agent_auth-0.9.
  always:
  
 -pam_ssh_agent_auth.so: $(LIBCOMPAT) $(SSHOBJS) $(PAM_SSH_AGENT_AUTH_OBJS)  pam_ssh_agent_auth.o
--	$(LD) $(LDFLAGS_SHARED) -o $@ $(SSHOBJS) $(PAM_SSH_AGENT_AUTH_OBJS) $(LDFLAGS) -lopenbsd-compat $(LIBS) -lpam pam_ssh_agent_auth.o
+-	$(LD) $(LDFLAGS_SHARED) -o $@ $(SSHOBJS) $(PAM_SSH_AGENT_AUTH_OBJS) $(LDFLAGS) -lopenbsd-compat pam_ssh_agent_auth.o $(LIBS) -lpam
 +pam_ssh_agent_auth.so: $(PAM_SSH_AGENT_AUTH_OBJS)  pam_ssh_agent_auth.o
-+	$(LD) $(LDFLAGS_SHARED) -o $@ $(PAM_SSH_AGENT_AUTH_OBJS) $(LDFLAGS) -lssh -lopenbsd-compat $(LIBS) -lpam -lnss3 pam_ssh_agent_auth.o
++	$(LD) $(LDFLAGS_SHARED) -o $@ $(PAM_SSH_AGENT_AUTH_OBJS) $(LDFLAGS) -lssh -lopenbsd-compat pam_ssh_agent_auth.o $(LIBS) -lpam -lnss3
  
  $(MANPAGES): $(MANPAGES_IN)
- 	pod2man --section=8 --release=v0.8 --name=pam_ssh_agent_auth --official --center "PAM" pam_ssh_agent_auth.pod > pam_ssh_agent_auth.8
-diff --git pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c
-index e2c5777..9b8b863 100644
---- pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c.psaa-build
-+++ pam_ssh_agent_auth-0.9.3/iterate_ssh_agent_keys.c
-@@ -58,7 +58,7 @@ uint8_t session_id_len = 0;
- u_char *
- session_id2_gen()
- {
--    char *cookie = NULL;
-+    u_char *cookie = NULL;
-     uint8_t i = 0;
-     uint32_t rnd = 0;
- 
-@@ -71,7 +71,7 @@ session_id2_gen()
-         if (i % 4 == 0) {
-             rnd = arc4random();
-         }
--        cookie[i] = (char) rnd;
-+        cookie[i] = (u_char) rnd;
-         rnd >>= 8;
-     }
- 
+ 	pod2man --section=8 --release=v0.10.2 --name=pam_ssh_agent_auth --official --center "PAM" pam_ssh_agent_auth.pod > pam_ssh_agent_auth.8
