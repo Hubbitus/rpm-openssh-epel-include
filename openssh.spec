@@ -234,6 +234,8 @@ Patch935: openssh-7.1p1-ssh-copy-id.patch
 # Preserve IUTF8 tty mode flag over ssh connections (#1270248)
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2477
 Patch936: openssh-7.1p1-iutf8.patch
+# CVE-2016-1908: possible fallback from untrusted to trusted X11 forwarding
+Patch937: openssh-7.1p2-fallback-x11-untrusted.patch
 
 
 License: BSD
@@ -471,6 +473,7 @@ popd
 %patch934 -p1 -b .hostkey
 %patch935 -p1 -b .ssh-copy-id
 %patch936 -p1 -b .iutf8
+%patch937 -p1 -b .x11-fallback
 
 %patch200 -p1 -b .audit
 %patch700 -p1 -b .fips
