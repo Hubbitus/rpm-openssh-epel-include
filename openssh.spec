@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.1p2
-%global openssh_rel 1
+%global openssh_rel 2
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 1
 
@@ -813,6 +813,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Jan 25 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-2 + 0.10.2-1
+- Rebased to recent version of pam_ssh_agent_auth
+- Upstream fix for CVE-2016-1908
+- Remove useless defattr
+
 * Thu Jan 14 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-1 + 0.9.2-9
 - New security upstream release for CVE-2016-0777
 
