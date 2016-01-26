@@ -715,7 +715,6 @@ getent passwd sshd >/dev/null || \
 %systemd_postun_with_restart sshd.service
 
 %files
-%defattr(-,root,root)
 %license LICENCE
 %doc CREDITS ChangeLog INSTALL OVERVIEW PROTOCOL* README README.platform README.privsep README.tun README.dns TODO
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
@@ -729,7 +728,6 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %files clients
-%defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
 %attr(0644,root,root) %{_libdir}/fipscheck/ssh.hmac
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
@@ -755,14 +753,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %files clients-ssh1
-%defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh1
 %attr(0755,root,root) %{_bindir}/scp1
 %attr(0755,root,root) %{_bindir}/ssh-keygen1
 
 %if ! %{rescue}
 %files server
-%defattr(-,root,root)
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
 %attr(0755,root,root) %{_sbindir}/sshd-keygen
@@ -784,7 +780,6 @@ getent passwd sshd >/dev/null || \
 
 %if %{ldap}
 %files ldap
-%defattr(-,root,root)
 %doc HOWTO.ldap-keys openssh-lpk-openldap.schema openssh-lpk-sun.schema ldap.conf
 %doc openssh-lpk-openldap.ldif openssh-lpk-sun.ldif
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-ldap-helper
@@ -794,14 +789,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %files keycat
-%defattr(-,root,root)
 %doc HOWTO.ssh-keycat
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-keycat
 %attr(0644,root,root) %config(noreplace) /etc/pam.d/ssh-keycat
 
 %if ! %{no_gnome_askpass}
 %files askpass
-%defattr(-,root,root)
 %attr(0644,root,root) %{_sysconfdir}/profile.d/gnome-ssh-askpass.*
 %attr(0755,root,root) %{_libexecdir}/openssh/gnome-ssh-askpass
 %attr(0755,root,root) %{_libexecdir}/openssh/ssh-askpass
@@ -814,7 +807,6 @@ getent passwd sshd >/dev/null || \
 
 %if %{pam_ssh_agent}
 %files -n pam_ssh_agent_auth
-%defattr(-,root,root)
 %license pam_ssh_agent_auth-%{pam_ssh_agent_ver}/OPENSSH_LICENSE
 %attr(0755,root,root) %{_libdir}/security/pam_ssh_agent_auth.so
 %attr(0644,root,root) %{_mandir}/man8/pam_ssh_agent_auth.8*
