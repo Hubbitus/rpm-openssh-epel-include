@@ -5,8 +5,10 @@ After=network.target sshd-keygen.service
 Wants=sshd-keygen.service
 
 [Service]
+Type=forking
+PIDFile=/var/run/sshd.pid
 EnvironmentFile=-/etc/sysconfig/sshd
-ExecStart=/usr/sbin/sshd -D $OPTIONS
+ExecStart=/usr/sbin/sshd $OPTIONS
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
