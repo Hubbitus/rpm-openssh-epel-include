@@ -686,3 +686,28 @@ diff -up openssh-7.1p2/pam_ssh_agent_auth-0.10.2/uuencode.c.psaa-xfree openssh-7
 -	pamsshagentauth_xfree(buf);
 +	free(buf);
  }
+diff --git a/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c b/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
+index d5a574f..9e866c1 100644
+--- a/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
++++ b/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
+@@ -68,10 +68,10 @@ userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
+ 
+     /* first test if this key is even allowed */
+     if(! pam_user_key_allowed(ruser, id->key))
+-        goto user_auth_clean_exit;
++        goto user_auth_clean_exit_without_buffer;
+ 
+     if(key_to_blob(id->key, &pkblob, &blen) == 0)
+-        goto user_auth_clean_exit;
++        goto user_auth_clean_exit_without_buffer;
+ 
+     /* construct packet to sign and test */
+     buffer_init(&b);
+@@ -95,6 +95,7 @@ userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
+   user_auth_clean_exit:
+     /* if(&b != NULL) */
+     buffer_free(&b);
++  user_auth_clean_exit_without_buffer:
+     if(sig != NULL)
+         free(sig);
+     if(pkblob != NULL)
