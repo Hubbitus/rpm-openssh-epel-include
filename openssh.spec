@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.1p2
-%global openssh_rel 2
+%global openssh_rel 3
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 1
 
@@ -813,6 +813,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Sat Jan 30 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-3 + 0.10.2-1
+- Fix segfaults with pam_ssh_agent_auth (#1303036)
+- Silently disable X11 forwarding on problems
+- Systemd service should be forking to detect immediate failures
+
 * Mon Jan 25 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-2 + 0.10.2-1
 - Rebased to recent version of pam_ssh_agent_auth
 - Upstream fix for CVE-2016-1908
