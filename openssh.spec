@@ -131,8 +131,6 @@ Patch502: openssh-6.6p1-keycat.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-6.6p1-allow-ip-opts.patch
-#http://cvsweb.netbsd.org/cgi-bin/cvsweb.cgi/src/crypto/dist/ssh/Attic/sftp-glob.c.diff?r1=1.13&r2=1.13.12.1&f=h
-Patch603: openssh-5.8p1-glob.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1893
 Patch604: openssh-6.6p1-keyperm.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1925
@@ -428,7 +426,6 @@ popd
 %patch502 -p1 -b .keycat
 
 %patch601 -p1 -b .ip-opts
-%patch603 -p1 -b .glob
 %patch604 -p1 -b .keyperm
 %patch606 -p1 -b .ipv6man
 %patch607 -p1 -b .sigpipe
