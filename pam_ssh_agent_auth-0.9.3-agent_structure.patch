@@ -104,3 +104,16 @@ diff -up openssh-7.1p2/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c.psaa-
          goto user_auth_clean_exit;
  
      /* test for correct signature */
+diff --git a/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c b/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
+--- a/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
++++ b/pam_ssh_agent_auth-0.10.2/userauth_pubkey_from_id.c
+@@ -85,7 +85,7 @@ userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
+     buffer_put_cstring(&b, pkalg);
+     buffer_put_string(&b, pkblob, blen);
+ 
+-    if(ssh_agent_sign(id->ac->fd, id->key, &sig, &slen, buffer_ptr(&b), buffer_len(&b), 0) != 0)
++    if(ssh_agent_sign(id->ac->fd, id->key, &sig, &slen, buffer_ptr(&b), buffer_len(&b), NULL, 0) != 0)
+         goto user_auth_clean_exit;
+ 
+     /* test for correct signature */
+

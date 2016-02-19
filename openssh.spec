@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%global openssh_ver 7.1p2
-%global openssh_rel 4
+%global openssh_ver 7.2p1
+%global openssh_rel 1
 %global pam_ssh_agent_ver 0.10.2
-%global pam_ssh_agent_rel 1
+%global pam_ssh_agent_rel 2
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -105,7 +105,7 @@ Patch103: openssh-5.8p1-packet.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1402
 # https://bugzilla.redhat.com/show_bug.cgi?id=1171248
 # record pfs= field in CRYPTO_SESSION audit event
-Patch200: openssh-6.7p1-audit.patch
+Patch200: openssh-7.2p1-audit.patch
 # Audit race condition in forked child (#1310684)
 Patch201: openssh-7.1p2-audit-race-condition.patch
 
@@ -143,7 +143,7 @@ Patch607: openssh-5.8p2-sigpipe.patch
 Patch609: openssh-5.5p1-x11.patch
 
 #?
-Patch700: openssh-6.7p1-fips.patch
+Patch700: openssh-7.2p1-fips.patch
 #?
 Patch702: openssh-5.1p1-askpass-progress.patch
 #?
@@ -168,7 +168,7 @@ Patch714: openssh-6.7p1-kdf-cavs.patch
 
 #http://www.sxw.org.uk/computing/patches/openssh.html
 #changed cache storage type - #848228
-Patch800: openssh-6.6p1-gsskex.patch
+Patch800: openssh-7.2p1-gsskex.patch
 #http://www.mail-archive.com/kerberos@mit.edu/msg17591.html
 Patch801: openssh-6.6p1-force_krb.patch
 # add new option GSSAPIEnablek5users and disable using ~/.k5users by default (#1169843)
@@ -225,17 +225,9 @@ Patch931: openssh-6.9p1-scp-progressmeter.patch
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
 # Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
 Patch933: openssh-7.0p1-show-more-fingerprints.patch
-# Brokend HostKeyAlgorthms on server using + sign
-# from http://lists.mindrot.org/pipermail/openssh-unix-dev/2015-August/034324.html
-Patch934: openssh-7.1p1-hostkeyalgorithms.patch
-# Updated version of ssh-copy-id
-# http://git.hands.com/ssh-copy-id
-Patch935: openssh-7.1p1-ssh-copy-id.patch
 # Preserve IUTF8 tty mode flag over ssh connections (#1270248)
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2477
 Patch936: openssh-7.1p1-iutf8.patch
-# CVE-2016-1908: possible fallback from untrusted to trusted X11 forwarding
-Patch937: openssh-7.1p2-fallback-x11-untrusted.patch
 
 
 License: BSD
@@ -469,10 +461,7 @@ popd
 %patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
-%patch934 -p1 -b .hostkey
-%patch935 -p1 -b .ssh-copy-id
 %patch936 -p1 -b .iutf8
-%patch937 -p1 -b .x11-fallback
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
@@ -734,8 +723,6 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
-%attr(0755,root,root) %{_bindir}/slogin
-%attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-agent
@@ -813,6 +800,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Feb 29 2016 Jakub Jelen <jjelen@redhat.com> 7.2p1-1 + 0.10.2-2
+- New upstream release (#1312870)
+
 * Wed Feb 24 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-4.1 + 0.10.2-1
 - Fix race condition in auditing events when using multiplexing (#1308295)
 - Fix X11 forwarding CVE according to upstream
