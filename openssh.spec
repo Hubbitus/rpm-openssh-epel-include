@@ -106,6 +106,8 @@ Patch103: openssh-5.8p1-packet.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1171248
 # record pfs= field in CRYPTO_SESSION audit event
 Patch200: openssh-6.7p1-audit.patch
+# Audit race condition in forked child (#1310684)
+Patch201: openssh-7.1p2-audit-race-condition.patch
 
 # --- pam_ssh-agent ---
 # make it build reusing the openssh sources
@@ -473,6 +475,7 @@ popd
 %patch937 -p1 -b .x11-fallback
 
 %patch200 -p1 -b .audit
+%patch201 -p1 -b .audit-race
 %patch700 -p1 -b .fips
 
 %patch100 -p1 -b .coverity
