@@ -66,14 +66,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.1p2
-%global openssh_rel 3
+%global openssh_rel 4
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 1
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}%{?dist}%{?rescue_rel}.1
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -813,6 +813,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Feb 24 2016 Jakub Jelen <jjelen@redhat.com> 7.1p2-4.1 + 0.10.2-1
+- Fix race condition in auditing events when using multiplexing (#1308295)
+- Fix X11 forwarding CVE according to upstream
+- Fix problem when running without privsep (#1303910)
+- Remove hard glob limit in SFTP
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 7.1p2-3.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
