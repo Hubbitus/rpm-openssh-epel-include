@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p1
-%global openssh_rel 1
+%global openssh_rel 2
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 2
 
@@ -809,6 +809,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Mar 03 2016 Jakub Jelen <jjelen@redhat.com> 7.2p1-2 + 0.10.2-2
+- Restore slogin symlinks to preserve backward compatibility
+
 * Mon Feb 29 2016 Jakub Jelen <jjelen@redhat.com> 7.2p1-1 + 0.10.2-2
 - New upstream release (#1312870)
 
