@@ -660,6 +660,13 @@ install -m755 ssh1 $RPM_BUILD_ROOT/%{_bindir}/ssh1
 install -m755 scp1 $RPM_BUILD_ROOT/%{_bindir}/scp1
 install -m755 ssh-keygen1 $RPM_BUILD_ROOT/%{_bindir}/ssh-keygen1
 
+# restore slogin
+pushd $RPM_BUILD_ROOT%{_bindir}
+ln -s ./ssh slogin
+pushd $RPM_BUILD_ROOT%{_mandir}/man1
+ln -s ./ssh.1 slogin.1
+popd; popd;
+
 %if ! %{no_gnome_askpass}
 install contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome-ssh-askpass
 %endif
@@ -723,6 +730,8 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
+%attr(0755,root,root) %{_bindir}/slogin
+%attr(0644,root,root) %{_mandir}/man1/slogin.1*
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-agent
