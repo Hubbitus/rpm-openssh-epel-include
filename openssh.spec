@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%global openssh_ver 7.2p1
-%global openssh_rel 2
+%global openssh_ver 7.2p2
+%global openssh_rel 1
 %global pam_ssh_agent_ver 0.10.2
-%global pam_ssh_agent_rel 2
+%global pam_ssh_agent_rel 3
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -809,6 +809,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Thu Mar 10 2016 Jakub Jelen <jjelen@redhat.com> 7.2p2-1 + 0.10.2-3
+- New upstream (security) release (#1316529)
+- Clean up audit patch
+
 * Thu Mar 03 2016 Jakub Jelen <jjelen@redhat.com> 7.2p1-2 + 0.10.2-2
 - Restore slogin symlinks to preserve backward compatibility
 
