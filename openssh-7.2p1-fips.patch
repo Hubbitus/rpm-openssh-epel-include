@@ -637,3 +637,25 @@ diff -up openssh-7.2p1/sshkey.c.fips openssh-7.2p1/sshkey.c
  		ret = SSH_ERR_LIBCRYPTO_ERROR;
  		goto out;
  	}
+diff --git a/pam_ssh_agent_auth-0.10.2/pam_user_key_allowed2.c b/pam_ssh_agent_auth-0.10.2/pam_user_key_allowed2.c
+index 688b1b1..a3c1541 100644
+--- a/pam_ssh_agent_auth-0.10.2/pam_user_key_allowed2.c
++++ b/pam_ssh_agent_auth-0.10.2/pam_user_key_allowed2.c
+@@ -55,6 +55,7 @@
+ #include "secure_filename.h"
+ #include "uidswap.h"
+ #include <unistd.h>
++#include <openssl/crypto.h>
+ 
+ #include "identity.h"
+ 
+@@ -104,7 +105,8 @@ pamsshagentauth_check_authkeys_file(FILE * f, char *file, Key * key)
+             found_key = 1;
+             logit("matching key found: file/command %s, line %lu", file,
+                                   linenum);
+-            fp = sshkey_fingerprint(found, SSH_DIGEST_MD5, SSH_FP_HEX);
++            fp = sshkey_fingerprint(found, FIPS_mode() ? SSH_DIGEST_SHA1 : SSH_DIGEST_MD5,
++				SSH_FP_HEX);
+             logit("Found matching %s key: %s",
+                                   key_type(found), fp);
+             free(fp);
