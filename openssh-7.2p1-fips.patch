@@ -704,3 +704,18 @@ index 7efe312..bcf2ae1 100644
  #define	KEX_FIPS_ENCRYPT \
  	"aes128-ctr,aes192-ctr,aes256-ctr," \
  	"aes128-cbc,3des-cbc," \
+diff --git a/sandbox-seccomp-filter.c b/sandbox-seccomp-filter.c
+index a3975eb..5224084 100644
+--- a/sandbox-seccomp-filter.c
++++ b/sandbox-seccomp-filter.c
+@@ -112,6 +112,9 @@ static const struct sock_filter preauth_insns[] = {
+ #ifdef __NR_open
+ 	SC_DENY(open, EACCES),
+ #endif
++#ifdef __NR_socket
++	SC_DENY(socket, EACCES),
++#endif
+ #ifdef __NR_openat
+ 	SC_DENY(openat, EACCES),
+ #endif
+
