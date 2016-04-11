@@ -659,3 +659,20 @@ index 688b1b1..a3c1541 100644
              logit("Found matching %s key: %s",
                                    key_type(found), fp);
              free(fp);
+diff --git a/cipher.c b/cipher.c
+index f282907..51bbffb 100644
+--- a/cipher.c
++++ b/cipher.c
+@@ -112,12 +112,6 @@ static const struct sshcipher fips_ciphers[] = {
+ 	{ "aes128-ctr",	SSH_CIPHER_SSH2, 16, 16, 0, 0, 0, 0, EVP_aes_128_ctr },
+ 	{ "aes192-ctr",	SSH_CIPHER_SSH2, 16, 24, 0, 0, 0, 0, EVP_aes_192_ctr },
+ 	{ "aes256-ctr",	SSH_CIPHER_SSH2, 16, 32, 0, 0, 0, 0, EVP_aes_256_ctr },
+-#ifdef OPENSSL_HAVE_EVPGCM
+-	{ "aes128-gcm@openssh.com",
+-			SSH_CIPHER_SSH2, 16, 16, 12, 16, 0, 0, EVP_aes_128_gcm },
+-	{ "aes256-gcm@openssh.com",
+-			SSH_CIPHER_SSH2, 16, 32, 12, 16, 0, 0, EVP_aes_256_gcm },
+-#endif
+ 	{ NULL,		SSH_CIPHER_INVALID, 0, 0, 0, 0, 0, 0, NULL }
+ };
+ 
