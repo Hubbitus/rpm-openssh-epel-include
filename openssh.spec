@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 2
+%global openssh_rel 3
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -809,6 +809,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Wed Apr 13 2016 Jakub Jelen <jjelen@redhat.com> 7.2p2-3 + 0.10.2-3
+- Make sshd-keygen comply with packaging guidelines (#1325535)
+- Soft-deny socket() syscall in seccomp sandbox (#1324493)
+- Remove *sha1 Kex in FIPS mode (#1324493)
+- Remove *gcm ciphers in FIPS mode (#1324493)
+
 * Wed Apr 06 2016 Jakub Jelen <jjelen@redhat.com> 7.2p2-2 + 0.10.2-3
 - Fix GSSAPI Key Exchange according to RFC (#1323622)
 - Remove init.d/functions dependency from sshd-keygen (#1317722)
