@@ -1,10 +1,8 @@
 [Unit]
 Description=OpenSSH server daemon
 Documentation=man:sshd(8) man:sshd_config(5)
-After=network.target sshd-keygen.service
-Wants=sshd-keygen@rsa.service
-Wants=sshd-keygen@ecdsa.service
-Wants=sshd-keygen@ed25519.service
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
 
 [Service]
 Type=forking

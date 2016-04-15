@@ -89,6 +89,7 @@ Source11: sshd.service
 Source12: sshd-keygen@.service
 Source13: sshd-keygen
 Source14: sshd.tmpfiles
+Source15: sshd-keygen.target
 
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
@@ -649,6 +650,7 @@ install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
 install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
 install -m644 %{SOURCE11} $RPM_BUILD_ROOT/%{_unitdir}/sshd.service
 install -m644 %{SOURCE12} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen@.service
+install -m644 %{SOURCE15} $RPM_BUILD_ROOT/%{_unitdir}/sshd-keygen.target
 install -m744 %{SOURCE13} $RPM_BUILD_ROOT/%{_libexecdir}/openssh/sshd-keygen
 install -m755 contrib/ssh-copy-id $RPM_BUILD_ROOT%{_bindir}/
 install contrib/ssh-copy-id.1 $RPM_BUILD_ROOT%{_mandir}/man1/
@@ -770,6 +772,7 @@ getent passwd sshd >/dev/null || \
 %attr(0644,root,root) %{_unitdir}/sshd@.service
 %attr(0644,root,root) %{_unitdir}/sshd.socket
 %attr(0644,root,root) %{_unitdir}/sshd-keygen@.service
+%attr(0644,root,root) %{_unitdir}/sshd-keygen.target
 %attr(0644,root,root) %{_tmpfilesdir}/openssh.conf
 %endif
 
