@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 3
+%global openssh_rel 4
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -811,6 +811,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Apr 15 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-4 + 0.10.2-3
+- Revise socket activation and services dependencies (#1325535)
+- Drop unused init script
+
 * Wed Apr 13 2016 Jakub Jelen <jjelen@redhat.com> 7.2p2-3 + 0.10.2-3
 - Make sshd-keygen comply with packaging guidelines (#1325535)
 - Soft-deny socket() syscall in seccomp sandbox (#1324493)
