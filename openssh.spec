@@ -228,6 +228,8 @@ Patch933: openssh-7.0p1-show-more-fingerprints.patch
 # Preserve IUTF8 tty mode flag over ssh connections (#1270248)
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2477
 Patch936: openssh-7.1p1-iutf8.patch
+# CVE-2015-8325: ignore PAM environment vars when UseLogin=yes
+Patch937: openssh-7.2p2-CVE-2015-8325.patch
 
 
 License: BSD
@@ -462,6 +464,7 @@ popd
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
 %patch936 -p1 -b .iutf8
+%patch937 -p1 -b .pam_uselogin_cve
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
