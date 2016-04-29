@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 5
+%global openssh_rel 6
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -817,6 +817,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Apr 29 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-6 + 0.10.2-3
+- Add legacy sshd-keygen for anaconda (#1331077)
+
 * Fri Apr 22 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-5 + 0.10.2-3
 - CVE-2015-8325: ignore PAM environment vars when UseLogin=yes (#1328013)
 - Fix typo in sysconfig/sshd (#1325535)
