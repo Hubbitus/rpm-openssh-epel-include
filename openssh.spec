@@ -231,6 +231,8 @@ Patch933: openssh-7.0p1-show-more-fingerprints.patch
 Patch936: openssh-7.1p1-iutf8.patch
 # CVE-2015-8325: ignore PAM environment vars when UseLogin=yes
 Patch937: openssh-7.2p2-CVE-2015-8325.patch
+# Regression in certificate based authentication (#1333498)
+Patch938: openssh-7.2p2-certificats-regress.patch
 
 
 License: BSD
@@ -466,6 +468,7 @@ popd
 %patch933 -p1 -b .fingerprint
 %patch936 -p1 -b .iutf8
 %patch937 -p1 -b .pam_uselogin_cve
+%patch938 -p1 -b .certificates
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
