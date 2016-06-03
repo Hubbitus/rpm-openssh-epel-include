@@ -110,16 +110,6 @@ diff -up openssh-6.8p1/openbsd-compat/bindresvport.c.coverity openssh-6.8p1/open
  	int i;
  
  	if (sa == NULL) {
-diff -up openssh-6.8p1/openbsd-compat/port-linux.h.coverity openssh-6.8p1/openbsd-compat/port-linux.h
---- openssh-6.8p1/openbsd-compat/port-linux.h.coverity	2015-03-18 17:21:51.861264906 +0100
-+++ openssh-6.8p1/openbsd-compat/port-linux.h	2015-03-18 17:21:51.897264831 +0100
-@@ -37,4 +37,6 @@ void oom_adjust_restore(void);
- void oom_adjust_setup(void);
- #endif
- 
-+void linux_seed(void);
-+
- #endif /* ! _PORT_LINUX_H */
 diff -up openssh-6.8p1/scp.c.coverity openssh-6.8p1/scp.c
 --- openssh-6.8p1/scp.c.coverity	2015-03-18 17:21:51.868264891 +0100
 +++ openssh-6.8p1/scp.c	2015-03-18 17:21:58.281251460 +0100
