@@ -144,7 +144,7 @@ Patch606: openssh-5.9p1-ipv6man.patch
 #?
 Patch607: openssh-5.8p2-sigpipe.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1789
-Patch609: openssh-5.5p1-x11.patch
+Patch609: openssh-7.2p2-x11.patch
 
 #?
 Patch700: openssh-7.2p1-fips.patch
