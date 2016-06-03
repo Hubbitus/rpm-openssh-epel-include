@@ -178,12 +178,14 @@ Patch802: openssh-6.6p1-GSSAPIEnablek5users.patch
 # Documentation about GSSAPI
 # from https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765655
 Patch803: openssh-7.1p1-gssapi-documentation.patch
+# use default_ccache_name from /etc/krb5.conf (#991186)
+Patch804: openssh-6.3p1-krb5-use-default_ccache_name.patch
+# Respect k5login_directory option in krk5.conf (#1328243)
+Patch805: openssh-7.2p2-k5login_directory.patch
 
 Patch900: openssh-6.1p1-gssapi-canohost.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1780
 Patch901: openssh-6.6p1-kuserok.patch
-# use default_ccache_name from /etc/krb5.conf (#991186)
-Patch902: openssh-6.3p1-krb5-use-default_ccache_name.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
 # set a client's address right after a connection is set
@@ -443,10 +445,11 @@ popd
 %patch800 -p1 -b .gsskex
 %patch801 -p1 -b .force_krb
 %patch803 -p1 -b .gss-docs
+%patch804 -p1 -b .ccache_name
+%patch805 -p1 -b .k5login
 # 
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
-%patch902 -p1 -b .ccache_name
 %patch906 -p1 -b .fromto-remote
 %patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
