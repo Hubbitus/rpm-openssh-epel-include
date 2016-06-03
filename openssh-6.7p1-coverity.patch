@@ -399,14 +399,3 @@ diff -up openssh-6.8p1/sshd.c.coverity openssh-6.8p1/sshd.c
  }
  
  
-diff -up openssh-6.8p1/sshkey.c.coverity openssh-6.8p1/sshkey.c
---- openssh-6.8p1/sshkey.c.coverity	2015-03-18 17:21:58.285251452 +0100
-+++ openssh-6.8p1/sshkey.c	2015-03-18 17:45:32.232705363 +0100
-@@ -58,6 +58,7 @@
- #include "digest.h"
- #define SSHKEY_INTERNAL
- #include "sshkey.h"
-+#include "log.h"
- #include "match.h"
- 
- /* openssh private key file format */
