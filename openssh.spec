@@ -121,6 +121,9 @@ Patch302: pam_ssh_agent_auth-0.9.2-visibility.patch
 Patch305: pam_ssh_agent_auth-0.9.3-agent_structure.patch
 # remove prefixes to be able to build against current openssh library
 Patch306: pam_ssh_agent_auth-0.10.2-compat.patch
+# Fix NULL dereference from getpwuid() return value
+# https://sourceforge.net/p/pamsshagentauth/bugs/22/
+Patch307: pam_ssh_agent_auth-0.10.2-dereference.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1641 (WONTFIX)
 Patch400: openssh-6.6p1-role-mls.patch
@@ -411,6 +414,7 @@ pushd pam_ssh_agent_auth-%{pam_ssh_agent_ver}
 %patch302 -p2 -b .psaa-visibility
 %patch306 -p2 -b .psaa-compat
 %patch305 -p2 -b .psaa-agent
+%patch307 -p2 -b .psaa-deref
 # Remove duplicate headers and library files
 rm -f $(cat %{SOURCE5})
 popd
