@@ -95,11 +95,11 @@ Source16: sshd-keygen.legacy
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
 
-#?
+#https://bugzilla.mindrot.org/show_bug.cgi?id=2581
 Patch100: openssh-6.7p1-coverity.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1894
 #https://bugzilla.redhat.com/show_bug.cgi?id=735889
-Patch102: openssh-5.8p1-getaddrinfo.patch
+#Patch102: openssh-5.8p1-getaddrinfo.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1889
 Patch103: openssh-5.8p1-packet.patch
 
@@ -137,9 +137,9 @@ Patch502: openssh-6.6p1-keycat.patch
 
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1644
 Patch601: openssh-6.6p1-allow-ip-opts.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1893
+#https://bugzilla.mindrot.org/show_bug.cgi?id=1893 (WONTFIX)
 Patch604: openssh-6.6p1-keyperm.patch
-#https://bugzilla.mindrot.org/show_bug.cgi?id=1925
+#(drop?) https://bugzilla.mindrot.org/show_bug.cgi?id=1925
 Patch606: openssh-5.9p1-ipv6man.patch
 #?
 Patch607: openssh-5.8p2-sigpipe.patch
@@ -150,10 +150,8 @@ Patch609: openssh-7.2p2-x11.patch
 Patch700: openssh-7.2p1-fips.patch
 #?
 Patch702: openssh-5.1p1-askpass-progress.patch
-#?
+#https://bugzilla.redhat.com/show_bug.cgi?id=198332
 Patch703: openssh-4.3p2-askpass-grab-info.patch
-#?
-Patch706: openssh-6.6.1p1-localdomain.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1635 (WONTFIX)
 Patch707: openssh-6.6p1-redhat.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1890 (WONTFIX) need integration to prng helper which is discontinued :)
@@ -437,7 +435,6 @@ popd
 %patch609 -p1 -b .x11
 %patch702 -p1 -b .progress
 %patch703 -p1 -b .grab-info
-%patch706 -p1 -b .localdomain
 %patch707 -p1 -b .redhat
 %patch708 -p1 -b .entropy
 %patch709 -p1 -b .vendor
