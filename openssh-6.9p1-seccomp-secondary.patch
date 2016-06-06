@@ -16,7 +16,7 @@ diff --git a/configure.ac b/configure.ac
 index 24378a7..0bed910 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -811,6 +811,12 @@ main() { if (NSVersionOfRunTimeLibrary("System") >= (60 << 16))
+@@ -811,6 +811,18 @@ main() { if (NSVersionOfRunTimeLibrary("System") >= (60 << 16))
  	aarch64*-*)
  		seccomp_audit_arch=AUDIT_ARCH_AARCH64
  		;;
@@ -25,6 +25,12 @@ index 24378a7..0bed910 100644
 +		;;
 +	s390-*)
 +		seccomp_audit_arch=AUDIT_ARCH_S390
++		;;
++	powerpc64-*)
++		seccomp_audit_arch=AUDIT_ARCH_PPC64
++		;;
++	powerpc64le-*)
++		seccomp_audit_arch=AUDIT_ARCH_PPC64LE
 +		;;
  	esac
  	if test "x$seccomp_audit_arch" != "x" ; then
