@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 6
+%global openssh_rel 7
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -824,6 +824,13 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Jun 06 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-7
+- Fix regression in certificate-based authentication (#1333498)
+- Check for real location of .k5login file (#1328243)
+- Fix unchecked dereference in pam_ssh_agent_auth
+- Clean up old patches
+- Build with seccomp filter on ppc64(le) (#1195065)
+
 * Fri Apr 29 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-6 + 0.10.2-3
 - Add legacy sshd-keygen for anaconda (#1331077)
 
