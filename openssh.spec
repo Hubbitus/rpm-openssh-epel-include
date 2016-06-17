@@ -159,7 +159,7 @@ Patch708: openssh-6.6p1-entropy.patch
 #https://bugzilla.mindrot.org/show_bug.cgi?id=1640 (WONTFIX)
 Patch709: openssh-6.2p1-vendor.patch
 # warn users for unsupported UsePAM=no (#757545)
-Patch711: openssh-6.6p1-log-usepam-no.patch
+Patch711: openssh-7.2p2-UsePAM-UseLogin-warning.patch
 # make aes-ctr ciphers use EVP engines such as AES-NI from OpenSSL
 Patch712: openssh-6.3p1-ctr-evp-fast.patch
 # add cavs test binary for the aes-ctr
