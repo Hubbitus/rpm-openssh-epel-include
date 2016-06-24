@@ -1,23 +1,20 @@
-
---- openssh-6.6p1/pam_ssh_agent_auth-0.9.3/pam_user_authorized_keys.c.psaa-command	2016-04-20 09:31:32.164686370 +0200
-+++ openssh-6.6p1/pam_ssh_agent_auth-0.9.3/pam_user_authorized_keys.c	2016-04-20 09:35:49.778344576 +0200
-@@ -145,11 +145,14 @@
+diff --git a/pam_ssh_agent_auth-0.10.2/pam_user_authorized_keys.c b/pam_ssh_agent_auth-0.10.2/pam_user_authorized_keys.c
+--- a/pam_ssh_agent_auth-0.10.2/pam_user_authorized_keys.c
++++ b/pam_ssh_agent_auth-0.10.2/pam_user_authorized_keys.c
+@@ -158,11 +158,12 @@ parse_authorized_key_file(const char *user,
  int
  pam_user_key_allowed(const char *ruser, Key * key)
  {
--    return
++    struct passwd *pw;
+     return
 -        pamsshagentauth_user_key_allowed2(getpwuid(authorized_keys_file_allowed_owner_uid),
 -                                          key, authorized_keys_file)
 -        || pamsshagentauth_user_key_allowed2(getpwuid(0), key,
 -                                             authorized_keys_file)
-+    struct passwd *file_pw, *root_pw;
-+    file_pw = getpwuid(authorized_keys_file_allowed_owner_uid);
-+    root_pw = getpwuid(0);
-+    return
-+        (file_pw != NULL &&
-+            pamsshagentauth_user_key_allowed2(file_pw, key, authorized_keys_file))
-+        || (root_pw != NULL &&
-+            pamsshagentauth_user_key_allowed2(root_pw, key, authorized_keys_file))
++        ( (pw = getpwuid(authorized_keys_file_allowed_owner_uid)) &&
++            pamsshagentauth_user_key_allowed2(pw, key, authorized_keys_file))
++        || ((pw = getpwuid(0)) &&
++            pamsshagentauth_user_key_allowed2(pw, key, authorized_keys_file))
          || pamsshagentauth_user_key_command_allowed2(authorized_keys_command,
                                                       authorized_keys_command_user,
                                                       getpwnam(ruser), key);
