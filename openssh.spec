@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 7
+%global openssh_rel 8
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -824,6 +824,12 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Jun 24 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-8 + 0.10.2-3
+- Enable seccomp filter for MIPS architectures
+- UseLogin=yes is not supported in Fedora
+- SFTP server forced permissions should restore umask
+- pam_ssh_agent_auth: Fix conflict bewteen two getpwuid() calls (#1349551)
+
 * Mon Jun 06 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-7
 - Fix regression in certificate-based authentication (#1333498)
 - Check for real location of .k5login file (#1328243)
