@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 8
+%global openssh_rel 9
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -824,6 +824,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Fri Jul 01 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-9 + 0.10.2-3
+- Fix wrong detection of UseLogin in server configuration (#1350347)
+
 * Fri Jun 24 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-8 + 0.10.2-3
 - Enable seccomp filter for MIPS architectures
 - UseLogin=yes is not supported in Fedora
