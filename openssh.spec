@@ -236,6 +236,8 @@ Patch936: openssh-7.1p1-iutf8.patch
 Patch937: openssh-7.2p2-CVE-2015-8325.patch
 # Regression in certificate based authentication (#1333498)
 Patch938: openssh-7.2p2-certificats-regress.patch
+# make s390 use /dev/ crypto devices -- ignore closefrom
+Patch939: openssh-7.2p2-s390-closefrom.patch
 
 
 License: BSD
@@ -473,6 +475,7 @@ popd
 %patch936 -p1 -b .iutf8
 %patch937 -p1 -b .pam_uselogin_cve
 %patch938 -p1 -b .certificates
+%patch939 -p1 -b .s390-dev
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
