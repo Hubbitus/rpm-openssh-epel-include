@@ -238,6 +238,9 @@ Patch937: openssh-7.2p2-CVE-2015-8325.patch
 Patch938: openssh-7.2p2-certificats-regress.patch
 # make s390 use /dev/ crypto devices -- ignore closefrom
 Patch939: openssh-7.2p2-s390-closefrom.patch
+# expose more information to PAM
+# https://github.com/openssh/openssh-portable/pull/47
+Patch940: openssh-7.2p2-expose-pam.patch
 
 
 License: BSD
@@ -476,6 +479,7 @@ popd
 %patch937 -p1 -b .pam_uselogin_cve
 %patch938 -p1 -b .certificates
 %patch939 -p1 -b .s390-dev
+%patch940 -p1 -b .expose-pam
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
