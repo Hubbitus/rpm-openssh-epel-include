@@ -245,6 +245,8 @@ Patch940: openssh-7.2p2-expose-pam.patch
 # https://github.com/openssh/openssh-portable/commit/9286875a
 # https://github.com/openssh/openssh-portable/commit/283b97ff
 Patch941: openssh-7.2p2-user-enumeration.patch
+# Rework SELinux context handling with chroot (#1357860)
+Patch942: openssh-7.2p2-chroot-capabilities.patch
 
 
 License: BSD
@@ -274,6 +276,7 @@ BuildRequires: tcp_wrappers-devel
 BuildRequires: fipscheck-devel >= 1.3.0
 BuildRequires: openssl-devel >= 0.9.8j
 BuildRequires: perl-podlators
+BuildRequires: libcap-ng-devel
 
 %if %{kerberos5}
 BuildRequires: krb5-devel
@@ -485,6 +488,7 @@ popd
 %patch939 -p1 -b .s390-dev
 %patch940 -p1 -b .expose-pam
 %patch941 -p1 -b .user-enumeration
+%patch942 -p1 -b .chroot-cap
 
 %patch200 -p1 -b .audit
 %patch201 -p1 -b .audit-race
