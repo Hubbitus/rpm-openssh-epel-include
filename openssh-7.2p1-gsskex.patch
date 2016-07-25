@@ -179,7 +179,7 @@ diff -up openssh-7.2p1/configure.ac.gsskex openssh-7.2p1/configure.ac
 +		[AC_MSG_RESULT(no)]
 +	)
  	m4_pattern_allow([AU_IPv])
- 	AC_CHECK_DECL([AU_IPv4], [], 
+ 	AC_CHECK_DECL([AU_IPv4], [],
  	    AC_DEFINE([AU_IPv4], [0], [System only supports IPv4 audit records])
 diff -up openssh-7.2p1/gss-genr.c.gsskex openssh-7.2p1/gss-genr.c
 --- openssh-7.2p1/gss-genr.c.gsskex	2016-02-12 11:47:25.000000000 +0100
@@ -1392,6 +1392,7 @@ diff -up openssh-7.2p1/kexgsss.c.gsskex openssh-7.2p1/kexgsss.c
 +	u_char *kbuf;
 +	DH *dh;
 +	int min = -1, max = -1, nbits = -1;
++	int cmin = -1, cmax = -1; /* client proposal */
 +	BIGNUM *shared_secret = NULL;
 +	BIGNUM *dh_client_pub = NULL;
 +	int type = 0;
@@ -1430,11 +1431,12 @@ diff -up openssh-7.2p1/kexgsss.c.gsskex openssh-7.2p1/kexgsss.c
 +	case KEX_GSS_GEX_SHA1:
 +		debug("Doing group exchange");
 +		packet_read_expect(SSH2_MSG_KEXGSS_GROUPREQ);
-+		min = packet_get_int();
++		/* store client proposal to provide valid signature */
++		cmin = packet_get_int();
 +		nbits = packet_get_int();
-+		max = packet_get_int();
-+		min = MAX(DH_GRP_MIN, min);
-+		max = MIN(DH_GRP_MAX, max);
++		cmax = packet_get_int();
++		min = MAX(DH_GRP_MIN, cmin);
++		max = MIN(DH_GRP_MAX, cmax);
 +		packet_check_eom();
 +		if (max < min || nbits < min || max < nbits)
 +			fatal("GSS_GEX, bad parameters: %d !< %d !< %d",
@@ -1557,7 +1559,7 @@ diff -up openssh-7.2p1/kexgsss.c.gsskex openssh-7.2p1/kexgsss.c
 +		    buffer_ptr(ssh->kex->peer), buffer_len(ssh->kex->peer),
 +		    buffer_ptr(ssh->kex->my), buffer_len(ssh->kex->my),
 +		    NULL, 0,
-+		    min, nbits, max,
++		    cmin, nbits, cmax,
 +		    dh->p, dh->g,
 +		    dh_client_pub,
 +		    dh->pub_key,
@@ -1653,14 +1655,14 @@ diff -up openssh-7.2p1/kex.h.gsskex openssh-7.2p1/kex.h
 +int	 kexgss_server(struct ssh *);
 +#endif
  
- int	 kex_dh_hash(const char *, const char *,
+ int	 kex_dh_hash(int, const char *, const char *,
      const u_char *, size_t, const u_char *, size_t, const u_char *, size_t,
-diff -up openssh-7.2p1/Makefile.in.gsskex openssh-7.2p1/Makefile.in
---- openssh-7.2p1/Makefile.in.gsskex	2016-02-19 10:01:04.864969325 +0100
-+++ openssh-7.2p1/Makefile.in	2016-02-19 10:01:04.868969323 +0100
+diff -up openssh/Makefile.in.gsskex openssh/Makefile.in
+--- openssh/Makefile.in.gsskex	2016-07-25 14:11:42.978324182 +0200
++++ openssh/Makefile.in	2016-07-25 14:14:15.560289050 +0200
 @@ -90,6 +90,7 @@ LIBSSH_OBJS=${LIBOPENSSH_OBJS} \
  	readpass.o rsa.o ttymodes.o xmalloc.o addrmatch.o \
- 	atomicio.o key.o dispatch.o mac.o uidswap.o uuencode.o misc.o \
+ 	atomicio.o key.o dispatch.o mac.o uidswap.o uuencode.o misc.o utf8.o \
  	monitor_fdpass.o rijndael.o ssh-dss.o ssh-ecdsa.o ssh-rsa.o dh.o \
 +	kexgssc.o \
  	msg.o progressmeter.o dns.o entropy.o gss-genr.o umac.o umac128.o \
@@ -2064,21 +2066,21 @@ diff -up openssh-7.2p1/readconf.h.gsskex openssh-7.2p1/readconf.h
  	int     password_authentication;	/* Try password
  						 * authentication. */
  	int     kbd_interactive_authentication; /* Try keyboard-interactive auth. */
-diff -up openssh-7.2p1/regress/cert-hostkey.sh.gsskex openssh-7.2p1/regress/cert-hostkey.sh
---- openssh-7.2p1/regress/cert-hostkey.sh.gsskex	2016-02-12 11:47:25.000000000 +0100
-+++ openssh-7.2p1/regress/cert-hostkey.sh	2016-02-19 10:01:04.870969322 +0100
-@@ -46,7 +46,7 @@ touch $OBJ/host_revoked_plain
+diff -up openssh/regress/cert-hostkey.sh.gsskex openssh/regress/cert-hostkey.sh
+--- openssh/regress/cert-hostkey.sh.gsskex	2016-07-25 14:11:42.986324181 +0200
++++ openssh/regress/cert-hostkey.sh	2016-07-25 14:15:17.784274722 +0200
+@@ -59,7 +59,7 @@ touch $OBJ/host_revoked_plain
  touch $OBJ/host_revoked_cert
- cp $OBJ/host_ca_key.pub $OBJ/host_revoked_ca
+ cat $OBJ/host_ca_key.pub $OBJ/host_ca_key2.pub > $OBJ/host_revoked_ca
  
 -PLAIN_TYPES=`$SSH -Q key-plain | sed 's/^ssh-dss/ssh-dsa/g;s/^ssh-//'`
 +PLAIN_TYPES=`$SSH -Q key-plain | grep -v null | sed 's/^ssh-dss/ssh-dsa/g;s/^ssh-//'`
  
- # Prepare certificate, plain key and CA KRLs
- ${SSHKEYGEN} -kf $OBJ/host_krl_empty || fatal "KRL init failed"
-diff -up openssh-7.2p1/regress/cert-userkey.sh.gsskex openssh-7.2p1/regress/cert-userkey.sh
---- openssh-7.2p1/regress/cert-userkey.sh.gsskex	2016-02-12 11:47:25.000000000 +0100
-+++ openssh-7.2p1/regress/cert-userkey.sh	2016-02-19 10:01:04.870969322 +0100
+ if echo "$PLAIN_TYPES" | grep '^rsa$' >/dev/null 2>&1 ; then
+ 	PLAIN_TYPES="$PLAIN_TYPES rsa-sha2-256 rsa-sha2-512"
+diff -up openssh/regress/cert-userkey.sh.gsskex openssh/regress/cert-userkey.sh
+--- openssh/regress/cert-userkey.sh.gsskex	2016-07-25 14:11:42.986324181 +0200
++++ openssh/regress/cert-userkey.sh	2016-07-25 14:15:36.769270354 +0200
 @@ -7,7 +7,7 @@ rm -f $OBJ/authorized_keys_$USER $OBJ/us
  cp $OBJ/sshd_proxy $OBJ/sshd_proxy_bak
  cp $OBJ/ssh_proxy $OBJ/ssh_proxy_bak
@@ -2086,11 +2088,11 @@ diff -up openssh-7.2p1/regress/cert-userkey.sh.gsskex openssh-7.2p1/regress/cert
 -PLAIN_TYPES=`$SSH -Q key-plain | sed 's/^ssh-dss/ssh-dsa/;s/^ssh-//'`
 +PLAIN_TYPES=`$SSH -Q key-plain | grep -v null | sed 's/^ssh-dss/ssh-dsa/;s/^ssh-//'`
  
- kname() {
- 	n=`echo "$1" | sed 's/^dsa/ssh-dss/;s/^rsa/ssh-rsa/;s/^ed/ssh-ed/'`
-diff -up openssh-7.2p1/regress/kextype.sh.gsskex openssh-7.2p1/regress/kextype.sh
---- openssh-7.2p1/regress/kextype.sh.gsskex	2016-02-12 11:47:25.000000000 +0100
-+++ openssh-7.2p1/regress/kextype.sh	2016-02-19 10:01:04.870969322 +0100
+ if echo "$PLAIN_TYPES" | grep '^rsa$' >/dev/null 2>&1 ; then
+ 	PLAIN_TYPES="$PLAIN_TYPES rsa-sha2-256 rsa-sha2-512"
+diff -up openssh/regress/kextype.sh.gsskex openssh/regress/kextype.sh
+--- openssh/regress/kextype.sh.gsskex	2016-07-24 13:50:13.000000000 +0200
++++ openssh/regress/kextype.sh	2016-07-25 14:11:42.987324180 +0200
 @@ -14,6 +14,9 @@ echo "KexAlgorithms=$KEXOPT" >> $OBJ/ssh
  
  tries="1 2 3 4"
@@ -2739,41 +2741,3 @@ diff -up openssh-7.2p1/sshkey.h.gsskex openssh-7.2p1/sshkey.h
  	KEY_UNSPEC
  };
  
-diff --git a/kexgsss.c b/kexgsss.c
-index b2f9658..2d33ff7 100644
---- a/kexgsss.c
-+++ b/kexgsss.c
-@@ -69,6 +69,7 @@ kexgss_server(struct ssh *ssh)
- 	u_char *kbuf;
- 	DH *dh;
- 	int min = -1, max = -1, nbits = -1;
-+	int cmin = -1, cmax = -1; /* client proposal */
- 	BIGNUM *shared_secret = NULL;
- 	BIGNUM *dh_client_pub = NULL;
- 	int type = 0;
-@@ -107,11 +108,12 @@ kexgss_server(struct ssh *ssh)
- 	case KEX_GSS_GEX_SHA1:
- 		debug("Doing group exchange");
- 		packet_read_expect(SSH2_MSG_KEXGSS_GROUPREQ);
--		min = packet_get_int();
-+		/* store client proposal to provide valid signature */
-+		cmin = packet_get_int();
- 		nbits = packet_get_int();
--		max = packet_get_int();
--		min = MAX(DH_GRP_MIN, min);
--		max = MIN(DH_GRP_MAX, max);
-+		cmax = packet_get_int();
-+		min = MAX(DH_GRP_MIN, cmin);
-+		max = MIN(DH_GRP_MAX, cmax);
- 		packet_check_eom();
- 		if (max < min || nbits < min || max < nbits)
- 			fatal("GSS_GEX, bad parameters: %d !< %d !< %d",
-@@ -234,7 +236,7 @@ kexgss_server(struct ssh *ssh)
- 		    buffer_ptr(ssh->kex->peer), buffer_len(ssh->kex->peer),
- 		    buffer_ptr(ssh->kex->my), buffer_len(ssh->kex->my),
- 		    NULL, 0,
--		    min, nbits, max,
-+		    cmin, nbits, cmax,
- 		    dh->p, dh->g,
- 		    dh_client_pub,
- 		    dh->pub_key,

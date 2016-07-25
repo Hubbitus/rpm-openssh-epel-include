@@ -850,7 +850,7 @@ diff -up openssh-7.2p1/auth.c.audit openssh-7.2p1/auth.c
 +++ openssh-7.2p1/auth.c	2016-02-12 18:24:34.220825178 +0100
 @@ -646,9 +646,6 @@ getpwnamallow(const char *user)
  		record_failed_login(user,
- 		    get_canonical_hostname(options.use_dns), "ssh");
+ 		    auth_get_canonical_hostname(ssh, options.use_dns), "ssh");
  #endif
 -#ifdef SSH_AUDIT_EVENTS
 -		audit_event(SSH_INVALID_USER);
@@ -1084,7 +1084,7 @@ diff -up openssh-7.2p1/kex.h.audit openssh-7.2p1/kex.h
  
 +void	newkeys_destroy(struct newkeys *newkeys);
 +
- int	 kex_dh_hash(const char *, const char *,
+ int	 kex_dh_hash(int, const char *, const char *,
      const u_char *, size_t, const u_char *, size_t, const u_char *, size_t,
      const BIGNUM *, const BIGNUM *, const BIGNUM *, u_char *, size_t *);
 diff -up openssh-7.2p1/key.h.audit openssh-7.2p1/key.h
@@ -1126,8 +1126,8 @@ diff -up openssh-7.2p1/mac.h.audit openssh-7.2p1/mac.h
 --- openssh-7.2p1/mac.h.audit	2016-02-12 11:47:25.000000000 +0100
 +++ openssh-7.2p1/mac.h	2016-02-12 18:24:34.222825177 +0100
 @@ -47,5 +47,6 @@ int	 mac_init(struct sshmac *);
- int	 mac_compute(struct sshmac *, u_int32_t, const u_char *, int,
-     u_char *, size_t);
+ int	 mac_check(struct sshmac *, u_int32_t, const u_char *, size_t,
+     const u_char *, size_t);
  void	 mac_clear(struct sshmac *);
 +void	 mac_destroy(struct sshmac *);
  
@@ -1139,8 +1139,8 @@ diff -up openssh-7.2p1/Makefile.in.audit openssh-7.2p1/Makefile.in
  	kex.o kexdh.o kexgex.o kexecdh.o kexc25519.o \
  	kexdhc.o kexgexc.o kexecdhc.o kexc25519c.o \
  	kexdhs.o kexgexs.o kexecdhs.o kexc25519s.o \
--	platform-pledge.o
-+	platform-pledge.o auditstub.o
+-	platform-pledge.o platform-tracing.o
++	platform-pledge.o platform-tracing.o auditstub.o
  
  SSHOBJS= ssh.o readconf.o clientloop.o sshtty.o \
  	sshconnect.o sshconnect1.o sshconnect2.o mux.o
@@ -1618,9 +1618,9 @@ diff -up openssh-7.2p1/monitor_wrap.h.audit openssh-7.2p1/monitor_wrap.h
 --- openssh-7.2p1/monitor_wrap.h.audit	2016-02-12 18:24:34.152825204 +0100
 +++ openssh-7.2p1/monitor_wrap.h	2016-02-12 18:24:34.224825176 +0100
 @@ -52,7 +52,8 @@ int mm_key_allowed(enum mm_keytype, char
- int mm_user_key_allowed(struct passwd *, Key *, int);
- int mm_hostbased_key_allowed(struct passwd *, char *, char *, Key *);
- int mm_auth_rhosts_rsa_key_allowed(struct passwd *, char *, char *, Key *);
+     const char *, Key *);
+ int mm_auth_rhosts_rsa_key_allowed(struct passwd *, const char *,
+     const char *, Key *);
 -int mm_key_verify(Key *, u_char *, u_int, u_char *, u_int);
 +int mm_hostbased_key_verify(Key *, u_char *, u_int, u_char *, u_int);
 +int mm_user_key_verify(Key *, u_char *, u_int, u_char *, u_int);
@@ -1962,13 +1962,15 @@ diff -up openssh-7.2p1/session.c.audit openssh-7.2p1/session.c
  void
  do_cleanup(Authctxt *authctxt)
  {
-@@ -2793,5 +2861,5 @@ do_cleanup(Authctxt *authctxt)
+@@ -2793,7 +2861,7 @@ do_cleanup(Authctxt *authctxt)
  	 * or if running in monitor.
  	 */
  	if (!use_privsep || mm_is_monitor())
 -		session_destroy_all(session_pty_cleanup2);
 +		session_destroy_all(do_cleanup_one_session);
  }
+ 
+ /* Return a name for the remote host that fits inside utmp_size */
 diff -up openssh-7.2p1/session.h.audit openssh-7.2p1/session.h
 --- openssh-7.2p1/session.h.audit	2016-02-26 04:40:04.000000000 +0100
 +++ openssh-7.2p1/session.h	2016-03-04 14:25:52.641329882 +0100
