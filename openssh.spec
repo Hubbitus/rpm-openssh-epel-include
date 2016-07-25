@@ -188,9 +188,6 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.6p1-kuserok.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
-# set a client's address right after a connection is set
-# http://bugzilla.mindrot.org/show_bug.cgi?id=2257
-Patch911: openssh-6.6p1-set_remote_ipaddr.patch
 # apply RFC3454 stringprep to banners when possible
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2058
 # slightly changed patch from comment 10
@@ -463,7 +460,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch906 -p1 -b .fromto-remote
-%patch911 -p1 -b .set_remote_ipaddr
 %patch912 -p1 -b .utf8-banner
 %patch914 -p1 -b .servconf
 %patch916 -p1 -b .contexts
