@@ -216,10 +216,6 @@ Patch931: openssh-6.9p1-scp-progressmeter.patch
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
 # Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
 Patch933: openssh-7.0p1-show-more-fingerprints.patch
-# CVE-2015-8325: ignore PAM environment vars when UseLogin=yes
-Patch937: openssh-7.2p2-CVE-2015-8325.patch
-# Regression in certificate based authentication (#1333498)
-Patch938: openssh-7.2p2-certificats-regress.patch
 # make s390 use /dev/ crypto devices -- ignore closefrom
 Patch939: openssh-7.2p2-s390-closefrom.patch
 # expose more information to PAM
@@ -462,8 +458,6 @@ popd
 %patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
-%patch937 -p1 -b .pam_uselogin_cve
-%patch938 -p1 -b .certificates
 %patch939 -p1 -b .s390-dev
 %patch940 -p1 -b .expose-pam
 %patch941 -p1 -b .user-enumeration
