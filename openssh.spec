@@ -188,9 +188,6 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.6p1-kuserok.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
-# fix parsing of empty options in sshd_conf
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2281
-Patch914: openssh-6.6.1p1-servconf-parser.patch
 # privsep_preauth: use SELinux context from selinux-policy (#1008580)
 Patch916: openssh-6.6.1p1-selinux-contexts.patch
 # use different values for DH for Cisco servers (#1026430)
@@ -456,7 +453,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch906 -p1 -b .fromto-remote
-%patch914 -p1 -b .servconf
 %patch916 -p1 -b .contexts
 #%patch917 -p1 -b .cisco-dh # investigate
 %patch918 -p1 -b .log-in-chroot
