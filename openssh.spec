@@ -216,9 +216,6 @@ Patch931: openssh-6.9p1-scp-progressmeter.patch
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
 # Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
 Patch933: openssh-7.0p1-show-more-fingerprints.patch
-# Preserve IUTF8 tty mode flag over ssh connections (#1270248)
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2477
-Patch936: openssh-7.1p1-iutf8.patch
 # CVE-2015-8325: ignore PAM environment vars when UseLogin=yes
 Patch937: openssh-7.2p2-CVE-2015-8325.patch
 # Regression in certificate based authentication (#1333498)
@@ -465,7 +462,6 @@ popd
 %patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
-%patch936 -p1 -b .iutf8
 %patch937 -p1 -b .pam_uselogin_cve
 %patch938 -p1 -b .certificates
 %patch939 -p1 -b .s390-dev
