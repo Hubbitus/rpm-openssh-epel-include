@@ -221,10 +221,6 @@ Patch939: openssh-7.2p2-s390-closefrom.patch
 # expose more information to PAM
 # https://github.com/openssh/openssh-portable/pull/47
 Patch940: openssh-7.2p2-expose-pam.patch
-# Prevent user enumeration via covert timing channel (#1357443)
-# https://github.com/openssh/openssh-portable/commit/9286875a
-# https://github.com/openssh/openssh-portable/commit/283b97ff
-Patch941: openssh-7.2p2-user-enumeration.patch
 # Rework SELinux context handling with chroot (#1357860)
 Patch942: openssh-7.2p2-chroot-capabilities.patch
 
@@ -460,7 +456,6 @@ popd
 %patch933 -p1 -b .fingerprint
 %patch939 -p1 -b .s390-dev
 %patch940 -p1 -b .expose-pam
-%patch941 -p1 -b .user-enumeration
 %patch942 -p1 -b .chroot-cap
 
 %patch200 -p1 -b .audit
