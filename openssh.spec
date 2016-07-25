@@ -188,10 +188,6 @@ Patch900: openssh-6.1p1-gssapi-canohost.patch
 Patch901: openssh-6.6p1-kuserok.patch
 # Use tty allocation for a remote scp (#985650)
 Patch906: openssh-6.4p1-fromto-remote.patch
-# apply RFC3454 stringprep to banners when possible
-# https://bugzilla.mindrot.org/show_bug.cgi?id=2058
-# slightly changed patch from comment 10
-Patch912: openssh-6.6.1p1-utf8-banner.patch
 # fix parsing of empty options in sshd_conf
 # https://bugzilla.mindrot.org/show_bug.cgi?id=2281
 Patch914: openssh-6.6.1p1-servconf-parser.patch
@@ -460,7 +456,6 @@ popd
 %patch900 -p1 -b .canohost
 %patch901 -p1 -b .kuserok
 %patch906 -p1 -b .fromto-remote
-%patch912 -p1 -b .utf8-banner
 %patch914 -p1 -b .servconf
 %patch916 -p1 -b .contexts
 #%patch917 -p1 -b .cisco-dh # investigate
