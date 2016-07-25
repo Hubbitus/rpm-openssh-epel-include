@@ -203,8 +203,6 @@ Patch920: openssh-6.6.1p1-ip-port-config-parser.patch
 Patch921: openssh-6.7p1-debian-restore-tcp-wrappers.patch
 # apply upstream patch and make sshd -T more consistent (#1187521)
 Patch922: openssh-6.8p1-sshdT-output.patch
-# Seccomp support for secondary architectures (#1195065)
-Patch924: openssh-6.9p1-seccomp-secondary.patch
 # Add sftp option to force mode of created files (#1191055)
 Patch926: openssh-6.7p1-sftp-force-permission.patch
 # Memory problems
@@ -461,7 +459,6 @@ popd
 %patch802 -p1 -b .GSSAPIEnablek5users
 %patch921 -p1 -b .tcp_wrappers
 %patch922 -p1 -b .sshdt
-%patch924 -p1 -b .seccomp
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
