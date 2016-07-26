@@ -2029,7 +2029,7 @@ diff -up openssh-7.3p1/sshd.c.audit openssh-7.3p1/sshd.c
 + */
 +int listening_for_clients(void)
 +{
-+	return num_listen_socks > 0;
++	return num_listen_socks >= 0;
 +}
 +
  static void
