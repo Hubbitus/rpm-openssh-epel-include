@@ -320,7 +320,7 @@ diff -up openssh-7.2p1/myproposal.h.fips openssh-7.2p1/myproposal.h
  
 +#define KEX_DEFAULT_KEX_FIPS		\
 +	KEX_ECDH_METHODS \
-+	KEX_SHA256_METHODS \
++	KEX_SHA2_METHODS \
 +	"diffie-hellman-group-exchange-sha1," \
 +	"diffie-hellman-group14-sha1"
 +#define	KEX_FIPS_ENCRYPT \
@@ -705,10 +705,10 @@ index 7efe312..bcf2ae1 100644
  
  #define KEX_DEFAULT_KEX_FIPS		\
  	KEX_ECDH_METHODS \
--	KEX_SHA256_METHODS \
+-	KEX_SHA2_METHODS \
 -	"diffie-hellman-group-exchange-sha1," \
 -	"diffie-hellman-group14-sha1"
-+	KEX_SHA256_METHODS
++	KEX_SHA2_METHODS
  #define	KEX_FIPS_ENCRYPT \
  	"aes128-ctr,aes192-ctr,aes256-ctr," \
  	"aes128-cbc,3des-cbc," \

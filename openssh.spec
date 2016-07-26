@@ -65,10 +65,10 @@
 %endif
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
-%global openssh_ver 7.2p2
-%global openssh_rel 11
+%global openssh_ver 7.3p1
+%global openssh_rel 1
 %global pam_ssh_agent_ver 0.10.2
-%global pam_ssh_agent_rel 3
+%global pam_ssh_agent_rel 4
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
@@ -798,6 +798,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Aug 02 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-1 + 0.10.2-4
+- New upstream release (#1362156)
+
 * Tue Jul 26 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-11 + 0.10.2-3
 - Remove slogin and sshd-keygen (#1359762)
 - Prevent guest_t from running sudo (#1357860)
