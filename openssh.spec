@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.2p2
-%global openssh_rel 10
+%global openssh_rel 11
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 3
 
@@ -828,6 +828,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Jul 26 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-11 + 0.10.2-3
+- Remove slogin and sshd-keygen (#1359762)
+- Prevent guest_t from running sudo (#1357860)
+
 * Mon Jul 18 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-10 + 0.10.2-3
 - CVE-2016-6210: User enumeration via covert timing channel (#1357443)
 - Expose more information about authentication to PAM
