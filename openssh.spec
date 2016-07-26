@@ -90,7 +90,6 @@ Source12: sshd-keygen@.service
 Source13: sshd-keygen
 Source14: sshd.tmpfiles
 Source15: sshd-keygen.target
-Source16: sshd-keygen.legacy
 
 # Internal debug
 Patch0: openssh-5.9p1-wIm.patch
@@ -672,7 +671,6 @@ install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
-install -m755 %{SOURCE16} $RPM_BUILD_ROOT/%{_sbindir}/sshd-keygen
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
 install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
 install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
@@ -777,7 +775,6 @@ getent passwd sshd >/dev/null || \
 %files server
 %dir %attr(0711,root,root) %{_var}/empty/sshd
 %attr(0755,root,root) %{_sbindir}/sshd
-%attr(0755,root,root) %{_sbindir}/sshd-keygen
 %attr(0644,root,root) %{_libdir}/fipscheck/sshd.hmac
 %attr(0755,root,root) %{_libexecdir}/openssh/sftp-server
 %attr(0755,root,root) %{_libexecdir}/openssh/sshd-keygen
