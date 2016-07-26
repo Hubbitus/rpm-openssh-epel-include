@@ -495,7 +495,7 @@ diff -up openssh-7.2p1/sshconnect2.c.fips openssh-7.2p1/sshconnect2.c
 -		orig = options.kex_algorithms;
 -
 -		if (options.gss_trust_dns)
--			gss_host = (char *)get_canonical_hostname(1);
+-			gss_host = (char *)get_canonical_hostname(active_state, 1);
 -		else
 -			gss_host = host;
 -
@@ -514,7 +514,7 @@ diff -up openssh-7.2p1/sshconnect2.c.fips openssh-7.2p1/sshconnect2.c
 +			orig = options.kex_algorithms;
 +
 +			if (options.gss_trust_dns)
-+				gss_host = (char *)get_canonical_hostname(1);
++				gss_host = (char *)get_canonical_hostname(active_state, 1);
 +			else
 +				gss_host = host;
 +
