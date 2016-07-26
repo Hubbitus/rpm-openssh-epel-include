@@ -210,8 +210,6 @@ Patch926: openssh-6.7p1-sftp-force-permission.patch
 Patch928: openssh-6.8p1-memory-problems.patch
 # Restore compatible default (#89216)
 Patch929: openssh-6.9p1-permit-root-login.patch
-# Handle terminal control characters in scp progressmeter (#1247204)
-Patch931: openssh-6.9p1-scp-progressmeter.patch
 # Add GSSAPIKexAlgorithms option for server and client application
 Patch932: openssh-7.0p1-gssKexAlgorithms.patch
 # Possibility to validate legacy systems by more fingerprints (#1249626)(#2439)
@@ -451,7 +449,6 @@ popd
 %patch926 -p1 -b .sftp-force-mode
 %patch928 -p1 -b .memory
 %patch929 -p1 -b .root-login
-%patch931 -p1 -b .progressmeter
 %patch932 -p1 -b .gsskexalg
 %patch933 -p1 -b .fingerprint
 %patch939 -p1 -b .s390-dev
