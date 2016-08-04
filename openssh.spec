@@ -625,6 +625,7 @@ make tests
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh
+mkdir -p -m755 $RPM_BUILD_ROOT%{_sysconfdir}/ssh/ssh_config.d
 mkdir -p -m755 $RPM_BUILD_ROOT%{_libexecdir}/openssh
 mkdir -p -m755 $RPM_BUILD_ROOT%{_var}/empty/sshd
 make install DESTDIR=$RPM_BUILD_ROOT
@@ -637,6 +638,7 @@ install -d $RPM_BUILD_ROOT%{_libdir}/fipscheck
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/sshd
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT/etc/pam.d/ssh-keycat
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/sysconfig/sshd
+install -m644 ssh_config.redhat $RPM_BUILD_ROOT/etc/ssh/ssh_config.d/05-redhat.conf
 install -d -m755 $RPM_BUILD_ROOT/%{_unitdir}
 install -m644 %{SOURCE9} $RPM_BUILD_ROOT/%{_unitdir}/sshd@.service
 install -m644 %{SOURCE10} $RPM_BUILD_ROOT/%{_unitdir}/sshd.socket
@@ -716,6 +718,8 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
+%dir %attr(0644,root,root) %{_sysconfdir}/ssh/ssh_config.d/
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config.d/05-redhat.conf
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
 %attr(0755,root,root) %{_bindir}/ssh-agent
