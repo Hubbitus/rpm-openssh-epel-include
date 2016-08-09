@@ -718,7 +718,7 @@ getent passwd sshd >/dev/null || \
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
-%dir %attr(0644,root,root) %{_sysconfdir}/ssh/ssh_config.d/
+%dir %attr(0755,root,root) %{_sysconfdir}/ssh/ssh_config.d/
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config.d/05-redhat.conf
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %if ! %{rescue}
