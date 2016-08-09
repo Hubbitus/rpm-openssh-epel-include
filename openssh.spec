@@ -66,14 +66,14 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.3p1
-%global openssh_rel 1
+%global openssh_rel 2
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 4
 
 Summary: An open source implementation of SSH protocol versions 1 and 2
 Name: openssh
 Version: %{openssh_ver}
-Release: %{openssh_rel}.1%{?dist}%{?rescue_rel}
+Release: %{openssh_rel}%{?dist}%{?rescue_rel}
 URL: http://www.openssh.com/portable.html
 #URL1: http://pamsshagentauth.sourceforge.net
 Source0: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-%{version}.tar.gz
@@ -798,7 +798,10 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
-* Tue Aug 02 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-1. + 0.10.2-4
+* Tue Aug 09 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-2 + 0.10.2-4
+- Fix permissions on the include directory (#1365270)
+
+* Tue Aug 02 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-1 + 0.10.2-4
 - New upstream release (#1362156)
 
 * Tue Jul 26 2016 Jakub Jelen <jjelen@redhat.com> - 7.2p2-11 + 0.10.2-3
