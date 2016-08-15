@@ -66,7 +66,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.3p1
-%global openssh_rel 2
+%global openssh_rel 3
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 4
 
@@ -798,6 +798,9 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Mon Aug 15 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-3 + 0.10.2-4
+- Proper content of included configuration file
+
 * Tue Aug 09 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-2 + 0.10.2-4
 - Fix permissions on the include directory (#1365270)
 
