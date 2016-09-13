@@ -1269,7 +1269,7 @@ diff -up openssh-7.3p1/monitor.c.audit openssh-7.3p1/monitor.c
  	}
 +#ifdef SSH_AUDIT_EVENTS
 +	if (s->command != NULL) {
-+		debug3("%s: command %d", __func__, s->command_handle);
++//?		debug3("%s: command %d", __func__, s->command_handle);
 +		session_end_command2(s);
 +	}
 +#endif
@@ -1300,7 +1300,7 @@ diff -up openssh-7.3p1/monitor.c.audit openssh-7.3p1/monitor.c
 +	if (s == NULL)
 +		fatal("%s: error allocating a session", __func__);
 +	s->command = cmd;
-+	s->command_handle = audit_run_command(cmd);
++//?	s->command_handle = audit_run_command(cmd);
 +
 +	buffer_clear(m);
 +	buffer_put_int(m, s->self);
@@ -1845,7 +1845,7 @@ diff -up openssh-7.3p1/session.c.audit openssh-7.3p1/session.c
  	    s->self);
  
  #ifdef SSH_AUDIT_EVENTS
-+	if (s->command != NULL || s->command_handle != -1)
++	if (s->command != NULL)
 +		fatal("do_exec: command already set");
  	if (command != NULL)
 -		PRIVSEP(audit_run_command(command));
@@ -1858,8 +1858,8 @@ diff -up openssh-7.3p1/session.c.audit openssh-7.3p1/session.c
 -		PRIVSEP(audit_run_command(shell));
 +		s->command = xstrdup(shell);
  	}
-+	if (s->command != NULL && s->ptyfd == -1)
-+		s->command_handle = PRIVSEP(audit_run_command(s->command));
++//?	if (s->command != NULL && s->ptyfd == -1)
++//?		s->command_handle = PRIVSEP(audit_run_command(s->command));
  #endif
  	if (s->ttyfd != -1)
  		ret = do_exec_pty(s, command);
@@ -1879,7 +1879,7 @@ diff -up openssh-7.3p1/session.c.audit openssh-7.3p1/session.c
  	sessions[id].ttyfd = -1;
  	sessions[id].ptymaster = -1;
  	sessions[id].x11_chanids = NULL;
-+	sessions[id].command_handle = -1;
++//?	sessions[id].command_handle = -1;
  	sessions[id].next_unused = sessions_first_unused;
  	sessions_first_unused = id;
  }
@@ -1912,11 +1912,11 @@ diff -up openssh-7.3p1/session.c.audit openssh-7.3p1/session.c
 +session_end_command2(Session *s)
 +{
 +	if (s->command != NULL) {
-+		if (s->command_handle != -1)
-+			audit_end_command(s->command_handle, s->command);
++//?		if (s->command_handle != -1)
++//?			audit_end_command(s->command_handle, s->command);
 +		free(s->command);
 +		s->command = NULL;
-+		s->command_handle = -1;
++//?		s->command_handle = -1;
 +	}
 +}
 +
@@ -1924,11 +1924,11 @@ diff -up openssh-7.3p1/session.c.audit openssh-7.3p1/session.c
 +session_end_command(Session *s)
 +{
 +	if (s->command != NULL) {
-+		if (s->command_handle != -1)
-+			PRIVSEP(audit_end_command(s->command_handle, s->command));
++//?		if (s->command_handle != -1)
++//?			PRIVSEP(audit_end_command(s->command_handle, s->command));
 +		free(s->command);
 +		s->command = NULL;
-+		s->command_handle = -1;
++//?		s->command_handle = -1;
 +	}
 +}
 +#endif
@@ -1982,7 +1982,7 @@ diff -up openssh-7.3p1/session.h.audit openssh-7.3p1/session.h
 +
 +	/* exec */
 +#ifdef SSH_AUDIT_EVENTS
-+	int	command_handle;
++//?	int	command_handle;
 +	char	*command;
 +#endif
  };

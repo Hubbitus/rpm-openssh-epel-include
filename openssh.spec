@@ -1,9 +1,5 @@
 # Do we want SELinux & Audit
-%if 0%{?!noselinux:1}
-%global WITH_SELINUX 1
-%else
 %global WITH_SELINUX 0
-%endif
 
 %global _hardened_build 1
 
@@ -66,7 +62,7 @@
 
 # Do not forget to bump pam_ssh_agent_auth release if you rewind the main package release to 1
 %global openssh_ver 7.3p1
-%global openssh_rel 3
+%global openssh_rel 3.1
 %global pam_ssh_agent_ver 0.10.2
 %global pam_ssh_agent_rel 4
 
@@ -404,10 +400,10 @@ rm -f $(cat %{SOURCE5})
 popd
 %endif
 
-%if %{WITH_SELINUX}
+# %%if %{WITH_SELINUX}
 %patch400 -p1 -b .role-mls
 %patch404 -p1 -b .privsep-selinux
-%endif
+# %%%endif
 
 %if %{ldap}
 %patch501 -p1 -b .ldap
@@ -798,6 +794,11 @@ getent passwd sshd >/dev/null || \
 %endif
 
 %changelog
+* Tue Sep 13 2016 Pavel Alexeev <Pahan@Hubbitus.info> - 7.3p1-3.1 + 0.10.2-4
+- Build for epel7 with Include capability (https://bugzilla.mindrot.org/show_bug.cgi?id=1585)
+- Set %%global WITH_SELINUX 0
+- Adjust several patches for old libs.
+
 * Mon Aug 15 2016 Jakub Jelen <jjelen@redhat.com> - 7.3p1-3 + 0.10.2-4
 - Proper content of included configuration file
 

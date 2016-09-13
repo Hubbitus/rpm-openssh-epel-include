@@ -67,9 +67,9 @@ diff -up openssh/auth1.c.role-mls openssh/auth1.c
  
  	authctxt->user = user;
  	authctxt->style = style;
-+#ifdef WITH_SELINUX
-+	authctxt->role = role;
-+#endif
++//?#ifdef WITH_SELINUX
++//?	authctxt->role = role;
++//?#endif
  
  	/* Verify that the user is a valid user. */
  	if ((authctxt->pw = PRIVSEP(getpwnamallow(user))) != NULL)
@@ -89,11 +89,11 @@ diff -up openssh/auth2-gss.c.role-mls openssh/auth2-gss.c
  	mic.length = len;
  
 -	ssh_gssapi_buildmic(&b, authctxt->user, authctxt->service,
-+#ifdef WITH_SELINUX
-+	if (authctxt->role && (strlen(authctxt->role) > 0))
-+		xasprintf(&micuser, "%s/%s", authctxt->user, authctxt->role);
-+	else
-+#endif
++//?#ifdef WITH_SELINUX
++//?	if (authctxt->role && (strlen(authctxt->role) > 0))
++//?		xasprintf(&micuser, "%s/%s", authctxt->user, authctxt->role);
++//?	else
++//?#endif
 +		micuser = authctxt->user;
 +	ssh_gssapi_buildmic(&b, micuser, authctxt->service,
  	    "gssapi-with-mic");
@@ -116,14 +116,14 @@ diff -up openssh/auth2-hostbased.c.role-mls openssh/auth2-hostbased.c
  	/* reconstruct packet */
  	buffer_put_char(&b, SSH2_MSG_USERAUTH_REQUEST);
 -	buffer_put_cstring(&b, authctxt->user);
-+#ifdef WITH_SELINUX
-+	if (authctxt->role) {
-+		buffer_put_int(&b, strlen(authctxt->user)+strlen(authctxt->role)+1);
-+		buffer_append(&b, authctxt->user, strlen(authctxt->user));
-+		buffer_put_char(&b, '/');
-+		buffer_append(&b, authctxt->role, strlen(authctxt->role));
-+	} else 
-+#endif
++//?#ifdef WITH_SELINUX
++//?	if (authctxt->role) {
++//?		buffer_put_int(&b, strlen(authctxt->user)+strlen(authctxt->role)+1);
++//?		buffer_append(&b, authctxt->user, strlen(authctxt->user));
++//?		buffer_put_char(&b, '/');
++//?		buffer_append(&b, authctxt->role, strlen(authctxt->role));
++//?	} else 
++//?#endif
 +		buffer_put_cstring(&b, authctxt->user);
  	buffer_put_cstring(&b, service);
  	buffer_put_cstring(&b, "hostbased");
@@ -140,8 +140,8 @@ diff -up openssh/auth2-pubkey.c.role-mls openssh/auth2-pubkey.c
  		    authctxt->style ? ":" : "",
 -		    authctxt->style ? authctxt->style : "");
 +		    authctxt->style ? authctxt->style : "",
-+		    authctxt->role ? "/" : "",
-+		    authctxt->role ? authctxt->role : "");
++		    "hu??",
++		    "hu??");
  		buffer_put_cstring(&b, userstyle);
  		free(userstyle);
  		buffer_put_cstring(&b,
@@ -175,9 +175,9 @@ diff -up openssh/auth2.c.role-mls openssh/auth2.c
  		authctxt->service = xstrdup(service);
  		authctxt->style = style ? xstrdup(style) : NULL;
 -		if (use_privsep)
-+#ifdef WITH_SELINUX
-+		authctxt->role = role ? xstrdup(role) : NULL;
-+#endif
++//?#ifdef WITH_SELINUX
++//?		authctxt->role = role ? xstrdup(role) : NULL;
++//?#endif
 +		if (use_privsep) {
  			mm_inform_authserv(service, style);
 +#ifdef WITH_SELINUX
@@ -255,14 +255,14 @@ diff -up openssh/monitor.c.role-mls openssh/monitor.c
 +{
 +	monitor_permit_authentications(1);
 +
-+	authctxt->role = buffer_get_string(m, NULL);
-+	debug3("%s: role=%s",
-+	    __func__, authctxt->role);
++//?	authctxt->role = buffer_get_string(m, NULL);
++//?	debug3("%s: role=%s",
++//?	    __func__, authctxt->role);
 +
-+	if (strlen(authctxt->role) == 0) {
-+		free(authctxt->role);
-+		authctxt->role = NULL;
-+	}
++//?	if (strlen(authctxt->role) == 0) {
++//?		free(authctxt->role);
++//?		authctxt->role = NULL;
++//?	}
 +
 +	return (0);
 +}
@@ -592,16 +592,16 @@ diff -up openssh/openbsd-compat/port-linux-sshd.c.role-mls openssh/openbsd-compa
 +{
 +	*role = NULL;
 +	*level = NULL;
-+	if (the_authctxt) {
-+		if (the_authctxt->role != NULL) {
-+			char *slash;
-+			*role = xstrdup(the_authctxt->role);
-+			if ((slash = strchr(*role, '/')) != NULL) {
-+				*slash = '\0';
-+				*level = slash + 1;
-+			}
-+		}
-+	}
++//?	if (the_authctxt) {
++//?		if (the_authctxt->role != NULL) {
++//?			char *slash;
++//?			*role = xstrdup(the_authctxt->role);
++//?			if ((slash = strchr(*role, '/')) != NULL) {
++//?				*slash = '\0';
++//?				*level = slash + 1;
++//?			}
++//?		}
++//?	}
 +}
 +
 +/* Return the default security context for the given username */

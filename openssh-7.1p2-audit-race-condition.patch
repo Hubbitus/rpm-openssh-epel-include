@@ -81,8 +81,8 @@ index 8949fd1..9afb764 100644
  static int have_dev_log = 1;
 @@ -875,6 +879,8 @@ do_exec(Session *s, const char *command)
  	}
- 	if (s->command != NULL && s->ptyfd == -1)
- 		s->command_handle = PRIVSEP(audit_run_command(s->command));
+ //?	if (s->command != NULL && s->ptyfd == -1)
+ //?		s->command_handle = PRIVSEP(audit_run_command(s->command));
 +	if (pipe(paudit) < 0)
 +		fatal("pipe: %s", strerror(errno));
  #endif
